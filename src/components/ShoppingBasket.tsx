@@ -144,6 +144,8 @@ export function ShoppingBasket({
   };
 
 
+
+// THIS IS THE NEW PAYMENT METHOD BUTTON THAT I CREATED
 const makePayment = async () => {
   const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -163,6 +165,11 @@ const makePayment = async () => {
   const session = await response.json();
   const result = await stripe?.redirectToCheckout({ sessionId: session.id });
 };
+
+
+
+
+
   const handleRemoveItem = (assessmentId: string) => {
     const removedItem = items.find(item => item.assessment.id === assessmentId);
     if (removedItem) {
