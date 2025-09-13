@@ -1,3 +1,4 @@
+import 'dotenv/config'; // add this at the very top
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
@@ -11,29 +12,27 @@ const stripe = new Stripe(process.env.VITE_STRIPE_SECRET_KEY, {
 });
 
 app.post("/api/create-checkout-session", async (req, res) => {
+  const { products } = req.body;
+
+  const line_items = products.map((item) => ({
+    price_data: {
+      currency: "gbp",
+      product_data: { name: item.item_name },
+      unit_amount: item.price * 100,
+    },
+    quantity: item.quantity || 1,
+  }));
+
   try {
-    const { products } = req.body;
-
-    const line_items = products.map((item) => ({
-      price_data: {
-        currency: "gbp",
-        product_data: { name: item.item_name },
-        unit_amount: item.price * 100,
-      },
-      quantity: item.quantity || 1,
-    }));
-
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: "http://18.134.97.224/#success",
-      cancel_url: "http://18.134.97.224/#cancel",
+      success_url: "http://18.134.97.224/success",
+      cancel_url: "http://18.134.97.224/cancel",
     });
-
     res.json({ id: session.id });
-  } catch (err: any) {
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
