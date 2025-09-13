@@ -156,7 +156,7 @@ const makePayment = async () => {
     price: item.assessment.price,
     quantity: item.quantity,
   }));
-  const response = await fetch("http://18.175.235.240/api/create-checkout-session/", {
+  const response = await fetch("http://18.212.225.123/api/create-checkout-session/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ products: checkoutItems }),
