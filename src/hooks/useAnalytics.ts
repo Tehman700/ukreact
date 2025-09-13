@@ -19,7 +19,6 @@ import {
   getUserId,
   getSessionId,
 } from '../utils/analytics';
-
 export interface UseAnalyticsReturn {
   // Page tracking
   trackPage: (pageName: string, category?: string) => void;
