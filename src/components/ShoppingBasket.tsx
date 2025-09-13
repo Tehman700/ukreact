@@ -169,7 +169,6 @@ const makePayment = async () => {
 
 
 
-
   const handleRemoveItem = (assessmentId: string) => {
     const removedItem = items.find(item => item.assessment.id === assessmentId);
     if (removedItem) {
