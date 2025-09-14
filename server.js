@@ -1,4 +1,4 @@
-import 'dotenv/config'; // add this at the very top
+import 'dotenv/config';
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
@@ -7,7 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const stripe = new Stripe(process.env.VITE_STRIPE_SECRET_KEY, {
+// ❌ Don’t use VITE_ prefix here
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
