@@ -157,11 +157,12 @@ const makePayment = async () => {
     quantity: item.quantity,
   }));
 
-  const response = await fetch("https://18.134.97.224:8000/api/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ products: checkoutItems }),
-  });
+        const response = await fetch("https://luther.health/api/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ products: checkoutItems }),
+        });
+
 
   const session = await response.json();
   const result = await stripe?.redirectToCheckout({ sessionId: session.id });
