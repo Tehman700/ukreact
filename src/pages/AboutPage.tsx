@@ -8,7 +8,7 @@ export function AboutPage() {
   const values = [
     {
       icon: Shield,
-      title: 'Regulated Care',
+      title: 'Regulated',
       description: 'Fully regulated by the CQC and GMC, ensuring the highest standards of medical care and patient safety.'
     },
     {
