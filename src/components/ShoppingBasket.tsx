@@ -157,16 +157,26 @@ const makePayment = async () => {
     quantity: item.quantity,
   }));
 
-        const response = await fetch("https://luther.health/api/create-checkout-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ products: checkoutItems }),
-        });
-
+  const response = await fetch("https://luther.health/api/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ products: checkoutItems }),
+  });
 
   const session = await response.json();
+
+  if (session.error) {
+    console.error("Checkout session error:", session.error);
+    alert("Payment failed: " + session.error);
+    return;
+  }
+
   const result = await stripe?.redirectToCheckout({ sessionId: session.id });
+  if (result?.error) {
+    console.error("Stripe redirect error:", result.error);
+  }
 };
+
 
 
 
