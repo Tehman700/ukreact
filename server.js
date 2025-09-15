@@ -214,7 +214,7 @@ app.post("/api/assessments", async (req, res) => {
     // Insert each answer - now expecting question and answer instead of question_id
     for (const ans of answers) {
       await client.query(
-        `INSERT INTO answers (assessment_id, question_id, answer)
+        `INSERT INTO answers (assessment_id, question_text, answer)
          VALUES ($1, $2, $3)`,
         [assessment.id, ans.question, ans.answer] // Changed from ans.question_id to ans.question
       );
