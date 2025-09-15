@@ -214,11 +214,11 @@ app.post("/api/assessments", async (req, res) => {
 
     // Insert each answer
     for (const ans of answers) {
-      await client.query(
-        `INSERT INTO answers (assessment_id, question_id, answer)
-         VALUES ($1, $2, $3)`,
-        [assessment.id, ans.question_id, Array.isArray(ans.answer) ? ans.answer.join(",") : ans.answer]
-      );
+        await client.query(
+          `INSERT INTO answers (assessment_id, question, answer)
+           VALUES ($1, $2, $3)`,
+          [assessment.id, ans.question, ans.answer]
+        );
     }
 
     await client.query("COMMIT");
