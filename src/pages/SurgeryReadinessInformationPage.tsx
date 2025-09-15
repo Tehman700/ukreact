@@ -38,22 +38,55 @@ export function SurgeryReadinessInformationPage() {
            userInfo.age !== '';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormValid()) return;
+// THis portion is changed for sending data to SQL
 
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Store user information for the assessment
-    sessionStorage.setItem('surgeryAssessmentUserInfo', JSON.stringify(userInfo));
-    
-    // Navigate to database processing
-    window.location.hash = 'database-processing';
-  };
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!isFormValid()) return;
+//
+//     setIsSubmitting(true);
+//
+//     // Simulate API call
+//     await new Promise(resolve => setTimeout(resolve, 800));
+//
+//     // Store user information for the assessment
+//     sessionStorage.setItem('surgeryAssessmentUserInfo', JSON.stringify(userInfo));
+//
+//     // Navigate to database processing
+//     window.location.hash = 'database-processing';
+//   };
 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!isFormValid()) return;
+
+  setIsSubmitting(true);
+  try {
+    const response = await fetch("https://luther.health/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        age_range: userInfo.age
+      }),
+    });
+
+    const savedUser = await response.json();
+
+    // Store user_id in session for later
+    sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+
+    // Navigate to quiz
+    window.location.hash = "surgery-readiness-assessment";
+  } catch (err) {
+    console.error("Error saving user:", err);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
 
   return (

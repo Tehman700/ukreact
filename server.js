@@ -167,25 +167,75 @@ pool.connect()
   .then(() => console.log("✅ Connected to PostgreSQL"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
-// Example route: insert user
+/**
+ * 1. Save User Info
+ */
 app.post("/api/users", async (req, res) => {
   try {
     const { first_name, last_name, email, phone, age_range } = req.body;
 
     const result = await pool.query(
       `INSERT INTO users (first_name, last_name, email, phone, age_range)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (email) DO UPDATE SET
+         first_name = EXCLUDED.first_name,
+         last_name = EXCLUDED.last_name,
+         phone = EXCLUDED.phone,
+         age_range = EXCLUDED.age_range
+       RETURNING *`,
       [first_name, last_name, email, phone, age_range]
     );
 
-    res.json(result.rows[0]);
+    res.json(result.rows[0]); // send back user row
   } catch (err) {
     console.error("Insert user error:", err);
     res.status(500).json({ error: "Database insert failed" });
   }
 });
 
-// Your Stripe checkout route (already working)
+/**
+ * 2. Save Assessment + Answers
+ */
+app.post("/api/assessments", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { user_id, assessment_type, answers } = req.body;
+
+    await client.query("BEGIN");
+
+    // Insert into assessments
+    const assessmentResult = await client.query(
+      `INSERT INTO assessments (user_id, assessment_type)
+       VALUES ($1, $2) RETURNING *`,
+      [user_id, assessment_type]
+    );
+
+    const assessment = assessmentResult.rows[0];
+
+    // Insert each answer
+    for (const ans of answers) {
+      await client.query(
+        `INSERT INTO answers (assessment_id, question_id, answer)
+         VALUES ($1, $2, $3)`,
+        [assessment.id, ans.question_id, Array.isArray(ans.answer) ? ans.answer.join(",") : ans.answer]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    res.json({ assessment });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Insert assessment error:", err);
+    res.status(500).json({ error: "Assessment insert failed" });
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * 3. Existing Stripe Checkout
+ */
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { products } = req.body;
@@ -220,6 +270,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
+
 
 
 

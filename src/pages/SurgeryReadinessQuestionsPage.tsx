@@ -87,10 +87,31 @@ const surgeryReadinessQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Surgery Readiness Assessment completed with answers:', answers);
-    window.location.hash = 'surgery-readiness-assessment-information';
-  },
+onComplete: async (answers) => {
+  console.log("Surgery Readiness Assessment completed with answers:", answers);
+
+  const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+
+  try {
+    await fetch("https://luther.health/api/assessments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        assessment_type: "Surgery Readiness",
+        answers: Object.entries(answers).map(([question_id, answer]) => ({
+          question_id,
+          answer,
+        })),
+      }),
+    });
+
+    completeAssessment();
+    window.location.hash = "surgery-readiness-assessment-information";
+  } catch (err) {
+    console.error("Error saving assessment:", err);
+  }
+},
   onBack: () => {
     window.location.hash = 'surgery-readiness-assessment-learn-more';
   },
