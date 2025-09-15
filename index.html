@@ -23,7 +23,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -63,6 +62,13 @@
       fbq("init", "2198423147310150");
       fbq("track", "PageView");
     </script>
+    <!-- End Meta Pixel Code -->
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <!-- Meta Pixel NoScript (must be inside <body>, not <head>) -->
     <noscript>
       <img
         height="1"
@@ -71,11 +77,7 @@
         src="https://www.facebook.com/tr?id=2198423147310150&ev=PageView&noscript=1"
       />
     </noscript>
-    <!-- End Meta Pixel Code -->
-  </head>
 
-  <body>
-    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
