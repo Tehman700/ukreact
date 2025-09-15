@@ -126,19 +126,57 @@ export function SurgeryReadinessQuestionsPage() {
   );
 
   // Enhanced quiz configuration with analytics tracking
-  const surgeryReadinessQuizWithAnalytics: QuizConfig = {
-    ...surgeryReadinessQuiz,
-    informationPageRoute: 'surgery-readiness-assessment-information',
-    onComplete: (answers) => {
-      console.log('Surgery Readiness Assessment completed with answers:', answers);
+//   const surgeryReadinessQuizWithAnalytics: QuizConfig = {
+//     ...surgeryReadinessQuiz,
+//     informationPageRoute: 'surgery-readiness-assessment-information',
+//     onComplete: (answers) => {
+//       console.log('Surgery Readiness Assessment completed with answers:', answers);
+//       completeAssessment();
+//       window.location.hash = 'surgery-readiness-assessment-information';
+//     },
+//     onQuestionComplete: (questionIndex, totalQuestions) => {
+//       const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
+//       trackProgress(`question_${questionIndex + 1}`, completionPercentage);
+//     },
+//   };
+
+const surgeryReadinessQuizWithAnalytics: QuizConfig = {
+  ...surgeryReadinessQuiz,
+  informationPageRoute: 'surgery-readiness-assessment-information',
+  onComplete: async (answers) => {
+    console.log("Surgery Readiness Assessment completed with answers:", answers);
+
+    const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+
+    try {
+      await fetch("https://luther.health/api/assessments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          assessment_type: "Surgery Readiness",
+          answers: Object.entries(answers).map(([question_id, answer]) => ({
+            question_id,
+            answer,
+          })),
+        }),
+      });
+
+      // ✅ Analytics + navigation
       completeAssessment();
-      window.location.hash = 'surgery-readiness-assessment-information';
-    },
-    onQuestionComplete: (questionIndex, totalQuestions) => {
-      const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-      trackProgress(`question_${questionIndex + 1}`, completionPercentage);
-    },
-  };
+      window.location.hash = "surgery-readiness-assessment-information";
+    } catch (err) {
+      console.error("Error saving assessment:", err);
+    }
+  },
+  onQuestionComplete: (questionIndex, totalQuestions) => {
+    const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
+    trackProgress(`question_${questionIndex + 1}`, completionPercentage);
+  },
+};
+
+
+
 
   // Start assessment tracking when component mounts
   React.useEffect(() => {
