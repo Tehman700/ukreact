@@ -99,50 +99,28 @@ export function SurgeryReadinessQuestionsPage() {
 
   // Helper function to convert answer IDs to labels
   const convertAnswersToLabels = (answers: Record<string, any>) => {
-    console.log("Raw answers received:", answers);
     const convertedAnswers: Array<{ question: string; answer: string }> = [];
 
     Object.entries(answers).forEach(([questionId, answerValue]) => {
       // Find the question by ID
       const question = surgeryReadinessQuiz.questions.find(q => q.id === questionId);
-      if (!question) {
-        console.log("Question not found for ID:", questionId);
-        return;
-      }
+      if (!question) return;
 
-      let answerLabels: string = '';
+      let answerLabels: string;
 
-      console.log(`Processing question: ${questionId}, multiSelect: ${question.multiSelect}, answerValue:`, answerValue);
-
-      if (question.multiSelect) {
+      if (question.multiSelect && Array.isArray(answerValue)) {
         // Handle multi-select questions
-        if (Array.isArray(answerValue)) {
-          const labels = answerValue.map(answerId => {
-            const option = question.options.find(opt => opt.id === answerId);
-            return option ? option.label : answerId;
-          });
-          answerLabels = labels.join(', ');
-        } else {
-          // Single answer in multi-select (shouldn't happen but handle it)
-          const option = question.options.find(opt => opt.id === answerValue);
-          answerLabels = option ? option.label : answerValue || '';
-        }
+        const labels = answerValue.map(answerId => {
+          const option = question.options.find(opt => opt.id === answerId);
+          return option ? option.label : answerId;
+        });
+        answerLabels = labels.join(', ');
       } else {
         // Handle single-select questions
-        let selectedAnswerId = answerValue;
-
-        // If it's an array (shouldn't be for single select), take the first element
-        if (Array.isArray(answerValue)) {
-          selectedAnswerId = answerValue.length > 0 ? answerValue[0] : null;
-        }
-
-        console.log(`Looking for option with ID: ${selectedAnswerId}`);
+        const selectedAnswerId = Array.isArray(answerValue) ? answerValue[0] : answerValue;
         const option = question.options.find(opt => opt.id === selectedAnswerId);
-        answerLabels = option ? option.label : (selectedAnswerId || '');
-        console.log(`Found option:`, option, `Result: ${answerLabels}`);
+        answerLabels = option ? option.label : selectedAnswerId || '';
       }
-
-      console.log(`Final answer for ${questionId}: "${answerLabels}"`);
 
       convertedAnswers.push({
         question: question.question,
@@ -150,7 +128,6 @@ export function SurgeryReadinessQuestionsPage() {
       });
     });
 
-    console.log("Final converted answers:", convertedAnswers);
     return convertedAnswers;
   };
 
@@ -162,47 +139,26 @@ export function SurgeryReadinessQuestionsPage() {
       console.log("Surgery Readiness Assessment completed with answers:", answers);
 
       const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
-      console.log("Current user from session:", user);
-
-      if (!user.id) {
-        console.error("No user ID found in session storage");
-        alert("Error: User information not found. Please go back and fill out your information again.");
-        return;
-      }
 
       try {
         // Convert answers to use question text and answer labels
         const convertedAnswers = convertAnswersToLabels(answers);
-        console.log("Converted answers:", convertedAnswers);
 
-        const payload = {
-          user_id: user.id,
-          assessment_type: "Surgery Readiness",
-          answers: convertedAnswers,
-        };
-        console.log("Sending payload:", payload);
-
-        const response = await fetch("https://luther.health/api/assessments", {
+        await fetch("https://luther.health/api/assessments", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            user_id: user.id,
+            assessment_type: "Surgery Readiness",
+            answers: convertedAnswers,
+          }),
         });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Server response error:", errorText);
-          throw new Error(`Server error: ${response.status} - ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log("Assessment saved successfully:", result);
 
         // ✅ Analytics + navigation
         completeAssessment();
         window.location.hash = "surgery-readiness-assessment-information";
       } catch (err) {
         console.error("Error saving assessment:", err);
-        alert("Error saving assessment. Please try again.");
       }
     },
     onQuestionComplete: (questionIndex, totalQuestions) => {
