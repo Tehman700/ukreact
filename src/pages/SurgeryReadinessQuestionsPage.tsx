@@ -96,14 +96,29 @@ onComplete: async (answers) => {
     await fetch("https://luther.health/api/assessments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        assessment_type: "Surgery Readiness",
-        answers: Object.entries(answers).map(([question_id, answer]) => ({
-          question_id,
-          answer,
-        })),
-      }),
+        body: JSON.stringify({
+          user_id: user.id,
+          assessment_type: "Surgery Readiness",
+          answers: Object.entries(answers).map(([question_id, answer]) => {
+            const questionObj = surgeryReadinessQuiz.questions.find(q => q.id === question_id);
+
+            // Map answer ids to labels (handle multiSelect and single)
+            let answerLabels: string[] = [];
+            if (Array.isArray(answer)) {
+              answerLabels = answer.map(a =>
+                questionObj?.options.find(opt => opt.id === a)?.label || a
+              );
+            } else {
+              answerLabels = [
+                questionObj?.options.find(opt => opt.id === answer)?.label || String(answer)
+              ];
+            }
+
+            return {
+              question: questionObj?.question || question_id,
+              answer: answerLabels.join(", ")
+            };
+          }),
     });
 
     completeAssessment();
