@@ -139,20 +139,24 @@ import 'dotenv/config';
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
+import fetch from "node-fetch";  // needed for Meta API call
 import pkg from "pg";
 
 const { Pool } = pkg;
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Stripe setup
+// ----------------------------
+// STRIPE
+// ----------------------------
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
-// PostgreSQL connection
+// ----------------------------
+// POSTGRES
+// ----------------------------
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -161,14 +165,13 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// Test DB connection
 pool.connect()
   .then(() => console.log("✅ Connected to PostgreSQL"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
-/**
- * 1. Save User Info
- */
+// ----------------------------
+// 1. Save User
+// ----------------------------
 app.post("/api/users", async (req, res) => {
   try {
     const { first_name, last_name, email, phone, age_range } = req.body;
@@ -185,16 +188,16 @@ app.post("/api/users", async (req, res) => {
       [first_name, last_name, email, phone, age_range]
     );
 
-    res.json(result.rows[0]); // send back user row
+    res.json(result.rows[0]);
   } catch (err) {
     console.error("Insert user error:", err);
     res.status(500).json({ error: "Database insert failed" });
   }
 });
 
-/**
- * 2. Save Assessment + Answers
- */
+// ----------------------------
+// 2. Save Assessment + Answers
+// ----------------------------
 app.post("/api/assessments", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -202,7 +205,6 @@ app.post("/api/assessments", async (req, res) => {
 
     await client.query("BEGIN");
 
-    // Insert into assessments
     const assessmentResult = await client.query(
       `INSERT INTO assessments (user_id, assessment_type)
        VALUES ($1, $2) RETURNING *`,
@@ -211,17 +213,15 @@ app.post("/api/assessments", async (req, res) => {
 
     const assessment = assessmentResult.rows[0];
 
-    // Insert each answer - now expecting question and answer instead of question_id
     for (const ans of answers) {
       await client.query(
         `INSERT INTO answers (assessment_id, question_text, answer)
          VALUES ($1, $2, $3)`,
-        [assessment.id, ans.question, ans.answer] // Changed from ans.question_id to ans.question
+        [assessment.id, ans.question, ans.answer]
       );
     }
 
     await client.query("COMMIT");
-
     res.json({ assessment });
   } catch (err) {
     await client.query("ROLLBACK");
@@ -232,12 +232,12 @@ app.post("/api/assessments", async (req, res) => {
   }
 });
 
-/**
- * 3. Existing Stripe Checkout
- */
+// ----------------------------
+// 3. Stripe Checkout
+// ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products } = req.body;
+    const { products, email } = req.body;
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
@@ -255,6 +255,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
+      customer_email: email,  // ✅ capture user email
       success_url: "https://luther.health/Health-Audit.html#success",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
@@ -266,10 +267,68 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
+// ----------------------------
+// 4. Stripe Webhook → Send Meta Conversion API
+// ----------------------------
+app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  let event;
+
+  try {
+    event = JSON.parse(req.body);
+  } catch (err) {
+    console.error("Webhook error:", err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    console.log("✅ Payment success:", session);
+
+    // ----------------------------
+    // Send Conversion API Event to Meta
+    // ----------------------------
+    const payload = {
+      data: [
+        {
+          event_name: "Purchase",
+          event_time: Math.floor(Date.now() / 1000),
+          action_source: "website",
+          event_source_url: "https://luther.health/Health-Audit.html#success",
+          user_data: {
+            em: [session.customer_email], // hash automatically handled by Meta if raw
+          },
+          custom_data: {
+            currency: session.currency.toUpperCase(),
+            value: session.amount_total / 100,
+          },
+        },
+      ],
+    };
+
+    try {
+      const fbRes = await fetch(
+        `https://graph.facebook.com/v17.0/${process.env.META_PIXEL_ID}/events?access_token=${process.env.META_ACCESS_TOKEN}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const fbData = await fbRes.json();
+      console.log("📡 Meta Conversion API response:", fbData);
+    } catch (err) {
+      console.error("Meta API error:", err);
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// ----------------------------
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
-
 
 
 
