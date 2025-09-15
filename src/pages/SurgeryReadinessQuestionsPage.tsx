@@ -100,16 +100,16 @@ onComplete: async (answers) => {
         user_id: user.id,
         assessment_type: "Surgery Readiness",
         answers: Object.entries(answers).map(([question_id, answer]) => {
-          // Find the matching question object
           const questionObj = surgeryReadinessQuiz.questions.find(
             (q) => q.id === question_id
           );
 
-          // Map answer IDs to human-readable labels
+          // Convert option IDs → readable labels
           let answerLabels: string[] = [];
           if (Array.isArray(answer)) {
             answerLabels = answer.map(
-              (a) => questionObj?.options.find((opt) => opt.id === a)?.label || a
+              (a) =>
+                questionObj?.options.find((opt) => opt.id === a)?.label || a
             );
           } else {
             answerLabels = [
@@ -144,22 +144,6 @@ export function SurgeryReadinessQuestionsPage() {
     'Surgery Readiness Score',
     37.00
   );
-
-  // Enhanced quiz configuration with analytics tracking
-//   const surgeryReadinessQuizWithAnalytics: QuizConfig = {
-//     ...surgeryReadinessQuiz,
-//     informationPageRoute: 'surgery-readiness-assessment-information',
-//     onComplete: (answers) => {
-//       console.log('Surgery Readiness Assessment completed with answers:', answers);
-//       completeAssessment();
-//       window.location.hash = 'surgery-readiness-assessment-information';
-//     },
-//     onQuestionComplete: (questionIndex, totalQuestions) => {
-//       const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-//       trackProgress(`question_${questionIndex + 1}`, completionPercentage);
-//     },
-//   };
-
 const surgeryReadinessQuizWithAnalytics: QuizConfig = {
   ...surgeryReadinessQuiz,
   informationPageRoute: 'surgery-readiness-assessment-information',
