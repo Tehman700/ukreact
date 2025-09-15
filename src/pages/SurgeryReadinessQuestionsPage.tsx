@@ -87,34 +87,6 @@ const surgeryReadinessQuiz: QuizConfig = {
       ],
     },
   ],
-onComplete: async (answers) => {
-  console.log("Surgery Readiness Assessment completed with answers:", answers);
-
-  const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
-
-  try {
-    await fetch("https://luther.health/api/assessments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        assessment_type: "Surgery Readiness",
-        answers: Object.entries(answers).map(([question_id, answer]) => ({
-          question_id,
-          answer,
-        })),
-      }),
-    });
-
-    completeAssessment();
-    window.location.hash = "surgery-readiness-assessment-information";
-  } catch (err) {
-    console.error("Error saving assessment:", err);
-  }
-},
-  onBack: () => {
-    window.location.hash = 'surgery-readiness-assessment-learn-more';
-  },
 };
 
 export function SurgeryReadinessQuestionsPage() {
@@ -125,58 +97,75 @@ export function SurgeryReadinessQuestionsPage() {
     37.00
   );
 
-  // Enhanced quiz configuration with analytics tracking
-//   const surgeryReadinessQuizWithAnalytics: QuizConfig = {
-//     ...surgeryReadinessQuiz,
-//     informationPageRoute: 'surgery-readiness-assessment-information',
-//     onComplete: (answers) => {
-//       console.log('Surgery Readiness Assessment completed with answers:', answers);
-//       completeAssessment();
-//       window.location.hash = 'surgery-readiness-assessment-information';
-//     },
-//     onQuestionComplete: (questionIndex, totalQuestions) => {
-//       const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-//       trackProgress(`question_${questionIndex + 1}`, completionPercentage);
-//     },
-//   };
+  // Helper function to convert answer IDs to labels
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const convertedAnswers: Array<{ question: string; answer: string }> = [];
 
-const surgeryReadinessQuizWithAnalytics: QuizConfig = {
-  ...surgeryReadinessQuiz,
-  informationPageRoute: 'surgery-readiness-assessment-information',
-  onComplete: async (answers) => {
-    console.log("Surgery Readiness Assessment completed with answers:", answers);
+    Object.entries(answers).forEach(([questionId, answerValue]) => {
+      // Find the question by ID
+      const question = surgeryReadinessQuiz.questions.find(q => q.id === questionId);
+      if (!question) return;
 
-    const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+      let answerLabels: string;
 
-    try {
-      await fetch("https://luther.health/api/assessments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.id,
-          assessment_type: "Surgery Readiness",
-          answers: Object.entries(answers).map(([question_id, answer]) => ({
-            question_id,
-            answer,
-          })),
-        }),
+      if (question.multiSelect && Array.isArray(answerValue)) {
+        // Handle multi-select questions
+        const labels = answerValue.map(answerId => {
+          const option = question.options.find(opt => opt.id === answerId);
+          return option ? option.label : answerId;
+        });
+        answerLabels = labels.join(', ');
+      } else {
+        // Handle single-select questions
+        const selectedAnswerId = Array.isArray(answerValue) ? answerValue[0] : answerValue;
+        const option = question.options.find(opt => opt.id === selectedAnswerId);
+        answerLabels = option ? option.label : selectedAnswerId || '';
+      }
+
+      convertedAnswers.push({
+        question: question.question,
+        answer: answerLabels
       });
+    });
 
-      // ✅ Analytics + navigation
-      completeAssessment();
-      window.location.hash = "surgery-readiness-assessment-information";
-    } catch (err) {
-      console.error("Error saving assessment:", err);
-    }
-  },
-  onQuestionComplete: (questionIndex, totalQuestions) => {
-    const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-    trackProgress(`question_${questionIndex + 1}`, completionPercentage);
-  },
-};
+    return convertedAnswers;
+  };
 
+  // Enhanced quiz configuration with analytics tracking
+  const surgeryReadinessQuizWithAnalytics: QuizConfig = {
+    ...surgeryReadinessQuiz,
+    informationPageRoute: 'surgery-readiness-assessment-information',
+    onComplete: async (answers) => {
+      console.log("Surgery Readiness Assessment completed with answers:", answers);
 
+      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
 
+      try {
+        // Convert answers to use question text and answer labels
+        const convertedAnswers = convertAnswersToLabels(answers);
+
+        await fetch("https://luther.health/api/assessments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            assessment_type: "Surgery Readiness",
+            answers: convertedAnswers,
+          }),
+        });
+
+        // ✅ Analytics + navigation
+        completeAssessment();
+        window.location.hash = "surgery-readiness-assessment-information";
+      } catch (err) {
+        console.error("Error saving assessment:", err);
+      }
+    },
+    onQuestionComplete: (questionIndex, totalQuestions) => {
+      const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
+      trackProgress(`question_${questionIndex + 1}`, completionPercentage);
+    },
+  };
 
   // Start assessment tracking when component mounts
   React.useEffect(() => {
