@@ -302,6 +302,11 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
     try {
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
+      console.log("🎯 Preparing to send Meta Conversion API event...");
+      console.log("📧 Customer email:", session.customer_email);
+      console.log("💰 Purchase amount:", session.amount_total / 100);
+      console.log("💱 Currency:", session.currency.toUpperCase());
+
       // Create user data
       const userData = (new UserData())
         .setEmails([session.customer_email]); // SDK will handle hashing automatically
@@ -326,10 +331,20 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
 
       // Execute the request
       const response = await eventRequest.execute();
-      console.log("📡 Meta Conversion API response:", response);
+      console.log("✅ Meta Conversion API SUCCESS!");
+      console.log("📡 Full response:", JSON.stringify(response, null, 2));
+
+      // Check if there are any errors in the response
+      if (response && response.events_received) {
+        console.log("🎉 Events received by Meta:", response.events_received);
+      }
+      if (response && response.messages) {
+        console.log("📝 Meta response messages:", response.messages);
+      }
 
     } catch (err) {
-      console.error("Meta API error:", err);
+      console.error("❌ Meta API ERROR:", err.message);
+      console.error("🔍 Full error details:", err);
     }
   }
 
@@ -340,8 +355,6 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
-
-
 
 
 
