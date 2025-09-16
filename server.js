@@ -379,6 +379,11 @@ import bizSdk from "facebook-nodejs-business-sdk";
 const { Pool } = pkg;
 const app = express();
 app.use(cors());
+
+// Important: Raw body parsing for webhook BEFORE express.json()
+app.use('/api/webhook', express.raw({ type: 'application/json' }));
+
+// JSON parsing for other routes
 app.use(express.json());
 
 // ----------------------------
@@ -515,7 +520,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 // ----------------------------
 // 4. Stripe Webhook → Send Meta Conversion API
 // ----------------------------
-app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+app.post("/api/webhook", async (req, res) => {
   let event = req.body;
 
   // Verify webhook signature if endpoint secret is provided
@@ -607,7 +612,6 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
-
 
 
 
