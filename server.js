@@ -139,13 +139,25 @@ import 'dotenv/config';
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
-import fetch from "node-fetch";  // needed for Meta API call
 import pkg from "pg";
+// Import Facebook Business SDK
+import bizSdk from "facebook-nodejs-business-sdk";
 
 const { Pool } = pkg;
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// ----------------------------
+// FACEBOOK BUSINESS SDK SETUP
+// ----------------------------
+const ServerEvent = bizSdk.ServerEvent;
+const EventRequest = bizSdk.EventRequest;
+const UserData = bizSdk.UserData;
+const CustomData = bizSdk.CustomData;
+
+// Initialize Facebook Ads API
+const api = bizSdk.FacebookAdsApi.init(process.env.META_ACCESS_TOKEN);
 
 // ----------------------------
 // STRIPE
@@ -255,7 +267,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      customer_email: email,  // ✅ capture user email
+      customer_email: email,
       success_url: "https://luther.health/Health-Audit.html#success",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
@@ -285,38 +297,37 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
     console.log("✅ Payment success:", session);
 
     // ----------------------------
-    // Send Conversion API Event to Meta
+    // Send Conversion API Event to Meta using Business SDK
     // ----------------------------
-    const payload = {
-      data: [
-        {
-          event_name: "Purchase",
-          event_time: Math.floor(Date.now() / 1000),
-          action_source: "website",
-          event_source_url: "https://luther.health/Health-Audit.html#success",
-          user_data: {
-            em: [session.customer_email], // hash automatically handled by Meta if raw
-          },
-          custom_data: {
-            currency: session.currency.toUpperCase(),
-            value: session.amount_total / 100,
-          },
-        },
-      ],
-    };
-
     try {
-      const fbRes = await fetch(
-        `https://graph.facebook.com/v17.0/${process.env.META_PIXEL_ID}/events?access_token=${process.env.META_ACCESS_TOKEN}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const currentTimestamp = Math.floor(Date.now() / 1000);
 
-      const fbData = await fbRes.json();
-      console.log("📡 Meta Conversion API response:", fbData);
+      // Create user data
+      const userData = (new UserData())
+        .setEmails([session.customer_email]); // SDK will handle hashing automatically
+
+      // Create custom data with purchase information
+      const customData = (new CustomData())
+        .setValue(session.amount_total / 100) // Convert from cents to actual amount
+        .setCurrency(session.currency.toUpperCase());
+
+      // Create server event
+      const serverEvent = (new ServerEvent())
+        .setEventName("Purchase")
+        .setEventTime(currentTimestamp)
+        .setUserData(userData)
+        .setCustomData(customData)
+        .setActionSource("website")
+        .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
+
+      // Create event request
+      const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
+        .setEvents([serverEvent]);
+
+      // Execute the request
+      const response = await eventRequest.execute();
+      console.log("📡 Meta Conversion API response:", response);
+
     } catch (err) {
       console.error("Meta API error:", err);
     }
@@ -329,7 +340,6 @@ app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, 
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
-
 
 
 
