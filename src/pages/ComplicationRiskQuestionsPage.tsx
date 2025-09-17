@@ -95,87 +95,49 @@ const complicationRiskQuiz: QuizConfig = {
 };
 
 export function ComplicationRiskQuestionsPage() {
-  // Helper function to convert answer IDs to labels
+  // Convert answer IDs → labels
   const convertAnswersToLabels = (answers: Record<string, any>) => {
-    const convertedAnswers: Array<{ question: string; answer: string }> = [];
+    const converted: Array<{ question: string; answer: string }> = [];
+    complicationRiskQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
 
-    Object.entries(answers).forEach(([questionId, answerValue]) => {
-      // Find the question by ID
-      const question = complicationRiskQuiz.questions.find(q => q.id === questionId);
-      if (!question) return;
-
-      let answerLabels: string;
-
-      if (question.multiSelect && Array.isArray(answerValue)) {
-        // Handle multi-select questions
-        const labels = answerValue.map(answerId => {
-          const option = question.options.find(opt => opt.id === answerId);
-          return option ? option.label : answerId;
-        });
-        answerLabels = labels.join(', ');
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer.map((id) => q.options.find((o) => o.id === id)?.label || id).join(', ');
       } else {
-        // Handle single-select questions
-        const selectedAnswerId = Array.isArray(answerValue) ? answerValue[0] : answerValue;
-        const option = question.options.find(opt => opt.id === selectedAnswerId);
-        answerLabels = option ? option.label : selectedAnswerId || '';
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
       }
 
-      convertedAnswers.push({
-        question: question.question,
-        answer: answerLabels
-      });
+      converted.push({ question: q.question, answer: labels });
     });
-
-    return convertedAnswers;
+    return converted;
   };
 
-  // Enhanced quiz configuration with database saving
-  const complicationRiskQuizWithSaving: QuizConfig = {
+  const quizWithSubmit: QuizConfig = {
     ...complicationRiskQuiz,
+    informationPageRoute: 'complication-risk-checker-information',
     onComplete: async (answers) => {
       console.log('Complication Risk Assessment completed with answers:', answers);
-
-      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
-      console.log("Current user from session:", user);
-
-      if (!user.id) {
-        console.error("No user ID found in session storage");
-        alert("Error: User information not found. Please go back and fill out your information again.");
-        return;
-      }
+      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
 
       try {
-        // Convert answers to use question text and answer labels
         const convertedAnswers = convertAnswersToLabels(answers);
-        console.log("Converted answers:", convertedAnswers);
 
-        const payload = {
-          user_id: user.id,
-          assessment_type: "Complication Risk",
-          answers: convertedAnswers,
-        };
-        console.log("Sending payload:", payload);
-
-        const response = await fetch("https://luther.health/api/assessments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+        await fetch('https://luther.health/api/assessments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: user.id,
+            assessment_type: 'Complication Risk',
+            answers: convertedAnswers,
+          }),
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Server response error:", errorText);
-          throw new Error(`Server error: ${response.status} - ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log("Assessment saved successfully:", result);
-
-        // Navigate to information page
         window.location.hash = 'complication-risk-checker-information';
       } catch (err) {
-        console.error("Error saving assessment:", err);
-        alert("Error saving assessment. Please try again.");
+        console.error('Error saving complication risk assessment:', err);
       }
     },
     onBack: () => {
@@ -183,5 +145,5 @@ export function ComplicationRiskQuestionsPage() {
     },
   };
 
-  return <QuizTemplate config={complicationRiskQuizWithSaving} />;
+  return <QuizTemplate config={quizWithSubmit} />;
 }
