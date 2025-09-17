@@ -42,23 +42,42 @@ export function ComplicationRiskInformationPage() {
     if (!isFormValid()) return;
 
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Store user information for the assessment
-    sessionStorage.setItem('complicationRiskUserInfo', JSON.stringify(userInfo));
-    
-    // Navigate to database processing
-    window.location.hash = 'database-processing';
+    try {
+      const response = await fetch("https://luther.health/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          age_range: userInfo.age
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const savedUser = await response.json();
+      console.log("User saved successfully:", savedUser);
+
+      // Store user_id in session for later
+      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+
+      // Navigate to quiz
+      window.location.hash = "complication-risk-checker";
+    } catch (err) {
+      console.error("Error saving user:", err);
+      alert("Error saving user information. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-
 
   return (
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-2xl">
-
 
         {/* Information Form */}
         <div>
@@ -153,7 +172,6 @@ export function ComplicationRiskInformationPage() {
                 </Button>
               </div>
             </form>
-
 
           </div>
         </div>

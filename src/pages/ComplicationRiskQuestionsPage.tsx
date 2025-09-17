@@ -92,15 +92,96 @@ const complicationRiskQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Complication Risk Assessment completed with answers:', answers);
-    window.location.hash = 'complication-risk-checker-information';
-  },
-  onBack: () => {
-    window.location.hash = 'complication-risk-checker-learn-more';
-  },
 };
 
 export function ComplicationRiskQuestionsPage() {
-  return <QuizTemplate config={complicationRiskQuiz} />;
+  // Helper function to convert answer IDs to labels
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const convertedAnswers: Array<{ question: string; answer: string }> = [];
+
+    Object.entries(answers).forEach(([questionId, answerValue]) => {
+      // Find the question by ID
+      const question = complicationRiskQuiz.questions.find(q => q.id === questionId);
+      if (!question) return;
+
+      let answerLabels: string;
+
+      if (question.multiSelect && Array.isArray(answerValue)) {
+        // Handle multi-select questions
+        const labels = answerValue.map(answerId => {
+          const option = question.options.find(opt => opt.id === answerId);
+          return option ? option.label : answerId;
+        });
+        answerLabels = labels.join(', ');
+      } else {
+        // Handle single-select questions
+        const selectedAnswerId = Array.isArray(answerValue) ? answerValue[0] : answerValue;
+        const option = question.options.find(opt => opt.id === selectedAnswerId);
+        answerLabels = option ? option.label : selectedAnswerId || '';
+      }
+
+      convertedAnswers.push({
+        question: question.question,
+        answer: answerLabels
+      });
+    });
+
+    return convertedAnswers;
+  };
+
+  // Enhanced quiz configuration with database saving
+  const complicationRiskQuizWithSaving: QuizConfig = {
+    ...complicationRiskQuiz,
+    onComplete: async (answers) => {
+      console.log('Complication Risk Assessment completed with answers:', answers);
+
+      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+      console.log("Current user from session:", user);
+
+      if (!user.id) {
+        console.error("No user ID found in session storage");
+        alert("Error: User information not found. Please go back and fill out your information again.");
+        return;
+      }
+
+      try {
+        // Convert answers to use question text and answer labels
+        const convertedAnswers = convertAnswersToLabels(answers);
+        console.log("Converted answers:", convertedAnswers);
+
+        const payload = {
+          user_id: user.id,
+          assessment_type: "Complication Risk",
+          answers: convertedAnswers,
+        };
+        console.log("Sending payload:", payload);
+
+        const response = await fetch("https://luther.health/api/assessments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server response error:", errorText);
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("Assessment saved successfully:", result);
+
+        // Navigate to information page
+        window.location.hash = 'complication-risk-checker-information';
+      } catch (err) {
+        console.error("Error saving assessment:", err);
+        alert("Error saving assessment. Please try again.");
+      }
+    },
+    onBack: () => {
+      window.location.hash = 'complication-risk-checker-learn-more';
+    },
+  };
+
+  return <QuizTemplate config={complicationRiskQuizWithSaving} />;
 }
