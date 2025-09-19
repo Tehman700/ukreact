@@ -24,7 +24,6 @@ import { QuizPage } from './pages/QuizPage';
 import { LoadingPage } from './pages/LoadingPage';
 import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
-
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
 import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
