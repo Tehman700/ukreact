@@ -36,17 +36,44 @@ export function PaymentGate({
     try {
       setPaymentStatus(prev => ({ ...prev, loading: true, error: null }));
 
-      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-      if (!user.email) {
-        throw new Error('User email not found');
+      // First check if we have a payment session stored locally
+      const paymentSession = sessionStorage.getItem('paymentCompleted');
+      const paymentProduct = sessionStorage.getItem('paymentProduct');
+
+      console.log('Checking local payment session:', paymentSession, paymentProduct);
+
+      if (paymentSession === 'true' && paymentProduct && paymentProduct.includes(requiredProduct)) {
+        console.log('Payment verified from local session');
+        setPaymentStatus({
+          hasPaid: true,
+          loading: false,
+          error: null
+        });
+        return;
       }
 
-      console.log('Checking payment for:', user.email, 'Product:', requiredProduct);
+      // Check URL for success parameter (from Stripe redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlHash = window.location.hash;
 
-      // Use full API URL for production
+      if (urlHash.includes('success') || urlParams.get('payment') === 'success') {
+        console.log('Payment success detected from URL');
+        // Store payment completion in session
+        sessionStorage.setItem('paymentCompleted', 'true');
+        sessionStorage.setItem('paymentProduct', requiredProduct);
+
+        setPaymentStatus({
+          hasPaid: true,
+          loading: false,
+          error: null
+        });
+        return;
+      }
+
+      // Fallback: Check database by product status
       const apiUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:5000/api/check-payment-status'
-        : 'https://luther.health/api/check-payment-status';
+        ? 'http://localhost:5000/api/check-payment-by-product'
+        : 'https://luther.health/api/check-payment-by-product';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -55,19 +82,22 @@ export function PaymentGate({
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          email: user.email,
           requiredProduct: requiredProduct
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('API Error:', response.status, errorData);
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Payment status response:', data);
+      console.log('Database payment check:', data);
+
+      if (data.hasPaid) {
+        // Store successful verification
+        sessionStorage.setItem('paymentCompleted', 'true');
+        sessionStorage.setItem('paymentProduct', requiredProduct);
+      }
 
       setPaymentStatus({
         hasPaid: data.hasPaid,
@@ -75,14 +105,12 @@ export function PaymentGate({
         error: null
       });
 
-      // If not paid, redirect to payment page after a short delay
+      // If not paid, redirect to payment page
       if (!data.hasPaid) {
         console.log('Payment not found, redirecting to:', fallbackRoute);
         setTimeout(() => {
           window.location.hash = fallbackRoute;
         }, 2000);
-      } else {
-        console.log('Payment verified successfully!');
       }
 
     } catch (error) {

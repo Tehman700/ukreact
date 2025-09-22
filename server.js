@@ -501,13 +501,45 @@ app.post("/api/create-checkout-session", async (req, res) => {
       quantity: item.quantity || 1,
     }));
 
+    // Determine URLs based on environment or request origin
+    const origin = req.headers.origin || req.headers.referer || 'https://luther.health';
+    const baseUrl = origin.includes('localhost') ? origin : 'https://luther.health';
+
+    // Set success URL to go directly to the assessment with success indicator
+    const productName = products[0].item_name;
+    let successRoute = 'complication-risk-checker-questions';
+
+    if (productName.includes('Surgery Readiness')) {
+      successRoute = 'surgery-readiness-questions';
+    } else if (productName.includes('Complication Risk')) {
+      successRoute = 'complication-risk-checker-questions';
+    }
+
+    const successUrl = baseUrl.includes('localhost')
+      ? `${baseUrl}/#${successRoute}?payment=success`
+      : `${baseUrl}/Health-Audit.html#${successRoute}?payment=success`;
+
+    const cancelUrl = baseUrl.includes('localhost')
+      ? `${baseUrl}/#complication-risk-checker-upsell`
+      : `${baseUrl}/Health-Audit.html#complication-risk-checker-upsell`;
+
+    console.log(`Creating checkout session:
+      Products: ${products.map(p => p.item_name).join(', ')}
+      Success: ${successUrl}
+      Cancel: ${cancelUrl}`);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
       customer_email: email,
-      success_url: "https://luther.health/Health-Audit.html#success",
-      cancel_url: "https://luther.health/Health-Audit.html#cancel",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        product_names: products.map(p => p.item_name).join(', '),
+        customer_email: email,
+        origin: origin
+      }
     });
 
     res.json({ id: session.id });
@@ -1002,6 +1034,87 @@ app.post("/api/analytics/pageview", async (req, res) => {
   } catch (error) {
     console.error("Page view tracking error:", error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// New backend endpoint - checks by product status instead of email
+app.post("/api/check-payment-by-product", async (req, res) => {
+  try {
+    const { requiredProduct } = req.body;
+
+    console.log(`🔍 Checking payment status for product: ${requiredProduct}`);
+
+    if (!requiredProduct) {
+      return res.status(400).json({
+        error: "Required product must be provided"
+      });
+    }
+
+    // Check if there are any successful payments for this product
+    const paymentQuery = `
+      SELECT sp.*, sp.created
+      FROM stripe_payments sp
+      WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
+        AND (
+          sp.product_name ILIKE $1
+          OR sp.line_items::text ILIKE $1
+        )
+      ORDER BY sp.created DESC
+      LIMIT 1
+    `;
+
+    const result = await pool.query(paymentQuery, [`%${requiredProduct}%`]);
+
+    const hasPaid = result.rows.length > 0;
+
+    if (hasPaid) {
+      const payment = result.rows[0];
+      console.log(`✅ Payment found for product ${requiredProduct}:`, {
+        sessionId: payment.stripe_session_id,
+        status: payment.status,
+        product: payment.product_name,
+        amount: payment.amount_total / 100,
+        date: payment.created
+      });
+    } else {
+      console.log(`❌ No payment found for product: ${requiredProduct}`);
+
+      // Debug: Show what payments exist
+      const debugResult = await pool.query(`
+        SELECT product_name, status, created
+        FROM stripe_payments
+        WHERE status IN ('complete', 'paid', 'complete_payment_intent')
+        ORDER BY created DESC
+        LIMIT 5
+      `);
+
+      console.log('Available paid products:', debugResult.rows.map(p => ({
+        product: p.product_name,
+        status: p.status,
+        date: p.created
+      })));
+    }
+
+    res.json({
+      hasPaid,
+      requiredProduct,
+      paymentDetails: hasPaid ? {
+        paymentDate: result.rows[0].created,
+        amount: result.rows[0].amount_total / 100,
+        currency: result.rows[0].currency,
+        sessionId: result.rows[0].stripe_session_id,
+        status: result.rows[0].status,
+        productName: result.rows[0].product_name
+      } : null
+    });
+
+  } catch (error) {
+    console.error("Payment status check error:", error);
+    res.status(500).json({
+      error: "Failed to verify payment status",
+      hasPaid: false,
+      details: error.message
+    });
   }
 });
 
