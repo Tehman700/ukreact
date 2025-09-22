@@ -42,10 +42,19 @@ export function PaymentGate({
         throw new Error('User email not found');
       }
 
-      // Check payment status from your backend
-      const response = await fetch('/api/check-payment-status', {
+      console.log('Checking payment for:', user.email, 'Product:', requiredProduct);
+
+      // Use full API URL for production
+      const apiUrl = window.location.hostname === 'localhost'
+        ? 'http://localhost:5000/api/check-payment-status'
+        : 'https://luther.health/api/check-payment-status';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           email: user.email,
           requiredProduct: requiredProduct
@@ -53,10 +62,13 @@ export function PaymentGate({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to check payment status');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', response.status, errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Payment status response:', data);
 
       setPaymentStatus({
         hasPaid: data.hasPaid,
@@ -66,9 +78,12 @@ export function PaymentGate({
 
       // If not paid, redirect to payment page after a short delay
       if (!data.hasPaid) {
+        console.log('Payment not found, redirecting to:', fallbackRoute);
         setTimeout(() => {
           window.location.hash = fallbackRoute;
         }, 2000);
+      } else {
+        console.log('Payment verified successfully!');
       }
 
     } catch (error) {
