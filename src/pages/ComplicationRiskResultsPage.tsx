@@ -290,11 +290,11 @@ export function ComplicationRiskResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
-          <PaymentGate
-      assessmentType="Complication Risk Checker"
-      requiredProduct="Complication Risk Assessment"
-      fallbackRoute="complication-risk-checker-upsell"
-    >
+<PaymentGate
+  assessmentType="Complication Risk Checker"
+  requiredProduct="Complication Risk Checker"  // ← Changed this
+  fallbackRoute="complication-risk-checker-upsell"
+>
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">

@@ -203,11 +203,11 @@ export function ComplicationRiskReviewPage() {
   const hasSelectedFeedback = selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0;
 
   return (
-          <PaymentGate
-      assessmentType="Complication Risk Checker"
-      requiredProduct="Complication Risk Assessment"
-      fallbackRoute="complication-risk-checker-upsell"
-    >
+        <PaymentGate
+          assessmentType="Complication Risk Checker"
+          requiredProduct="Complication Risk Checker"  // ← Changed this
+          fallbackRoute="complication-risk-checker-upsell"
+        >
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-8">

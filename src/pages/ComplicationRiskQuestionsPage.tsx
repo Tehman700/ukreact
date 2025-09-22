@@ -148,10 +148,10 @@ export function ComplicationRiskQuestionsPage() {
   };
 
   return (
-    <PaymentGate
-      assessmentType="Complication Risk Checker"
-      requiredProduct="Complication Risk Assessment"
-      fallbackRoute="complication-risk-checker-upsell"
+<PaymentGate
+  assessmentType="Complication Risk Checker"
+  requiredProduct="Complication Risk Checker"  // ← Changed this
+  fallbackRoute="complication-risk-checker-upsell"
     >
       <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
