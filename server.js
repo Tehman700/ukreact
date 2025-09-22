@@ -1091,67 +1091,6 @@ app.post("/api/set-payment-session", async (req, res) => {
   }
 });
 
-
-app.post("/api/set-payment-session", async (req, res) => {
-  try {
-    const { email, productName, sessionId } = req.body;
-
-    // Store temporary payment session for immediate access
-    // This runs when payment is successful but before webhook
-    const sessionData = {
-      email,
-      productName,
-      sessionId,
-      timestamp: new Date().toISOString(),
-      verified: false
-    };
-
-    // You could store this in Redis or a temporary table
-    // For now, we'll rely on the webhook to update stripe_payments
-
-    res.json({ success: true });
-
-  } catch (error) {
-    console.error("Payment session error:", error);
-    res.status(500).json({ error: "Failed to set payment session" });
-  }
-});
-
-// Middleware to check payment for specific routes
-export function requirePayment(requiredProduct: string) {
-  return async (req: any, res: any, next: any) => {
-    try {
-      const userEmail = req.headers['x-user-email'] || req.body.email;
-
-      if (!userEmail) {
-        return res.status(401).json({ error: 'User email required' });
-      }
-
-      const paymentQuery = `
-        SELECT id FROM stripe_payments
-        WHERE customer_email = $1
-          AND product_name ILIKE $2
-          AND status IN ('complete', 'paid')
-        LIMIT 1
-      `;
-
-      const result = await pool.query(paymentQuery, [userEmail, `%${requiredProduct}%`]);
-
-      if (result.rows.length === 0) {
-        return res.status(402).json({
-          error: 'Payment required',
-          requiredProduct,
-          hasPaid: false
-        });
-      }
-
-      next();
-    } catch (error) {
-      console.error('Payment middleware error:', error);
-      res.status(500).json({ error: 'Payment verification failed' });
-    }
-  };
-}
 // ----------------------------
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
