@@ -1,3 +1,4 @@
+// PaymentGate.tsx - User-specific payment verification
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -36,13 +37,15 @@ export function PaymentGate({
     try {
       setPaymentStatus(prev => ({ ...prev, loading: true, error: null }));
 
-      // Get current user
-      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-      if (!user.email) {
-        throw new Error('Please complete user information first');
+      // Try to get user info, but don't require it immediately
+      let user = null;
+      try {
+        user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      } catch (e) {
+        console.log('No user info found in session');
       }
 
-      // First check if we have a payment session for THIS USER
+      // First check if we have a payment session for ANY USER (immediate after payment)
       const paymentSession = sessionStorage.getItem('paymentCompleted');
       const paymentProduct = sessionStorage.getItem('paymentProduct');
       const paymentUser = sessionStorage.getItem('paymentUser');
@@ -51,20 +54,21 @@ export function PaymentGate({
         session: paymentSession,
         product: paymentProduct,
         user: paymentUser,
-        currentUser: user.email
+        currentUser: user?.email
       });
 
-      // Verify the session belongs to current user
-      if (paymentSession === 'true' &&
-          paymentProduct && paymentProduct.includes(requiredProduct) &&
-          paymentUser === user.email) {
-        console.log('Payment verified from local session for user:', user.email);
-        setPaymentStatus({
-          hasPaid: true,
-          loading: false,
-          error: null
-        });
-        return;
+      // If we have a recent payment session, allow access
+      if (paymentSession === 'true' && paymentProduct && paymentProduct.includes(requiredProduct)) {
+        // If paymentUser matches currentUser OR if we just completed payment
+        if (!paymentUser || !user?.email || paymentUser === user.email) {
+          console.log('Payment verified from local session');
+          setPaymentStatus({
+            hasPaid: true,
+            loading: false,
+            error: null
+          });
+          return;
+        }
       }
 
       // Check URL for success parameter (from Stripe redirect)
@@ -72,11 +76,13 @@ export function PaymentGate({
       const urlHash = window.location.hash;
 
       if (urlHash.includes('success') || urlParams.get('payment') === 'success') {
-        console.log('Payment success detected from URL for user:', user.email);
-        // Store payment completion for THIS USER
+        console.log('Payment success detected from URL');
+        // Store payment completion (user will be set later when they provide info)
         sessionStorage.setItem('paymentCompleted', 'true');
         sessionStorage.setItem('paymentProduct', requiredProduct);
-        sessionStorage.setItem('paymentUser', user.email);
+        if (user?.email) {
+          sessionStorage.setItem('paymentUser', user.email);
+        }
 
         setPaymentStatus({
           hasPaid: true,
@@ -86,48 +92,60 @@ export function PaymentGate({
         return;
       }
 
-      // Fallback: Check database for THIS USER's payment
-      const apiUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:5000/api/check-user-payment'
-        : 'https://luther.health/api/check-user-payment';
+      // If we have user info, check database
+      if (user?.email) {
+        const apiUrl = window.location.hostname === 'localhost'
+          ? 'http://localhost:5000/api/check-user-payment'
+          : 'https://luther.health/api/check-user-payment';
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          email: user.email,
-          requiredProduct: requiredProduct
-        })
-      });
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            email: user.email,
+            requiredProduct: requiredProduct
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
 
-      const data = await response.json();
-      console.log('Database payment check for user:', user.email, data);
+        const data = await response.json();
+        console.log('Database payment check for user:', user.email, data);
 
-      if (data.hasPaid) {
-        // Store successful verification for THIS USER
-        sessionStorage.setItem('paymentCompleted', 'true');
-        sessionStorage.setItem('paymentProduct', requiredProduct);
-        sessionStorage.setItem('paymentUser', user.email);
-      }
+        if (data.hasPaid) {
+          sessionStorage.setItem('paymentCompleted', 'true');
+          sessionStorage.setItem('paymentProduct', requiredProduct);
+          sessionStorage.setItem('paymentUser', user.email);
+        }
 
-      setPaymentStatus({
-        hasPaid: data.hasPaid,
-        loading: false,
-        error: null
-      });
+        setPaymentStatus({
+          hasPaid: data.hasPaid,
+          loading: false,
+          error: null
+        });
 
-      // If not paid, redirect to payment page
-      if (!data.hasPaid) {
-        console.log(`No payment found for user ${user.email}, redirecting to:`, fallbackRoute);
+        if (!data.hasPaid) {
+          console.log(`No payment found for user ${user.email}, redirecting to:`, fallbackRoute);
+          setTimeout(() => {
+            window.location.hash = fallbackRoute;
+          }, 2000);
+        }
+      } else {
+        // No user info available, redirect to information page first
+        console.log('No user information found, redirecting to information page');
+        setPaymentStatus({
+          hasPaid: false,
+          loading: false,
+          error: 'Please complete your information first'
+        });
+
         setTimeout(() => {
-          window.location.hash = fallbackRoute;
+          window.location.hash = 'complication-risk-checker-information';
         }, 2000);
       }
 
@@ -139,7 +157,6 @@ export function PaymentGate({
         error: error instanceof Error ? error.message : 'Payment verification failed'
       });
 
-      // Redirect to payment on error
       setTimeout(() => {
         window.location.hash = fallbackRoute;
       }, 3000);
