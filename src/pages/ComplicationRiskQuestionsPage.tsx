@@ -1,5 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate';
+
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -145,5 +147,13 @@ export function ComplicationRiskQuestionsPage() {
     },
   };
 
-  return <QuizTemplate config={quizWithSubmit} />;
+  return (
+    <PaymentGate
+      assessmentType="Complication Risk Checker"
+      requiredProduct="Complication Risk Assessment"
+      fallbackRoute="complication-risk-checker-upsell"
+    >
+      <QuizTemplate config={quizWithSubmit} />
+    </PaymentGate>
+  );
 }

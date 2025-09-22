@@ -24,6 +24,7 @@ import { QuizPage } from './pages/QuizPage';
 import { LoadingPage } from './pages/LoadingPage';
 import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
+
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
 import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
@@ -908,6 +909,8 @@ export default function App() {
         return <NutritionBodyCompositionSignsPage />;
       case 'blog/functional-fitness-age-signs':
         return <FunctionalFitnessAgeSignsPage />;
+      case 'complication-risk-checker-upsell':
+        return <ComplicationRiskUpsellPage />;
       case 'complication-risk-checker-learn-more':
         return <ComplicationRiskUpsellPage />;
       case 'complication-risk-checker-questions':

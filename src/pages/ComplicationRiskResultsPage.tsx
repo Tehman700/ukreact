@@ -6,7 +6,11 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate';
+
 // Using custom CSS charts instead of Recharts for better reliability
+
+
 
 interface AssessmentResult {
   category: string;
@@ -286,6 +290,11 @@ export function ComplicationRiskResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+          <PaymentGate
+      assessmentType="Complication Risk Checker"
+      requiredProduct="Complication Risk Assessment"
+      fallbackRoute="complication-risk-checker-upsell"
+    >
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -900,5 +909,6 @@ export function ComplicationRiskResultsPage() {
         </Card>
       </div>
     </div>
+        </PaymentGate>
   );
 }
