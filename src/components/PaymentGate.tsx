@@ -36,14 +36,29 @@ export function PaymentGate({
     try {
       setPaymentStatus(prev => ({ ...prev, loading: true, error: null }));
 
-      // First check if we have a payment session stored locally
+      // Get current user
+      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      if (!user.email) {
+        throw new Error('Please complete user information first');
+      }
+
+      // First check if we have a payment session for THIS USER
       const paymentSession = sessionStorage.getItem('paymentCompleted');
       const paymentProduct = sessionStorage.getItem('paymentProduct');
+      const paymentUser = sessionStorage.getItem('paymentUser');
 
-      console.log('Checking local payment session:', paymentSession, paymentProduct);
+      console.log('Checking local payment session:', {
+        session: paymentSession,
+        product: paymentProduct,
+        user: paymentUser,
+        currentUser: user.email
+      });
 
-      if (paymentSession === 'true' && paymentProduct && paymentProduct.includes(requiredProduct)) {
-        console.log('Payment verified from local session');
+      // Verify the session belongs to current user
+      if (paymentSession === 'true' &&
+          paymentProduct && paymentProduct.includes(requiredProduct) &&
+          paymentUser === user.email) {
+        console.log('Payment verified from local session for user:', user.email);
         setPaymentStatus({
           hasPaid: true,
           loading: false,
@@ -57,10 +72,11 @@ export function PaymentGate({
       const urlHash = window.location.hash;
 
       if (urlHash.includes('success') || urlParams.get('payment') === 'success') {
-        console.log('Payment success detected from URL');
-        // Store payment completion in session
+        console.log('Payment success detected from URL for user:', user.email);
+        // Store payment completion for THIS USER
         sessionStorage.setItem('paymentCompleted', 'true');
         sessionStorage.setItem('paymentProduct', requiredProduct);
+        sessionStorage.setItem('paymentUser', user.email);
 
         setPaymentStatus({
           hasPaid: true,
@@ -70,10 +86,10 @@ export function PaymentGate({
         return;
       }
 
-      // Fallback: Check database by product status
+      // Fallback: Check database for THIS USER's payment
       const apiUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:5000/api/check-payment-by-product'
-        : 'https://luther.health/api/check-payment-by-product';
+        ? 'http://localhost:5000/api/check-user-payment'
+        : 'https://luther.health/api/check-user-payment';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -82,6 +98,7 @@ export function PaymentGate({
           'Accept': 'application/json'
         },
         body: JSON.stringify({
+          email: user.email,
           requiredProduct: requiredProduct
         })
       });
@@ -91,12 +108,13 @@ export function PaymentGate({
       }
 
       const data = await response.json();
-      console.log('Database payment check:', data);
+      console.log('Database payment check for user:', user.email, data);
 
       if (data.hasPaid) {
-        // Store successful verification
+        // Store successful verification for THIS USER
         sessionStorage.setItem('paymentCompleted', 'true');
         sessionStorage.setItem('paymentProduct', requiredProduct);
+        sessionStorage.setItem('paymentUser', user.email);
       }
 
       setPaymentStatus({
@@ -107,7 +125,7 @@ export function PaymentGate({
 
       // If not paid, redirect to payment page
       if (!data.hasPaid) {
-        console.log('Payment not found, redirecting to:', fallbackRoute);
+        console.log(`No payment found for user ${user.email}, redirecting to:`, fallbackRoute);
         setTimeout(() => {
           window.location.hash = fallbackRoute;
         }, 2000);
@@ -161,7 +179,7 @@ export function PaymentGate({
               <div className="p-4 bg-red-50 rounded-lg">
                 <div className="flex items-center justify-center mb-2">
                   <AlertTriangle className="w-5 h-5 text-red-600 mr-2" />
-                  <span className="font-medium text-red-800">Verification Error</span>
+                  <span className="font-medium text-red-800">Access Error</span>
                 </div>
                 <p className="text-red-700 text-sm">{paymentStatus.error}</p>
               </div>

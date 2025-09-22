@@ -747,7 +747,69 @@ app.post("/api/check-payment-by-product", async (req, res) => {
     });
   }
 });
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const { products, email } = req.body;
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: "No products provided" });
+    }
 
+    const line_items = products.map((item) => ({
+      price_data: {
+        currency: "gbp",
+        product_data: { name: item.item_name },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity || 1,
+    }));
+
+    // Determine URLs based on environment or request origin
+    const origin = req.headers.origin || req.headers.referer || 'https://luther.health';
+    const baseUrl = origin.includes('localhost') ? origin : 'https://luther.health';
+
+    // Set success URL to go directly to the assessment with success indicator
+    const productName = products[0].item_name;
+    let successRoute = 'complication-risk-checker-questions';
+
+    if (productName.includes('Surgery Readiness')) {
+      successRoute = 'surgery-readiness-questions';
+    } else if (productName.includes('Complication Risk')) {
+      successRoute = 'complication-risk-checker-questions';
+    }
+
+    const successUrl = baseUrl.includes('localhost')
+      ? `${baseUrl}/#${successRoute}?payment=success`
+      : `${baseUrl}/Health-Audit.html#${successRoute}?payment=success`;
+
+    const cancelUrl = baseUrl.includes('localhost')
+      ? `${baseUrl}/#complication-risk-checker-upsell`
+      : `${baseUrl}/Health-Audit.html#complication-risk-checker-upsell`;
+
+    console.log(`Creating checkout session:
+      Products: ${products.map(p => p.item_name).join(', ')}
+      Success: ${successUrl}
+      Cancel: ${cancelUrl}`);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      customer_email: email,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        product_names: products.map(p => p.item_name).join(', '),
+        customer_email: email,
+        origin: origin
+      }
+    });
+
+    res.json({ id: session.id });
+  } catch (err) {
+    console.error("Stripe session creation failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 // Backend API endpoint to add to server.js
 app.post("/api/check-payment-status", async (req, res) => {
   try {
@@ -807,6 +869,7 @@ app.post("/api/check-payment-status", async (req, res) => {
     });
   }
 });
+
 
 // Alternative: Session-based payment tracking
 app.post("/api/set-payment-session", async (req, res) => {
