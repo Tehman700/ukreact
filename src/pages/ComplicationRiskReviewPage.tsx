@@ -351,7 +351,7 @@ export function ComplicationRiskReviewPage() {
         )}
       </div>
     </div>
-        </PaymentGate>
+    </PaymentGate>
 
   );
 }

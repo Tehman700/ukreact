@@ -541,6 +541,7 @@ app.post("/api/webhook", async (req, res) => {
   }
 
   if (event.type === "checkout.session.completed") {
+
     const session = event.data.object;
     console.log("✅ Payment success:", session);
 
@@ -584,13 +585,14 @@ app.post("/api/webhook", async (req, res) => {
       `, [
         session.id,
         session.customer_email,
+
         session.amount_total,
         session.currency,
         session.payment_status,
         productName,
         JSON.stringify(lineItems.data)
       ]);
-
+      console.log(session.id, session.customer_email)
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
 
       // ----------------------------
