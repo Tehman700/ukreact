@@ -1003,6 +1003,91 @@ app.post("/api/analytics/pageview", async (req, res) => {
   }
 });
 
+// Backend API endpoint to add to server.js
+app.post("/api/check-payment-status", async (req, res) => {
+  try {
+    const { email, requiredProduct } = req.body;
+
+    if (!email || !requiredProduct) {
+      return res.status(400).json({
+        error: "Email and required product must be provided"
+      });
+    }
+
+    // Check if user has paid for the specific product
+    const paymentQuery = `
+      SELECT sp.*, sp.line_items
+      FROM stripe_payments sp
+      WHERE sp.customer_email = $1
+        AND sp.status IN ('complete', 'paid')
+        AND (
+          sp.product_name ILIKE $2
+          OR sp.line_items::text ILIKE $2
+        )
+      ORDER BY sp.created DESC
+      LIMIT 1
+    `;
+
+    const result = await pool.query(paymentQuery, [
+      email,
+      `%${requiredProduct}%`
+    ]);
+
+    const hasPaid = result.rows.length > 0;
+
+    // Log the payment check for analytics
+    if (hasPaid) {
+      console.log(`✅ Payment verified for ${email} - Product: ${requiredProduct}`);
+    } else {
+      console.log(`❌ Payment not found for ${email} - Product: ${requiredProduct}`);
+    }
+
+    res.json({
+      hasPaid,
+      email,
+      requiredProduct,
+      paymentDetails: hasPaid ? {
+        paymentDate: result.rows[0].created,
+        amount: result.rows[0].amount_total / 100,
+        currency: result.rows[0].currency,
+        sessionId: result.rows[0].stripe_session_id
+      } : null
+    });
+
+  } catch (error) {
+    console.error("Payment status check error:", error);
+    res.status(500).json({
+      error: "Failed to verify payment status",
+      hasPaid: false
+    });
+  }
+});
+
+// Alternative: Session-based payment tracking
+app.post("/api/set-payment-session", async (req, res) => {
+  try {
+    const { email, productName, sessionId } = req.body;
+
+    // Store temporary payment session for immediate access
+    // This runs when payment is successful but before webhook
+    const sessionData = {
+      email,
+      productName,
+      sessionId,
+      timestamp: new Date().toISOString(),
+      verified: false
+    };
+
+    // You could store this in Redis or a temporary table
+    // For now, we'll rely on the webhook to update stripe_payments
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error("Payment session error:", error);
+    res.status(500).json({ error: "Failed to set payment session" });
+  }
+});
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
