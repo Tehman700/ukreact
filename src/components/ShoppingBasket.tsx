@@ -331,7 +331,7 @@ const makePayment = async (funnelType = "complication-risk") => {
                 </div>
                 
                 <Button 
-                  onClick={makePayment}
+                  onClick={() => makePayment("complication-risk")}
                   className="w-full"
                   size="lg"
                 >
