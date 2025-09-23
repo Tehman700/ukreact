@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
+import { PaymentGate } from "../components/PaymentGate";
+
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 // Using custom CSS charts instead of Recharts for better reliability
@@ -286,7 +288,11 @@ export function ComplicationRiskResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
-    <div className="min-h-screen bg-background">
+          <PaymentGate
+      requiredFunnel="complication-risk"
+      redirectUrl="/Health-Audit.html#complication-risk-checkout"
+    >
+        <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
@@ -900,5 +906,7 @@ export function ComplicationRiskResultsPage() {
         </Card>
       </div>
     </div>
+    </PaymentGate>
+
   );
 }
