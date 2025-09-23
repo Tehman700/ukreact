@@ -147,7 +147,7 @@ export function ComplicationRiskQuestionsPage() {
   };
 
   return (
-    <PaymentGate requiredProduct="Complication Risk">
+<PaymentGate requiredProduct="Complication Risk Checker">
       <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );

@@ -216,7 +216,7 @@ app.post("/api/webhook", async (req, res) => {
         session.customer_email,
         session.amount_total,
         session.currency,
-        'complete', // Set explicit status
+        session.payment_status, // Stripe sets this to 'paid'
         productName,
         JSON.stringify(lineItems.data)
       ]);
@@ -632,65 +632,100 @@ app.post("/api/analytics/pageview", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+//app.post("/api/verify-payment", async (req, res) => {
+//  try {
+//    const { sessionId, productName } = req.body;
+//
+//    if (!sessionId) {
+//      return res.status(400).json({
+//        success: false,
+//        error: "Session ID is required"
+//      });
+//    }
+//
+//    // Check if payment exists in database with this session ID
+//    const paymentQuery = `
+//      SELECT * FROM stripe_payments
+//      WHERE stripe_session_id = $1
+//      AND status IN ('complete', 'paid')
+//      AND ($2 IS NULL OR product_name ILIKE $2)
+//      ORDER BY created DESC
+//      LIMIT 1
+//    `;
+//
+//    const result = await pool.query(paymentQuery, [
+//      sessionId,
+//      productName ? `%${productName}%` : null
+//    ]);
+//
+//    if (result.rows.length > 0) {
+//      const payment = result.rows[0];
+//      console.log(`✅ Payment verified for session: ${sessionId}`);
+//
+//      res.json({
+//        success: true,
+//        verified: true,
+//        payment: {
+//          sessionId: payment.stripe_session_id,
+//          amount: payment.amount_total / 100,
+//          currency: payment.currency,
+//          status: payment.status,
+//          productName: payment.product_name,
+//          paymentDate: payment.created
+//        }
+//      });
+//    } else {
+//      console.log(`❌ No payment found for session: ${sessionId}`);
+//      res.json({
+//        success: true,
+//        verified: false,
+//        message: "Payment not found or not completed"
+//      });
+//    }
+//
+//  } catch (error) {
+//    console.error("Payment verification error:", error);
+//    res.status(500).json({
+//      success: false,
+//      error: "Payment verification failed"
+//    });
+//  }
+//});
+
+
+
 app.post("/api/verify-payment", async (req, res) => {
   try {
     const { sessionId, productName } = req.body;
 
-    if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        error: "Session ID is required"
-      });
-    }
-
-    // Check if payment exists in database with this session ID
-    const paymentQuery = `
-      SELECT * FROM stripe_payments
-      WHERE stripe_session_id = $1
-      AND status IN ('complete', 'paid')
-      AND ($2 IS NULL OR product_name ILIKE $2)
-      ORDER BY created DESC
-      LIMIT 1
-    `;
-
-    const result = await pool.query(paymentQuery, [
-      sessionId,
-      productName ? `%${productName}%` : null
-    ]);
+    const result = await pool.query(
+      `SELECT * FROM stripe_payments
+       WHERE stripe_session_id = $1 AND status = 'paid'`,
+      [sessionId]
+    );
 
     if (result.rows.length > 0) {
       const payment = result.rows[0];
-      console.log(`✅ Payment verified for session: ${sessionId}`);
+      // Optional product check
+      if (productName && !payment.product_name.includes(productName)) {
+        return res.json({ success: true, verified: false });
+      }
 
-      res.json({
-        success: true,
-        verified: true,
-        payment: {
-          sessionId: payment.stripe_session_id,
-          amount: payment.amount_total / 100,
-          currency: payment.currency,
-          status: payment.status,
-          productName: payment.product_name,
-          paymentDate: payment.created
-        }
-      });
-    } else {
-      console.log(`❌ No payment found for session: ${sessionId}`);
-      res.json({
-        success: true,
-        verified: false,
-        message: "Payment not found or not completed"
-      });
+      return res.json({ success: true, verified: true, payment });
     }
 
-  } catch (error) {
-    console.error("Payment verification error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Payment verification failed"
-    });
+    res.json({ success: true, verified: false });
+  } catch (err) {
+    console.error("Verify payment error:", err);
+    res.status(500).json({ success: false, error: "Payment verification failed" });
   }
 });
+
+
+
+
+
+
 
 app.post("/api/create-payment-session", async (req, res) => {
   try {
