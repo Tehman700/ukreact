@@ -95,6 +95,7 @@ const complicationRiskQuiz: QuizConfig = {
 };
 
 export function ComplicationRiskQuestionsPage() {
+  // ⬇️ Payment gate states
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
 
@@ -113,7 +114,7 @@ export function ComplicationRiskQuestionsPage() {
         if (data.paid) {
           setAllowed(true);
         } else {
-          window.location.href = "/payment-required";
+          window.location.href = "/payment-required"; // or your checkout page
         }
       })
       .catch(err => {
@@ -123,9 +124,62 @@ export function ComplicationRiskQuestionsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // ⬇️ Same helper for answers → labels
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    complicationRiskQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(', ');
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  // ⬇️ Build quiz config with submit & redirect
+  const quizWithSubmit: QuizConfig = {
+    ...complicationRiskQuiz,
+    informationPageRoute: 'complication-risk-checker-information',
+    onComplete: async (answers) => {
+      console.log('Complication Risk Assessment completed with answers:', answers);
+      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+
+      try {
+        const convertedAnswers = convertAnswersToLabels(answers);
+
+        await fetch('https://luther.health/api/assessments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: user.id,
+            assessment_type: 'Complication Risk',
+            answers: convertedAnswers,
+          }),
+        });
+
+        window.location.hash = 'complication-risk-checker-information';
+      } catch (err) {
+        console.error('Error saving complication risk assessment:', err);
+      }
+    },
+    onBack: () => {
+      window.location.hash = 'complication-risk-checker-learn-more';
+    },
+  };
+
   if (loading) return <p>Loading...</p>;
   if (!allowed) return <p>Redirecting to payment...</p>;
 
-  // ✅ FIX: use complicationRiskQuiz instead of quizWithSubmit
-  return <QuizTemplate config={complicationRiskQuiz} />;
+  // ✅ Return gated + working quiz
+  return <QuizTemplate config={quizWithSubmit} />;
 }
