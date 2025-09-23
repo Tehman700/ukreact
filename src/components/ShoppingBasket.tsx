@@ -163,19 +163,24 @@ const makePayment = async () => {
     body: JSON.stringify({ products: checkoutItems }),
   });
 
-  const session = await response.json();
+  const data = await response.json();
 
-  if (session.error) {
-    console.error("Checkout session error:", session.error);
-    alert("Payment failed: " + session.error);
+  if (data.error) {
+    console.error("Checkout session error:", data.error);
+    alert("Payment failed: " + data.error);
     return;
   }
 
-  const result = await stripe?.redirectToCheckout({ sessionId: session.id });
+  // ✅ Save session ID for later quiz gating
+  sessionStorage.setItem("stripe_session_id", data.sessionId);
+
+  // Redirect user to Stripe Checkout
+  const result = await stripe?.redirectToCheckout({ sessionId: data.sessionId });
   if (result?.error) {
     console.error("Stripe redirect error:", result.error);
   }
 };
+
 
 
 

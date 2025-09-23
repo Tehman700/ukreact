@@ -117,7 +117,8 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, email } = req.body;
+    const { products } = req.body;
+
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
@@ -135,17 +136,19 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      customer_email: email,
-      success_url: "https://luther.health/Health-Audit.html#success",
+      // 👇 important: return session_id in redirect success url
+      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
-    res.json({ id: session.id });
+    // ✅ Return sessionId so frontend can save & use it
+    res.json({ sessionId: session.id });
   } catch (err) {
     console.error("Stripe session creation failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ----------------------------
 // 4. Enhanced Stripe Webhook → Store Data + Send Meta Conversion API
@@ -633,23 +636,22 @@ app.post("/api/analytics/pageview", async (req, res) => {
   }
 });
 // ----------------------------
-// 5. Check Payment Status
+// Check Payment Status by Session ID
 // ----------------------------
 app.get("/api/check-payment", async (req, res) => {
   try {
-    const { email } = req.query; // frontend sends user email
+    const { session_id } = req.query; // frontend sends session ID
 
-    if (!email) {
-      return res.status(400).json({ success: false, error: "Email is required" });
+    if (!session_id) {
+      return res.status(400).json({ success: false, error: "session_id is required" });
     }
 
     const result = await pool.query(
       `SELECT * FROM stripe_payments
-       WHERE customer_email = $1
+       WHERE stripe_session_id = $1
          AND status = 'paid'
-       ORDER BY created DESC
        LIMIT 1`,
-      [email]
+      [session_id]
     );
 
     if (result.rows.length > 0) {
@@ -662,6 +664,7 @@ app.get("/api/check-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Server error" });
   }
 });
+
 
 
 // ----------------------------

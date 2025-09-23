@@ -94,28 +94,26 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
-import React, { useEffect, useState } from 'react';
-import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-
 export function ComplicationRiskQuestionsPage() {
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-    if (!user.email) {
+    const sessionId = sessionStorage.getItem("stripe_session_id");
+
+    if (!sessionId) {
       setAllowed(false);
       setLoading(false);
       return;
     }
 
-    fetch(`https://luther.health/api/check-payment?email=${encodeURIComponent(user.email)}`)
+    fetch(`https://luther.health/api/check-payment?session_id=${sessionId}`)
       .then(res => res.json())
       .then(data => {
         if (data.paid) {
           setAllowed(true);
         } else {
-          window.location.href = "/payment-required"; // or Stripe checkout page
+          window.location.href = "/payment-required"; // redirect to checkout
         }
       })
       .catch(err => {
@@ -128,9 +126,6 @@ export function ComplicationRiskQuestionsPage() {
   if (loading) return <p>Loading...</p>;
   if (!allowed) return <p>Redirecting to payment...</p>;
 
-  // ✅ If allowed, show the quiz
+  // ✅ If paid, allow quiz
   return <QuizTemplate config={quizWithSubmit} />;
 }
-
-
-
