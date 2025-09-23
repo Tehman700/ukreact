@@ -94,11 +94,10 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
-export default function ComplicationRiskQuestionPage() {
+export function ComplicationRiskQuestionsPage() {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Get sessionId from URL (Stripe success URL has ?session_id=xxx)
     const params = new URLSearchParams(window.location.search);
     const sessionId =
       params.get("session_id") || sessionStorage.getItem("stripe_session_id");
@@ -113,7 +112,6 @@ export default function ComplicationRiskQuestionPage() {
       .then((data) => {
         if (data.paid) {
           setIsPaid(true);
-          // Store in sessionStorage so user doesn’t lose access on refresh
           sessionStorage.setItem("stripe_session_id", sessionId);
         } else {
           setIsPaid(false);
@@ -140,9 +138,5 @@ export default function ComplicationRiskQuestionPage() {
     );
   }
 
-  // ✅ User has paid → show quiz
   return <QuizTemplate config={complicationRiskQuiz} />;
 }
-
-
-
