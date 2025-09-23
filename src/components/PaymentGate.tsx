@@ -1,4 +1,3 @@
-// PaymentGate.tsx - User-specific payment verification
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -17,11 +16,11 @@ interface PaymentStatus {
   error: string | null;
 }
 
-export function PaymentGate({
-  children,
-  assessmentType,
-  requiredProduct,
-  fallbackRoute = 'complication-risk-checker-upsell'
+export function PaymentGate({ 
+  children, 
+  assessmentType, 
+  requiredProduct, 
+  fallbackRoute = 'complication-risk-checker-upsell' 
 }: PaymentGateProps) {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({
     hasPaid: false,
@@ -36,53 +35,17 @@ export function PaymentGate({
   const checkPaymentStatus = async () => {
     try {
       setPaymentStatus(prev => ({ ...prev, loading: true, error: null }));
-
-      // Try to get user info, but don't require it immediately
-      let user = null;
-      try {
-        user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-      } catch (e) {
-        console.log('No user info found in session');
-      }
-
-      // First check if we have a payment session for ANY USER (immediate after payment)
-      const paymentSession = sessionStorage.getItem('paymentCompleted');
-      const paymentProduct = sessionStorage.getItem('paymentProduct');
-      const paymentUser = sessionStorage.getItem('paymentUser');
-
-      console.log('Checking local payment session:', {
-        session: paymentSession,
-        product: paymentProduct,
-        user: paymentUser,
-        currentUser: user?.email
-      });
-
-      // If we have a recent payment session, allow access
-      if (paymentSession === 'true' && paymentProduct && paymentProduct.includes(requiredProduct)) {
-        // If paymentUser matches currentUser OR if we just completed payment
-        if (!paymentUser || !user?.email || paymentUser === user.email) {
-          console.log('Payment verified from local session');
-          setPaymentStatus({
-            hasPaid: true,
-            loading: false,
-            error: null
-          });
-          return;
-        }
-      }
-
-      // Check URL for success parameter (from Stripe redirect)
+      
+      // Check URL for success parameter FIRST (from Stripe redirect)
       const urlParams = new URLSearchParams(window.location.search);
       const urlHash = window.location.hash;
 
       if (urlHash.includes('success') || urlParams.get('payment') === 'success') {
-        console.log('Payment success detected from URL');
-        // Store payment completion (user will be set later when they provide info)
+        console.log('Payment success detected from URL - granting immediate access');
+        // Store payment completion for immediate access
         sessionStorage.setItem('paymentCompleted', 'true');
         sessionStorage.setItem('paymentProduct', requiredProduct);
-        if (user?.email) {
-          sessionStorage.setItem('paymentUser', user.email);
-        }
+        sessionStorage.setItem('paymentTimestamp', Date.now().toString());
 
         setPaymentStatus({
           hasPaid: true,
@@ -92,8 +55,50 @@ export function PaymentGate({
         return;
       }
 
+      // Check if we have a recent payment session (within last hour)
+      const paymentSession = sessionStorage.getItem('paymentCompleted');
+      const paymentProduct = sessionStorage.getItem('paymentProduct');
+      const paymentTimestamp = sessionStorage.getItem('paymentTimestamp');
+
+      console.log('Checking local payment session:', {
+        session: paymentSession,
+        product: paymentProduct,
+        timestamp: paymentTimestamp
+      });
+
+      // If we have a recent payment session (within 1 hour), allow access
+      if (paymentSession === 'true' && paymentProduct && paymentProduct.includes(requiredProduct)) {
+        const sessionAge = paymentTimestamp ? Date.now() - parseInt(paymentTimestamp) : 0;
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        if (sessionAge < oneHour) {
+          console.log('Payment verified from recent local session');
+          setPaymentStatus({
+            hasPaid: true,
+            loading: false,
+            error: null
+          });
+          return;
+        } else {
+          console.log('Payment session expired, clearing old session');
+          sessionStorage.removeItem('paymentCompleted');
+          sessionStorage.removeItem('paymentProduct');
+          sessionStorage.removeItem('paymentTimestamp');
+        }
+      }
+
+      // Try to get user info for database verification
+      let user = null;
+      try {
+        user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      } catch (e) {
+        console.log('No user info found in session');
+      }
+
       // If we have user info, check database
       if (user?.email) {
+        console.log('Checking database payment for user:', user.email);
+
         const apiUrl = window.location.hostname === 'localhost'
           ? 'http://localhost:5000/api/check-user-payment'
           : 'https://luther.health/api/check-user-payment';
@@ -115,12 +120,14 @@ export function PaymentGate({
         }
 
         const data = await response.json();
-        console.log('Database payment check for user:', user.email, data);
+        console.log('Database payment check result:', data);
 
         if (data.hasPaid) {
+          // Store successful verification with timestamp
           sessionStorage.setItem('paymentCompleted', 'true');
           sessionStorage.setItem('paymentProduct', requiredProduct);
           sessionStorage.setItem('paymentUser', user.email);
+          sessionStorage.setItem('paymentTimestamp', Date.now().toString());
         }
 
         setPaymentStatus({
@@ -130,22 +137,62 @@ export function PaymentGate({
         });
 
         if (!data.hasPaid) {
-          console.log(`No payment found for user ${user.email}, redirecting to:`, fallbackRoute);
+          console.log(`No payment found for user ${user.email}, redirecting to payment page`);
           setTimeout(() => {
             window.location.hash = fallbackRoute;
           }, 2000);
         }
       } else {
-        // No user info available, redirect to information page first
-        console.log('No user information found, redirecting to information page');
+        // No user info available - check for any recent payments as fallback
+        console.log('No user info available, checking for recent payments');
+
+        const apiUrl = window.location.hostname === 'localhost'
+          ? 'http://localhost:5000/api/check-recent-payment'
+          : 'https://luther.health/api/check-recent-payment';
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              requiredProduct: requiredProduct
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Recent payment check result:', data);
+
+            if (data.hasPaid) {
+              sessionStorage.setItem('paymentCompleted', 'true');
+              sessionStorage.setItem('paymentProduct', requiredProduct);
+              sessionStorage.setItem('paymentTimestamp', Date.now().toString());
+
+              setPaymentStatus({
+                hasPaid: true,
+                loading: false,
+                error: null
+              });
+              return;
+            }
+          }
+        } catch (recentPaymentError) {
+          console.log('Recent payment check failed:', recentPaymentError);
+        }
+
+        // No payment found - redirect to payment page
+        console.log('No payment verification possible, redirecting to payment page');
         setPaymentStatus({
           hasPaid: false,
           loading: false,
-          error: 'Please complete your information first'
+          error: 'Payment required to access this content'
         });
 
         setTimeout(() => {
-          window.location.hash = 'complication-risk-checker-information';
+          window.location.hash = fallbackRoute;
         }, 2000);
       }
 

@@ -971,6 +971,216 @@ app.post("/api/check-user-payment", async (req, res) => {
     });
   }
 });
+
+
+app.post("/api/check-recent-payment", async (req, res) => {
+  try {
+    const { requiredProduct } = req.body;
+
+    console.log(`🔍 Checking recent payments for product: ${requiredProduct}`);
+
+    if (!requiredProduct) {
+      return res.status(400).json({
+        error: "Required product must be provided"
+      });
+    }
+
+    // Check for payments in the last hour for this product
+    const recentPaymentQuery = `
+      SELECT sp.*, sp.created
+      FROM stripe_payments sp
+      WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
+        AND (
+          sp.product_name ILIKE $1
+          OR sp.line_items::text ILIKE $1
+          OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
+        )
+        AND sp.created >= NOW() - INTERVAL '1 hour'
+      ORDER BY sp.created DESC
+      LIMIT 1
+    `;
+
+    const result = await pool.query(recentPaymentQuery, [`%${requiredProduct}%`]);
+    const hasPaid = result.rows.length > 0;
+
+    if (hasPaid) {
+      const payment = result.rows[0];
+      console.log(`✅ Recent payment found for product ${requiredProduct}:`, {
+        sessionId: payment.stripe_session_id,
+        status: payment.status,
+        product: payment.product_name,
+        amount: payment.amount_total / 100,
+        date: payment.created,
+        minutesAgo: Math.round((Date.now() - new Date(payment.created).getTime()) / 60000)
+      });
+    } else {
+      console.log(`❌ No recent payment found for product: ${requiredProduct}`);
+    }
+
+    res.json({
+      hasPaid,
+      requiredProduct,
+      paymentDetails: hasPaid ? {
+        paymentDate: result.rows[0].created,
+        amount: result.rows[0].amount_total / 100,
+        currency: result.rows[0].currency,
+        sessionId: result.rows[0].stripe_session_id,
+        status: result.rows[0].status,
+        productName: result.rows[0].product_name,
+        minutesAgo: Math.round((Date.now() - new Date(result.rows[0].created).getTime()) / 60000)
+      } : null
+    });
+
+  } catch (error) {
+    console.error("Recent payment check error:", error);
+    res.status(500).json({
+      error: "Failed to check recent payments",
+      hasPaid: false,
+      details: error.message
+    });
+  }
+});
+  try {
+    const { email, requiredProduct } = req.body;
+
+    console.log(`🔍 Checking payment status for user: ${email}, product: ${requiredProduct}`);
+
+    if (!email || !requiredProduct) {
+      return res.status(400).json({
+        error: "Email and required product must be provided"
+      });
+    }
+
+    // Method 1: Check by customer email (if available)
+    let paymentQuery = `
+      SELECT sp.*, sp.created
+      FROM stripe_payments sp
+      WHERE sp.customer_email = $1
+        AND sp.status IN ('complete', 'paid', 'complete_payment_intent')
+        AND (
+          sp.product_name ILIKE $2
+          OR sp.line_items::text ILIKE $2
+          OR (sp.product_name ILIKE '%Risk%' AND $2 ILIKE '%Risk%')
+        )
+      ORDER BY sp.created DESC
+      LIMIT 1
+    `;
+
+    let result = await pool.query(paymentQuery, [email, `%${requiredProduct}%`]);
+    let hasPaid = result.rows.length > 0;
+    let method = 'email';
+
+    // Method 2: If no email match, check if user exists in users table and has recent payment
+    if (!hasPaid) {
+      console.log(`No direct email match found, checking user-based payment for ${email}`);
+
+      // Check if user exists in users table
+      const userQuery = `
+        SELECT id, email, created_at FROM users WHERE email = $1
+      `;
+      const userResult = await pool.query(userQuery, [email]);
+
+      if (userResult.rows.length > 0) {
+        const user = userResult.rows[0];
+        console.log(`User found: ${user.email}, created: ${user.created_at}`);
+
+        // Check if there's a payment for this product made around the time user was active
+        const timeBasedPaymentQuery = `
+          SELECT sp.*, sp.created
+          FROM stripe_payments sp
+          WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
+            AND (
+              sp.product_name ILIKE $1
+              OR sp.line_items::text ILIKE $1
+              OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
+            )
+            AND sp.created >= $2::timestamp - INTERVAL '1 hour'
+            AND sp.created <= $2::timestamp + INTERVAL '24 hours'
+          ORDER BY sp.created DESC
+          LIMIT 1
+        `;
+
+        const timeBasedResult = await pool.query(timeBasedPaymentQuery, [
+          `%${requiredProduct}%`,
+          user.created_at
+        ]);
+
+        if (timeBasedResult.rows.length > 0) {
+          result = timeBasedResult;
+          hasPaid = true;
+          method = 'time-based';
+          console.log(`Found time-based payment match for user ${email}`);
+        }
+      }
+    }
+
+    // Method 3: If still no match, check recent payments without email (fallback)
+    if (!hasPaid) {
+      console.log('Checking recent payments without customer email as fallback');
+      const fallbackQuery = `
+        SELECT sp.*, sp.created
+        FROM stripe_payments sp
+        WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
+          AND (
+            sp.product_name ILIKE $1
+            OR sp.line_items::text ILIKE $1
+            OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
+          )
+          AND sp.created >= NOW() - INTERVAL '1 hour'
+          AND (sp.customer_email IS NULL OR sp.customer_email = '')
+        ORDER BY sp.created DESC
+        LIMIT 1
+      `;
+
+      const fallbackResult = await pool.query(fallbackQuery, [`%${requiredProduct}%`]);
+      if (fallbackResult.rows.length > 0) {
+        result = fallbackResult;
+        hasPaid = true;
+        method = 'recent-fallback';
+        console.log(`Found recent payment without email as fallback`);
+      }
+    }
+
+    if (hasPaid) {
+      const payment = result.rows[0];
+      console.log(`✅ Payment verified for ${email} using ${method} method:`, {
+        sessionId: payment.stripe_session_id,
+        status: payment.status,
+        product: payment.product_name,
+        amount: payment.amount_total / 100,
+        date: payment.created
+      });
+    } else {
+      console.log(`❌ No payment found for user: ${email}, product: ${requiredProduct}`);
+    }
+
+    res.json({
+      hasPaid,
+      email,
+      requiredProduct,
+      verificationMethod: hasPaid ? method : null,
+      paymentDetails: hasPaid ? {
+        paymentDate: result.rows[0].created,
+        amount: result.rows[0].amount_total / 100,
+        currency: result.rows[0].currency,
+        sessionId: result.rows[0].stripe_session_id,
+        status: result.rows[0].status,
+        productName: result.rows[0].product_name
+      } : null
+    });
+
+  } catch (error) {
+    console.error("User payment check error:", error);
+    res.status(500).json({
+      error: "Failed to verify payment status",
+      hasPaid: false,
+      details: error.message
+    });
+  }
+});
+
+
+
 // ----------------------------
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
