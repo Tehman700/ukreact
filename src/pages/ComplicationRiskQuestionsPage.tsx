@@ -113,7 +113,7 @@ export function ComplicationRiskQuestionsPage() {
         if (data.paid) {
           setAllowed(true);
         } else {
-          window.location.href = "/payment-required"; // redirect to checkout
+          window.location.href = "/payment-required";
         }
       })
       .catch(err => {
@@ -126,6 +126,6 @@ export function ComplicationRiskQuestionsPage() {
   if (loading) return <p>Loading...</p>;
   if (!allowed) return <p>Redirecting to payment...</p>;
 
-  // ✅ If paid, allow quiz
-  return <QuizTemplate config={quizWithSubmit} />;
+  // ✅ FIX: use complicationRiskQuiz instead of quizWithSubmit
+  return <QuizTemplate config={complicationRiskQuiz} />;
 }
