@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from "../components/PaymentGate"; // 👈 import gate
-
+import { PaymentGate } from "../components/PaymentGate";
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -151,9 +150,11 @@ export function ComplicationRiskQuestionsPage() {
     },
   };
 
-  // ✅ Wrap with PaymentGate
   return (
-    <PaymentGate>
+    <PaymentGate
+      requiredFunnel="complication-risk"
+      redirectUrl="/Health-Audit.html#complication-risk-checkout"
+    >
       <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );

@@ -146,7 +146,7 @@ export function ShoppingBasket({
 
 
 // THIS IS THE NEW PAYMENT METHOD BUTTON THAT I CREATED
-const makePayment = async () => {
+const makePayment = async (funnelType = "complication-risk") => {
   const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
   const checkoutItems = items.map(item => ({
@@ -160,7 +160,10 @@ const makePayment = async () => {
   const response = await fetch("https://luther.health/api/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ products: checkoutItems }),
+    body: JSON.stringify({
+      products: checkoutItems,
+      funnel_type: funnelType  // Add this parameter
+    }),
   });
 
   const data = await response.json();
@@ -171,8 +174,10 @@ const makePayment = async () => {
     return;
   }
 
-  // ✅ Save session ID for later quiz gating
+  // Save session ID for later quiz gating
   sessionStorage.setItem("stripe_session_id", data.sessionId);
+  // Also save which funnel was purchased for reference
+  sessionStorage.setItem("purchased_funnel", funnelType);
 
   // Redirect user to Stripe Checkout
   const result = await stripe?.redirectToCheckout({ sessionId: data.sessionId });

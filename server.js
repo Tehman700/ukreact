@@ -117,7 +117,7 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products } = req.body;
+    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
@@ -136,12 +136,15 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      // 👇 important: return session_id in redirect success url
-      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
+      // Store funnel type in metadata
+      metadata: {
+        funnel_type: funnel_type
+      },
+      success_url: `https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}&funnel=${funnel_type}`,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
-    // ✅ Return sessionId so frontend can save & use it
+    // Return sessionId so frontend can save & use it
     res.json({ sessionId: session.id });
   } catch (err) {
     console.error("Stripe session creation failed:", err);
@@ -178,7 +181,7 @@ app.post("/api/webhook", async (req, res) => {
     console.log("✅ Payment success:", session);
 
     try {
-      // Create stripe_payments table if it doesn't exist
+      // Create stripe_payments table if it doesn't exist (with funnel_type column)
       await pool.query(`
         CREATE TABLE IF NOT EXISTS stripe_payments (
           id SERIAL PRIMARY KEY,
@@ -189,6 +192,7 @@ app.post("/api/webhook", async (req, res) => {
           status VARCHAR(50),
           product_name TEXT,
           line_items JSONB,
+          funnel_type VARCHAR(255),
           created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -197,6 +201,9 @@ app.post("/api/webhook", async (req, res) => {
       // Get line items from Stripe session
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
       const productName = lineItems.data.map(item => item.description).join(', ');
+
+      // Get funnel type from session metadata
+      const funnelType = session.metadata?.funnel_type || 'complication-risk';
 
       // Store payment in database
       const paymentResult = await pool.query(`
@@ -207,11 +214,13 @@ app.post("/api/webhook", async (req, res) => {
           currency,
           status,
           product_name,
-          line_items
+          line_items,
+          funnel_type
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (stripe_session_id) DO UPDATE SET
           status = EXCLUDED.status,
+          funnel_type = EXCLUDED.funnel_type,
           updated = CURRENT_TIMESTAMP
         RETURNING *
       `, [
@@ -219,16 +228,15 @@ app.post("/api/webhook", async (req, res) => {
         session.customer_email,
         session.amount_total,
         session.currency,
-        session.payment_status,
+        'paid', // Use 'paid' status for successful payments
         productName,
-        JSON.stringify(lineItems.data)
+        JSON.stringify(lineItems.data),
+        funnelType
       ]);
 
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
 
-      // ----------------------------
-      // Send Conversion API Event to Meta using Business SDK
-      // ----------------------------
+      // Your existing Meta Conversion API code remains the same...
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
       console.log("🎯 Preparing to send Meta Conversion API event...");
@@ -236,16 +244,13 @@ app.post("/api/webhook", async (req, res) => {
       console.log("💰 Purchase amount:", session.amount_total / 100);
       console.log("💱 Currency:", session.currency.toUpperCase());
 
-      // Create user data
       const userData = (new UserData())
         .setEmails([session.customer_email]);
 
-      // Create custom data with purchase information
       const customData = (new CustomData())
         .setValue(session.amount_total / 100)
         .setCurrency(session.currency.toUpperCase());
 
-      // Create server event
       const serverEvent = (new ServerEvent())
         .setEventName("Purchase")
         .setEventTime(currentTimestamp)
@@ -254,16 +259,13 @@ app.post("/api/webhook", async (req, res) => {
         .setActionSource("website")
         .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
 
-      // Create event request
       const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
         .setEvents([serverEvent]);
 
-      // Execute the request
       const response = await eventRequest.execute();
       console.log("✅ Meta Conversion API SUCCESS!");
       console.log("📡 Full response:", JSON.stringify(response, null, 2));
 
-      // Check if there are any errors in the response
       if (response && response.events_received) {
         console.log("🎉 Events received by Meta:", response.events_received);
       }
@@ -279,6 +281,7 @@ app.post("/api/webhook", async (req, res) => {
 
   res.json({ received: true });
 });
+
 
 // ----------------------------
 // ANALYTICS ENDPOINTS
@@ -640,22 +643,36 @@ app.post("/api/analytics/pageview", async (req, res) => {
 // ----------------------------
 app.get("/api/check-payment", async (req, res) => {
   try {
-    const { session_id } = req.query; // frontend sends session ID
+    const { session_id, funnel_type } = req.query;
 
     if (!session_id) {
       return res.status(400).json({ success: false, error: "session_id is required" });
+    }
+
+    if (!funnel_type) {
+      return res.status(400).json({ success: false, error: "funnel_type is required" });
     }
 
     const result = await pool.query(
       `SELECT * FROM stripe_payments
        WHERE stripe_session_id = $1
          AND status = 'paid'
+         AND funnel_type = $2
        LIMIT 1`,
-      [session_id]
+      [session_id, funnel_type]
     );
 
     if (result.rows.length > 0) {
-      return res.json({ success: true, paid: true });
+      return res.json({
+        success: true,
+        paid: true,
+        funnel_type: result.rows[0].funnel_type,
+        payment_info: {
+          amount: result.rows[0].amount_total / 100,
+          currency: result.rows[0].currency,
+          created: result.rows[0].created
+        }
+      });
     } else {
       return res.json({ success: true, paid: false });
     }

@@ -5,6 +5,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { ArrowRight } from 'lucide-react';
 
+
 interface UserInformation {
   firstName: string;
   lastName: string;
@@ -66,6 +67,11 @@ export function ComplicationRiskInformationPage() {
   };
 
   return (
+<PaymentGate
+  assessmentType="Complication Risk Checker"
+  requiredProduct="Complication Risk Checker"  // ← Changed this
+  fallbackRoute="complication-risk-checker-upsell"
+>
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-2xl">
         <div>
@@ -163,5 +169,7 @@ export function ComplicationRiskInformationPage() {
         </div>
       </div>
     </div>
+    </PaymentGate>
+
   );
 }
