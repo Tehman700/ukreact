@@ -329,16 +329,35 @@ const makePayment = async (funnelType = "complication-risk") => {
                   <p className="font-medium">Subtotal</p>
                   <p className="font-medium">£{totalPrice.toFixed(2)}</p>
                 </div>
-                
-                <Button 
-                  onClick={() => makePayment("complication-risk")}
-                  className="w-full"
-                  size="lg"
-                >
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Proceed to Checkout
-                </Button>
-                
+
+
+
+
+{/* Button for Complication Risk funnel */}
+<Button
+  onClick={() => makePayment("complication-risk")}
+  className="w-full"
+  size="lg"
+>
+  <CreditCard className="w-4 h-4 mr-2" />
+  Buy Complication Risk Assessment
+</Button>
+
+{/* Button for Recovery Speed funnel */}
+<Button
+  onClick={() => makePayment("recovery-speed")}
+  className="w-full"
+  size="lg"
+>
+  <CreditCard className="w-4 h-4 mr-2" />
+  Buy Recovery Speed Assessment
+</Button>
+
+
+
+
+
+
                 <p className="text-xs text-muted-foreground text-center">
                   Secure checkout powered by Luther Health
                 </p>

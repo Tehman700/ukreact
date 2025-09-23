@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const recoverySpeedQuiz: QuizConfig = {
   title: 'Recovery Speed Predictor',
@@ -119,5 +120,9 @@ const recoverySpeedQuiz: QuizConfig = {
 };
 
 export function RecoverySpeedQuestionsPage() {
-  return <QuizTemplate config={recoverySpeedQuiz} />;
+  return (
+    <PaymentGate requiredFunnel="recovery-speed">
+      <QuizTemplate config={recoverySpeedQuiz} />
+    </PaymentGate>
+  );
 }
