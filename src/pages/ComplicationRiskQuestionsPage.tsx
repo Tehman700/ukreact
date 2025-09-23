@@ -1,6 +1,3 @@
-I want this question page to be gated behind Payment method sp that if user made payment for that specicifc funnel than show the quesitions otherwise lock them:
-
-ComplicationRiskQuestionPage.tsx:
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 
