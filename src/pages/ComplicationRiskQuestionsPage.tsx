@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from "../components/PaymentGate"; // 👈 import gate
+
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -95,36 +97,6 @@ const complicationRiskQuiz: QuizConfig = {
 };
 
 export function ComplicationRiskQuestionsPage() {
-  // ⬇️ Payment gate states
-  const [loading, setLoading] = useState(true);
-  const [allowed, setAllowed] = useState(false);
-
-  useEffect(() => {
-    const sessionId = sessionStorage.getItem("stripe_session_id");
-
-    if (!sessionId) {
-      setAllowed(false);
-      setLoading(false);
-      return;
-    }
-
-    fetch(`https://luther.health/api/check-payment?session_id=${sessionId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.paid) {
-          setAllowed(true);
-        } else {
-          window.location.href = "/payment-required"; // or your checkout page
-        }
-      })
-      .catch(err => {
-        console.error("Payment check failed:", err);
-        setAllowed(false);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  // ⬇️ Same helper for answers → labels
   const convertAnswersToLabels = (answers: Record<string, any>) => {
     const converted: Array<{ question: string; answer: string }> = [];
     complicationRiskQuiz.questions.forEach((q) => {
@@ -135,10 +107,13 @@ export function ComplicationRiskQuestionsPage() {
       if (q.multiSelect && Array.isArray(answer)) {
         labels = answer
           .map((id) => q.options.find((o) => o.id === id)?.label || id)
-          .join(', ');
+          .join(", ");
       } else {
         const selectedId = Array.isArray(answer) ? answer[0] : answer;
-        labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
       }
 
       converted.push({ question: q.question, answer: labels });
@@ -146,40 +121,40 @@ export function ComplicationRiskQuestionsPage() {
     return converted;
   };
 
-  // ⬇️ Build quiz config with submit & redirect
   const quizWithSubmit: QuizConfig = {
     ...complicationRiskQuiz,
-    informationPageRoute: 'complication-risk-checker-information',
+    informationPageRoute: "complication-risk-checker-information",
     onComplete: async (answers) => {
-      console.log('Complication Risk Assessment completed with answers:', answers);
-      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      console.log("Complication Risk Assessment completed with answers:", answers);
+      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
 
       try {
         const convertedAnswers = convertAnswersToLabels(answers);
 
-        await fetch('https://luther.health/api/assessments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("https://luther.health/api/assessments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: user.id,
-            assessment_type: 'Complication Risk',
+            assessment_type: "Complication Risk",
             answers: convertedAnswers,
           }),
         });
 
-        window.location.hash = 'complication-risk-checker-information';
+        window.location.hash = "complication-risk-checker-information";
       } catch (err) {
-        console.error('Error saving complication risk assessment:', err);
+        console.error("Error saving complication risk assessment:", err);
       }
     },
     onBack: () => {
-      window.location.hash = 'complication-risk-checker-learn-more';
+      window.location.hash = "complication-risk-checker-learn-more";
     },
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!allowed) return <p>Redirecting to payment...</p>;
-
-  // ✅ Return gated + working quiz
-  return <QuizTemplate config={quizWithSubmit} />;
+  // ✅ Wrap with PaymentGate
+  return (
+    <PaymentGate>
+      <QuizTemplate config={quizWithSubmit} />
+    </PaymentGate>
+  );
 }
