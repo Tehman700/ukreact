@@ -136,7 +136,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       line_items,
       mode: "payment",
       customer_email: email,
-      success_url: "https://luther.health/Health-Audit.html#success",
+      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
