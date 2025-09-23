@@ -6,11 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate';
-
 // Using custom CSS charts instead of Recharts for better reliability
-
-
 
 interface AssessmentResult {
   category: string;
@@ -27,10 +23,10 @@ export function ComplicationRiskResultsPage() {
 
   const assessmentTitle = "Complication Risk Assessment";
   const assessmentType = "Comprehensive Risk Analysis";
-  const completionDate = new Date().toLocaleDateString('en-GB', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
   });
   const overallScore = 73;
 
@@ -219,7 +215,7 @@ export function ComplicationRiskResultsPage() {
       optimal: 85
     },
     {
-      name: "Lifestyle Risk Factors", 
+      name: "Lifestyle Risk Factors",
       yourScore: 75,
       average: 65,
       optimal: 90
@@ -290,11 +286,6 @@ export function ComplicationRiskResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
-<PaymentGate
-  assessmentType="Complication Risk Checker"
-  requiredProduct="Complication Risk Checker"  // ← Changed this
-  fallbackRoute="complication-risk-checker-upsell"
->
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -420,7 +411,7 @@ export function ComplicationRiskResultsPage() {
                     <div key={index} className="space-y-4">
                       {/* Category Title */}
                       <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
-                      
+
 
                       {/* Chart */}
                       <div className="relative max-w-lg mx-auto">
@@ -429,16 +420,16 @@ export function ComplicationRiskResultsPage() {
                           const rangeStart = Math.max(0, item.average - 20);
                           const rangeEnd = 100;
                           const rangeSize = rangeEnd - rangeStart;
-                          
+
                           // Convert actual percentages to display percentages within our range
                           const yourScorePosition = ((item.yourScore - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((item.average - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((item.optimal - rangeStart) / rangeSize) * 100;
-                          
+
                           return (
                             <>
                               {/* Your Score Label Above */}
-                              <div 
+                              <div
                                 className="absolute -top-14 transform -translate-x-1/2 text-center"
                                 style={{ left: `${yourScorePosition}%` }}
                               >
@@ -449,17 +440,17 @@ export function ComplicationRiskResultsPage() {
                               {/* Main bar */}
                               <div className="relative h-2 bg-gray-300 rounded-full p-[0px] m-[0px]">
                                 {/* Your score fill */}
-                                <div 
+                                <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
-                                
+
                                 {/* Benchmark markers - white lines on the bar */}
-                                <div 
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
                                 />
-                                <div 
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${optimalPosition}%` }}
                                 />
@@ -469,7 +460,7 @@ export function ComplicationRiskResultsPage() {
                               <div className="relative mt-3 h-12">
                                 {/* Always show labels unless they would really overlap */}
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${averagePosition}%` }}
                                   >
@@ -478,7 +469,7 @@ export function ComplicationRiskResultsPage() {
                                   </div>
                                 )}
                                 {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${optimalPosition}%` }}
                                   >
@@ -520,7 +511,7 @@ export function ComplicationRiskResultsPage() {
                   <CardContent>
                     <div className="space-y-6">
                       <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
-                      
+
                       {/* Clinical Context */}
                       <div>
                         <h4 className="font-medium mb-2 flex items-center space-x-2">
@@ -536,7 +527,7 @@ export function ComplicationRiskResultsPage() {
                       {analysis.benchmarkData.length > 0 && (
                         <div className="mt-6">
                           <h4 className="text-center font-medium mb-4 pt-[0px] pr-[0px] pb-[30px] pl-[0px]">Risk Assessment Benchmark</h4>
-                          
+
                           {/* Find your score and benchmarks */}
                           {(() => {
                             const yourScore = analysis.benchmarkData.find(entry => entry.category === 'Your Score')?.score || 0;
@@ -557,16 +548,16 @@ export function ComplicationRiskResultsPage() {
                                     const rangeStart = Math.max(0, averageScore - 20);
                                     const rangeEnd = 100;
                                     const rangeSize = rangeEnd - rangeStart;
-                                    
+
                                     // Convert actual percentages to display percentages within our range
                                     const yourScorePosition = ((yourScore - rangeStart) / rangeSize) * 100;
                                     const averagePosition = ((averageScore - rangeStart) / rangeSize) * 100;
                                     const optimalPosition = ((optimalScore - rangeStart) / rangeSize) * 100;
-                                    
+
                                     return (
                                       <>
                                         {/* Your Score Label Above */}
-                                        <div 
+                                        <div
                                           className="absolute -top-12 transform -translate-x-1/2 text-center"
                                           style={{ left: `${yourScorePosition}%` }}
                                         >
@@ -577,17 +568,17 @@ export function ComplicationRiskResultsPage() {
                                         {/* Main bar */}
                                         <div className="relative h-1.5 bg-gray-300 rounded-full">
                                           {/* Your score fill */}
-                                          <div 
+                                          <div
                                             className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                             style={{ width: `${yourScorePosition}%` }}
                                           />
-                                          
+
                                           {/* Benchmark markers - white lines on the bar */}
-                                          <div 
+                                          <div
                                             className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                             style={{ left: `${averagePosition}%` }}
                                           />
-                                          <div 
+                                          <div
                                             className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                             style={{ left: `${optimalPosition}%` }}
                                           />
@@ -597,7 +588,7 @@ export function ComplicationRiskResultsPage() {
                                         <div className="relative mt-2 h-10">
                                           {/* Ensure minimum spacing between labels */}
                                           {Math.abs(averagePosition - yourScorePosition) > 15 && (
-                                            <div 
+                                            <div
                                               className="absolute text-center transform -translate-x-1/2"
                                               style={{ left: `${averagePosition}%` }}
                                             >
@@ -606,7 +597,7 @@ export function ComplicationRiskResultsPage() {
                                             </div>
                                           )}
                                           {Math.abs(optimalPosition - yourScorePosition) > 15 && Math.abs(optimalPosition - averagePosition) > 15 && (
-                                            <div 
+                                            <div
                                               className="absolute text-center transform -translate-x-1/2"
                                               style={{ left: `${optimalPosition}%` }}
                                             >
@@ -734,7 +725,7 @@ export function ComplicationRiskResultsPage() {
                         </div>
                       </div>
                     ))}
-                  
+
                   {results.every(result => result.level === 'high' || result.level === 'optimal') && (
                     <div className="text-center py-8">
                       <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -801,7 +792,7 @@ export function ComplicationRiskResultsPage() {
               <div className="space-y-1">
                 <p className="font-medium">Important Note</p>
                 <p className="text-sm text-muted-foreground">
-                  This assessment is for informational purposes only and does not constitute medical advice. 
+                  This assessment is for informational purposes only and does not constitute medical advice.
                   Please consult with a qualified healthcare professional before making any health-related decisions.
                 </p>
               </div>
@@ -822,7 +813,7 @@ export function ComplicationRiskResultsPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-              
+
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="complication-risk">
                   <AccordionTrigger className="text-sm font-medium">
@@ -894,10 +885,10 @@ export function ComplicationRiskResultsPage() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              
+
               <div className="pt-4 border-t border-muted">
                 <p className="text-xs text-muted-foreground">
-                  <strong>Disclaimer:</strong> All information provided is based on current UK medical guidelines and evidence-based medicine. 
+                  <strong>Disclaimer:</strong> All information provided is based on current UK medical guidelines and evidence-based medicine.
                   Individual circumstances may vary, and professional medical advice should always be sought for specific health concerns.
                 </p>
               </div>
@@ -909,6 +900,5 @@ export function ComplicationRiskResultsPage() {
         </Card>
       </div>
     </div>
-        </PaymentGate>
   );
 }

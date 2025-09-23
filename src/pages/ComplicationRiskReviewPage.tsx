@@ -3,11 +3,10 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { Star, X, RefreshCw } from 'lucide-react';
-import { PaymentGate } from '../components/PaymentGate';
 
 const POSITIVE_FEEDBACK_OPTIONS = [
   "Comprehensive",
-  "Eye-opening", 
+  "Eye-opening",
   "Actionable",
   "Detailed",
   "Practical",
@@ -72,21 +71,21 @@ export function ComplicationRiskReviewPage() {
         "The Complication Risk Checker exceeded my expectations in identifying potential issues.",
         "As someone preparing for surgery, I found the Complication Risk Checker incredibly valuable."
       ];
-      
+
       const midRatingIntros = [
         "I completed the Complication Risk Checker and found it to be a solid resource overall.",
         "The Complication Risk Checker provided useful insights, though there's room for improvement.",
         "I went through the Complication Risk Checker and had a generally positive experience.",
         "The Complication Risk Checker was helpful in certain areas, with mixed results in others."
       ];
-      
+
       const lowRatingIntros = [
         "I tried the Complication Risk Checker but unfortunately didn't find it as helpful as I'd hoped.",
         "While I appreciate the concept behind the Complication Risk Checker, the execution fell short for me.",
         "I completed the Complication Risk Checker but came away with mixed feelings about the experience.",
         "The Complication Risk Checker has potential, but there are several areas that need improvement."
       ];
-      
+
       if (rating >= 4) return highRatingIntros[Math.floor(Math.random() * highRatingIntros.length)];
       if (rating === 3) return midRatingIntros[Math.floor(Math.random() * midRatingIntros.length)];
       return lowRatingIntros[Math.floor(Math.random() * lowRatingIntros.length)];
@@ -94,7 +93,7 @@ export function ComplicationRiskReviewPage() {
 
     const createFeedbackSentence = (positive: string[], negative: string[]) => {
       const sentences = [];
-      
+
       if (positive.length > 0) {
         const positiveConnectors = [
           "What I particularly appreciated was how",
@@ -102,10 +101,10 @@ export function ComplicationRiskReviewPage() {
           "The risk analysis was notably",
           "One thing that stood out was how"
         ];
-        
+
         const connector = positiveConnectors[Math.floor(Math.random() * positiveConnectors.length)];
         const traits = positive.slice(0, 3);
-        
+
         if (traits.length === 1) {
           sentences.push(`${connector} ${traits[0].toLowerCase()} it felt throughout the process.`);
         } else if (traits.length === 2) {
@@ -114,7 +113,7 @@ export function ComplicationRiskReviewPage() {
           sentences.push(`${connector} ${traits.slice(0, -1).map(t => t.toLowerCase()).join(', ')}, and ${traits[traits.length - 1].toLowerCase()} it felt.`);
         }
       }
-      
+
       if (negative.length > 0) {
         const negativeConnectors = [
           "However, I did find some aspects",
@@ -122,36 +121,36 @@ export function ComplicationRiskReviewPage() {
           "On the flip side, certain parts seemed",
           "I do think some improvements could be made where things felt"
         ];
-        
+
         const connector = negativeConnectors[Math.floor(Math.random() * negativeConnectors.length)];
         const issues = negative.slice(0, 2);
-        
+
         if (issues.length === 1) {
           sentences.push(`${connector} ${issues[0].toLowerCase()}.`);
         } else {
           sentences.push(`${connector} ${issues.join(' and ').toLowerCase()}.`);
         }
       }
-      
+
       return sentences;
     };
 
     let review = '';
-    
+
     if (rating > 0 || selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0) {
       if (rating > 0) {
         review += getIntroPhrase(rating) + ' ';
       }
-      
+
       const feedbackSentences = createFeedbackSentence(selectedPositiveFeedback, selectedNegativeFeedback);
       if (feedbackSentences.length > 0) {
         review += feedbackSentences.join(' ') + ' ';
       }
-      
+
       if (customText.trim()) {
         review += customText.trim() + ' ';
       }
-      
+
       if (rating >= 4) {
         const conclusions = [
           "Overall, I'd definitely recommend this to anyone preparing for surgery.",
@@ -177,14 +176,14 @@ export function ComplicationRiskReviewPage() {
         ];
         review += conclusions[Math.floor(Math.random() * conclusions.length)];
       }
-      
+
       if (rating > 0) {
         review += ` ${rating}/5 stars.`;
       }
     }
-    
+
     review = review.replace(/\s+/g, ' ').trim();
-    
+
     setGeneratedReview(review);
     setShowSubmitButton(true);
   };
@@ -196,18 +195,13 @@ export function ComplicationRiskReviewPage() {
       positiveFeedback: selectedPositiveFeedback,
       negativeFeedback: selectedNegativeFeedback
     });
-    
+
     window.location.hash = 'surgery-conditioning-protocol-challenge';
   };
 
   const hasSelectedFeedback = selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0;
 
   return (
-        <PaymentGate
-          assessmentType="Complication Risk Checker"
-          requiredProduct="Complication Risk Checker"  // ← Changed this
-          fallbackRoute="complication-risk-checker-upsell"
-        >
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-8">
@@ -336,10 +330,10 @@ export function ComplicationRiskReviewPage() {
                     Submit Review
                   </Button>
                 )}
-                <Button 
-                  onClick={generateReview} 
-                  variant="outline" 
-                  className="flex-1 sm:flex-none px-[14px] py-[10px]" 
+                <Button
+                  onClick={generateReview}
+                  variant="outline"
+                  className="flex-1 sm:flex-none px-[14px] py-[10px]"
                   size="lg"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -351,7 +345,5 @@ export function ComplicationRiskReviewPage() {
         )}
       </div>
     </div>
-    </PaymentGate>
-
   );
 }

@@ -1,7 +1,176 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate';
 
+// Payment verification component
+const PaymentGate: React.FC<{ onPaymentVerified: () => void }> = ({ onPaymentVerified }) => {
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<'checking' | 'verified' | 'required' | 'error'>('checking');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    verifyPaymentStatus();
+  }, []);
+
+  const verifyPaymentStatus = async () => {
+    try {
+      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+
+      if (!user.email) {
+        setPaymentStatus('required');
+        setIsVerifying(false);
+        return;
+      }
+
+      setUserEmail(user.email);
+
+      // Check if user has made a payment
+      const response = await fetch(`https://luther.health/api/verify-payment?email=${encodeURIComponent(user.email)}`);
+      const data = await response.json();
+
+      if (data.success && data.hasPaid) {
+        setPaymentStatus('verified');
+        onPaymentVerified();
+      } else {
+        setPaymentStatus('required');
+      }
+    } catch (error) {
+      console.error('Error verifying payment status:', error);
+      setPaymentStatus('error');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleProceedToPayment = () => {
+    // Redirect to payment page
+    window.location.hash = 'payment';
+  };
+
+  const handleBackToAssessments = () => {
+    // Redirect back to assessments list
+    window.location.hash = 'assessments';
+  };
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Verifying Access</h2>
+            <p className="text-gray-600">Please wait while we check your payment status...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (paymentStatus === 'error') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Verification Error</h2>
+            <p className="text-gray-600 mb-6">We encountered an error while verifying your payment status. Please try again.</p>
+            <div className="space-y-3">
+              <button
+                onClick={verifyPaymentStatus}
+                className="w-full bg-red-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={handleBackToAssessments}
+                className="w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+              >
+                Back to Assessments
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (paymentStatus === 'required') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full mx-4">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Premium Assessment</h2>
+            <p className="text-gray-600 mb-6">
+              The Complication Risk Checker is a premium assessment that requires payment to access.
+              This comprehensive tool provides detailed analysis of your surgical risk factors.
+            </p>
+
+            <div className="bg-blue-50 rounded-xl p-6 mb-6">
+              <h3 className="font-semibold text-gray-800 mb-3">What you'll get:</h3>
+              <ul className="text-left text-gray-700 space-y-2">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Comprehensive risk assessment
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Personalized recommendations
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Detailed risk factor analysis
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Professional-grade insights
+                </li>
+              </ul>
+            </div>
+
+            {userEmail && (
+              <p className="text-sm text-gray-500 mb-6">
+                Account: {userEmail}
+              </p>
+            )}
+
+            <div className="space-y-3">
+              <button
+                onClick={handleProceedToPayment}
+                className="w-full bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                Proceed to Payment
+              </button>
+              <button
+                onClick={handleBackToAssessments}
+                className="w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+              >
+                Back to Assessments
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null; // Payment verified, component will be unmounted
+};
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -97,6 +266,8 @@ const complicationRiskQuiz: QuizConfig = {
 };
 
 export function ComplicationRiskQuestionsPage() {
+  const [hasPaymentAccess, setHasPaymentAccess] = useState(false);
+
   // Convert answer IDs → labels
   const convertAnswersToLabels = (answers: Record<string, any>) => {
     const converted: Array<{ question: string; answer: string }> = [];
@@ -147,13 +318,11 @@ export function ComplicationRiskQuestionsPage() {
     },
   };
 
-  return (
-<PaymentGate
-  assessmentType="Complication Risk Checker"
-  requiredProduct="Complication Risk Checker"  // ← Changed this
-  fallbackRoute="complication-risk-checker-upsell"
-    >
-      <QuizTemplate config={quizWithSubmit} />
-    </PaymentGate>
-  );
+  // Show payment gate if user hasn't paid
+  if (!hasPaymentAccess) {
+    return <PaymentGate onPaymentVerified={() => setHasPaymentAccess(true)} />;
+  }
+
+  // Show quiz if payment verified
+  return <QuizTemplate config={quizWithSubmit} />;
 }

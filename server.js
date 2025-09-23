@@ -50,6 +50,119 @@ pool.connect()
   .catch((err) => console.error("❌ DB connection error:", err));
 
 // ----------------------------
+// PAYMENT VERIFICATION ENDPOINT
+// ----------------------------
+app.get("/api/verify-payment", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email parameter is required"
+      });
+    }
+
+    // Check if user has made a successful payment
+    const paymentQuery = `
+      SELECT
+        id,
+        stripe_session_id,
+        customer_email,
+        amount_total,
+        status,
+        product_name,
+        created
+      FROM stripe_payments
+      WHERE customer_email = $1
+      AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
+      ORDER BY created DESC
+      LIMIT 1
+    `;
+
+    const result = await pool.query(paymentQuery, [email]);
+
+    const hasPaid = result.rows.length > 0;
+    const paymentInfo = hasPaid ? result.rows[0] : null;
+
+    res.json({
+      success: true,
+      hasPaid,
+      paymentInfo: paymentInfo ? {
+        paymentId: paymentInfo.stripe_session_id,
+        amount: paymentInfo.amount_total / 100, // Convert cents to dollars
+        product: paymentInfo.product_name,
+        date: paymentInfo.created
+      } : null
+    });
+
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to verify payment status"
+    });
+  }
+});
+
+// ----------------------------
+// PREMIUM ACCESS CHECK ENDPOINT
+// ----------------------------
+app.get("/api/check-premium-access", async (req, res) => {
+  try {
+    const { email, assessmentType } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email parameter is required"
+      });
+    }
+
+    // Define which assessments require payment
+    const premiumAssessments = [
+      'Complication Risk',
+      'Advanced Health Analysis',
+      // Add more premium assessment types here
+    ];
+
+    const requiresPayment = premiumAssessments.includes(assessmentType);
+
+    if (!requiresPayment) {
+      return res.json({
+        success: true,
+        hasAccess: true,
+        requiresPayment: false
+      });
+    }
+
+    // Check payment status for premium assessments
+    const paymentQuery = `
+      SELECT COUNT(*) as payment_count
+      FROM stripe_payments
+      WHERE customer_email = $1
+      AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
+    `;
+
+    const result = await pool.query(paymentQuery, [email]);
+    const hasAccess = parseInt(result.rows[0].payment_count) > 0;
+
+    res.json({
+      success: true,
+      hasAccess,
+      requiresPayment: true
+    });
+
+  } catch (error) {
+    console.error("Premium access check error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to check premium access"
+    });
+  }
+});
+
+// ----------------------------
 // 1. Save User
 // ----------------------------
 app.post("/api/users", async (req, res) => {
@@ -76,12 +189,44 @@ app.post("/api/users", async (req, res) => {
 });
 
 // ----------------------------
-// 2. Save Assessment + Answers
+// 2. Save Assessment + Answers (with premium check)
 // ----------------------------
 app.post("/api/assessments", async (req, res) => {
   const client = await pool.connect();
   try {
     const { user_id, assessment_type, answers } = req.body;
+
+    // Get user email for premium check
+    const userResult = await client.query('SELECT email FROM users WHERE id = $1', [user_id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userEmail = userResult.rows[0].email;
+
+    // Check if this assessment requires premium access
+    const premiumAssessments = ['Complication Risk', 'Advanced Health Analysis'];
+    const requiresPayment = premiumAssessments.includes(assessment_type);
+
+    if (requiresPayment) {
+      // Verify payment status
+      const paymentQuery = `
+        SELECT COUNT(*) as payment_count
+        FROM stripe_payments
+        WHERE customer_email = $1
+        AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
+      `;
+
+      const paymentResult = await client.query(paymentQuery, [userEmail]);
+      const hasAccess = parseInt(paymentResult.rows[0].payment_count) > 0;
+
+      if (!hasAccess) {
+        return res.status(403).json({
+          error: "Premium access required",
+          requiresPayment: true
+        });
+      }
+    }
 
     await client.query("BEGIN");
 
@@ -117,7 +262,7 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, email } = req.body;
+    const { products, email, metadata = {} } = req.body;
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
@@ -131,45 +276,17 @@ app.post("/api/create-checkout-session", async (req, res) => {
       quantity: item.quantity || 1,
     }));
 
-    // Determine URLs based on environment or request origin
-    const origin = req.headers.origin || req.headers.referer || 'https://luther.health';
-    const baseUrl = origin.includes('localhost') ? origin : 'https://luther.health';
-
-    // Set success URL to go directly to the assessment with success indicator
-    const productName = products[0].item_name;
-    let successRoute = 'complication-risk-checker-questions';
-
-    if (productName.includes('Surgery Readiness')) {
-      successRoute = 'surgery-readiness-questions';
-    } else if (productName.includes('Complication Risk')) {
-      successRoute = 'complication-risk-checker-questions';
-    }
-
-    const successUrl = baseUrl.includes('localhost')
-      ? `${baseUrl}/#${successRoute}?payment=success`
-      : `${baseUrl}/Health-Audit.html#${successRoute}?payment=success`;
-
-    const cancelUrl = baseUrl.includes('localhost')
-      ? `${baseUrl}/#complication-risk-checker-upsell`
-      : `${baseUrl}/Health-Audit.html#complication-risk-checker-upsell`;
-
-    console.log(`Creating checkout session:
-      Products: ${products.map(p => p.item_name).join(', ')}
-      Success: ${successUrl}
-      Cancel: ${cancelUrl}`);
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
       customer_email: email,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
       metadata: {
-        product_names: products.map(p => p.item_name).join(', '),
-        customer_email: email,
-        origin: origin
-      }
+        ...metadata,
+        unlock_premium: "true" // Flag to indicate this payment unlocks premium features
+      },
+      success_url: "https://luther.health/Health-Audit.html#payment-success",
+      cancel_url: "https://luther.health/Health-Audit.html#payment-cancelled",
     });
 
     res.json({ id: session.id });
@@ -203,7 +320,6 @@ app.post("/api/webhook", async (req, res) => {
   }
 
   if (event.type === "checkout.session.completed") {
-
     const session = event.data.object;
     console.log("✅ Payment success:", session);
 
@@ -219,6 +335,7 @@ app.post("/api/webhook", async (req, res) => {
           status VARCHAR(50),
           product_name TEXT,
           line_items JSONB,
+          metadata JSONB,
           created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -237,9 +354,10 @@ app.post("/api/webhook", async (req, res) => {
           currency,
           status,
           product_name,
-          line_items
+          line_items,
+          metadata
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (stripe_session_id) DO UPDATE SET
           status = EXCLUDED.status,
           updated = CURRENT_TIMESTAMP
@@ -251,10 +369,19 @@ app.post("/api/webhook", async (req, res) => {
         session.currency,
         session.payment_status,
         productName,
-        JSON.stringify(lineItems.data)
+        JSON.stringify(lineItems.data),
+        JSON.stringify(session.metadata || {})
       ]);
-      console.log(session.id, session.customer_email)
+
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
+
+      // If this payment unlocks premium features, update user access
+      if (session.metadata && session.metadata.unlock_premium === "true") {
+        console.log("🔓 Premium access unlocked for:", session.customer_email);
+
+        // You could also create a separate premium_access table here if needed
+        // For now, we're using the payment record as proof of premium access
+      }
 
       // ----------------------------
       // Send Conversion API Event to Meta using Business SDK
@@ -282,7 +409,7 @@ app.post("/api/webhook", async (req, res) => {
         .setUserData(userData)
         .setCustomData(customData)
         .setActionSource("website")
-        .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
+        .setEventSourceUrl("https://luther.health/Health-Audit.html#payment-success");
 
       // Create event request
       const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
@@ -308,6 +435,90 @@ app.post("/api/webhook", async (req, res) => {
   }
 
   res.json({ received: true });
+});
+
+// ----------------------------
+// PAYMENT SUCCESS REDIRECT ENDPOINT
+// ----------------------------
+app.get("/api/payment-success", async (req, res) => {
+  try {
+    const { session_id, email } = req.query;
+
+    if (session_id) {
+      // Verify the session and get payment details
+      const session = await stripe.checkout.sessions.retrieve(session_id);
+
+      if (session.payment_status === 'paid') {
+        // Redirect to success page with appropriate route
+        const redirectUrl = `https://luther.health/Health-Audit.html#complication-risk-checker-questions`;
+        return res.redirect(redirectUrl);
+      }
+    }
+
+    // Fallback redirect
+    res.redirect('https://luther.health/Health-Audit.html#payment-success');
+  } catch (error) {
+    console.error("Payment success redirect error:", error);
+    res.redirect('https://luther.health/Health-Audit.html#payment-error');
+  }
+});
+
+// ----------------------------
+// USER PAYMENT HISTORY
+// ----------------------------
+app.get("/api/user-payments", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email parameter is required"
+      });
+    }
+
+    const paymentsQuery = `
+      SELECT
+        stripe_session_id,
+        amount_total,
+        currency,
+        status,
+        product_name,
+        created,
+        metadata
+      FROM stripe_payments
+      WHERE customer_email = $1
+      ORDER BY created DESC
+    `;
+
+    const result = await pool.query(paymentsQuery, [email]);
+
+    const payments = result.rows.map(payment => ({
+      sessionId: payment.stripe_session_id,
+      amount: payment.amount_total / 100,
+      currency: payment.currency,
+      status: payment.status,
+      product: payment.product_name,
+      date: payment.created,
+      metadata: payment.metadata
+    }));
+
+    res.json({
+      success: true,
+      payments,
+      totalPayments: payments.length,
+      hasPremiumAccess: payments.some(p =>
+        p.status === 'complete' || p.status === 'paid' || p.status === 'complete_payment_intent'
+      )
+    });
+
+  } catch (error) {
+    console.error("User payments history error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch payment history"
+    });
+  }
 });
 
 // ----------------------------
@@ -355,7 +566,7 @@ app.get("/api/analytics/dashboard", async (req, res) => {
         currency,
         DATE_TRUNC('day', created) as date
       FROM stripe_payments
-      WHERE created BETWEEN $1 AND $2 AND status = 'complete_payment_intent'
+      WHERE created BETWEEN $1 AND $2 AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
       GROUP BY currency, DATE_TRUNC('day', created)
       ORDER BY date DESC
     `;
@@ -536,6 +747,7 @@ app.get("/api/analytics/funnel", async (req, res) => {
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
         AND sp.created >= a.created_at
         AND sp.created <= a.created_at + INTERVAL '24 hours'
+        AND (sp.status = 'complete' OR sp.status = 'paid' OR sp.status = 'complete_payment_intent')
       ${whereClause}
       GROUP BY a.assessment_type
       ORDER BY started DESC
@@ -581,7 +793,7 @@ app.get("/api/analytics/users", async (req, res) => {
       SELECT
         age_range,
         COUNT(*) as count,
-        COUNT(CASE WHEN sp.customer_email IS NOT NULL THEN 1 END) as purchasers
+        COUNT(CASE WHEN sp.customer_email IS NOT NULL AND (sp.status = 'complete' OR sp.status = 'paid' OR sp.status = 'complete_payment_intent') THEN 1 END) as purchasers
       FROM users u
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
       WHERE u.created_at BETWEEN $1 AND $2
@@ -599,7 +811,7 @@ app.get("/api/analytics/users", async (req, res) => {
         u.created_at,
         COUNT(a.id) as assessments_taken,
         COUNT(sp.id) as purchases_made,
-        SUM(sp.amount_total / 100.0) as total_spent
+        SUM(CASE WHEN sp.status IN ('complete', 'paid', 'complete_payment_intent') THEN sp.amount_total / 100.0 ELSE 0 END) as total_spent
       FROM users u
       LEFT JOIN assessments a ON u.id = a.user_id
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
@@ -663,372 +875,6 @@ app.post("/api/analytics/pageview", async (req, res) => {
   } catch (error) {
     console.error("Page view tracking error:", error);
     res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// ----------------------------
-// PAYMENT VERIFICATION ENDPOINTS
-// ----------------------------
-
-// Check payment by product (any user)
-app.post("/api/check-payment-by-product", async (req, res) => {
-  try {
-    const { requiredProduct } = req.body;
-
-    console.log(`🔍 Checking payment status for product: ${requiredProduct}`);
-
-    if (!requiredProduct) {
-      return res.status(400).json({
-        error: "Required product must be provided"
-      });
-    }
-
-    // Check if there are any successful payments for this product
-    const paymentQuery = `
-      SELECT sp.*, sp.created
-      FROM stripe_payments sp
-      WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
-        AND (
-          sp.product_name ILIKE $1
-          OR sp.line_items::text ILIKE $1
-        )
-      ORDER BY sp.created DESC
-      LIMIT 1
-    `;
-
-    const result = await pool.query(paymentQuery, [`%${requiredProduct}%`]);
-
-    const hasPaid = result.rows.length > 0;
-
-    if (hasPaid) {
-      const payment = result.rows[0];
-      console.log(`✅ Payment found for product ${requiredProduct}:`, {
-        sessionId: payment.stripe_session_id,
-        status: payment.status,
-        product: payment.product_name,
-        amount: payment.amount_total / 100,
-        date: payment.created
-      });
-    } else {
-      console.log(`❌ No payment found for product: ${requiredProduct}`);
-    }
-
-    res.json({
-      hasPaid,
-      requiredProduct,
-      paymentDetails: hasPaid ? {
-        paymentDate: result.rows[0].created,
-        amount: result.rows[0].amount_total / 100,
-        currency: result.rows[0].currency,
-        sessionId: result.rows[0].stripe_session_id,
-        status: result.rows[0].status,
-        productName: result.rows[0].product_name
-      } : null
-    });
-
-  } catch (error) {
-    console.error("Payment status check error:", error);
-    res.status(500).json({
-      error: "Failed to verify payment status",
-      hasPaid: false,
-      details: error.message
-    });
-  }
-});
-
-// Check payment status for specific user
-app.post("/api/check-payment-status", async (req, res) => {
-  try {
-    const { email, requiredProduct } = req.body;
-
-    if (!email || !requiredProduct) {
-      return res.status(400).json({
-        error: "Email and required product must be provided"
-      });
-    }
-
-    // Check if user has paid for the specific product
-    const paymentQuery = `
-      SELECT sp.*, sp.line_items
-      FROM stripe_payments sp
-      WHERE sp.customer_email = $1
-        AND sp.status IN ('complete', 'paid')
-        AND (
-          sp.product_name ILIKE $2
-          OR sp.line_items::text ILIKE $2
-        )
-      ORDER BY sp.created DESC
-      LIMIT 1
-    `;
-
-    const result = await pool.query(paymentQuery, [
-      email,
-      `%${requiredProduct}%`
-    ]);
-
-    const hasPaid = result.rows.length > 0;
-
-    // Log the payment check for analytics
-    if (hasPaid) {
-      console.log(`✅ Payment verified for ${email} - Product: ${requiredProduct}`);
-    } else {
-      console.log(`❌ Payment not found for ${email} - Product: ${requiredProduct}`);
-    }
-
-    res.json({
-      hasPaid,
-      email,
-      requiredProduct,
-      paymentDetails: hasPaid ? {
-        paymentDate: result.rows[0].created,
-        amount: result.rows[0].amount_total / 100,
-        currency: result.rows[0].currency,
-        sessionId: result.rows[0].stripe_session_id
-      } : null
-    });
-
-  } catch (error) {
-    console.error("Payment status check error:", error);
-    res.status(500).json({
-      error: "Failed to verify payment status",
-      hasPaid: false
-    });
-  }
-});
-
-// Check user-specific payment with multiple methods
-app.post("/api/check-user-payment", async (req, res) => {
-  try {
-    const { email, requiredProduct } = req.body;
-
-    console.log(`🔍 Checking payment status for user: ${email}, product: ${requiredProduct}`);
-
-    if (!email || !requiredProduct) {
-      return res.status(400).json({
-        error: "Email and required product must be provided"
-      });
-    }
-
-    // Method 1: Check by customer email (if available)
-    let paymentQuery = `
-      SELECT sp.*, sp.created
-      FROM stripe_payments sp
-      WHERE sp.customer_email = $1
-        AND sp.status IN ('complete', 'paid', 'complete_payment_intent')
-        AND (
-          sp.product_name ILIKE $2
-          OR sp.line_items::text ILIKE $2
-          OR (sp.product_name ILIKE '%Risk%' AND $2 ILIKE '%Risk%')
-        )
-      ORDER BY sp.created DESC
-      LIMIT 1
-    `;
-
-    let result = await pool.query(paymentQuery, [email, `%${requiredProduct}%`]);
-    let hasPaid = result.rows.length > 0;
-    let method = 'email';
-
-    // Method 2: If no email match, check if user exists in users table and has recent payment
-    if (!hasPaid) {
-      console.log(`No direct email match found, checking user-based payment for ${email}`);
-
-      // Check if user exists in users table
-      const userQuery = `
-        SELECT id, email, created_at FROM users WHERE email = $1
-      `;
-      const userResult = await pool.query(userQuery, [email]);
-
-      if (userResult.rows.length > 0) {
-        const user = userResult.rows[0];
-        console.log(`User found: ${user.email}, created: ${user.created_at}`);
-
-        // Check if there's a payment for this product made around the time user was active
-        const timeBasedPaymentQuery = `
-          SELECT sp.*, sp.created
-          FROM stripe_payments sp
-          WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
-            AND (
-              sp.product_name ILIKE $1
-              OR sp.line_items::text ILIKE $1
-              OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
-            )
-            AND sp.created >= $2::timestamp - INTERVAL '1 hour'
-            AND sp.created <= $2::timestamp + INTERVAL '24 hours'
-          ORDER BY sp.created DESC
-          LIMIT 1
-        `;
-
-        const timeBasedResult = await pool.query(timeBasedPaymentQuery, [
-          `%${requiredProduct}%`,
-          user.created_at
-        ]);
-
-        if (timeBasedResult.rows.length > 0) {
-          result = timeBasedResult;
-          hasPaid = true;
-          method = 'time-based';
-          console.log(`Found time-based payment match for user ${email}`);
-        }
-      }
-    }
-
-    // Method 3: If still no match, check recent payments without email (fallback)
-    if (!hasPaid) {
-      console.log('Checking recent payments without customer email as fallback');
-      const fallbackQuery = `
-        SELECT sp.*, sp.created
-        FROM stripe_payments sp
-        WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
-          AND (
-            sp.product_name ILIKE $1
-            OR sp.line_items::text ILIKE $1
-            OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
-          )
-          AND sp.created >= NOW() - INTERVAL '1 hour'
-          AND (sp.customer_email IS NULL OR sp.customer_email = '')
-        ORDER BY sp.created DESC
-        LIMIT 1
-      `;
-
-      const fallbackResult = await pool.query(fallbackQuery, [`%${requiredProduct}%`]);
-      if (fallbackResult.rows.length > 0) {
-        result = fallbackResult;
-        hasPaid = true;
-        method = 'recent-fallback';
-        console.log(`Found recent payment without email as fallback`);
-      }
-    }
-
-    if (hasPaid) {
-      const payment = result.rows[0];
-      console.log(`✅ Payment verified for ${email} using ${method} method:`, {
-        sessionId: payment.stripe_session_id,
-        status: payment.status,
-        product: payment.product_name,
-        amount: payment.amount_total / 100,
-        date: payment.created
-      });
-    } else {
-      console.log(`❌ No payment found for user: ${email}, product: ${requiredProduct}`);
-    }
-
-    res.json({
-      hasPaid,
-      email,
-      requiredProduct,
-      verificationMethod: hasPaid ? method : null,
-      paymentDetails: hasPaid ? {
-        paymentDate: result.rows[0].created,
-        amount: result.rows[0].amount_total / 100,
-        currency: result.rows[0].currency,
-        sessionId: result.rows[0].stripe_session_id,
-        status: result.rows[0].status,
-        productName: result.rows[0].product_name
-      } : null
-    });
-
-  } catch (error) {
-    console.error("User payment check error:", error);
-    res.status(500).json({
-      error: "Failed to verify payment status",
-      hasPaid: false,
-      details: error.message
-    });
-  }
-});
-
-// Check for recent payments (fallback method)
-app.post("/api/check-recent-payment", async (req, res) => {
-  try {
-    const { requiredProduct } = req.body;
-
-    console.log(`🔍 Checking recent payments for product: ${requiredProduct}`);
-
-    if (!requiredProduct) {
-      return res.status(400).json({
-        error: "Required product must be provided"
-      });
-    }
-
-    // Check for payments in the last hour for this product
-    const recentPaymentQuery = `
-      SELECT sp.*, sp.created
-      FROM stripe_payments sp
-      WHERE sp.status IN ('complete', 'paid', 'complete_payment_intent')
-        AND (
-          sp.product_name ILIKE $1
-          OR sp.line_items::text ILIKE $1
-          OR (sp.product_name ILIKE '%Risk%' AND $1 ILIKE '%Risk%')
-        )
-        AND sp.created >= NOW() - INTERVAL '1 hour'
-      ORDER BY sp.created DESC
-      LIMIT 1
-    `;
-
-    const result = await pool.query(recentPaymentQuery, [`%${requiredProduct}%`]);
-    const hasPaid = result.rows.length > 0;
-
-    if (hasPaid) {
-      const payment = result.rows[0];
-      console.log(`✅ Recent payment found for product ${requiredProduct}:`, {
-        sessionId: payment.stripe_session_id,
-        status: payment.status,
-        product: payment.product_name,
-        amount: payment.amount_total / 100,
-        date: payment.created,
-        minutesAgo: Math.round((Date.now() - new Date(payment.created).getTime()) / 60000)
-      });
-    } else {
-      console.log(`❌ No recent payment found for product: ${requiredProduct}`);
-    }
-
-    res.json({
-      hasPaid,
-      requiredProduct,
-      paymentDetails: hasPaid ? {
-        paymentDate: result.rows[0].created,
-        amount: result.rows[0].amount_total / 100,
-        currency: result.rows[0].currency,
-        sessionId: result.rows[0].stripe_session_id,
-        status: result.rows[0].status,
-        productName: result.rows[0].product_name,
-        minutesAgo: Math.round((Date.now() - new Date(result.rows[0].created).getTime()) / 60000)
-      } : null
-    });
-
-  } catch (error) {
-    console.error("Recent payment check error:", error);
-    res.status(500).json({
-      error: "Failed to check recent payments",
-      hasPaid: false,
-      details: error.message
-    });
-  }
-});
-
-// Session-based payment tracking
-app.post("/api/set-payment-session", async (req, res) => {
-  try {
-    const { email, productName, sessionId } = req.body;
-
-    // Store temporary payment session for immediate access
-    // This runs when payment is successful but before webhook
-    const sessionData = {
-      email,
-      productName,
-      sessionId,
-      timestamp: new Date().toISOString(),
-      verified: false
-    };
-
-    // You could store this in Redis or a temporary table
-    // For now, we'll rely on the webhook to update stripe_payments
-
-    res.json({ success: true });
-
-  } catch (error) {
-    console.error("Payment session error:", error);
-    res.status(500).json({ error: "Failed to set payment session" });
   }
 });
 
