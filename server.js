@@ -113,6 +113,41 @@ app.post("/api/assessments", async (req, res) => {
 });
 
 // ----------------------------
+// 3. Stripe Checkout
+// ----------------------------
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const { products, email } = req.body;
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: "No products provided" });
+    }
+
+    const line_items = products.map((item) => ({
+      price_data: {
+        currency: "gbp",
+        product_data: { name: item.item_name },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity || 1,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      customer_email: email,
+      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://luther.health/Health-Audit.html#cancel",
+    });
+
+    res.json({ id: session.id });
+  } catch (err) {
+    console.error("Stripe session creation failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ----------------------------
 // 4. Enhanced Stripe Webhook → Store Data + Send Meta Conversion API
 // ----------------------------
 app.post("/api/webhook", async (req, res) => {
@@ -287,7 +322,7 @@ app.get("/api/analytics/dashboard", async (req, res) => {
         currency,
         DATE_TRUNC('day', created) as date
       FROM stripe_payments
-      WHERE created BETWEEN $1 AND $2 AND status = 'paid'
+      WHERE created BETWEEN $1 AND $2 AND status = 'complete_payment_intent'
       GROUP BY currency, DATE_TRUNC('day', created)
       ORDER BY date DESC
     `;
@@ -597,6 +632,67 @@ app.post("/api/analytics/pageview", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+//app.post("/api/verify-payment", async (req, res) => {
+//  try {
+//    const { sessionId, productName } = req.body;
+//
+//    if (!sessionId) {
+//      return res.status(400).json({
+//        success: false,
+//        error: "Session ID is required"
+//      });
+//    }
+//
+//    // Check if payment exists in database with this session ID
+//    const paymentQuery = `
+//      SELECT * FROM stripe_payments
+//      WHERE stripe_session_id = $1
+//      AND status IN ('complete', 'paid')
+//      AND ($2 IS NULL OR product_name ILIKE $2)
+//      ORDER BY created DESC
+//      LIMIT 1
+//    `;
+//
+//    const result = await pool.query(paymentQuery, [
+//      sessionId,
+//      productName ? `%${productName}%` : null
+//    ]);
+//
+//    if (result.rows.length > 0) {
+//      const payment = result.rows[0];
+//      console.log(`✅ Payment verified for session: ${sessionId}`);
+//
+//      res.json({
+//        success: true,
+//        verified: true,
+//        payment: {
+//          sessionId: payment.stripe_session_id,
+//          amount: payment.amount_total / 100,
+//          currency: payment.currency,
+//          status: payment.status,
+//          productName: payment.product_name,
+//          paymentDate: payment.created
+//        }
+//      });
+//    } else {
+//      console.log(`❌ No payment found for session: ${sessionId}`);
+//      res.json({
+//        success: true,
+//        verified: false,
+//        message: "Payment not found or not completed"
+//      });
+//    }
+//
+//  } catch (error) {
+//    console.error("Payment verification error:", error);
+//    res.status(500).json({
+//      success: false,
+//      error: "Payment verification failed"
+//    });
+//  }
+//});
+
+
 
 app.post("/api/verify-payment", async (req, res) => {
   try {
@@ -624,6 +720,12 @@ app.post("/api/verify-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Payment verification failed" });
   }
 });
+
+
+
+
+
+
 
 app.post("/api/create-payment-session", async (req, res) => {
   try {
