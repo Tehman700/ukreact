@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 
 const complicationRiskQuiz: QuizConfig = {
@@ -94,57 +94,41 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
+import React, { useEffect, useState } from 'react';
+import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+
 export function ComplicationRiskQuestionsPage() {
-  // Convert answer IDs → labels
-  const convertAnswersToLabels = (answers: Record<string, any>) => {
-    const converted: Array<{ question: string; answer: string }> = [];
-    complicationRiskQuiz.questions.forEach((q) => {
-      const answer = answers[q.id];
-      if (!answer) return;
+  const [loading, setLoading] = useState(true);
+  const [allowed, setAllowed] = useState(false);
 
-      let labels: string;
-      if (q.multiSelect && Array.isArray(answer)) {
-        labels = answer.map((id) => q.options.find((o) => o.id === id)?.label || id).join(', ');
-      } else {
-        const selectedId = Array.isArray(answer) ? answer[0] : answer;
-        labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
-      }
+  useEffect(() => {
+    const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    if (!user.email) {
+      setAllowed(false);
+      setLoading(false);
+      return;
+    }
 
-      converted.push({ question: q.question, answer: labels });
-    });
-    return converted;
-  };
+    fetch(`https://luther.health/api/check-payment?email=${encodeURIComponent(user.email)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.paid) {
+          setAllowed(true);
+        } else {
+          window.location.href = "/payment-required"; // or Stripe checkout page
+        }
+      })
+      .catch(err => {
+        console.error("Payment check failed:", err);
+        setAllowed(false);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const quizWithSubmit: QuizConfig = {
-    ...complicationRiskQuiz,
-    informationPageRoute: 'complication-risk-checker-information',
-    onComplete: async (answers) => {
-      console.log('Complication Risk Assessment completed with answers:', answers);
-      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+  if (loading) return <p>Loading...</p>;
+  if (!allowed) return <p>Redirecting to payment...</p>;
 
-      try {
-        const convertedAnswers = convertAnswersToLabels(answers);
-
-        await fetch('https://luther.health/api/assessments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: user.id,
-            assessment_type: 'Complication Risk',
-            answers: convertedAnswers,
-          }),
-        });
-
-        window.location.hash = 'complication-risk-checker-information';
-      } catch (err) {
-        console.error('Error saving complication risk assessment:', err);
-      }
-    },
-    onBack: () => {
-      window.location.hash = 'complication-risk-checker-learn-more';
-    },
-  };
-
+  // ✅ If allowed, show the quiz
   return <QuizTemplate config={quizWithSubmit} />;
 }
 

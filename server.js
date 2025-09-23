@@ -632,6 +632,36 @@ app.post("/api/analytics/pageview", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ----------------------------
+// 5. Check Payment Status
+// ----------------------------
+app.get("/api/check-payment", async (req, res) => {
+  try {
+    const { email } = req.query; // frontend sends user email
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: "Email is required" });
+    }
+
+    const result = await pool.query(
+      `SELECT * FROM stripe_payments
+       WHERE customer_email = $1
+         AND status = 'paid'
+       ORDER BY created DESC
+       LIMIT 1`,
+      [email]
+    );
+
+    if (result.rows.length > 0) {
+      return res.json({ success: true, paid: true });
+    } else {
+      return res.json({ success: true, paid: false });
+    }
+  } catch (error) {
+    console.error("Check payment error:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 
 
 // ----------------------------

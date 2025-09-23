@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 // Core Components
+
+
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
