@@ -1,129 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 
-interface PaymentGateProps {
+type PaymentGateProps = {
   children: React.ReactNode;
-  requiredProduct?: string;
-}
+  productName: string; // so you can reuse PaymentGate for other products
+};
 
-export function PaymentGate({ children, requiredProduct }: PaymentGateProps) {
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const PaymentGate: React.FC<PaymentGateProps> = ({ children, productName }) => {
+  const [unlocked, setUnlocked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    verifyPaymentAccess();
-  }, []);
+    // Grab session_id from URL
+    const url = new URL(window.location.href);
+    const sessionId = url.searchParams.get("session_id");
 
-  const verifyPaymentAccess = async () => {
-    try {
-      // Check for session ID in URL params
-      const urlParams = new URLSearchParams(window.location.search);
-      let sessionId = urlParams.get('session_id');
-
-      // If not in URL, check localStorage
-      if (!sessionId) {
-        sessionId = localStorage.getItem('stripe_session_id');
-      } else {
-        // Store session ID in localStorage for future visits
-        localStorage.setItem('stripe_session_id', sessionId);
-      }
-
-      if (!sessionId) {
-        setError('No payment session found');
-        setIsVerifying(false);
-        return;
-      }
-
-      // Verify payment with backend
-      const response = await fetch('/api/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          productName: requiredProduct
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.verified) {
-        setHasAccess(true);
-        console.log('Payment verified:', data.payment);
-      } else {
-        setError('Payment not found or incomplete');
-      }
-
-    } catch (err) {
-      console.error('Payment verification error:', err);
-      setError('Unable to verify payment');
-    } finally {
-      setIsVerifying(false);
+    if (!sessionId) {
+      setLoading(false);
+      return;
     }
-  };
 
-  // Loading state
-  if (isVerifying) {
+    // Call backend to verify payment
+    fetch("https://luther.health/api/verify-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, productName })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.verified) {
+          setUnlocked(true);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Payment verification failed:", err);
+        setLoading(false);
+      });
+  }, [productName]);
+
+  if (loading) {
+    return <p>Checking payment...</p>;
+  }
+
+  if (!unlocked) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px',
-        flexDirection: 'column'
-      }}>
-        <div>Verifying payment...</div>
+      <div className="locked-message">
+        <h2>🔒 Locked</h2>
+        <p>Please complete your payment to access this content.</p>
       </div>
     );
   }
 
-  // Payment required state
-  if (!hasAccess) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px',
-        flexDirection: 'column',
-        textAlign: 'center'
-      }}>
-        <h2>Payment Required</h2>
-        <p>You need to complete payment to access this assessment.</p>
-        <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>
-        <button
-          onClick={() => window.location.href = '#payment'}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007cba',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginTop: '20px'
-          }}
-        >
-          Complete Payment
-        </button>
-      </div>
-    );
-  }
-
-  // Payment verified - show content
-  return (
-    <>
-      <div style={{
-        backgroundColor: '#d4edda',
-        color: '#155724',
-        padding: '10px',
-        margin: '10px 0',
-        borderRadius: '5px',
-        fontSize: '14px'
-      }}>
-        ✅ Payment verified - Access granted
-      </div>
-      {children}
-    </>
-  );
-}
+  // If verified, render the gated content
+  return <>{children}</>;
+};

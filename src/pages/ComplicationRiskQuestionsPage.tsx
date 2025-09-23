@@ -95,7 +95,7 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
-export function ComplicationRiskQuestionsPage() {
+export default function ComplicationRiskQuestionPage() {
   // Convert answer IDs → labels (same as before)
   const convertAnswersToLabels = (answers: Record<string, any>) => {
     const converted: Array<{ question: string; answer: string }> = [];
@@ -147,8 +147,8 @@ export function ComplicationRiskQuestionsPage() {
   };
 
   return (
-    <PaymentGate requiredProduct="Complication Risk">
-      <QuizTemplate config={quizWithSubmit} />
+    <PaymentGate productName="Complication Risk Checker">
+      <QuizTemplate config={complicationRiskQuiz} />
     </PaymentGate>
   );
 }

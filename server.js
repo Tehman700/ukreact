@@ -700,13 +700,14 @@ app.post("/api/verify-payment", async (req, res) => {
 
     const result = await pool.query(
       `SELECT * FROM stripe_payments
-       WHERE stripe_session_id = $1 AND status = 'paid'`,
+       WHERE stripe_session_id = $1
+       AND status IN ('paid', 'complete')`,
       [sessionId]
     );
 
     if (result.rows.length > 0) {
       const payment = result.rows[0];
-      // Optional product check
+
       if (productName && !payment.product_name.includes(productName)) {
         return res.json({ success: true, verified: false });
       }
@@ -720,6 +721,7 @@ app.post("/api/verify-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Payment verification failed" });
   }
 });
+
 
 
 
