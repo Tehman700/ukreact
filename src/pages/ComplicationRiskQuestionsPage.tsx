@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { PaymentGate } from '../components/PaymentGate';
 
@@ -113,7 +113,7 @@ export function ComplicationRiskQuestionsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sessionId,
-        productName: "Complication Risk Checker", // must match DB
+        productName: "Complication Risk Checker", // MUST match Stripe checkout product name
       }),
     })
       .then((res) => res.json())
@@ -137,11 +137,7 @@ export function ComplicationRiskQuestionsPage() {
       <div style={{ textAlign: "center", marginTop: "50px" }}>
         <h2>🔒 Payment Required</h2>
         <p>You must complete payment before accessing this quiz.</p>
-        <a href="/Health-Audit.html">
-          <button style={{ padding: "10px 20px", fontSize: "16px" }}>
-            Go to Payment
-          </button>
-        </a>
+        <PaymentGate productName="Complication Risk Checker" />
       </div>
     );
   }
@@ -149,6 +145,5 @@ export function ComplicationRiskQuestionsPage() {
   // ✅ User paid → show quiz
   return <QuizTemplate config={complicationRiskQuiz} />;
 }
-
 
 
