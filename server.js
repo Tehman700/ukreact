@@ -50,119 +50,6 @@ pool.connect()
   .catch((err) => console.error("❌ DB connection error:", err));
 
 // ----------------------------
-// PAYMENT VERIFICATION ENDPOINT
-// ----------------------------
-app.get("/api/verify-payment", async (req, res) => {
-  try {
-    const { email } = req.query;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: "Email parameter is required"
-      });
-    }
-
-    // Check if user has made a successful payment
-    const paymentQuery = `
-      SELECT
-        id,
-        stripe_session_id,
-        customer_email,
-        amount_total,
-        status,
-        product_name,
-        created
-      FROM stripe_payments
-      WHERE customer_email = $1
-      AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
-      ORDER BY created DESC
-      LIMIT 1
-    `;
-
-    const result = await pool.query(paymentQuery, [email]);
-
-    const hasPaid = result.rows.length > 0;
-    const paymentInfo = hasPaid ? result.rows[0] : null;
-
-    res.json({
-      success: true,
-      hasPaid,
-      paymentInfo: paymentInfo ? {
-        paymentId: paymentInfo.stripe_session_id,
-        amount: paymentInfo.amount_total / 100, // Convert cents to dollars
-        product: paymentInfo.product_name,
-        date: paymentInfo.created
-      } : null
-    });
-
-  } catch (error) {
-    console.error("Payment verification error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to verify payment status"
-    });
-  }
-});
-
-// ----------------------------
-// PREMIUM ACCESS CHECK ENDPOINT
-// ----------------------------
-app.get("/api/check-premium-access", async (req, res) => {
-  try {
-    const { email, assessmentType } = req.query;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: "Email parameter is required"
-      });
-    }
-
-    // Define which assessments require payment
-    const premiumAssessments = [
-      'Complication Risk',
-      'Advanced Health Analysis',
-      // Add more premium assessment types here
-    ];
-
-    const requiresPayment = premiumAssessments.includes(assessmentType);
-
-    if (!requiresPayment) {
-      return res.json({
-        success: true,
-        hasAccess: true,
-        requiresPayment: false
-      });
-    }
-
-    // Check payment status for premium assessments
-    const paymentQuery = `
-      SELECT COUNT(*) as payment_count
-      FROM stripe_payments
-      WHERE customer_email = $1
-      AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
-    `;
-
-    const result = await pool.query(paymentQuery, [email]);
-    const hasAccess = parseInt(result.rows[0].payment_count) > 0;
-
-    res.json({
-      success: true,
-      hasAccess,
-      requiresPayment: true
-    });
-
-  } catch (error) {
-    console.error("Premium access check error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to check premium access"
-    });
-  }
-});
-
-// ----------------------------
 // 1. Save User
 // ----------------------------
 app.post("/api/users", async (req, res) => {
@@ -189,44 +76,12 @@ app.post("/api/users", async (req, res) => {
 });
 
 // ----------------------------
-// 2. Save Assessment + Answers (with premium check)
+// 2. Save Assessment + Answers
 // ----------------------------
 app.post("/api/assessments", async (req, res) => {
   const client = await pool.connect();
   try {
     const { user_id, assessment_type, answers } = req.body;
-
-    // Get user email for premium check
-    const userResult = await client.query('SELECT email FROM users WHERE id = $1', [user_id]);
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const userEmail = userResult.rows[0].email;
-
-    // Check if this assessment requires premium access
-    const premiumAssessments = ['Complication Risk', 'Advanced Health Analysis'];
-    const requiresPayment = premiumAssessments.includes(assessment_type);
-
-    if (requiresPayment) {
-      // Verify payment status
-      const paymentQuery = `
-        SELECT COUNT(*) as payment_count
-        FROM stripe_payments
-        WHERE customer_email = $1
-        AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
-      `;
-
-      const paymentResult = await client.query(paymentQuery, [userEmail]);
-      const hasAccess = parseInt(paymentResult.rows[0].payment_count) > 0;
-
-      if (!hasAccess) {
-        return res.status(403).json({
-          error: "Premium access required",
-          requiresPayment: true
-        });
-      }
-    }
 
     await client.query("BEGIN");
 
@@ -262,7 +117,7 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, email, metadata = {} } = req.body;
+    const { products, email } = req.body;
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
@@ -281,12 +136,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
       line_items,
       mode: "payment",
       customer_email: email,
-      metadata: {
-        ...metadata,
-        unlock_premium: "true" // Flag to indicate this payment unlocks premium features
-      },
-      success_url: "https://luther.health/Health-Audit.html#payment-success",
-      cancel_url: "https://luther.health/Health-Audit.html#payment-cancelled",
+      success_url: "https://luther.health/Health-Audit.html#success",
+      cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
     res.json({ id: session.id });
@@ -335,7 +186,6 @@ app.post("/api/webhook", async (req, res) => {
           status VARCHAR(50),
           product_name TEXT,
           line_items JSONB,
-          metadata JSONB,
           created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -354,10 +204,9 @@ app.post("/api/webhook", async (req, res) => {
           currency,
           status,
           product_name,
-          line_items,
-          metadata
+          line_items
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (stripe_session_id) DO UPDATE SET
           status = EXCLUDED.status,
           updated = CURRENT_TIMESTAMP
@@ -369,19 +218,10 @@ app.post("/api/webhook", async (req, res) => {
         session.currency,
         session.payment_status,
         productName,
-        JSON.stringify(lineItems.data),
-        JSON.stringify(session.metadata || {})
+        JSON.stringify(lineItems.data)
       ]);
 
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
-
-      // If this payment unlocks premium features, update user access
-      if (session.metadata && session.metadata.unlock_premium === "true") {
-        console.log("🔓 Premium access unlocked for:", session.customer_email);
-
-        // You could also create a separate premium_access table here if needed
-        // For now, we're using the payment record as proof of premium access
-      }
 
       // ----------------------------
       // Send Conversion API Event to Meta using Business SDK
@@ -409,7 +249,7 @@ app.post("/api/webhook", async (req, res) => {
         .setUserData(userData)
         .setCustomData(customData)
         .setActionSource("website")
-        .setEventSourceUrl("https://luther.health/Health-Audit.html#payment-success");
+        .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
 
       // Create event request
       const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
@@ -435,90 +275,6 @@ app.post("/api/webhook", async (req, res) => {
   }
 
   res.json({ received: true });
-});
-
-// ----------------------------
-// PAYMENT SUCCESS REDIRECT ENDPOINT
-// ----------------------------
-app.get("/api/payment-success", async (req, res) => {
-  try {
-    const { session_id, email } = req.query;
-
-    if (session_id) {
-      // Verify the session and get payment details
-      const session = await stripe.checkout.sessions.retrieve(session_id);
-
-      if (session.payment_status === 'paid') {
-        // Redirect to success page with appropriate route
-        const redirectUrl = `https://luther.health/Health-Audit.html#complication-risk-checker-questions`;
-        return res.redirect(redirectUrl);
-      }
-    }
-
-    // Fallback redirect
-    res.redirect('https://luther.health/Health-Audit.html#payment-success');
-  } catch (error) {
-    console.error("Payment success redirect error:", error);
-    res.redirect('https://luther.health/Health-Audit.html#payment-error');
-  }
-});
-
-// ----------------------------
-// USER PAYMENT HISTORY
-// ----------------------------
-app.get("/api/user-payments", async (req, res) => {
-  try {
-    const { email } = req.query;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: "Email parameter is required"
-      });
-    }
-
-    const paymentsQuery = `
-      SELECT
-        stripe_session_id,
-        amount_total,
-        currency,
-        status,
-        product_name,
-        created,
-        metadata
-      FROM stripe_payments
-      WHERE customer_email = $1
-      ORDER BY created DESC
-    `;
-
-    const result = await pool.query(paymentsQuery, [email]);
-
-    const payments = result.rows.map(payment => ({
-      sessionId: payment.stripe_session_id,
-      amount: payment.amount_total / 100,
-      currency: payment.currency,
-      status: payment.status,
-      product: payment.product_name,
-      date: payment.created,
-      metadata: payment.metadata
-    }));
-
-    res.json({
-      success: true,
-      payments,
-      totalPayments: payments.length,
-      hasPremiumAccess: payments.some(p =>
-        p.status === 'complete' || p.status === 'paid' || p.status === 'complete_payment_intent'
-      )
-    });
-
-  } catch (error) {
-    console.error("User payments history error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch payment history"
-    });
-  }
 });
 
 // ----------------------------
@@ -566,7 +322,7 @@ app.get("/api/analytics/dashboard", async (req, res) => {
         currency,
         DATE_TRUNC('day', created) as date
       FROM stripe_payments
-      WHERE created BETWEEN $1 AND $2 AND (status = 'complete' OR status = 'paid' OR status = 'complete_payment_intent')
+      WHERE created BETWEEN $1 AND $2 AND status = 'complete_payment_intent'
       GROUP BY currency, DATE_TRUNC('day', created)
       ORDER BY date DESC
     `;
@@ -747,7 +503,6 @@ app.get("/api/analytics/funnel", async (req, res) => {
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
         AND sp.created >= a.created_at
         AND sp.created <= a.created_at + INTERVAL '24 hours'
-        AND (sp.status = 'complete' OR sp.status = 'paid' OR sp.status = 'complete_payment_intent')
       ${whereClause}
       GROUP BY a.assessment_type
       ORDER BY started DESC
@@ -793,7 +548,7 @@ app.get("/api/analytics/users", async (req, res) => {
       SELECT
         age_range,
         COUNT(*) as count,
-        COUNT(CASE WHEN sp.customer_email IS NOT NULL AND (sp.status = 'complete' OR sp.status = 'paid' OR sp.status = 'complete_payment_intent') THEN 1 END) as purchasers
+        COUNT(CASE WHEN sp.customer_email IS NOT NULL THEN 1 END) as purchasers
       FROM users u
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
       WHERE u.created_at BETWEEN $1 AND $2
@@ -811,7 +566,7 @@ app.get("/api/analytics/users", async (req, res) => {
         u.created_at,
         COUNT(a.id) as assessments_taken,
         COUNT(sp.id) as purchases_made,
-        SUM(CASE WHEN sp.status IN ('complete', 'paid', 'complete_payment_intent') THEN sp.amount_total / 100.0 ELSE 0 END) as total_spent
+        SUM(sp.amount_total / 100.0) as total_spent
       FROM users u
       LEFT JOIN assessments a ON u.id = a.user_id
       LEFT JOIN stripe_payments sp ON u.email = sp.customer_email
@@ -877,6 +632,7 @@ app.post("/api/analytics/pageview", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
