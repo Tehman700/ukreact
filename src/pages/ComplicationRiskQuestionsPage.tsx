@@ -96,61 +96,58 @@ const complicationRiskQuiz: QuizConfig = {
 };
 
 export function ComplicationRiskQuestionsPage() {
-  // Convert answer IDs → labels (same as before)
-  const convertAnswersToLabels = (answers: Record<string, any>) => {
-    const converted: Array<{ question: string; answer: string }> = [];
-    complicationRiskQuiz.questions.forEach((q) => {
-      const answer = answers[q.id];
-      if (!answer) return;
+  const [isPaid, setIsPaid] = useState<boolean | null>(null);
 
-      let labels: string;
-      if (q.multiSelect && Array.isArray(answer)) {
-        labels = answer.map((id) => q.options.find((o) => o.id === id)?.label || id).join(', ');
-      } else {
-        const selectedId = Array.isArray(answer) ? answer[0] : answer;
-        labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
-      }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId =
+      params.get("session_id") || sessionStorage.getItem("stripe_session_id");
 
-      converted.push({ question: q.question, answer: labels });
-    });
-    return converted;
-  };
+    if (!sessionId) {
+      setIsPaid(false);
+      return;
+    }
 
-  const quizWithSubmit: QuizConfig = {
-    ...complicationRiskQuiz,
-    informationPageRoute: 'complication-risk-checker-information',
-    onComplete: async (answers) => {
-      console.log('Complication Risk Assessment completed with answers:', answers);
-      const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    fetch("/api/verify-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId,
+        productName: "Complication Risk Checker", // must match DB
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.verified) {
+          setIsPaid(true);
+          sessionStorage.setItem("stripe_session_id", sessionId);
+        } else {
+          setIsPaid(false);
+        }
+      })
+      .catch(() => setIsPaid(false));
+  }, []);
 
-      try {
-        const convertedAnswers = convertAnswersToLabels(answers);
+  if (isPaid === null) {
+    return <div>🔄 Checking payment status...</div>;
+  }
 
-        await fetch('https://luther.health/api/assessments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: user.id,
-            assessment_type: 'Complication Risk',
-            answers: convertedAnswers,
-          }),
-        });
+  if (!isPaid) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <h2>🔒 Payment Required</h2>
+        <p>You must complete payment before accessing this quiz.</p>
+        <a href="/Health-Audit.html">
+          <button style={{ padding: "10px 20px", fontSize: "16px" }}>
+            Go to Payment
+          </button>
+        </a>
+      </div>
+    );
+  }
 
-        window.location.hash = 'complication-risk-checker-information';
-      } catch (err) {
-        console.error('Error saving complication risk assessment:', err);
-      }
-    },
-    onBack: () => {
-      window.location.hash = 'complication-risk-checker-learn-more';
-    },
-  };
-
-  return (
-<PaymentGate requiredProduct="Complication Risk Checker">
-      <QuizTemplate config={quizWithSubmit} />
-    </PaymentGate>
-  );
+  // ✅ User paid → show quiz
+  return <QuizTemplate config={complicationRiskQuiz} />;
 }
 
 

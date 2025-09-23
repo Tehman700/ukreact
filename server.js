@@ -113,41 +113,6 @@ app.post("/api/assessments", async (req, res) => {
 });
 
 // ----------------------------
-// 3. Stripe Checkout
-// ----------------------------
-app.post("/api/create-checkout-session", async (req, res) => {
-  try {
-    const { products, email } = req.body;
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: "No products provided" });
-    }
-
-    const line_items = products.map((item) => ({
-      price_data: {
-        currency: "gbp",
-        product_data: { name: item.item_name },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity || 1,
-    }));
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      customer_email: email,
-      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://luther.health/Health-Audit.html#cancel",
-    });
-
-    res.json({ id: session.id });
-  } catch (err) {
-    console.error("Stripe session creation failed:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ----------------------------
 // 4. Enhanced Stripe Webhook → Store Data + Send Meta Conversion API
 // ----------------------------
 app.post("/api/webhook", async (req, res) => {
