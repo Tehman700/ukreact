@@ -9,34 +9,28 @@ export const PaymentGate: React.FC<PaymentGateProps> = ({ children, productName 
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Grab session_id from URL
-    const url = new URL(window.location.href);
-    const sessionId = url.searchParams.get("session_id");
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
 
-    if (!sessionId) {
-      setLoading(false);
-      return;
-    }
-
-    // Call backend to verify payment
-    fetch("https://luther.health/api/verify-payment", {
+  if (sessionId) {
+    fetch("/api/verify-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, productName })
+      body: JSON.stringify({
+        sessionId,
+        productName, // e.g. "Complication Risk Checker"
+      }),
     })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.verified) {
-          setUnlocked(true);
+          setVerified(true);
         }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Payment verification failed:", err);
-        setLoading(false);
       });
-  }, [productName]);
+  }
+}, [productName]);
+
 
   if (loading) {
     return <p>Checking payment...</p>;

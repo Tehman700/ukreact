@@ -698,17 +698,23 @@ app.post("/api/verify-payment", async (req, res) => {
   try {
     const { sessionId, productName } = req.body;
 
+    if (!sessionId) {
+      return res.status(400).json({ success: false, error: "Missing sessionId" });
+    }
+
     const result = await pool.query(
       `SELECT * FROM stripe_payments
        WHERE stripe_session_id = $1
-       AND status IN ('paid', 'complete')`,
+       AND status = 'paid'
+       ORDER BY created DESC
+       LIMIT 1`,
       [sessionId]
     );
 
     if (result.rows.length > 0) {
       const payment = result.rows[0];
 
-      if (productName && !payment.product_name.includes(productName)) {
+      if (productName && !payment.product_name.toLowerCase().includes(productName.toLowerCase())) {
         return res.json({ success: true, verified: false });
       }
 
@@ -721,6 +727,7 @@ app.post("/api/verify-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Payment verification failed" });
   }
 });
+
 
 
 
