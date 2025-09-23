@@ -633,6 +633,33 @@ app.post("/api/analytics/pageview", async (req, res) => {
   }
 });
 
+// server.js
+app.get("/api/verify-payment/:sessionId", async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const result = await pool.query(
+      `SELECT * FROM stripe_payments WHERE stripe_session_id = $1 LIMIT 1`,
+      [sessionId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ paid: false, message: "No payment found" });
+    }
+
+    const payment = result.rows[0];
+
+    // Stripe marks it as "paid"
+    if (payment.status === "paid" || payment.status === "complete" || payment.status === "complete_payment_intent") {
+      return res.json({ paid: true, email: payment.customer_email });
+    }
+
+    res.json({ paid: false, message: "Payment not completed" });
+  } catch (err) {
+    console.error("Payment verify error:", err);
+    res.status(500).json({ paid: false, error: "Server error" });
+  }
+});
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
