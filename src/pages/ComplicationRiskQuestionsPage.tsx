@@ -1,6 +1,5 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate';
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -95,8 +94,8 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
-export const ComplicationRiskQuestionsPage = () => {
-  // Convert answer IDs → labels (same as before)
+export function ComplicationRiskQuestionsPage() {
+  // Convert answer IDs → labels
   const convertAnswersToLabels = (answers: Record<string, any>) => {
     const converted: Array<{ question: string; answer: string }> = [];
     complicationRiskQuiz.questions.forEach((q) => {
@@ -146,9 +145,8 @@ export const ComplicationRiskQuestionsPage = () => {
     },
   };
 
-  return (
-    <PaymentGate productName="Complication Risk Checker">
-      <QuizTemplate config={complicationRiskQuiz} />
-    </PaymentGate>
-  );
+  return <QuizTemplate config={quizWithSubmit} />;
 }
+
+
+

@@ -136,7 +136,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       line_items,
       mode: "payment",
       customer_email: email,
-      success_url: "https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}",
+      success_url: "https://luther.health/Health-Audit.html#success",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
@@ -216,12 +216,12 @@ app.post("/api/webhook", async (req, res) => {
         session.customer_email,
         session.amount_total,
         session.currency,
-        session.payment_status, // Stripe sets this to 'paid'
+        session.payment_status,
         productName,
         JSON.stringify(lineItems.data)
       ]);
 
-      console.log("💾 Payment stored with session ID:", session.id);
+      console.log("💾 Payment stored in database:", paymentResult.rows[0]);
 
       // ----------------------------
       // Send Conversion API Event to Meta using Business SDK
@@ -632,152 +632,8 @@ app.post("/api/analytics/pageview", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-//app.post("/api/verify-payment", async (req, res) => {
-//  try {
-//    const { sessionId, productName } = req.body;
-//
-//    if (!sessionId) {
-//      return res.status(400).json({
-//        success: false,
-//        error: "Session ID is required"
-//      });
-//    }
-//
-//    // Check if payment exists in database with this session ID
-//    const paymentQuery = `
-//      SELECT * FROM stripe_payments
-//      WHERE stripe_session_id = $1
-//      AND status IN ('complete', 'paid')
-//      AND ($2 IS NULL OR product_name ILIKE $2)
-//      ORDER BY created DESC
-//      LIMIT 1
-//    `;
-//
-//    const result = await pool.query(paymentQuery, [
-//      sessionId,
-//      productName ? `%${productName}%` : null
-//    ]);
-//
-//    if (result.rows.length > 0) {
-//      const payment = result.rows[0];
-//      console.log(`✅ Payment verified for session: ${sessionId}`);
-//
-//      res.json({
-//        success: true,
-//        verified: true,
-//        payment: {
-//          sessionId: payment.stripe_session_id,
-//          amount: payment.amount_total / 100,
-//          currency: payment.currency,
-//          status: payment.status,
-//          productName: payment.product_name,
-//          paymentDate: payment.created
-//        }
-//      });
-//    } else {
-//      console.log(`❌ No payment found for session: ${sessionId}`);
-//      res.json({
-//        success: true,
-//        verified: false,
-//        message: "Payment not found or not completed"
-//      });
-//    }
-//
-//  } catch (error) {
-//    console.error("Payment verification error:", error);
-//    res.status(500).json({
-//      success: false,
-//      error: "Payment verification failed"
-//    });
-//  }
-//});
 
 
-
-app.post("/api/verify-payment", async (req, res) => {
-  try {
-    const { sessionId, productName } = req.body;
-
-    if (!sessionId) {
-      return res.status(400).json({ success: false, error: "Missing sessionId" });
-    }
-
-    const result = await pool.query(
-      `SELECT * FROM stripe_payments
-       WHERE stripe_session_id = $1
-       AND status = 'paid'
-       ORDER BY created DESC
-       LIMIT 1`,
-      [sessionId]
-    );
-
-    if (result.rows.length > 0) {
-      const payment = result.rows[0];
-
-      if (productName && !payment.product_name.toLowerCase().includes(productName.toLowerCase())) {
-        return res.json({ success: true, verified: false });
-      }
-
-      return res.json({ success: true, verified: true, payment });
-    }
-
-    res.json({ success: true, verified: false });
-  } catch (err) {
-    console.error("Verify payment error:", err);
-    res.status(500).json({ success: false, error: "Payment verification failed" });
-  }
-});
-
-
-
-
-
-
-
-
-
-app.post("/api/create-payment-session", async (req, res) => {
-  try {
-    const { products, email } = req.body;
-
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: "No products provided" });
-    }
-
-    const line_items = products.map((item) => ({
-      price_data: {
-        currency: "gbp",
-        product_data: { name: item.item_name },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity || 1,
-    }));
-
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      customer_email: email,
-      success_url: `https://luther.health/Health-Audit.html#complication-risk-checker-questions?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: "https://luther.health/Health-Audit.html#cancel",
-      metadata: {
-        product_names: products.map(p => p.item_name).join(', ')
-      }
-    });
-
-    console.log(`Created checkout session: ${session.id}`);
-
-    res.json({
-      sessionId: session.id,
-      url: session.url
-    });
-
-  } catch (err) {
-    console.error("Stripe session creation failed:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
 // ----------------------------
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
