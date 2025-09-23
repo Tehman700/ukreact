@@ -95,7 +95,7 @@ const complicationRiskQuiz: QuizConfig = {
   ],
 };
 
-export default function ComplicationRiskQuestionPage() {
+export const ComplicationRiskQuestionsPage = () => {
   // Convert answer IDs → labels (same as before)
   const convertAnswersToLabels = (answers: Record<string, any>) => {
     const converted: Array<{ question: string; answer: string }> = [];
