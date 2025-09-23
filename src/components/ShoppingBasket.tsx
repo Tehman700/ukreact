@@ -332,26 +332,29 @@ const makePayment = async (funnelType = "complication-risk") => {
 
 
 
-
-{/* Button for Complication Risk funnel */}
 <Button
-  onClick={() => makePayment("complication-risk")}
+  onClick={() => {
+    // use the first item’s id or category to decide funnel type
+    const firstItem = items[0]?.assessment;
+
+    // map assessment IDs to funnels
+    const funnelMap: Record<string, string> = {
+      "6": "complication-risk",
+      "7": "recovery-speed",
+      // add other mappings as needed
+    };
+
+    const funnelType = funnelMap[firstItem?.id] || "complication-risk";
+
+    makePayment(funnelType);
+  }}
   className="w-full"
   size="lg"
 >
   <CreditCard className="w-4 h-4 mr-2" />
-  Buy Complication Risk Assessment
+  Checkout
 </Button>
 
-{/* Button for Recovery Speed funnel */}
-<Button
-  onClick={() => makePayment("recovery-speed")}
-  className="w-full"
-  size="lg"
->
-  <CreditCard className="w-4 h-4 mr-2" />
-  Buy Recovery Speed Assessment
-</Button>
 
 
 
