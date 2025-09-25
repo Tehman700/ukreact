@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const completedChronicSymptomsQuiz: QuizConfig = {
   title: 'Completed Chronic Symptoms Bundle',
@@ -597,5 +598,9 @@ const completedChronicSymptomsQuiz: QuizConfig = {
 };
 
 export function CompletedChronicSymptomsQuestionsPage() {
-  return <QuizTemplate config={completedChronicSymptomsQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="chronic">
+      <QuizTemplate config={completedChronicSymptomsQuiz} />
+    </PaymentGate>
+  );
 }

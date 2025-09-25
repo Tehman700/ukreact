@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Calendar } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -191,6 +192,8 @@ export function CompletedSurgeryPreparationResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+            <PaymentGate requiredFunnel="surgery">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -935,5 +938,7 @@ export function CompletedSurgeryPreparationResultsPage() {
         </Card>
       </div>
     </div>
+    </PaymentGate>
+
   );
 }

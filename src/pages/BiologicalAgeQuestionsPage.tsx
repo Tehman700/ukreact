@@ -1,6 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { useAssessmentAnalytics } from '../hooks/useAnalytics';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const biologicalAgeQuiz: QuizConfig = {
   title: 'Biological Age Calculator',
@@ -176,5 +177,9 @@ export function BiologicalAgeQuestionsPage() {
     startAssessment();
   }, [startAssessment]);
 
-  return <QuizTemplate config={biologicalAgeQuizWithAnalytics} />;
+  return (
+    <PaymentGate requiredFunnel="bio">
+      <QuizTemplate config={biologicalAgeQuizWithAnalytics} />
+    </PaymentGate>
+  );
 }

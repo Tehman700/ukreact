@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 import { ArrowRight } from 'lucide-react';
 
@@ -90,6 +91,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   return (
+      <PaymentGate requiredFunnel="surgery-readiness">
+
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-2xl">
 
@@ -205,5 +208,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
       </div>
     </div>
+        </PaymentGate>
   );
 }

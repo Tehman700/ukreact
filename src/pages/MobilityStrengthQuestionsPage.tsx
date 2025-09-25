@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const mobilityStrengthQuiz: QuizConfig = {
   title: 'Mobility & Strength Score',
@@ -117,5 +118,9 @@ const mobilityStrengthQuiz: QuizConfig = {
 };
 
 export function MobilityStrengthQuestionsPage() {
-  return <QuizTemplate config={mobilityStrengthQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="mobility">
+      <QuizTemplate config={mobilityStrengthQuiz} />
+    </PaymentGate>
+  );
 }

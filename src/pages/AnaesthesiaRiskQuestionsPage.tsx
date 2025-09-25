@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const anaesthesiaRiskQuiz: QuizConfig = {
   title: 'Anaesthesia Risk Screener',
@@ -129,5 +130,9 @@ const anaesthesiaRiskQuiz: QuizConfig = {
 };
 
 export function AnaesthesiaRiskQuestionsPage() {
-  return <QuizTemplate config={anaesthesiaRiskQuiz} />;
+      return (
+    <PaymentGate requiredFunnel="anesthesia">
+      <QuizTemplate config={anaesthesiaRiskQuiz} />
+    </PaymentGate>
+  );
 }

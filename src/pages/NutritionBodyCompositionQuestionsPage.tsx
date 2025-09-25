@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const nutritionBodyCompositionQuiz: QuizConfig = {
   title: 'Nutrition & Body Composition Score',
@@ -149,5 +150,9 @@ const nutritionBodyCompositionQuiz: QuizConfig = {
 };
 
 export function NutritionBodyCompositionQuestionsPage() {
-  return <QuizTemplate config={nutritionBodyCompositionQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="nutrition">
+      <QuizTemplate config={nutritionBodyCompositionQuiz} />
+    </PaymentGate>
+  );
 }

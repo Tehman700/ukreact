@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const medicationBurdenQuiz: QuizConfig = {
   title: 'Medication Burden Calculator Assessment',
@@ -150,5 +151,9 @@ const medicationBurdenQuiz: QuizConfig = {
 };
 
 export function MedicationBurdenQuestionsPage() {
-  return <QuizTemplate config={medicationBurdenQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="medication">
+      <QuizTemplate config={medicationBurdenQuiz} />
+    </PaymentGate>
+  );
 }

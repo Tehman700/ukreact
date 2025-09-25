@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -130,6 +131,8 @@ export function BiologicalAgeResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+                  <PaymentGate requiredFunnel="bio">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -603,5 +606,7 @@ export function BiologicalAgeResultsPage() {
         </Card>
       </div>
     </div>
+                </PaymentGate>
+
   );
 }

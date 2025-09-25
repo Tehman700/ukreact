@@ -6,7 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-// Using custom CSS charts instead of Recharts for better reliability
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -316,6 +316,8 @@ export function AnaesthesiaRiskResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+            <PaymentGate requiredFunnel="anesthesia">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -930,5 +932,7 @@ export function AnaesthesiaRiskResultsPage() {
         </Card>
       </div>
     </div>
+            </PaymentGate>
+
   );
 }

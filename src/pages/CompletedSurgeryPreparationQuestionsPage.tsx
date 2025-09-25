@@ -1,6 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { useAssessmentAnalytics } from '../hooks/useAnalytics';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const completedSurgeryPreparationQuiz: QuizConfig = {
   title: 'Completed Surgery Preparation Bundle',
@@ -759,5 +760,9 @@ export function CompletedSurgeryPreparationQuestionsPage() {
     startAssessment();
   }, [startAssessment]);
 
-  return <QuizTemplate config={completedSurgeryPreparationQuizWithAnalytics} />;
+  return (
+    <PaymentGate requiredFunnel="surgery">
+      <QuizTemplate config={completedSurgeryPreparationQuizWithAnalytics} />
+    </PaymentGate>
+  );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { useAssessmentAnalytics } from '../hooks/useAnalytics';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const cardiometabolicRiskQuiz: QuizConfig = {
   title: 'Cardiometabolic Risk Score',
@@ -176,5 +177,9 @@ export function CardiometabolicRiskQuestionsPage() {
     startAssessment();
   }, [startAssessment]);
 
-  return <QuizTemplate config={cardiometabolicRiskQuizWithAnalytics} />;
+      return (
+    <PaymentGate requiredFunnel="card">
+      <QuizTemplate config={cardiometabolicRiskQuizWithAnalytics} />
+    </PaymentGate>
+  );
 }

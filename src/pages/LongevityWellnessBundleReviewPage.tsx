@@ -3,6 +3,8 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { Star, X, RefreshCw, SkipForward } from 'lucide-react';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+
 
 const POSITIVE_FEEDBACK_OPTIONS = [
   "Comprehensive",
@@ -236,6 +238,8 @@ export function LongevityWellnessBundleReviewPage() {
   const hasSelectedFeedback = selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0;
 
   return (
+                       <PaymentGate requiredFunnel="longevity">
+
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-8">
@@ -393,5 +397,7 @@ export function LongevityWellnessBundleReviewPage() {
         )}
       </div>
     </div>
+    </PaymentGate>
+
   );
 }

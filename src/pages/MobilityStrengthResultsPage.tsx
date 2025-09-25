@@ -7,6 +7,7 @@ import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Activity, Target, BookOpen, BarChart3, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 // Using custom CSS charts instead of Recharts for better reliability
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -347,6 +348,8 @@ export function MobilityStrengthResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+                  <PaymentGate requiredFunnel="mobility">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -961,5 +964,7 @@ export function MobilityStrengthResultsPage() {
         </Card>
       </div>
     </div>
+                </PaymentGate>
+
   );
 }

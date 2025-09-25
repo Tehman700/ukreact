@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 import { ArrowRight } from 'lucide-react';
 
@@ -55,6 +56,8 @@ export function LongevityWellnessBundleInformationPage() {
   };
 
   return (
+            <PaymentGate requiredFunnel="longevity">
+
     <div className="min-h-screen bg-background py-16">
       <div className="container mx-auto px-4 max-w-2xl">
 
@@ -170,5 +173,7 @@ export function LongevityWellnessBundleInformationPage() {
         </div>
       </div>
     </div>
+            </PaymentGate>
+
   );
 }

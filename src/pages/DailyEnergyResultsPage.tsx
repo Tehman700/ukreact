@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Battery, BarChart3, Clock, Target, BookOpen } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -126,6 +127,8 @@ export function DailyEnergyResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+                  <PaymentGate requiredFunnel="energy">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -608,5 +611,7 @@ export function DailyEnergyResultsPage() {
         </Card>
       </div>
     </div>
+                </PaymentGate>
+
   );
 }

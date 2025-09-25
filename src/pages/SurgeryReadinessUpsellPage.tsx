@@ -6,6 +6,8 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ShoppingBasket } from '../components/ShoppingBasket';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -83,6 +85,8 @@ export function SurgeryReadinessUpsellPage() {
   };
 
   return (
+          <PaymentGate requiredFunnel="surgery-readiness">
+
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-muted/20 to-background p-[0px] bg-[rgba(249,249,249,1)]">
@@ -245,5 +249,6 @@ export function SurgeryReadinessUpsellPage() {
         totalPrice={getTotalPrice()}
       />
     </div>
+        </PaymentGate>
   );
 }

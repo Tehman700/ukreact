@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const symptomSeverityQuiz: QuizConfig = {
   title: 'Symptom Severity Index Assessment',
@@ -147,5 +148,9 @@ const symptomSeverityQuiz: QuizConfig = {
 };
 
 export function SymptomSeverityQuestionsPage() {
-  return <QuizTemplate config={symptomSeverityQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="symptom">
+      <QuizTemplate config={symptomSeverityQuiz} />
+    </PaymentGate>
+  );
 }

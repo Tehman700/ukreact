@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const functionalFitnessAgeQuiz: QuizConfig = {
   title: 'Functional Fitness Age Test',
@@ -146,5 +147,9 @@ const functionalFitnessAgeQuiz: QuizConfig = {
 };
 
 export function FunctionalFitnessAgeQuestionsPage() {
-  return <QuizTemplate config={functionalFitnessAgeQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="functional">
+      <QuizTemplate config={functionalFitnessAgeQuiz} />
+    </PaymentGate>
+  );
 }

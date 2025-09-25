@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const dailyEnergyQuiz: QuizConfig = {
   title: 'Daily Energy Audit Assessment',
@@ -147,5 +148,9 @@ const dailyEnergyQuiz: QuizConfig = {
 };
 
 export function DailyEnergyQuestionsPage() {
-  return <QuizTemplate config={dailyEnergyQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="energy">
+      return <QuizTemplate config={dailyEnergyQuiz} />
+    </PaymentGate>
+  );
 }

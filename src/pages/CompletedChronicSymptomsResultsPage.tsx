@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Thermometer, Pill, Battery, Stethoscope, Calendar } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -150,6 +151,8 @@ export function CompletedChronicSymptomsResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+            <PaymentGate requiredFunnel="chronic">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -719,5 +722,7 @@ export function CompletedChronicSymptomsResultsPage() {
         </Card>
       </div>
     </div>
+    </PaymentGate>
+
   );
 }

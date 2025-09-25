@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Users, BarChart3, Clock, Target, BookOpen } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -129,6 +130,8 @@ export function LifestyleLimiterResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+                  <PaymentGate requiredFunnel="lifestyle">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -612,5 +615,7 @@ export function LifestyleLimiterResultsPage() {
         </Card>
       </div>
     </div>
+                </PaymentGate>
+
   );
 }

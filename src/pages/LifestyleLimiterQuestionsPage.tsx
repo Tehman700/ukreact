@@ -1,5 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+
 
 const lifestyleLimiterQuiz: QuizConfig = {
   title: 'Lifestyle Limiter Score Assessment',
@@ -145,5 +147,9 @@ const lifestyleLimiterQuiz: QuizConfig = {
 };
 
 export function LifestyleLimiterQuestionsPage() {
-  return <QuizTemplate config={lifestyleLimiterQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="lifestyle">
+      <QuizTemplate config={lifestyleLimiterQuiz} />
+    </PaymentGate>
+  );
 }

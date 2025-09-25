@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Clock, Heart, Activity, Zap, Apple, Brain, BarChart3, Target, BookOpen, Users, Calendar } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -145,6 +146,8 @@ export function LongevityWellnessBundleResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   return (
+            <PaymentGate requiredFunnel="longevity">
+
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
       <div className="border-b bg-card">
@@ -714,5 +717,6 @@ export function LongevityWellnessBundleResultsPage() {
         </Card>
       </div>
     </div>
+    </PaymentGate>
   );
 }

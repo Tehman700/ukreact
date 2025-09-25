@@ -341,7 +341,22 @@ const makePayment = async (funnelType = "complication-risk") => {
     const funnelMap: Record<string, string> = {
       "6": "complication-risk",
       "7": "recovery-speed",
-      // add other mappings as needed
+      "1": "surgery-readiness",
+      "8": "anesthesia",
+      "9": "mobility",
+      "10": "symptom",
+      "11": "inflammation",
+      "12": "medication",
+      "13": "energy",
+      "14": "lifestyle",
+      "2": "bio",
+      "17": "card",
+      "18": "res",
+      "19": "nutrition",
+      "20": "functional",
+      "21": "surgery",
+      "22": "chronic",
+      "23": "longevity"
     };
 
     const funnelType = funnelMap[firstItem?.id] || "complication-risk";

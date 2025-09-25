@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const inflammationRiskQuiz: QuizConfig = {
   title: 'Inflammation Risk Score Assessment',
@@ -164,5 +165,9 @@ const inflammationRiskQuiz: QuizConfig = {
 };
 
 export function InflammationRiskQuestionsPage() {
-  return <QuizTemplate config={inflammationRiskQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="inflammation">
+      <QuizTemplate config={inflammationRiskQuiz} />
+    </PaymentGate>
+  );
 }

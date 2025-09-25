@@ -1,5 +1,6 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const resilienceIndexQuiz: QuizConfig = {
   title: 'Resilience Index',
@@ -147,5 +148,9 @@ const resilienceIndexQuiz: QuizConfig = {
 };
 
 export function ResilienceIndexQuestionsPage() {
-  return <QuizTemplate config={resilienceIndexQuiz} />;
+    return (
+    <PaymentGate requiredFunnel="res">
+      <QuizTemplate config={resilienceIndexQuiz} />
+    </PaymentGate>
+  );
 }
