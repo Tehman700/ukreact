@@ -20,7 +20,7 @@ const openai = new OpenAI({
 // ----------------------------
 // EMAIL CONFIGURATION
 // ----------------------------
-const emailTransporter = nodemailer.createTransporter({
+const emailTransporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
