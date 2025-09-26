@@ -737,6 +737,7 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
 
     const aiAnalysis = completion.choices[0].message.content;
+    console.log(aiAnalysis)
 
     // Parse AI response into structured format
     const structuredReport = parseAIResponse(aiAnalysis, assessmentType);
