@@ -15,6 +15,7 @@ interface UserInformation {
   age: string;
 }
 
+
 export function ComplicationRiskInformationPage() {
   const [userInfo, setUserInfo] = useState<UserInformation>({
     firstName: '',

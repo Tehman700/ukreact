@@ -123,28 +123,51 @@ export function ComplicationRiskQuestionsPage() {
   const quizWithSubmit: QuizConfig = {
     ...complicationRiskQuiz,
     informationPageRoute: "complication-risk-checker-information",
-    onComplete: async (answers) => {
-      console.log("Complication Risk Assessment completed with answers:", answers);
-      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+onComplete: async (answers) => {
+  console.log("Complication Risk Assessment completed with answers:", answers);
+  const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
 
-      try {
-        const convertedAnswers = convertAnswersToLabels(answers);
+  try {
+    const convertedAnswers = convertAnswersToLabels(answers);
 
-        await fetch("https://luther.health/api/assessments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            assessment_type: "Complication Risk",
-            answers: convertedAnswers,
-          }),
-        });
+    // Save assessment to database
+    const assessmentResponse = await fetch("https://luther.health/api/assessments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        assessment_type: "Complication Risk",
+        answers: convertedAnswers,
+      }),
+    });
 
-        window.location.hash = "complication-risk-checker-information";
-      } catch (err) {
-        console.error("Error saving complication risk assessment:", err);
-      }
-    },
+    // Generate AI report
+    const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assessmentType: "Complication Risk",
+        answers: convertedAnswers,
+        userInfo: user,
+      }),
+    });
+
+    const reportData = await reportResponse.json();
+
+    if (reportData.success) {
+      // Store report data in sessionStorage for results page
+      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+      sessionStorage.setItem("reportId", reportData.reportId.toString());
+
+      window.location.hash = "complication-risk-checker-information";
+    } else {
+      console.error("Failed to generate AI report:", reportData.error);
+    }
+
+  } catch (err) {
+    console.error("Error in assessment completion:", err);
+  }
+},
     onBack: () => {
       window.location.hash = "complication-risk-checker-learn-more";
     },
