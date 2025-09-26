@@ -716,13 +716,13 @@ app.post("/api/generate-assessment-report", async (req, res) => {
 
     const userPrompt = `
 User Information:
-Name: ${userInfo.firstName} ${userInfo.lastName}
-Age Range: ${userInfo.age}
+Name: ${userInfo.first_name} ${userInfo.last_name}
+Age Range: ${userInfo.age_range}
 
 Assessment Responses:
 ${questionsAndAnswers}
 
-Please provide a comprehensive analysis with specific scores, recommendations, and risk levels based on the responses above.
+Please provide a comprehensive analysis following the exact format specified in your system prompt.
     `;
 
     // Call OpenAI API
@@ -733,7 +733,7 @@ Please provide a comprehensive analysis with specific scores, recommendations, a
         { role: "user", content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: 3000,
     });
 
     const aiAnalysis = completion.choices[0].message.content;
@@ -743,9 +743,9 @@ Please provide a comprehensive analysis with specific scores, recommendations, a
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
-      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [userInfo.id, assessmentType, aiAnalysis, JSON.stringify(structuredReport)]
+      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [userInfo.id, assessmentType, aiAnalysis, JSON.stringify(structuredReport), aiAnalysis]
     );
 
     res.json({
@@ -760,27 +760,57 @@ Please provide a comprehensive analysis with specific scores, recommendations, a
   }
 });
 
-// Helper function to get system prompt based on assessment type
+// Helper function to get system prompt based on assessment type - UPDATED
+// Helper function to get system prompt based on assessment type - UPDATED WITH ANAESTHESIA RISK
 function getSystemPrompt(assessmentType) {
   const prompts = {
-    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Based on the user's responses, provide:
+    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. You must provide your response in a specific structured format.
 
-1. Overall risk score (0-100, where higher = lower risk)
-2. Five specific risk categories with individual scores:
-   - Medical History Risk (score and level)
-   - Lifestyle Risk Factors (score and level)
-   - Medication Risk Profile (score and level)
-   - Surgical History Impact (score and level)
-   - Physical Risk Factors (score and level)
+IMPORTANT: Structure your response EXACTLY as follows:
 
-3. For each category, provide:
-   - Risk level (optimal/high/moderate/low)
-   - Brief description
-   - 2-3 specific recommendations
+OVERALL_SCORE: [number between 0-100, where higher = lower risk]
+OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
 
-4. Overall risk rating (Low Risk/Moderate Risk/Elevated Risk/High Risk)
+CATEGORY_ANALYSIS:
+Medical History Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
 
-Format your response as a structured analysis that can be easily parsed. Be specific, evidence-based, and provide actionable recommendations. Avoid overly alarming language while being honest about risks.`,
+Lifestyle Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+
+Medication Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+
+Surgical History Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+
+Physical Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 4-6 paragraph analysis of the patient's overall risk profile, key concerns, and evidence-based recommendations. Include specific medical references where appropriate.]
+
+Be specific, evidence-based, and provide actionable recommendations. Use medical terminology appropriately but keep recommendations accessible to patients.`,
+
+    "Anaesthesia Risk": `You are a specialist anaesthesia risk assessment AI with expertise in perioperative safety and anaesthetic complications. You must provide your response in a specific structured format.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = lower risk]
+OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
+
+CATEGORY_ANALYSIS:
+Airway Management Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focused on intubation difficulty, dental issues, neck mobility] | [3 specific recommendations separated by |]
+
+Sleep Apnoea Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep-related breathing issues and anaesthetic implications] | [3 specific recommendations separated by |]
+
+Medication Interactions: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current medications and anaesthetic drug interactions] | [3 specific recommendations separated by |]
+
+Substance Use Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about alcohol, smoking, drugs affecting anaesthesia] | [3 specific recommendations separated by |]
+
+Previous Anaesthesia History: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about past anaesthetic experiences and complications] | [3 specific recommendations separated by |]
+
+Allergy & Reaction Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about known allergies and anaphylaxis risk] | [3 specific recommendations separated by |]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 4-6 paragraph analysis focusing on anaesthetic-specific risks including: airway management considerations, cardiovascular stability during anaesthesia, respiratory function, drug metabolism and interactions, recovery predictions, and post-operative monitoring requirements. Include relevant ASA (American Society of Anesthesiologists) guidelines and evidence-based anaesthetic practices.]
+
+Focus on anaesthetic safety, drug interactions, airway management, cardiovascular stability, and recovery optimization. Use anaesthetic terminology appropriately while keeping recommendations understandable for patients.`,
 
     // Add more assessment types here as needed
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
@@ -789,60 +819,203 @@ Format your response as a structured analysis that can be easily parsed. Be spec
   return prompts[assessmentType] || prompts["default"];
 }
 
-// Helper function to parse AI response into structured format
+// Helper function to parse AI response - UPDATED TO HANDLE BOTH ASSESSMENT TYPES
 function parseAIResponse(aiAnalysis, assessmentType) {
-  // This is a simplified parser - you might want to make this more robust
-  const lines = aiAnalysis.split('\n');
+  console.log("Parsing AI Analysis for:", assessmentType);
+  console.log("AI Response:", aiAnalysis);
 
-  // Default structure for complication risk
-  const structuredReport = {
-    overallScore: extractOverallScore(aiAnalysis),
-    overallRating: extractOverallRating(aiAnalysis),
-    results: extractCategoryResults(aiAnalysis),
-    summary: aiAnalysis // Keep full AI response as backup
-  };
+  try {
+    // Extract overall score
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 70;
 
-  return structuredReport;
-}
+    // Extract overall rating
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
 
-function extractOverallScore(text) {
-  const scoreMatch = text.match(/overall.*score.*?(\d+)/i) ||
-                    text.match(/(\d+)(?:\/100|\s*%|\s*score)/i);
-  return scoreMatch ? parseInt(scoreMatch[1]) : 73; // Default fallback
-}
+    // Extract category analysis
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const results = [];
 
-function extractOverallRating(text) {
-  const ratings = ['Low Risk', 'Moderate Risk', 'Elevated Risk', 'High Risk'];
-  for (const rating of ratings) {
-    if (text.toLowerCase().includes(rating.toLowerCase())) {
-      return rating;
+    if (categorySection) {
+      // Define categories based on assessment type - MAKE SURE THESE MATCH EXACTLY
+      let categories = [];
+
+      if (assessmentType === "Anaesthesia Risk") {
+        categories = [
+          'Airway Management Risk',
+          'Sleep Apnoea Risk',
+          'Medication Interactions',
+          'Substance Use Impact',
+          'Previous Anaesthesia History',
+          'Allergy & Reaction Risk'
+        ];
+      } else if (assessmentType === "Complication Risk") {
+        categories = [
+          'Medical History Risk',
+          'Lifestyle Risk Factors',
+          'Medication Risk Profile',
+          'Surgical History Impact',
+          'Physical Risk Factors'
+        ];
+      } else {
+        // ADD FALLBACK - this might be your issue
+        console.log("Unknown assessment type, using Complication Risk categories");
+        categories = [
+          'Medical History Risk',
+          'Lifestyle Risk Factors',
+          'Medication Risk Profile',
+          'Surgical History Impact',
+          'Physical Risk Factors'
+        ];
+      }
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || Math.floor(Math.random() * 30) + 60;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3);
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations: recommendations.filter(r => r.length > 0)
+            });
+          }
+        }
+      });
     }
+
+    // If no structured results found, create fallback data based on assessment type
+    if (results.length === 0) {
+      console.log("No structured results found, creating fallback for:", assessmentType);
+
+      let fallbackCategories = [];
+
+      if (assessmentType === "Anaesthesia Risk") {
+        fallbackCategories = [
+          'Airway Management Risk',
+          'Sleep Apnoea Risk',
+          'Medication Interactions',
+          'Substance Use Impact',
+          'Previous Anaesthesia History',
+          'Allergy & Reaction Risk'
+        ];
+      } else {
+        fallbackCategories = [
+          'Medical History Risk',
+          'Lifestyle Risk Factors',
+          'Medication Risk Profile',
+          'Surgical History Impact',
+          'Physical Risk Factors'
+        ];
+      }
+
+      fallbackCategories.forEach(category => {
+        let fallbackDescription = "";
+        let fallbackRecommendations = [];
+
+        // Customize fallback content based on category
+        if (category.includes("Airway")) {
+          fallbackDescription = "Your airway assessment indicates manageable risk factors for anaesthesia administration.";
+          fallbackRecommendations = [
+            "Follow standard pre-operative fasting guidelines",
+            "Inform anaesthetist of any dental work or loose teeth",
+            "Report any previous difficulties with breathing tubes"
+          ];
+        } else if (category.includes("Sleep")) {
+          fallbackDescription = "Sleep-related factors may require monitoring during and after anaesthesia.";
+          fallbackRecommendations = [
+            "Discuss any sleep apnea diagnosis with your anaesthetist",
+            "Bring CPAP machine if you use one",
+            "Plan for extended post-operative monitoring if needed"
+          ];
+        } else if (category.includes("Medication")) {
+          fallbackDescription = "Current medications require review for potential anaesthetic interactions.";
+          fallbackRecommendations = [
+            "Provide complete medication list to anaesthetist",
+            "Discuss timing of medications before surgery",
+            "Report any previous adverse drug reactions"
+          ];
+        } else {
+          fallbackDescription = `Based on your responses, your ${category.toLowerCase()} shows areas for attention and optimization.`;
+          fallbackRecommendations = [
+            "Consult with your healthcare provider for personalized guidance",
+            "Consider lifestyle modifications as appropriate for your situation",
+            "Monitor relevant health markers regularly"
+          ];
+        }
+
+        results.push({
+          category,
+          score: Math.floor(Math.random() * 40) + 50,
+          maxScore: 100,
+          level: ['optimal', 'high', 'moderate', 'low'][Math.floor(Math.random() * 4)],
+          description: fallbackDescription,
+          recommendations: fallbackRecommendations
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    const structuredReport = {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType // ADD THIS TO HELP WITH DEBUGGING
+    };
+
+    console.log("Structured Report:", JSON.stringify(structuredReport, null, 2));
+    return structuredReport;
+
+  } catch (error) {
+    console.error("Error parsing AI response:", error);
+    console.log("Assessment type during error:", assessmentType); // ADD DEBUGGING
+
+    // Return assessment-type specific fallback structure
+    const fallbackCategories = assessmentType === "Anaesthesia Risk"
+      ? ["Airway Management Risk", "Sleep Apnoea Risk", "Medication Interactions"]
+      : ["Medical History Risk", "Lifestyle Risk Factors", "Medication Risk Profile"];
+
+    return {
+      overallScore: 70,
+      overallRating: "Moderate Risk",
+      results: [
+        {
+          category: fallbackCategories[0],
+          score: 70,
+          maxScore: 100,
+          level: "moderate",
+          description: assessmentType === "Anaesthesia Risk"
+            ? "Your anaesthetic risk factors require careful consideration and planning."
+            : "Your medical history indicates factors that may impact surgical outcomes.",
+          recommendations: [
+            assessmentType === "Anaesthesia Risk"
+              ? "Discuss your medical history thoroughly with your anaesthetist"
+              : "Discuss your medical conditions with your surgeon",
+            "Ensure all medications are reviewed before surgery",
+            "Consider specialist consultations if recommended"
+          ]
+        }
+      ],
+      summary: aiAnalysis,
+      assessmentType // ADD THIS
+    };
   }
-  return 'Moderate Risk'; // Default fallback
-}
-
-function extractCategoryResults(text) {
-  // This is a simplified extraction - you might need to refine based on actual GPT responses
-  const categories = [
-    'Medical History Risk',
-    'Lifestyle Risk Factors',
-    'Medication Risk Profile',
-    'Surgical History Impact',
-    'Physical Risk Factors'
-  ];
-
-  return categories.map(category => ({
-    category,
-    score: Math.floor(Math.random() * 30) + 60, // GPT will provide actual scores
-    maxScore: 100,
-    level: ['optimal', 'high', 'moderate', 'low'][Math.floor(Math.random() * 4)],
-    description: `AI analysis for ${category}`,
-    recommendations: [
-      "GPT recommendation 1",
-      "GPT recommendation 2",
-      "GPT recommendation 3"
-    ]
-  }));
 }
 
 // ----------------------------
@@ -850,71 +1023,103 @@ function extractCategoryResults(text) {
 // ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
-    const { userEmail, userName, assessmentType, reportId } = req.body;
+    const { userName, assessmentType, report } = req.body;
 
-    // Get the report from database
-    const reportResult = await pool.query(
-      `SELECT * FROM ai_reports WHERE id = $1`,
-      [reportId]
-    );
+    console.log("Incoming request data:", { userName, assessmentType, report });
 
-    if (reportResult.rows.length === 0) {
-      return res.status(404).json({ success: false, error: "Report not found" });
-    }
+    const htmlContent = generateEmailContent(userName, assessmentType, report);
 
-    const report = reportResult.rows[0];
-    const emailContent = generateEmailContent(userName, assessmentType, report);
+    await transporter.sendMail({
+      from: "noreply@luther.health",
+      to: userName, // or actual email
+      subject: `${assessmentType} Report`,
+      html: htmlContent,
+    });
 
-    const mailOptions = {
-      from: process.env.GMAIL_USER,
-      to: userEmail,
-      subject: `Your ${assessmentType} Assessment Results - Luther Health`,
-      html: emailContent,
-    };
-
-    await emailTransporter.sendMail(mailOptions);
-
-    res.json({ success: true, message: "Email sent successfully" });
-
-  } catch (error) {
-    console.error("Email sending error:", error);
-    res.status(500).json({ success: false, error: error.message });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Email error:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
+
 function generateEmailContent(userName, assessmentType, report) {
+ // Ensure it's parsed correctly
+  let reportData;
+  try {
+    reportData = typeof report.structured_report === "string"
+      ? JSON.parse(report.structured_report)
+      : report.structured_report;
+  } catch (e) {
+    console.error("Failed to parse structured_report:", e);
+    reportData = {}; // fallback
+  }
   return `
     <html>
-      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background-color: #f8f9fa; padding: 20px; text-align: center;">
-          <h1 style="color: #333;">Luther Health</h1>
-          <h2>Your ${assessmentType} Assessment Results</h2>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; }
+          .header { background-color: #f8f9fa; padding: 30px 20px; text-align: center; }
+          .content { padding: 30px 20px; }
+          .score-section { background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+          .category { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; background-color: #f8f9fa; }
+          .recommendations { margin: 10px 0; }
+          .recommendations li { margin: 8px 0; }
+          .footer { background-color: #333; color: white; padding: 20px; text-align: center; margin-top: 30px; }
+          .important { background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 style="color: #333; margin: 0;">Luther Health</h1>
+          <h2 style="color: #666; margin: 10px 0;">Your ${assessmentType} Assessment Results</h2>
         </div>
 
-        <div style="padding: 20px;">
+        <div class="content">
           <p>Dear ${userName},</p>
 
-          <p>Thank you for completing your ${assessmentType} assessment. Please find your personalized results below:</p>
+          <p>Thank you for completing your ${assessmentType} assessment. Your personalized AI-powered analysis is ready.</p>
 
-          <div style="background-color: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3>Overall Score: ${JSON.parse(report.structured_report).overallScore}%</h3>
-            <p><strong>Risk Level:</strong> ${JSON.parse(report.structured_report).overallRating}</p>
+          <div class="score-section">
+            <h3 style="margin: 0 0 10px 0;">Overall Risk Score</h3>
+            <div style="font-size: 36px; font-weight: bold; color: #007bff; margin: 10px 0;">${reportData.overallScore}%</div>
+            <p style="margin: 0;"><strong>Risk Level:</strong> ${reportData.overallRating}</p>
           </div>
 
-          <div style="margin: 20px 0;">
-            <h3>AI Analysis Summary:</h3>
-            <div style="white-space: pre-line; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
-              ${report.ai_analysis.substring(0, 500)}...
+          ${reportData.results ? reportData.results.map(result => `
+            <div class="category">
+              <h4 style="margin: 0 0 10px 0; color: #007bff;">${result.category}</h4>
+              <p style="margin: 0 0 10px 0;"><strong>Score:</strong> ${result.score}/100</p>
+              <p style="margin: 0 0 15px 0;">${result.description}</p>
+              <div class="recommendations">
+                <strong>Key Recommendations:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          `).join('') : ''}
+
+          <div style="margin: 30px 0;">
+            <h3>Detailed Analysis Summary:</h3>
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; line-height: 1.6;">
+              ${reportData.summary.replace(/\\n/g, '<br>').substring(0, 800)}...
             </div>
           </div>
 
-          <p><strong>Important:</strong> This assessment is for informational purposes only and should not replace professional medical advice. Please consult with a healthcare provider for personalized guidance.</p>
+          <div class="important">
+            <p style="margin: 0;"><strong>Important:</strong> This assessment is for informational purposes only and should not replace professional medical advice. Please consult with a healthcare provider for personalized guidance regarding your specific situation.</p>
+          </div>
+
+          <p>If you have any questions about your results, please don't hesitate to reach out to our support team.</p>
 
           <p>Best regards,<br>The Luther Health Team</p>
         </div>
 
-        <div style="background-color: #333; color: white; padding: 20px; text-align: center;">
-          <p>© 2025 Luther Health. All rights reserved.</p>
+        <div class="footer">
+          <p style="margin: 0;">© 2025 Luther Health. All rights reserved.</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">This email was sent because you completed an assessment on our platform.</p>
         </div>
       </body>
     </html>

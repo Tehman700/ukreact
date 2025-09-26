@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from "../components/PaymentGate";
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -122,63 +121,17 @@ export function ComplicationRiskQuestionsPage() {
 
   const quizWithSubmit: QuizConfig = {
     ...complicationRiskQuiz,
-    informationPageRoute: "complication-risk-checker-information",
-onComplete: async (answers) => {
-  console.log("Complication Risk Assessment completed with answers:", answers);
-  const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+    informationPageRoute: "complication-risk-checker-results",
+        onComplete: async (answers) => {
+          console.log("Complication Risk Assessment completed:", answers);
+          sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+          window.location.hash = "complication-risk-checker-information"; // go to info page
+        },
 
-  try {
-    const convertedAnswers = convertAnswersToLabels(answers);
-
-    // Save assessment to database
-    const assessmentResponse = await fetch("https://luther.health/api/assessments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        assessment_type: "Complication Risk",
-        answers: convertedAnswers,
-      }),
-    });
-
-    // Generate AI report
-    const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        assessmentType: "Complication Risk",
-        answers: convertedAnswers,
-        userInfo: user,
-      }),
-    });
-
-    const reportData = await reportResponse.json();
-
-    if (reportData.success) {
-      // Store report data in sessionStorage for results page
-      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-      sessionStorage.setItem("reportId", reportData.reportId.toString());
-
-      window.location.hash = "complication-risk-checker-information";
-    } else {
-      console.error("Failed to generate AI report:", reportData.error);
-    }
-
-  } catch (err) {
-    console.error("Error in assessment completion:", err);
-  }
-},
     onBack: () => {
       window.location.hash = "complication-risk-checker-learn-more";
     },
   };
 
-  return (
-    <PaymentGate
-      requiredFunnel="complication-risk"
-      redirectUrl="/Health-Audit.html#complication-risk-checkout"
-    >
-      <QuizTemplate config={quizWithSubmit} />
-    </PaymentGate>
-  );
+  return <QuizTemplate config={quizWithSubmit} />;
 }

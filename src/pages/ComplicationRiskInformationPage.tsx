@@ -4,8 +4,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { ArrowRight } from 'lucide-react';
-import { PaymentGate } from "../components/PaymentGate";
-
 
 interface UserInformation {
   firstName: string;
@@ -14,7 +12,6 @@ interface UserInformation {
   phone: string;
   age: string;
 }
-
 
 export function ComplicationRiskInformationPage() {
   const [userInfo, setUserInfo] = useState<UserInformation>({
@@ -45,6 +42,7 @@ export function ComplicationRiskInformationPage() {
 
     setIsSubmitting(true);
     try {
+      // Save user
       const response = await fetch("https://luther.health/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,27 +51,104 @@ export function ComplicationRiskInformationPage() {
           last_name: userInfo.lastName,
           email: userInfo.email,
           phone: userInfo.phone,
-          age_range: userInfo.age
+          age_range: userInfo.age,
         }),
       });
 
       const savedUser = await response.json();
       sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
 
-      window.location.hash = "complication-risk-checker";
+      // Get stored answers
+      const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
+
+      // Generate AI report
+      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentType: "Complication Risk",
+          answers: pendingAnswers,
+          userInfo: savedUser,
+        }),
+      });
+
+      const reportData = await reportResponse.json();
+      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+      sessionStorage.setItem("reportId", reportData.reportId.toString());
+      sessionStorage.setItem("assessmentType", "Complication Risk"); // Add this line
+
+      // Send email automatically
+      await fetch("https://luther.health/api/send-email-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: savedUser.email,
+          userName: `${savedUser.first_name} ${savedUser.last_name}`,
+          assessmentType: "Complication Risk",
+          reportId: reportData.reportId,
+        }),
+      });
+
+      // Redirect to results page
+      window.location.hash = "complication-risk-checker-results";
     } catch (err) {
-      console.error("Error saving complication risk user:", err);
+      console.error("Error saving user info and generating report:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-          <PaymentGate
-      requiredFunnel="complication-risk"
-      redirectUrl="/Health-Audit.html#complication-risk-checkout"
-    >
-    <div className="min-h-screen bg-background py-16">
+    <div className="min-h-screen bg-background py-16 relative">
+      {/* Full-page loading indicator */}
+      {isSubmitting && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0,
+            width: '100%', height: '100%',
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              padding: '30px',
+              borderRadius: '10px',
+              textAlign: 'center',
+              maxWidth: '300px',
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #3498db',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 20px',
+              }}
+            />
+            <h3 style={{ margin: '0 0 10px 0' }}>Generating Your Report</h3>
+            <p style={{ margin: 0, color: '#666' }}>We are analyzing your Symptoms...</p>
+          </div>
+
+          <style>
+            {`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}
+          </style>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 max-w-2xl">
         <div>
           <div className="mb-6">
@@ -152,7 +227,7 @@ export function ComplicationRiskInformationPage() {
                 disabled={!isFormValid() || isSubmitting}
                 className="mx-auto my-[0px] px-[60px] py-[7px]"
               >
-                {isSubmitting ? 'Processing...' : <>Next <ArrowRight className="w-4 h-4 ml-2" /></>}
+                Next <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </form>
@@ -170,7 +245,5 @@ export function ComplicationRiskInformationPage() {
         </div>
       </div>
     </div>
-        </PaymentGate>
-
   );
 }
