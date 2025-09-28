@@ -851,7 +851,7 @@ Physical Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-sente
 DETAILED_SUMMARY:
 [Provide a comprehensive 4-6 paragraph analysis focusing on recovery timeline predictions including: expected healing phases, potential complications or delays, optimization strategies for each recovery stage, realistic timeline expectations, and evidence-based recovery acceleration techniques. Include relevant rehabilitation guidelines and recovery milestones.]
 
-Focus on evidence-based recovery optimization, realistic timeline expectations, healing physiology, and practical recovery strategies. Use medical terminology appropriately while keeping recommendations actionable for patients preparing for surgery.`
+Focus on evidence-based recovery optimization, realistic timeline expectations, healing physiology, and practical recovery strategies. Use medical terminology appropriately while keeping recommendations actionable for patients preparing for surgery.`,
 
     // Add more assessment types here as needed
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
