@@ -23,7 +23,7 @@ interface AIReport {
   results: AssessmentResult[];
   summary: string;
 }
-
+``
 export function RecoverySpeedResultsPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed'>('overview');
   const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['overview']));

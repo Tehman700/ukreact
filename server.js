@@ -853,6 +853,33 @@ DETAILED_SUMMARY:
 
 Focus on evidence-based recovery optimization, realistic timeline expectations, healing physiology, and practical recovery strategies. Use medical terminology appropriately while keeping recommendations actionable for patients preparing for surgery.`,
 
+"Mobility": `You are a specialist mobility and strength assessment AI with expertise in functional capacity evaluation, rehabilitation potential, and post-surgical mobility outcomes. You must provide your response in a specific structured format.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better mobility/strength baseline]
+OVERALL_RATING: [exactly one of: "Independent mobility in 2-3 weeks", "Independent mobility in 3-4 weeks", "Independent mobility in 4-6 weeks", "Independent mobility in 6-8 weeks"]
+
+CATEGORY_ANALYSIS:
+Cardiovascular Endurance: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on walking ability, stamina, and cardiovascular fitness for recovery] | [3 specific recommendations separated by |]
+
+Lower Body Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about leg strength, mobility foundation, and surgical recovery support] | [3 specific recommendations separated by |]
+
+Balance & Stability: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about balance ability, fall risk, and stability during recovery] | [3 specific recommendations separated by |]
+
+Functional Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about grip strength, upper body function, and daily activity capacity] | [3 specific recommendations separated by |]
+
+Independence Level: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current self-sufficiency and potential for independent recovery] | [3 specific recommendations separated by |]
+
+Pain Management: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current pain levels, stiffness, and impact on mobility recovery] | [3 specific recommendations separated by |]
+
+Activity Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current exercise habits and activity level supporting recovery] | [3 specific recommendations separated by |]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 4-6 paragraph analysis focusing on mobility and strength recovery predictions including: functional capacity assessment, mobility milestone expectations, strength preservation strategies, rehabilitation timeline projections, fall risk mitigation, and evidence-based mobility optimization techniques. Include relevant physiotherapy guidelines and functional recovery benchmarks.]
+
+Focus on functional mobility outcomes, strength preservation, realistic timeline expectations, safety considerations, and evidence-based rehabilitation strategies. Use physiotherapy and rehabilitation terminology appropriately while keeping recommendations practical for patients preparing for surgery and recovery.`,
+
     // Add more assessment types here as needed
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
@@ -911,6 +938,16 @@ function parseAIResponse(aiAnalysis, assessmentType) {
     'Physical Baseline'
   ];
     }
+else if (assessmentType === "Mobility") {
+  categories = [
+    'Cardiovascular Endurance',
+    'Lower Body Strength',
+    'Balance & Stability',
+    'Functional Strength',
+    'Independence Level',
+    'Pain Management',
+    'Activity Baseline'
+  ];}
 
       else {
         // ADD FALLBACK - this might be your issue
