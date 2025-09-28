@@ -78,16 +78,19 @@ export function ComplicationRiskInformationPage() {
       sessionStorage.setItem("assessmentType", "Complication Risk"); // Add this line
 
       // Send email automatically
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Complication Risk",
-          reportId: reportData.reportId,
-        }),
-      });
+// WITH THIS:
+// Send email automatically
+        await fetch("https://luther.health/api/send-email-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userEmail: savedUser.email,
+            userName: `${savedUser.first_name} ${savedUser.last_name}`,
+            assessmentType: "Complication Risk",
+            report: reportData.report, // Pass the full report object
+            reportId: reportData.reportId,
+          }),
+        });
 
       // Redirect to results page
       window.location.hash = "complication-risk-checker-results";

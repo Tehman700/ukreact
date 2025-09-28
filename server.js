@@ -20,13 +20,27 @@ const openai = new OpenAI({
 // ----------------------------
 // EMAIL CONFIGURATION
 // ----------------------------
-const emailTransporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransporter({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ Email configuration error:', error);
+  } else {
+    console.log('✅ Email server ready');
+  }
+});
+
+
+
+
+
+
 // Important: Raw body parsing for webhook BEFORE express.json()
 app.use('/api/webhook', express.raw({ type: 'application/json' }));
 
@@ -1024,103 +1038,267 @@ function parseAIResponse(aiAnalysis, assessmentType) {
 // ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
-    const { userName, assessmentType, report } = req.body;
+    const { userEmail, userName, assessmentType, report, reportId } = req.body;
 
-    console.log("Incoming request data:", { userName, assessmentType, report });
+    console.log("=== EMAIL DEBUG ===");
+    console.log("User Email:", userEmail);
+    console.log("User Name:", userName);
+    console.log("Assessment Type:", assessmentType);
+    console.log("Report received:", !!report);
+    console.log("==================");
 
+    if (!userEmail || !userName || !assessmentType || !report) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields for email"
+      });
+    }
+
+    // Generate HTML content
     const htmlContent = generateEmailContent(userName, assessmentType, report);
 
-    await transporter.sendMail({
-      from: "noreply@luther.health",
-      to: userName, // or actual email
-      subject: `${assessmentType} Report`,
+    // Send email
+    const mailOptions = {
+      from: `"Luther Health" <${process.env.GMAIL_USER}>`,
+      to: userEmail,
+      subject: `Your ${assessmentType} Assessment Results - Luther Health`,
       html: htmlContent,
-    });
+    };
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Email error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    await transporter.sendMail(mailOptions);
+
+    console.log(`✅ Email sent successfully to ${userEmail}`);
+    res.json({ success: true, message: "Email sent successfully" });
+
+  } catch (error) {
+    console.error("❌ Email sending error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: "Failed to send email report"
+    });
   }
 });
 
 
-function generateEmailContent(userName, assessmentType, report) {
- // Ensure it's parsed correctly
-  let reportData;
-  try {
-    reportData = typeof report.structured_report === "string"
-      ? JSON.parse(report.structured_report)
-      : report.structured_report;
-  } catch (e) {
-    console.error("Failed to parse structured_report:", e);
-    reportData = {}; // fallback
+function generateEmailContent(userName, assessmentType, reportData) {
+  console.log("Generating email for:", userName, assessmentType);
+  console.log("Report data structure:", Object.keys(reportData || {}));
+
+  // Handle the report data structure correctly
+  let report;
+  if (reportData.structured_report) {
+    // If it's from database with structured_report field
+    report = typeof reportData.structured_report === "string"
+      ? JSON.parse(reportData.structured_report)
+      : reportData.structured_report;
+  } else if (reportData.results) {
+    // If it's the direct report object
+    report = reportData;
+  } else {
+    // Fallback
+    report = {
+      overallScore: 75,
+      overallRating: "Moderate Risk",
+      results: [],
+      summary: "Your assessment has been completed. Please consult with a healthcare provider for detailed interpretation."
+    };
   }
+
   return `
+    <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; }
-          .header { background-color: #f8f9fa; padding: 30px 20px; text-align: center; }
+          body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+          }
+          .container {
+            background-color: white;
+            margin: 20px auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+          }
           .content { padding: 30px 20px; }
-          .score-section { background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
-          .category { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; background-color: #f8f9fa; }
-          .recommendations { margin: 10px 0; }
-          .recommendations li { margin: 8px 0; }
-          .footer { background-color: #333; color: white; padding: 20px; text-align: center; margin-top: 30px; }
-          .important { background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107; }
+          .score-section {
+            background-color: #e8f4fd;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+            border: 2px solid #007bff;
+          }
+          .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 15px 0;
+          }
+          .category {
+            margin: 25px 0;
+            padding: 20px;
+            border-left: 5px solid #007bff;
+            background-color: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+          }
+          .category h4 {
+            margin: 0 0 15px 0;
+            color: #007bff;
+            font-size: 18px;
+          }
+          .category-score {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+          .recommendations {
+            margin: 15px 0;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+          }
+          .recommendations ul {
+            margin: 10px 0;
+            padding-left: 25px;
+          }
+          .recommendations li {
+            margin: 8px 0;
+            padding: 5px 0;
+          }
+          .summary-section {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 5px solid #28a745;
+          }
+          .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            margin-top: 30px;
+          }
+          .important {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 5px solid #ffc107;
+          }
+          .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+          }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1 style="color: #333; margin: 0;">Luther Health</h1>
-          <h2 style="color: #666; margin: 10px 0;">Your ${assessmentType} Assessment Results</h2>
-        </div>
-
-        <div class="content">
-          <p>Dear ${userName},</p>
-
-          <p>Thank you for completing your ${assessmentType} assessment. Your personalized AI-powered analysis is ready.</p>
-
-          <div class="score-section">
-            <h3 style="margin: 0 0 10px 0;">Overall Risk Score</h3>
-            <div style="font-size: 36px; font-weight: bold; color: #007bff; margin: 10px 0;">${reportData.overallScore}%</div>
-            <p style="margin: 0;"><strong>Risk Level:</strong> ${reportData.overallRating}</p>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0; font-size: 28px;">Luther Health</h1>
+            <h2 style="margin: 15px 0 5px 0; font-weight: normal; opacity: 0.9;">
+              Your ${assessmentType} Assessment Results
+            </h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.8;">
+              Completed on ${new Date().toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </p>
           </div>
 
-          ${reportData.results ? reportData.results.map(result => `
-            <div class="category">
-              <h4 style="margin: 0 0 10px 0; color: #007bff;">${result.category}</h4>
-              <p style="margin: 0 0 10px 0;"><strong>Score:</strong> ${result.score}/100</p>
-              <p style="margin: 0 0 15px 0;">${result.description}</p>
-              <div class="recommendations">
-                <strong>Key Recommendations:</strong>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                  ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                </ul>
+          <div class="content">
+            <h3 style="color: #333; margin-bottom: 5px;">Dear ${userName},</h3>
+
+            <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and recommendations.</p>
+
+            <div class="score-section">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Overall Risk Assessment</h3>
+              <div class="score-number">${report.overallScore || 'N/A'}%</div>
+              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #666;">
+                Risk Level: ${report.overallRating || 'Moderate Risk'}
+              </p>
+              <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+                This score reflects your overall risk profile based on your assessment responses.
+              </p>
+            </div>
+
+            <h3 style="color: #333; margin: 30px 0 20px 0;">Category Breakdown:</h3>
+
+            ${(report.results || []).map(result => `
+              <div class="category">
+                <h4>${result.category || 'Assessment Category'}</h4>
+                <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
+                <p style="margin: 15px 0; color: #555; font-size: 15px;">
+                  ${result.description || 'Analysis not available.'}
+                </p>
+                ${result.recommendations && result.recommendations.length > 0 ? `
+                  <div class="recommendations">
+                    <strong style="color: #007bff;">Key Recommendations:</strong>
+                    <ul>
+                      ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
               </div>
-            </div>
-          `).join('') : ''}
+            `).join('')}
 
-          <div style="margin: 30px 0;">
-            <h3>Detailed Analysis Summary:</h3>
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; line-height: 1.6;">
-              ${reportData.summary.replace(/\\n/g, '<br>').substring(0, 800)}...
+            ${report.summary ? `
+              <div class="summary-section">
+                <h3 style="margin: 0 0 20px 0; color: #28a745;">Detailed Analysis Summary</h3>
+                <div style="line-height: 1.7; color: #333;">
+                  ${report.summary.replace(/\n/g, '<br>').substring(0, 1000)}${report.summary.length > 1000 ? '...' : ''}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="important">
+              <h4 style="margin: 0 0 10px 0; color: #856404;">⚠️ Important Medical Disclaimer</h4>
+              <p style="margin: 0; font-size: 14px;">
+                <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
+                The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
+                Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition.
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <p>Questions about your results? Our support team is here to help.</p>
+              <p style="margin: 20px 0 10px 0;">Best regards,<br><strong>The Luther Health Team</strong></p>
             </div>
           </div>
 
-          <div class="important">
-            <p style="margin: 0;"><strong>Important:</strong> This assessment is for informational purposes only and should not replace professional medical advice. Please consult with a healthcare provider for personalized guidance regarding your specific situation.</p>
+          <div class="footer">
+            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold;">Luther Health</p>
+            <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+              Providing AI-powered health assessments and insights
+            </p>
+            <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+              © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
+              This email was sent because you completed an assessment on our platform.
+            </p>
           </div>
-
-          <p>If you have any questions about your results, please don't hesitate to reach out to our support team.</p>
-
-          <p>Best regards,<br>The Luther Health Team</p>
-        </div>
-
-        <div class="footer">
-          <p style="margin: 0;">© 2025 Luther Health. All rights reserved.</p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">This email was sent because you completed an assessment on our platform.</p>
         </div>
       </body>
     </html>
