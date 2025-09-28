@@ -1040,13 +1040,6 @@ app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId } = req.body;
 
-    console.log("=== EMAIL DEBUG ===");
-    console.log("User Email:", userEmail);
-    console.log("User Name:", userName);
-    console.log("Assessment Type:", assessmentType);
-    console.log("Report received:", !!report);
-    console.log("==================");
-
     if (!userEmail || !userName || !assessmentType || !report) {
       return res.status(400).json({
         success: false,
@@ -1105,202 +1098,487 @@ function generateEmailContent(userName, assessmentType, reportData) {
     };
   }
 
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const getBadgeClass = (level) => {
+    switch(level?.toLowerCase()) {
+      case 'optimal': return 'badge-optimal';
+      case 'high': return 'badge-high';
+      case 'moderate': return 'badge-moderate';
+      case 'low': return 'badge-low';
+      default: return 'badge-moderate';
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#28a745'; // Green
+    if (score >= 60) return '#ffc107'; // Yellow
+    if (score >= 40) return '#fd7e14'; // Orange
+    return '#dc3545'; // Red
+  };
+
+  const getIcon = (level) => {
+    switch(level?.toLowerCase()) {
+      case 'optimal': return '✓';
+      case 'high': return '↗';
+      case 'moderate': return '⚠';
+      case 'low': return '⚠';
+      default: return '•';
+    }
+  };
+
   return `
     <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${assessmentType} Results - Luther Health</title>
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            color: #333;
-            line-height: 1.6;
-            background-color: #f9f9f9;
-          }
-          .container {
-            background-color: white;
-            margin: 20px auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-          }
-          .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-          }
-          .content { padding: 30px 20px; }
-          .score-section {
-            background-color: #e8f4fd;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            text-align: center;
-            border: 2px solid #007bff;
-          }
-          .score-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: #007bff;
-            margin: 15px 0;
-          }
-          .category {
-            margin: 25px 0;
-            padding: 20px;
-            border-left: 5px solid #007bff;
-            background-color: #f8f9fa;
-            border-radius: 0 8px 8px 0;
-          }
-          .category h4 {
-            margin: 0 0 15px 0;
-            color: #007bff;
-            font-size: 18px;
-          }
-          .category-score {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-          }
-          .recommendations {
-            margin: 15px 0;
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-          }
-          .recommendations ul {
-            margin: 10px 0;
-            padding-left: 25px;
-          }
-          .recommendations li {
-            margin: 8px 0;
-            padding: 5px 0;
-          }
-          .summary-section {
-            background-color: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            border-left: 5px solid #28a745;
-          }
-          .footer {
-            background-color: #2c3e50;
-            color: white;
-            padding: 25px;
-            text-align: center;
-            margin-top: 30px;
-          }
-          .important {
-            background-color: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 25px 0;
-            border-left: 5px solid #ffc107;
-          }
-          .button {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
-          }
+            /* CSS Variables matching your design system */
+            :root {
+                --font-size: 14px;
+                --background: #ffffff;
+                --foreground: #1a1a1a;
+                --card: #ffffff;
+                --card-foreground: #1a1a1a;
+                --primary: #030213;
+                --primary-foreground: #ffffff;
+                --secondary: #f5f5f5;
+                --secondary-foreground: #030213;
+                --muted: #ececf0;
+                --muted-foreground: #717182;
+                --border: rgba(0, 0, 0, 0.1);
+                --radius: 0.625rem;
+
+                /* Badge colors */
+                --badge-low-bg: #fef2f2;
+                --badge-low-text: #dc2626;
+                --badge-low-border: #fecaca;
+
+                --badge-moderate-bg: #fffbeb;
+                --badge-moderate-text: #d97706;
+                --badge-moderate-border: #fed7aa;
+
+                --badge-high-bg: #f0f9ff;
+                --badge-high-text: #0284c7;
+                --badge-high-border: #bae6fd;
+
+                --badge-optimal-bg: #f0fdf4;
+                --badge-optimal-text: #16a34a;
+                --badge-optimal-border: #bbf7d0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: var(--foreground);
+                background-color: #f9fafb;
+                margin: 0;
+                padding: 0;
+            }
+
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: var(--background);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                margin: 0 0 10px 0;
+                font-size: 28px;
+                font-weight: 600;
+            }
+
+            .header h2 {
+                margin: 0 0 5px 0;
+                font-size: 18px;
+                font-weight: 400;
+                opacity: 0.9;
+            }
+
+            .header .date {
+                margin: 0;
+                font-size: 14px;
+                opacity: 0.8;
+            }
+
+            .content {
+                padding: 30px;
+            }
+
+            .greeting {
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+
+            .greeting h3 {
+                color: var(--primary);
+                margin: 0 0 10px 0;
+                font-size: 18px;
+            }
+
+            /* Overall Score Section */
+            .score-section {
+                background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
+                border: 2px solid #0284c7;
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                margin: 30px 0;
+            }
+
+            .score-number {
+                font-size: 56px;
+                font-weight: bold;
+                color: #0284c7;
+                margin: 15px 0;
+                line-height: 1;
+            }
+
+            .score-rating {
+                display: inline-block;
+                background-color: #0284c7;
+                color: white;
+                padding: 8px 20px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 16px;
+                margin: 15px 0;
+            }
+
+            .score-description {
+                font-size: 14px;
+                color: #4b5563;
+                margin: 10px 0 0 0;
+            }
+
+            /* Category Cards */
+            .categories-section {
+                margin: 35px 0;
+            }
+
+            .categories-title {
+                color: var(--primary);
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 25px 0;
+                border-bottom: 2px solid var(--border);
+                padding-bottom: 10px;
+            }
+
+            .category-card {
+                background-color: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 25px;
+                margin: 20px 0;
+                border-left: 5px solid #0284c7;
+            }
+
+            .category-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .category-title {
+                color: var(--primary);
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+                display: flex;
+                align-items: center;
+            }
+
+            .category-icon {
+                margin-right: 10px;
+                font-size: 18px;
+            }
+
+            .category-score {
+                background-color: var(--primary);
+                color: white;
+                padding: 6px 15px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 14px;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 8px;
+                background-color: #e5e7eb;
+                border-radius: 4px;
+                margin: 15px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--primary) 0%, #4f46e5 100%);
+                border-radius: 4px;
+                transition: width 0.5s ease;
+            }
+
+            .category-description {
+                color: #4b5563;
+                font-size: 15px;
+                line-height: 1.6;
+                margin: 15px 0;
+            }
+
+            .recommendations {
+                background-color: #f8fafc;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 15px 0;
+            }
+
+            .recommendations h4 {
+                color: var(--primary);
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 15px 0;
+            }
+
+            .recommendations ul {
+                margin: 0;
+                padding-left: 20px;
+                list-style: none;
+            }
+
+            .recommendations li {
+                margin: 10px 0;
+                padding-left: 10px;
+                position: relative;
+                color: #374151;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .recommendations li::before {
+                content: '•';
+                color: #0284c7;
+                font-weight: bold;
+                position: absolute;
+                left: -10px;
+            }
+
+            /* Summary Section */
+            .summary-section {
+                background-color: #f8fafc;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 25px;
+                margin: 30px 0;
+                border-left: 5px solid #16a34a;
+            }
+
+            .summary-title {
+                color: #16a34a;
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 20px 0;
+                display: flex;
+                align-items: center;
+            }
+
+            .summary-content {
+                color: #374151;
+                font-size: 15px;
+                line-height: 1.7;
+            }
+
+            /* Important Notice */
+            .important-notice {
+                background-color: #fffbeb;
+                border: 1px solid #fed7aa;
+                border-radius: 8px;
+                padding: 25px;
+                margin: 30px 0;
+                border-left: 5px solid #f59e0b;
+            }
+
+            .important-notice h4 {
+                color: #92400e;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+
+            .important-notice p {
+                color: #78350f;
+                font-size: 14px;
+                line-height: 1.6;
+                margin: 0;
+            }
+
+            /* Footer */
+            .footer {
+                background-color: #1f2937;
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .footer .logo {
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+
+            .footer .tagline {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 0 0 20px 0;
+            }
+
+            .footer .copyright {
+                font-size: 12px;
+                opacity: 0.7;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            /* Responsive */
+            @media (max-width: 600px) {
+                .content {
+                    padding: 20px;
+                }
+
+                .score-number {
+                    font-size: 44px;
+                }
+
+                .category-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+            }
         </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1 style="margin: 0; font-size: 28px;">Luther Health</h1>
-            <h2 style="margin: 15px 0 5px 0; font-weight: normal; opacity: 0.9;">
-              Your ${assessmentType} Assessment Results
-            </h2>
-            <p style="margin: 5px 0 0 0; opacity: 0.8;">
-              Completed on ${new Date().toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </p>
-          </div>
-
-          <div class="content">
-            <h3 style="color: #333; margin-bottom: 5px;">Dear ${userName},</h3>
-
-            <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and recommendations.</p>
-
-            <div class="score-section">
-              <h3 style="margin: 0 0 10px 0; color: #333;">Overall Risk Assessment</h3>
-              <div class="score-number">${report.overallScore || 'N/A'}%</div>
-              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #666;">
-                Risk Level: ${report.overallRating || 'Moderate Risk'}
-              </p>
-              <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
-                This score reflects your overall risk profile based on your assessment responses.
-              </p>
+    </head>
+    <body>
+        <div class="email-container">
+            <!-- Header -->
+            <div class="header">
+                <h1>Luther Health</h1>
+                <h2>Your ${assessmentType} Assessment Results</h2>
+                <p class="date">Completed on ${completionDate}</p>
             </div>
 
-            <h3 style="color: #333; margin: 30px 0 20px 0;">Category Breakdown:</h3>
-
-            ${(report.results || []).map(result => `
-              <div class="category">
-                <h4>${result.category || 'Assessment Category'}</h4>
-                <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
-                <p style="margin: 15px 0; color: #555; font-size: 15px;">
-                  ${result.description || 'Analysis not available.'}
-                </p>
-                ${result.recommendations && result.recommendations.length > 0 ? `
-                  <div class="recommendations">
-                    <strong style="color: #007bff;">Key Recommendations:</strong>
-                    <ul>
-                      ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                    </ul>
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-
-            ${report.summary ? `
-              <div class="summary-section">
-                <h3 style="margin: 0 0 20px 0; color: #28a745;">Detailed Analysis Summary</h3>
-                <div style="line-height: 1.7; color: #333;">
-                  ${report.summary.replace(/\n/g, '<br>').substring(0, 1000)}${report.summary.length > 1000 ? '...' : ''}
+            <!-- Content -->
+            <div class="content">
+                <!-- Greeting -->
+                <div class="greeting">
+                    <h3>Dear ${userName},</h3>
+                    <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and evidence-based recommendations.</p>
                 </div>
-              </div>
-            ` : ''}
 
-            <div class="important">
-              <h4 style="margin: 0 0 10px 0; color: #856404;">⚠️ Important Medical Disclaimer</h4>
-              <p style="margin: 0; font-size: 14px;">
-                <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
-                The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
-                Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition.
-              </p>
+                <!-- Overall Score -->
+                <div class="score-section">
+                    <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 22px;">Overall Assessment Score</h3>
+                    <div class="score-number">${report.overallScore || 'N/A'}%</div>
+                    <div class="score-rating">${report.overallRating || 'Moderate Risk'}</div>
+                    <p class="score-description">
+                        This score reflects your overall risk profile based on your assessment responses and clinical evidence.
+                    </p>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories-section">
+                    <h3 class="categories-title">Category Breakdown & Analysis</h3>
+
+                    ${(report.results || []).map(result => `
+                        <div class="category-card">
+                            <div class="category-header">
+                                <h4 class="category-title">
+                                    <span class="category-icon">${getIcon(result.level)}</span>
+                                    ${result.category || 'Assessment Category'}
+                                </h4>
+                                <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
+                            </div>
+
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%"></div>
+                            </div>
+
+                            <p class="category-description">
+                                ${result.description || 'Analysis not available for this category.'}
+                            </p>
+
+                            ${result.recommendations && result.recommendations.length > 0 ? `
+                                <div class="recommendations">
+                                    <h4>Key Recommendations</h4>
+                                    <ul>
+                                        ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Summary -->
+                ${report.summary ? `
+                    <div class="summary-section">
+                        <h3 class="summary-title">
+                            📊 Detailed Clinical Analysis
+                        </h3>
+                        <div class="summary-content">
+                            ${report.summary.replace(/\n/g, '<br>').substring(0, 1200)}${report.summary.length > 1200 ? '...' : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Important Medical Disclaimer -->
+                <div class="important-notice">
+                    <h4>⚠️ Important Medical Disclaimer</h4>
+                    <p>
+                        <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
+                        The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
+                        Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
+                    </p>
+                </div>
+
+                <!-- Contact Information -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #4b5563; margin: 0 0 20px 0;">
+                        Questions about your results? Our support team is here to help.
+                    </p>
+                    <p style="color: var(--primary); margin: 0; font-size: 16px;">
+                        Best regards,<br>
+                        <strong>The Luther Health Team</strong>
+                    </p>
+                </div>
             </div>
 
-            <div style="text-align: center; margin: 30px 0;">
-              <p>Questions about your results? Our support team is here to help.</p>
-              <p style="margin: 20px 0 10px 0;">Best regards,<br><strong>The Luther Health Team</strong></p>
+            <!-- Footer -->
+            <div class="footer">
+                <div class="logo">Luther Health</div>
+                <div class="tagline">AI-powered health assessments and clinical insights</div>
+                <div class="copyright">
+                    © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
+                    This email was sent because you completed an assessment on our platform.<br>
+                    For support, please contact our team or visit our website.
+                </div>
             </div>
-          </div>
-
-          <div class="footer">
-            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold;">Luther Health</p>
-            <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
-              Providing AI-powered health assessments and insights
-            </p>
-            <p style="margin: 0; font-size: 12px; opacity: 0.7;">
-              © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
-              This email was sent because you completed an assessment on our platform.
-            </p>
-          </div>
         </div>
-      </body>
+    </body>
     </html>
   `;
 }
