@@ -79,16 +79,17 @@ export function AnaesthesiaRiskInformationPage() {
       sessionStorage.setItem("assessmentType", "Anaesthesia Risk");
 
       // Send email automatically
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Anaesthesia Risk",
-          reportId: reportData.reportId,
-        }),
-      });
+        await fetch("https://luther.health/api/send-email-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userEmail: savedUser.email,
+            userName: `${savedUser.first_name} ${savedUser.last_name}`,
+            assessmentType: "Anaesthesia Risk",
+            report: reportData.report, // Pass the full report object
+            reportId: reportData.reportId,
+          }),
+        });
 
       // Redirect to results page
       window.location.hash = "anaesthesia-risk-screener-results";
