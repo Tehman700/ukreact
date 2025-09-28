@@ -1,7 +1,10 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
+// ----------------------
+// Quiz Config
+// ----------------------
 const inflammationRiskQuiz: QuizConfig = {
   title: 'Inflammation Risk Score Assessment',
   questions: [
@@ -155,19 +158,56 @@ const inflammationRiskQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Inflammation Risk Score Assessment completed with answers:', answers);
-    window.location.hash = 'inflammation-risk-score-information';
-  },
-  onBack: () => {
-    window.location.hash = 'inflammation-risk-score-learn-more';
-  },
 };
 
+// ----------------------
+// Convert Answers (like Anaesthesia)
+// ----------------------
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  inflammationRiskQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(", ");
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels =
+        q.options.find((o) => o.id === selectedId)?.label || selectedId || "";
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
+};
+
+// ----------------------
+// Page Component
+// ----------------------
 export function InflammationRiskQuestionsPage() {
-    return (
+  const quizWithSubmit: QuizConfig = {
+    ...inflammationRiskQuiz,
+    informationPageRoute: "inflammation-risk-score-results",
+    onComplete: async (answers) => {
+      console.log("Inflammation Risk Assessment completed:", answers);
+      sessionStorage.setItem(
+        "pendingAnswers",
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
+      window.location.hash = "inflammation-risk-score-information";
+    },
+    onBack: () => {
+      window.location.hash = "inflammation-risk-score-learn-more";
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="inflammation">
-      <QuizTemplate config={inflammationRiskQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }
