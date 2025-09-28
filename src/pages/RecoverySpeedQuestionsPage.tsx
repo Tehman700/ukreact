@@ -1,7 +1,8 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
+// Recovery Speed Quiz Config
 const recoverySpeedQuiz: QuizConfig = {
   title: 'Recovery Speed Predictor',
   questions: [
@@ -110,19 +111,50 @@ const recoverySpeedQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Recovery Speed Assessment completed with answers:', answers);
-    window.location.hash = 'recovery-speed-predictor-information';
-  },
-  onBack: () => {
-    window.location.hash = 'recovery-speed-predictor-learn-more';
-  },
+};
+
+// ✅ Convert answers into readable labels like in AnaesthesiaRiskQuestionsPage
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  recoverySpeedQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(', ');
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
 };
 
 export function RecoverySpeedQuestionsPage() {
+  const quizWithSubmit: QuizConfig = {
+    ...recoverySpeedQuiz,
+    informationPageRoute: 'recovery-speed-predictor-results',
+    onComplete: async (answers) => {
+      console.log('Recovery Speed Assessment completed:', answers);
+      sessionStorage.setItem(
+        'pendingAnswers',
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
+      window.location.hash = 'recovery-speed-predictor-information'; // go to info page
+    },
+    onBack: () => {
+      window.location.hash = 'recovery-speed-predictor-learn-more';
+    },
+  };
+
   return (
     <PaymentGate requiredFunnel="recovery-speed">
-      <QuizTemplate config={recoverySpeedQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

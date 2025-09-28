@@ -776,7 +776,7 @@ Please provide a comprehensive analysis following the exact format specified in 
 });
 
 // Helper function to get system prompt based on assessment type - UPDATED
-// Helper function to get system prompt based on assessment type - UPDATED WITH ANAESTHESIA RISK
+
 function getSystemPrompt(assessmentType) {
   const prompts = {
     "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. You must provide your response in a specific structured format.
@@ -827,6 +827,32 @@ DETAILED_SUMMARY:
 
 Focus on anaesthetic safety, drug interactions, airway management, cardiovascular stability, and recovery optimization. Use anaesthetic terminology appropriately while keeping recommendations understandable for patients.`,
 
+
+    "Recovery Speed": `You are a specialist recovery prediction AI with expertise in post-surgical healing, rehabilitation timelines, and recovery optimization. You must provide your response in a specific structured format.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = faster recovery]
+OVERALL_RATING: [exactly one of: "Fast Recovery", "Good Recovery", "Average Recovery", "Slower Recovery"]
+
+CATEGORY_ANALYSIS:
+Nutritional Foundation: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on protein intake, micronutrients, and healing support] | [3 specific recommendations separated by |]
+
+Mental Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about psychological preparation and coping mechanisms] | [3 specific recommendations separated by |]
+
+Support System Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about available help, family support, and care network] | [3 specific recommendations separated by |]
+
+Home Environment Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about physical home setup and recovery space preparation] | [3 specific recommendations separated by |]
+
+Sleep Quality Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep patterns and their effect on healing] | [3 specific recommendations separated by |]
+
+Physical Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current fitness level and pre-operative conditioning] | [3 specific recommendations separated by |]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 4-6 paragraph analysis focusing on recovery timeline predictions including: expected healing phases, potential complications or delays, optimization strategies for each recovery stage, realistic timeline expectations, and evidence-based recovery acceleration techniques. Include relevant rehabilitation guidelines and recovery milestones.]
+
+Focus on evidence-based recovery optimization, realistic timeline expectations, healing physiology, and practical recovery strategies. Use medical terminology appropriately while keeping recommendations actionable for patients preparing for surgery.`
+
     // Add more assessment types here as needed
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
@@ -873,7 +899,20 @@ function parseAIResponse(aiAnalysis, assessmentType) {
           'Surgical History Impact',
           'Physical Risk Factors'
         ];
-      } else {
+      }
+
+      else if (assessmentType === "Recovery Speed") {
+  categories = [
+    'Nutritional Foundation',
+    'Mental Readiness',
+    'Support System Strength',
+    'Home Environment Readiness',
+    'Sleep Quality Impact',
+    'Physical Baseline'
+  ];
+    }
+
+      else {
         // ADD FALLBACK - this might be your issue
         console.log("Unknown assessment type, using Complication Risk categories");
         categories = [
@@ -926,7 +965,18 @@ function parseAIResponse(aiAnalysis, assessmentType) {
           'Previous Anaesthesia History',
           'Allergy & Reaction Risk'
         ];
-      } else {
+      }
+      else if (assessmentType === "Recovery Speed") {
+          fallbackCategories = [
+            'Nutritional Foundation',
+            'Mental Readiness',
+            'Support System Strength',
+            'Home Environment Readiness',
+            'Sleep Quality Impact',
+            'Physical Baseline'
+          ];
+      }
+      else {
         fallbackCategories = [
           'Medical History Risk',
           'Lifestyle Risk Factors',
