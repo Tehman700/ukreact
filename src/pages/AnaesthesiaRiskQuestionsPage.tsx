@@ -1,5 +1,7 @@
 import React from "react";
 import { QuizTemplate, QuizConfig } from "../components/QuizTemplate";
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+
 
 // Anaesthesia Quiz Config
 const anaesthesiaRiskQuiz: QuizConfig = {
@@ -162,5 +164,9 @@ export function AnaesthesiaRiskQuestionsPage() {
     },
   };
 
-return <QuizTemplate config={quizWithSubmit} />;
+  return (
+    <PaymentGate requiredFunnel="anesthesia">
+      <QuizTemplate config={quizWithSubmit} />
+    </PaymentGate>
+  );
 }

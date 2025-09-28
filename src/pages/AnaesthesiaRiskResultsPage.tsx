@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, Mail, Clock } from 'lucide-react';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -98,7 +99,10 @@ export function AnaesthesiaRiskResultsPage() {
   }
 
   if (!reportData) {
+
     return (
+                                     <PaymentGate requiredFunnel="anesthesia">
+
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -107,10 +111,14 @@ export function AnaesthesiaRiskResultsPage() {
           <Button onClick={handleBackToAssessments}>Back to Assessments</Button>
         </div>
       </div>
+                          </PaymentGate>
+
     );
   }
 
   return (
+                       <PaymentGate requiredFunnel="anesthesia">
+
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
@@ -307,5 +315,7 @@ export function AnaesthesiaRiskResultsPage() {
         </Card>
       </div>
     </div>
+                    </PaymentGate>
+
   );
 }

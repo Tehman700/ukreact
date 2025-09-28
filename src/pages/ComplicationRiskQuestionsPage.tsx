@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
+import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const complicationRiskQuiz: QuizConfig = {
   title: 'Complication Risk Checker',
@@ -132,6 +133,9 @@ export function ComplicationRiskQuestionsPage() {
       window.location.hash = "complication-risk-checker-learn-more";
     },
   };
-
-  return <QuizTemplate config={quizWithSubmit} />;
+  return (
+    <PaymentGate requiredFunnel="complication-risk">
+      <QuizTemplate config={quizWithSubmit} />
+    </PaymentGate>
+  );
 }
