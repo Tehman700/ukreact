@@ -330,8 +330,6 @@ const makePayment = async (funnelType = "complication-risk") => {
                   <p className="font-medium">£{totalPrice.toFixed(2)}</p>
                 </div>
 
-
-
 <Button
   onClick={() => {
     // use the first item’s id or category to decide funnel type

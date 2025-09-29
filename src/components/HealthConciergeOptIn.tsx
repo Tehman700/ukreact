@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { X } from 'lucide-react';
@@ -10,15 +10,39 @@ interface HealthConciergeOptInProps {
 }
 
 export function HealthConciergeOptIn({ isOpen, onClose, onAccept }: HealthConciergeOptInProps) {
-  if (!isOpen) return null;
+  const [shouldShow, setShouldShow] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShouldShow(false);
+      return;
+    }
+
+    // Check if user has paid for any funnel
+    const sessionId = sessionStorage.getItem("stripe_session_id");
+
+    if (!sessionId) {
+      // No payment session, show popup
+      setShouldShow(true);
+      return;
+    }
+
+    // User has a payment session, don't show popup
+    setShouldShow(false);
+    console.log("✅ User has paid for a funnel - hiding Health Concierge popup");
+  }, [isOpen]);
+
+  if (!isOpen || !shouldShow) return null;
 
   const handleClose = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // prevent any default action that could scroll
+    e.preventDefault();
+    e.stopPropagation();
     onClose();
   };
 
   const handleAccept = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     onAccept();
   };
 
@@ -48,13 +72,14 @@ export function HealthConciergeOptIn({ isOpen, onClose, onAccept }: HealthConcie
                 That's why we've made it simple — <strong>and free</strong> — to figure it out.
               </p>
               <p className="text-muted-foreground">
-               Just answer a few quick questions about where you’re at, and we’ll point you toward the right steps, tests, or support for your health journey.
+               Just answer a few quick questions about where you're at, and we'll point you toward the right steps, tests, or support for your health journey.
               </p>
+              <br></br>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button onClick={handleAccept} size="lg" className="px-8">
-                👉 Find Out What’s Right for You
+                👉 Find Out What's Right for You
               </Button>
               <Button variant="ghost" onClick={handleClose} size="lg">
                 Maybe Later

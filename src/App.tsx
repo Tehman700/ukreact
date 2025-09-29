@@ -528,7 +528,8 @@ export default function App() {
         return;
       }
       
-      // Get current basket items for tracking
+      // Get current basket items for
+       tracking
       const currentAssessmentIds = basketItems.map(item => item.assessment.id);
       const currentValue = basketItems.reduce((total, item) => total + item.assessment.price, 0);
       const savings = currentValue - bundle.price;
@@ -568,25 +569,30 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [hasSeenOptIn, analytics]);
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const newPage = hash || 'home';
+useEffect(() => {
+  const handleHashChange = () => {
+    const hash = window.location.hash.replace('#', '');
+    const newPage = hash || 'home';
+
+    // Only update page and scroll if it's actually a different page
+    if (newPage !== currentPage) {
       setCurrentPage(newPage);
-      
+
       // Track page navigation
       analytics.trackPage(newPage, 'Navigation');
 
-      
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    }
+  };
 
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Check initial hash
+  window.addEventListener('hashchange', handleHashChange);
+  handleHashChange(); // Check initial hash
 
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [analytics]);
+  return () => window.removeEventListener('hashchange', handleHashChange);
+}, [currentPage, analytics]);
+
+
 
   // Set current assessment based on the current page
   useEffect(() => {

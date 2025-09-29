@@ -25,13 +25,6 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
   const handleAddToCart = () => {
     if (onAddToCart) {
       onAddToCart(product);
-      toast.success(
-        `Added ${product.isTrialOffer ? 'Surgery Conditioning Protocol - 14 day Trial' : product.name} to cart`,
-        {
-          description: product.isTrialOffer ? '£200.00' : `£${product.price.toFixed(2)}`,
-          duration: 3000,
-        }
-      );
     }
   };
 
