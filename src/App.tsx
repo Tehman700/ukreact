@@ -514,48 +514,43 @@ export default function App() {
   const analytics = useAnalytics();
 
   // Define the upgrade to bundle function early to ensure it's available
-  const handleUpgradeToBundle = useCallback((bundleId: string) => {
-    console.log('handleUpgradeToBundle called with bundleId:', bundleId);
-    
-    try {
-      const bundle = globalAssessments.find(a => a.id === bundleId);
-      console.log('Found bundle:', bundle);
-      
-      if (!bundle) {
-        console.error('Bundle not found with id:', bundleId);
-        alert('Bundle not found. Please try again.');
-        analytics.trackError('bundle_not_found', `Bundle ID ${bundleId} not found`, currentPage);
-        return;
-      }
-      
-      // Get current basket items for
-       tracking
-      const currentAssessmentIds = basketItems.map(item => item.assessment.id);
-      const currentValue = basketItems.reduce((total, item) => total + item.assessment.price, 0);
-      const savings = currentValue - bundle.price;
-      
-      console.log('Clearing current basket and adding bundle');
-      // Clear current basket and add the bundle
-      setBasketItems([{ assessment: bundle, quantity: 1 }]);
-      console.log('setBasketItems called with:', [{ assessment: bundle, quantity: 1 }]);
-      
-      // Track bundle upgrade
-      analytics.trackBundleUpgrade(currentAssessmentIds, bundleId, bundle.name, savings);
-      
-      // Close the basket to show the change
-      setIsBasketOpen(false);
-      
-      // Reopen after a brief delay to show the updated content
-      setTimeout(() => {
-        setIsBasketOpen(true);
-      }, 100);
-      
-    } catch (error) {
-      console.error('Error in handleUpgradeToBundle:', error);
-      analytics.trackError('bundle_upgrade_error', error.message, currentPage);
-      alert('There was an error upgrading to the bundle. Please try again.');
+const handleUpgradeToBundle = useCallback((bundleId: string) => {
+  console.log('handleUpgradeToBundle called with bundleId:', bundleId);
+
+  try {
+    const bundle = globalAssessments.find(a => a.id === bundleId);
+    console.log('Found bundle:', bundle);
+
+    if (!bundle) {
+      console.error('Bundle not found with id:', bundleId);
+      alert('Bundle not found. Please try again.');
+      analytics.trackError('bundle_not_found', `Bundle ID ${bundleId} not found`, currentPage);
+      return;
     }
-  }, [setBasketItems, setIsBasketOpen, basketItems, analytics]);
+
+    // Get current basket items for tracking
+    const currentAssessmentIds = basketItems.map(item => item.assessment.id);
+    const currentValue = basketItems.reduce((total, item) => total + item.assessment.price, 0);
+    const savings = currentValue - bundle.price;
+
+    console.log('Clearing current basket and adding bundle');
+
+    // Track bundle upgrade BEFORE state changes
+    analytics.trackBundleUpgrade(currentAssessmentIds, bundleId, bundle.name, savings);
+
+    // Clear current basket and add the bundle in a single state update
+    setBasketItems([{ assessment: bundle, quantity: 1 }]);
+    console.log('setBasketItems called with:', [{ assessment: bundle, quantity: 1 }]);
+
+    // Don't close/reopen basket - just let it update naturally
+    // The basket will re-render with the new items automatically
+
+  } catch (error) {
+    console.error('Error in handleUpgradeToBundle:', error);
+    analytics.trackError('bundle_upgrade_error', error.message, currentPage);
+    alert('There was an error upgrading to the bundle. Please try again.');
+  }
+}, [basketItems, analytics, currentPage]); // Add dependencies
 
   // Health Concierge opt-in timer
   useEffect(() => {
@@ -713,7 +708,10 @@ useEffect(() => {
       case 'services':
         return <ServicesPage onRequestQuote={handleRequestQuote} />;
       case 'assessments':
-        return <AssessmentsPage />;
+          return <AssessmentsPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'contact':
         return <ContactPage />;
       case 'health-concierge':

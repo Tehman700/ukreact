@@ -2,6 +2,7 @@ import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
+// Daily Energy Quiz Config
 const dailyEnergyQuiz: QuizConfig = {
   title: 'Daily Energy Audit Assessment',
   questions: [
@@ -138,19 +139,50 @@ const dailyEnergyQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Daily Energy Audit Assessment completed with answers:', answers);
-    window.location.hash = 'daily-energy-audit-information';
-  },
-  onBack: () => {
-    window.location.hash = 'daily-energy-audit-learn-more';
-  },
+};
+
+// Convert answers into labels
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  dailyEnergyQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(', ');
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
 };
 
 export function DailyEnergyQuestionsPage() {
-    return (
+  const quizWithSubmit: QuizConfig = {
+    ...dailyEnergyQuiz,
+    informationPageRoute: 'daily-energy-audit-results',
+    onComplete: (answers) => {
+      console.log('Daily Energy Audit Assessment completed:', answers);
+      sessionStorage.setItem(
+        'pendingAnswers',
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
+      window.location.hash = 'daily-energy-audit-information';
+    },
+    onBack: () => {
+      window.location.hash = 'daily-energy-audit-learn-more';
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="energy">
-      return <QuizTemplate config={dailyEnergyQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

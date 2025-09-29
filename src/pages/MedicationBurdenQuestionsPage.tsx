@@ -1,7 +1,8 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
+// Medication Burden Quiz Config
 const medicationBurdenQuiz: QuizConfig = {
   title: 'Medication Burden Calculator Assessment',
   questions: [
@@ -28,7 +29,7 @@ const medicationBurdenQuiz: QuizConfig = {
         { id: 'three-times', label: '3 times daily' },
         { id: 'four-times', label: '4 times daily' },
         { id: 'five-plus', label: '5 or more times daily' },
-        { id: 'no-medications', label: 'I don\'t take medications' },
+        { id: 'no-medications', label: "I don't take medications" },
       ],
     },
     {
@@ -141,19 +142,50 @@ const medicationBurdenQuiz: QuizConfig = {
       ],
     },
   ],
-  onComplete: (answers) => {
-    console.log('Medication Burden Calculator Assessment completed with answers:', answers);
-    window.location.hash = 'medication-burden-calculator-information';
-  },
-  onBack: () => {
-    window.location.hash = 'medication-burden-calculator-learn-more';
-  },
+};
+
+// Convert answers like in Anaesthesia
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  medicationBurdenQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(', ');
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
 };
 
 export function MedicationBurdenQuestionsPage() {
-    return (
+  const quizWithSubmit: QuizConfig = {
+    ...medicationBurdenQuiz,
+    informationPageRoute: 'medication-burden-calculator-results',
+    onComplete: async (answers) => {
+      console.log('Medication Burden Assessment completed:', answers);
+      sessionStorage.setItem(
+        'pendingAnswers',
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
+      window.location.hash = 'medication-burden-calculator-information'; // go to info page
+    },
+    onBack: () => {
+      window.location.hash = 'medication-burden-calculator-learn-more';
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="medication">
-      <QuizTemplate config={medicationBurdenQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

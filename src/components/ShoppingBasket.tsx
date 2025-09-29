@@ -19,6 +19,7 @@ interface ShoppingBasketProps {
   totalPrice: number;
 }
 
+
 // Bundle suggestion logic
 const getBundleSuggestion = (items: BasketItem[]) => {
   const itemIds = items.map(item => item.assessment.id);

@@ -2,72 +2,39 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
+// REMOVE this import - we don't render ShoppingBasket here anymore
+// import { ShoppingBasket } from '../components/ShoppingBasket';
 import { Play, Star, Clock, Shield, TrendingUp, AlertTriangle, Zap, Heart, Activity, Thermometer, Pill, Battery, Users, Apple, Stethoscope } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { getVisibleAssessments, Assessment, BasketItem } from '../App';
 import { useSearchAnalytics, useAnalytics } from '../hooks/useAnalytics';
 
-export function AssessmentsPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+// Add props interface
+interface AssessmentsPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
+
+// Add props to function signature
+export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPageProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Initialize analytics for search and filtering
+
   const { trackFilterApplied } = useSearchAnalytics();
   const { trackAssessmentStart, trackAddToBasket } = useAnalytics();
 
-  const handleUpgradeToBundle = (bundleId: string) => {
-    // Add upgrade to bundle logic here
-    console.log('Upgrading to bundle:', bundleId);
-    // This would need to integrate with the main App's bundle upgrade logic
-  };
-
   const addToBasket = (assessment: Assessment) => {
-    setBasketItems(prev => {
-      const existingItem = prev.find(item => item.assessment.id === assessment.id);
-      if (existingItem) {
-        // Item already exists, don't add duplicate
-        return prev;
-      }
-      
-      // Track add to basket
-      trackAddToBasket(assessment.id, assessment.name, assessment.price);
-      
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
-
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems(prev => prev.filter(item => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems(prev =>
-      prev.map(item =>
-        item.assessment.id === assessmentId
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + (item.assessment.price * item.quantity), 0);
+    trackAddToBasket(assessment.id, assessment.name, assessment.price);
+    onAddToBasket(assessment);
+    onOpenBasket();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!scrollContainerRef.current) return;
-    
+
     const container = scrollContainerRef.current;
     const scrollAmount = container.offsetWidth * 0.8;
-    
+
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -77,7 +44,6 @@ export function AssessmentsPage() {
     }
   };
 
-  // Filter assessments based on active filter
   const filteredAssessments = () => {
     return getVisibleAssessments(activeFilter);
   };
@@ -387,15 +353,6 @@ export function AssessmentsPage() {
           <div className="absolute top-0 right-0 bottom-4 w-8 bg-gradient-to-l from-background/80 to-transparent pointer-events-none" />
         </div>
       </section>
-
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpgradeToBundle={handleUpgradeToBundle}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }
