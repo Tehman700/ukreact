@@ -35,8 +35,8 @@ export function AssessmentsSection() {
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
-          <div>
+        <div className="flex flex-col justify-center items-center mb-8 gap-4">
+          <div className="text-center">
             <h2 
               className="text-2xl mb-2 cursor-pointer hover:text-primary transition-colors"
               onClick={() => window.location.hash = 'assessments'}
@@ -73,7 +73,7 @@ export function AssessmentsSection() {
                 onClick={() => setSelectedCategory('symptoms-control')}
                 className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
               >
-                <span className="hidden sm:inline">Symptoms Control</span>
+                <span className="hidden sm:inline">Symptoms</span>
                 <span className="sm:hidden">Symptoms</span>
               </Button>
               <Button
@@ -82,7 +82,7 @@ export function AssessmentsSection() {
                 onClick={() => setSelectedCategory('surgery-preparation')}
                 className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
               >
-                <span className="hidden sm:inline">Surgery Preparation</span>
+                <span className="hidden sm:inline">Surgery</span>
                 <span className="sm:hidden">Surgery</span>
               </Button>
               <Button

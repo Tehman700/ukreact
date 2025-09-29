@@ -8,7 +8,7 @@ import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const POSITIVE_FEEDBACK_OPTIONS = [
   "Thorough screening",
-  "Eye-opening results", 
+  "Eye-opening results",
   "Potentially life-saving",
   "Comprehensive analysis",
   "Clear recommendations",
@@ -19,26 +19,18 @@ const POSITIVE_FEEDBACK_OPTIONS = [
   "Confidence-building"
 ];
 
-const NEGATIVE_FEEDBACK_OPTIONS = [
-  "Too technical",
-  "Overwhelming information",
-  "Unclear results",
-  "Generic recommendations",
-  "Missing context",
-  "Too brief"
-];
-
 export function AnaesthesiaRiskReviewPage() {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedPositiveFeedback, setSelectedPositiveFeedback] = useState<string[]>([]);
-  const [selectedNegativeFeedback, setSelectedNegativeFeedback] = useState<string[]>([]);
   const [customText, setCustomText] = useState('');
   const [generatedReview, setGeneratedReview] = useState('');
   const [showSubmitButton, setShowSubmitButton] = useState(false);
+  const [ratingError, setRatingError] = useState(false);
 
   const handleStarClick = (starRating: number) => {
     setRating(starRating);
+    setRatingError(false);
   };
 
   const handlePositiveFeedbackToggle = (feedback: string) => {
@@ -49,23 +41,16 @@ export function AnaesthesiaRiskReviewPage() {
     );
   };
 
-  const handleNegativeFeedbackToggle = (feedback: string) => {
-    setSelectedNegativeFeedback(prev =>
-      prev.includes(feedback)
-        ? prev.filter(item => item !== feedback)
-        : [...prev, feedback]
-    );
-  };
-
-  const removeSelectedFeedback = (feedback: string, isPositive: boolean) => {
-    if (isPositive) {
-      setSelectedPositiveFeedback(prev => prev.filter(item => item !== feedback));
-    } else {
-      setSelectedNegativeFeedback(prev => prev.filter(item => item !== feedback));
-    }
+  const removeSelectedFeedback = (feedback: string) => {
+    setSelectedPositiveFeedback(prev => prev.filter(item => item !== feedback));
   };
 
   const generateReview = () => {
+    if (rating === 0) {
+      setRatingError(true);
+      return;
+    }
+
     const getIntroPhrase = (rating: number) => {
       const highRatingIntros = [
         "I recently completed the Anaesthesia Risk Screener and was impressed with the thorough analysis.",
@@ -73,29 +58,29 @@ export function AnaesthesiaRiskReviewPage() {
         "The Anaesthesia Risk Screener exceeded my expectations in identifying potential complications.",
         "As someone preparing for surgery, I found the Anaesthesia Risk Screener incredibly valuable."
       ];
-      
+
       const midRatingIntros = [
         "I completed the Anaesthesia Risk Screener and found it to be a solid resource overall.",
         "The Anaesthesia Risk Screener provided useful insights, though there's room for improvement.",
         "I went through the Anaesthesia Risk Screener and had a generally positive experience.",
         "The Anaesthesia Risk Screener was helpful in certain areas, with mixed results in others."
       ];
-      
+
       const lowRatingIntros = [
         "I tried the Anaesthesia Risk Screener but unfortunately didn't find it as helpful as I'd hoped.",
         "While I appreciate the concept behind the Anaesthesia Risk Screener, the execution fell short for me.",
         "I completed the Anaesthesia Risk Screener but came away with mixed feelings about the experience.",
         "The Anaesthesia Risk Screener has potential, but there are several areas that need improvement."
       ];
-      
+
       if (rating >= 4) return highRatingIntros[Math.floor(Math.random() * highRatingIntros.length)];
       if (rating === 3) return midRatingIntros[Math.floor(Math.random() * midRatingIntros.length)];
       return lowRatingIntros[Math.floor(Math.random() * lowRatingIntros.length)];
     };
 
-    const createFeedbackSentence = (positive: string[], negative: string[]) => {
+    const createFeedbackSentence = (positive: string[]) => {
       const sentences = [];
-      
+
       if (positive.length > 0) {
         const positiveConnectors = [
           "What I particularly appreciated was how",
@@ -103,10 +88,10 @@ export function AnaesthesiaRiskReviewPage() {
           "The analysis was notably",
           "One thing that stood out was how"
         ];
-        
+
         const connector = positiveConnectors[Math.floor(Math.random() * positiveConnectors.length)];
         const traits = positive.slice(0, 3);
-        
+
         if (traits.length === 1) {
           sentences.push(`${connector} ${traits[0].toLowerCase()} it felt throughout the process.`);
         } else if (traits.length === 2) {
@@ -115,44 +100,26 @@ export function AnaesthesiaRiskReviewPage() {
           sentences.push(`${connector} ${traits.slice(0, -1).map(t => t.toLowerCase()).join(', ')}, and ${traits[traits.length - 1].toLowerCase()} it felt.`);
         }
       }
-      
-      if (negative.length > 0) {
-        const negativeConnectors = [
-          "However, I did find some aspects",
-          "That said, there were areas that felt",
-          "On the flip side, certain parts seemed",
-          "I do think some improvements could be made where things felt"
-        ];
-        
-        const connector = negativeConnectors[Math.floor(Math.random() * negativeConnectors.length)];
-        const issues = negative.slice(0, 2);
-        
-        if (issues.length === 1) {
-          sentences.push(`${connector} ${issues[0].toLowerCase()}.`);
-        } else {
-          sentences.push(`${connector} ${issues.join(' and ').toLowerCase()}.`);
-        }
-      }
-      
+
       return sentences;
     };
 
     let review = '';
-    
-    if (rating > 0 || selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0) {
+
+    if (rating > 0 || selectedPositiveFeedback.length > 0) {
       if (rating > 0) {
         review += getIntroPhrase(rating) + ' ';
       }
-      
-      const feedbackSentences = createFeedbackSentence(selectedPositiveFeedback, selectedNegativeFeedback);
+
+      const feedbackSentences = createFeedbackSentence(selectedPositiveFeedback);
       if (feedbackSentences.length > 0) {
         review += feedbackSentences.join(' ') + ' ';
       }
-      
+
       if (customText.trim()) {
         review += customText.trim() + ' ';
       }
-      
+
       if (rating >= 4) {
         const conclusions = [
           "Overall, I'd definitely recommend this to anyone preparing for surgery.",
@@ -178,14 +145,14 @@ export function AnaesthesiaRiskReviewPage() {
         ];
         review += conclusions[Math.floor(Math.random() * conclusions.length)];
       }
-      
+
       if (rating > 0) {
         review += ` ${rating}/5 stars.`;
       }
     }
-    
+
     review = review.replace(/\s+/g, ' ').trim();
-    
+
     setGeneratedReview(review);
     setShowSubmitButton(true);
   };
@@ -194,162 +161,134 @@ export function AnaesthesiaRiskReviewPage() {
     console.log('Submitting review:', {
       rating,
       review: generatedReview,
-      positiveFeedback: selectedPositiveFeedback,
-      negativeFeedback: selectedNegativeFeedback
+      positiveFeedback: selectedPositiveFeedback
     });
-    
+
     window.location.hash = 'surgery-conditioning-protocol-challenge';
   };
 
-  const hasSelectedFeedback = selectedPositiveFeedback.length > 0 || selectedNegativeFeedback.length > 0;
+  const hasSelectedFeedback = selectedPositiveFeedback.length > 0;
 
   return (
-                 <PaymentGate requiredFunnel="anesthesia">
-
-    <div className="min-h-screen bg-background py-16">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="mb-4">Did you find the Anaesthesia Risk Screener helpful?</h1>
-          <p className="text-muted-foreground">Leave a review to help us improve.</p>
-        </div>
-
-        <div className="mb-8 text-center">
-          <h3 className="mb-4">Overall Rating</h3>
-          <div className="flex gap-2 justify-center">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                className="p-1 transition-colors"
-                onClick={() => handleStarClick(star)}
-                onMouseEnter={() => setHoveredRating(star)}
-                onMouseLeave={() => setHoveredRating(0)}
-              >
-                <Star
-                  className={`w-8 h-8 ${
-                    star <= (hoveredRating || rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              </button>
-            ))}
+    <PaymentGate requiredFunnel="anesthesia">
+      <div className="min-h-screen bg-background py-16">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-8">
+            <h1 className="mb-4">Did you find the Anaesthesia Risk Screener helpful?</h1>
+            <p className="text-muted-foreground">Leave a review to help us improve.</p>
           </div>
-        </div>
 
-        <div className="mb-8">
-          <h3 className="mb-4">Positive Feedback</h3>
-          <div className="flex flex-wrap gap-2">
-            {POSITIVE_FEEDBACK_OPTIONS.map((feedback, index) => (
-              <Badge
-                key={index}
-                variant={selectedPositiveFeedback.includes(feedback) ? "default" : "secondary"}
-                className="cursor-pointer px-3 py-2 text-sm"
-                onClick={() => handlePositiveFeedbackToggle(feedback)}
-              >
-                {feedback}
-              </Badge>
-            ))}
+          <div className="mb-8 text-center">
+            <h3 className="mb-4">Overall Rating *</h3>
+            <div className="flex gap-2 justify-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  className="p-1 transition-colors"
+                  onClick={() => handleStarClick(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                >
+                  <Star
+                    className={`w-8 h-8 ${
+                      star <= (hoveredRating || rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            {ratingError && (
+              <p className="text-red-500 text-sm mt-2">Please select a star rating before generating your review</p>
+            )}
           </div>
-        </div>
 
-        <div className="mb-8">
-          <h3 className="mb-4">Negative Feedback</h3>
-          <div className="flex flex-wrap gap-2">
-            {NEGATIVE_FEEDBACK_OPTIONS.map((feedback, index) => (
-              <Badge
-                key={index}
-                variant={selectedNegativeFeedback.includes(feedback) ? "default" : "secondary"}
-                className="cursor-pointer px-3 py-2 text-sm"
-                onClick={() => handleNegativeFeedbackToggle(feedback)}
-              >
-                {feedback}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {hasSelectedFeedback && (
           <div className="mb-8">
-            <h3 className="mb-4">Selected Feedback</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                {selectedPositiveFeedback.map((feedback, index) => (
-                  <div key={index} className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                    <span className="text-sm">{feedback}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeSelectedFeedback(feedback, true)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-                {selectedNegativeFeedback.map((feedback, index) => (
-                  <div key={index} className="flex items-center justify-between bg-red-50 p-3 rounded-lg">
-                    <span className="text-sm">{feedback}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeSelectedFeedback(feedback, false)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-medium">Add your own thoughts:</label>
-                <Textarea
-                  placeholder="Add any additional feedback..."
-                  value={customText}
-                  onChange={(e) => setCustomText(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              {!generatedReview && (
-                <Button onClick={generateReview} className="w-full px-[14px] py-[10px]">
-                  Generate Review
-                </Button>
-              )}
+            <h3 className="mb-4">Positive Feedback</h3>
+            <div className="flex flex-wrap gap-2">
+              {POSITIVE_FEEDBACK_OPTIONS.map((feedback, index) => (
+                <Badge
+                  key={index}
+                  variant={selectedPositiveFeedback.includes(feedback) ? "default" : "secondary"}
+                  className="cursor-pointer px-3 py-2 text-sm"
+                  onClick={() => handlePositiveFeedbackToggle(feedback)}
+                >
+                  {feedback}
+                </Badge>
+              ))}
             </div>
           </div>
-        )}
 
-        {generatedReview && (
-          <div className="mb-8">
-            <h3 className="mb-4">Your Review</h3>
-            <div>
-              <Textarea
-                value={generatedReview}
-                onChange={(e) => setGeneratedReview(e.target.value)}
-                rows={4}
-                className="mb-4"
-              />
-              <div className="flex flex-col sm:flex-row gap-3">
-                {showSubmitButton && (
-                  <Button onClick={handleSubmitReview} className="flex-1 py-[20px] px-[21px] py-[10px]" size="lg">
-                    Submit Review
+          {hasSelectedFeedback && (
+            <div className="mb-8">
+              <h3 className="mb-4">Selected Feedback</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  {selectedPositiveFeedback.map((feedback, index) => (
+                    <div key={index} className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                      <span className="text-sm">{feedback}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSelectedFeedback(feedback)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Add your own thoughts:</label>
+                  <Textarea
+                    placeholder="Add any additional feedback..."
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                {!generatedReview && (
+                  <Button onClick={generateReview} className="w-full px-[14px] py-[10px]">
+                    Generate Review
                   </Button>
                 )}
-                <Button 
-                  onClick={generateReview} 
-                  variant="outline" 
-                  className="flex-1 sm:flex-none px-[14px] py-[10px]" 
-                  size="lg"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Regenerate
-                </Button>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-            </PaymentGate>
+          )}
 
+          {generatedReview && (
+            <div className="mb-8">
+              <h3 className="mb-4">Your Review</h3>
+              <div>
+                <Textarea
+                  value={generatedReview}
+                  onChange={(e) => setGeneratedReview(e.target.value)}
+                  rows={4}
+                  className="mb-4"
+                />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {showSubmitButton && (
+                    <Button onClick={handleSubmitReview} className="flex-1 py-[20px] px-[21px] py-[10px]" size="lg">
+                      Submit Review
+                    </Button>
+                  )}
+                  <Button
+                    onClick={generateReview}
+                    variant="outline"
+                    className="flex-1 sm:flex-none px-[14px] py-[10px]"
+                    size="lg"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Regenerate
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </PaymentGate>
   );
 }

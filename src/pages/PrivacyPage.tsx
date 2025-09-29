@@ -5,10 +5,10 @@ import { Shield, Mail, Database, Lock } from 'lucide-react';
 export function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
+  <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="mb-8 text-center">
           <h1 className="mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground">
+      <p className="text-muted-foreground max-w-3xl mx-auto">
             At Luther Health, your privacy is our priority. This policy outlines how we collect, use, share, and protect your personal information, whether you interact with us online or offline. Our practices comply with GDPR, HIPAA, and other relevant regulations.
           </p>
         </div>

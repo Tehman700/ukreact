@@ -88,13 +88,25 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
       container.scrollBy({ left: cardWidth, behavior: 'smooth' });
     }
   };
-
+{/* Header Section */}
+      <section className="bg-gradient-to-r from-gray-50 to-gray-100">
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h1 className="tracking-tight">
+              Health Assessments
+            </h1>
+            <p className="text-muted-foreground">
+             Our health assessments are designed by medical experts using real clinical data and the latest research to spot risks early, personalise your care, and give you a clear, actionable plan—all in ~ 10 minutes, fully remote, and built to help you stay ahead of your health.
+            </p>
+          </div>
+        </div>
+      </section>
   return (
     <section className="py-16 bg-background pt-[0px] pr-[0px] pb-[56px] pl-[0px]">
       <div className="container mx-auto px-4 pt-[58px] pr-[14px] pb-[0px] pl-[14px]">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
-          <div>
-            <h2 
+<div className="flex flex-col justify-center items-center mb-8 gap-4">
+          <div className="text-center">
+            <h2
               className="text-2xl mb-2 cursor-pointer hover:text-primary transition-colors"
               onClick={() => window.location.hash = 'services'}
             >
@@ -102,8 +114,6 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
             </h2>
             <p className="text-muted-foreground">Discover our selection of premium services</p>
           </div>
-          
-
         </div>
 
         {/* Category Filter */}
@@ -145,11 +155,11 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
         {/* Products Peek Carousel */}
         <div className="relative">
           {/* Carousel Container */}
-          <div 
+          <div
             ref={scrollContainerRef}
             className="overflow-x-auto overscroll-x-contain scrollbar-hide focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
-            style={{ 
-              scrollbarWidth: 'none', 
+            style={{
+              scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               scrollSnapType: 'x mandatory'
             }}
@@ -158,7 +168,7 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
             aria-label="Healthcare services carousel. Use arrow keys to scroll."
             onKeyDown={handleKeyDown}
           >
-            <div 
+            <div
               className="flex gap-4 pb-4 pl-4 pr-16"
               role="list"
               aria-label="Healthcare services carousel"
@@ -181,7 +191,7 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
               <div className="w-4 flex-shrink-0" />
             </div>
           </div>
-          
+
           {/* Optional subtle right-edge gradient for "more content" cue */}
           <div className="absolute top-0 right-0 bottom-4 w-8 bg-gradient-to-l from-background/80 to-transparent pointer-events-none" />
         </div>

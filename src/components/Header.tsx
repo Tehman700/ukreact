@@ -206,15 +206,9 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
                     <a href="#privacy" onClick={() => window.location.hash = 'privacy'} className="text-sm hover:text-primary transition-colors pl-2">Privacy Policy</a>
                     <a href="#cookies" onClick={() => window.location.hash = 'cookies'} className="text-sm hover:text-primary transition-colors pl-2">Cookie Policy</a>
                     <a href="#complaints" onClick={() => window.location.hash = 'complaints'} className="text-sm hover:text-primary transition-colors pl-2">Complaints Procedure</a>
-                    <a href="#cqc" onClick={() => window.location.hash = 'cqc'} className="text-sm hover:text-primary transition-colors pl-2">CQC Information</a>
-                    
-                    <h4 className="font-medium text-primary pt-4">Development Tools</h4>
-                    {onDesignSystemClick && (
-                      <button onClick={onDesignSystemClick} className="text-sm hover:text-primary transition-colors pl-2 text-left">
-                        Design System
-                      </button>
-                    )}
-                    <a href="#admin-login" onClick={() => window.location.hash = 'admin-login'} className="text-sm hover:text-primary transition-colors pl-2">Admin Portal (Testing)</a>
+
+                    <h4 className="font-medium text-primary pt-4">Admin Panel</h4>
+                    <a href="#admin-login" onClick={() => window.location.hash = 'admin-login'} className="text-sm hover:text-primary transition-colors pl-2">Admin Portal</a>
                   </nav>
                 </ScrollArea>
               </SheetContent>

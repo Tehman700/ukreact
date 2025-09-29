@@ -292,7 +292,7 @@ export function InflammationRiskResultsPage() {
         {/* Continue Button */}
         {allTabsViewed && (
           <div className="flex justify-center">
-            <Button onClick={() => window.location.hash = 'anaesthesia-risk-screener-feedback'} size="lg" className="px-8">
+            <Button onClick={() => window.location.hash = 'inflammation-risk-score-feedback'} size="lg" className="px-8">
               Continue
             </Button>
           </div>

@@ -7,10 +7,10 @@ import { Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
 export function ComplaintsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
+  <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="mb-8 text-center">
           <h1 className="mb-4">Complaints Procedure</h1>
-          <p className="text-muted-foreground">
+      <p className="text-muted-foreground max-w-3xl mx-auto">
             Luther Medical Ltd, trading as Luther Health, is dedicated to delivering the highest standards of care and customer service to all Patients. In the event that our service falls short of expectations, we are committed to attentively addressing and resolving complaints promptly. We acknowledge any mistakes made and take corrective actions to enhance our service. The complete complaints policy is provided to Patients, their affected relatives, or representatives when concerns are initially raised regarding any aspect of the service received.
           </p>
         </div>

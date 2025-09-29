@@ -4,10 +4,10 @@ import { Card, CardContent } from '../components/ui/card';
 export function TermsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-8 text-center">
           <h1 className="mb-4">Terms & Conditions</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground max-w-3xl mx-auto">
             By continuing to browse and use this website, you agree to comply with and be bound by the following terms and conditions of use, which together with our privacy policy govern Luther Medical Ltd's relationship with you, trading as Luther Health, in relation to this website. If you refuse to be bound by any part of these terms and conditions, please do not use our website.
           </p>
         </div>

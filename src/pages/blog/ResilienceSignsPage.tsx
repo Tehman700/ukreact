@@ -53,9 +53,8 @@ export function ResilienceSignsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Blog
           </Button>
-          
-          <div className="max-w-3xl">
-            <div className="flex items-center space-x-4 mb-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="flex items-center justify-center space-x-4 mb-4">
               <Badge variant="outline">Mental Resilience</Badge>
               <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />

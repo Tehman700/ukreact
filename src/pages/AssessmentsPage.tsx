@@ -84,9 +84,9 @@ export function AssessmentsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Section */}
+{/* Header Section */}
       <section className="bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4 py-16 md:py-24 mt-[0px] mr-[0px] mb-[20px] ml-[0px]">
+        <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h1 className="tracking-tight">
               Health Assessments
@@ -133,7 +133,7 @@ export function AssessmentsPage() {
               }}
               className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-initial"
             >
-              <span className="hidden sm:inline">Symptoms Control</span>
+              <span className="hidden sm:inline">Symptoms</span>
               <span className="sm:hidden">Symptoms</span>
             </Button>
             <Button
@@ -145,7 +145,7 @@ export function AssessmentsPage() {
               }}
               className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-initial"
             >
-              <span className="hidden sm:inline">Surgery Preparation</span>
+              <span className="hidden sm:inline">Surgery</span>
               <span className="sm:hidden">Surgery</span>
             </Button>
             <Button

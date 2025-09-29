@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, Phone, Clock } from 'lucide-react';
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,25 +14,6 @@ export function ContactPage() {
     service: '',
     message: ''
   });
-
-  // Check if user came from a service request
-  useEffect(() => {
-    const requestedService = sessionStorage.getItem('requestedService');
-    if (requestedService) {
-      try {
-        const serviceData = JSON.parse(requestedService);
-        setFormData(prev => ({
-          ...prev,
-          service: serviceData.category.toLowerCase().replace(' ', '-'),
-          message: `I'm interested in learning more about the ${serviceData.name} (£${serviceData.price}). Please contact me to discuss how this service can help with my health goals.`
-        }));
-        // Clear the session storage after using it
-        sessionStorage.removeItem('requestedService');
-      } catch (error) {
-        console.error('Error parsing requested service data:', error);
-      }
-    }
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,10 +88,10 @@ export function ContactPage() {
 
       {/* Contact Form & Info */}
       <section className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        <div className="max-w-2xl mx-auto">
           {/* Contact Form */}
           <div>
-            <h2 className="mb-6">Send us a message</h2>
+            <h2 className="mb-6 text-center">Send us a message</h2>
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -133,7 +114,7 @@ export function ContactPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="phone" className="block mb-2">Phone Number</label>
@@ -176,11 +157,6 @@ export function ContactPage() {
                 Send Message
               </Button>
             </form>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-8">
-
           </div>
         </div>
       </section>

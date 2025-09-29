@@ -291,7 +291,7 @@ export function MobilityStrengthResultsPage() {
         {/* Continue Button */}
         {allTabsViewed && (
           <div className="flex justify-center">
-            <Button onClick={() => window.location.hash = 'anaesthesia-risk-screener-feedback'} size="lg" className="px-8">
+            <Button onClick={() => window.location.hash = 'mobility-strength-score-feedback'} size="lg" className="px-8">
               Continue
             </Button>
           </div>

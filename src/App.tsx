@@ -20,7 +20,6 @@ import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { CookiePage } from './pages/CookiePage';
 import { ComplaintsPage } from './pages/ComplaintsPage';
-import { CQCPage } from './pages/CQCPage';
 import { QuizPage } from './pages/QuizPage';
 import { LoadingPage } from './pages/LoadingPage';
 import { QuizResultsPage } from './pages/QuizResultsPage';
@@ -577,6 +576,7 @@ export default function App() {
       
       // Track page navigation
       analytics.trackPage(newPage, 'Navigation');
+
       
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -728,8 +728,6 @@ export default function App() {
         return <CookiePage />;
       case 'complaints':
         return <ComplaintsPage />;
-      case 'cqc':
-        return <CQCPage />;
       case 'quiz':
         return <QuizPage />;
       case 'surgery-readiness-assessment-learn-more':

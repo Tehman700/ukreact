@@ -9,27 +9,40 @@ export function Footer() {
     <footer className="bg-muted/30 border-t">
       <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {/* Company Info */}
-          <div className="space-y-3 sm:space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
-            <h3 className="font-medium">Luther Health</h3>
-            <p className="text-sm text-muted-foreground">
-              Performance healthcare for men who demand excellence. Remote consultations, evidence-based protocols, results-driven care.
-            </p>
-            <div className="flex space-x-2 sm:space-x-4">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Facebook className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Instagram className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Twitter className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Youtube className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </div>
-          </div>
+{/* Company Info */}
+<div className="space-y-3 sm:space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
+  <h3 className="font-medium">Luther Health</h3>
+  <p className="text-sm text-muted-foreground">
+    Performance healthcare for men who demand excellence. Remote consultations, evidence-based protocols, results-driven care.
+  </p>
+  <div className="flex space-x-2 sm:space-x-4">
+    <a
+      href="https://www.facebook.com/profile.php?id=61563408115396#"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Facebook className="h-3 w-3 sm:h-4 sm:w-4" />
+      </Button>
+    </a>
+    <a
+      href="https://www.instagram.com/luther_health/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Instagram className="h-3 w-3 sm:h-4 sm:w-4" />
+      </Button>
+    </a>
+    <Button variant="ghost" size="icon" className="h-8 w-8">
+      <Twitter className="h-3 w-3 sm:h-4 sm:w-4" />
+    </Button>
+    <Button variant="ghost" size="icon" className="h-8 w-8">
+      <Youtube className="h-3 w-3 sm:h-4 sm:w-4" />
+    </Button>
+  </div>
+</div>
+
 
           {/* Services */}
           <div className="space-y-3 sm:space-y-4">
