@@ -84,17 +84,22 @@ export function FunctionalFitnessAgeUpsellPage() {
       {/* Hero Section (templated) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
-          {/* Image */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-none">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Functional Fitness Age Report"
-                className="w-full h-auto object-cover rounded-lg mt-[26px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
+{/* Image */}
+<div className="relative order-1 lg:order-2">
+  <div className="relative aspect-[3/4] max-w-2xl mx-auto lg:max-w-xl">
+    <ImageWithFallback
+      src={heroImage}
+      alt="Functional Fitness Age Report"
+      width={1600}
+      height={2000}
+      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 900px"
+      quality={90}
+      priority
+      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[900px]"
+    />
+    <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+  </div>
+</div>
 
           {/* Text */}
           <div className="space-y-6 order-2 lg:order-1">
