@@ -91,11 +91,10 @@ export function AnaesthesiaRiskInformationPage() {
         }),
       });
 
-      // Redirect to results page
+      // Only navigate after everything is complete
       window.location.hash = "anaesthesia-risk-screener-results";
     } catch (err) {
       console.error("Error saving user info and generating report:", err);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -105,9 +104,6 @@ export function AnaesthesiaRiskInformationPage() {
     return (
       <LoadingPage
         assessmentTitle="Anaesthesia Risk Assessment"
-        onComplete={() => {
-          window.location.hash = "anaesthesia-risk-screener-results";
-        }}
       />
     );
   }
