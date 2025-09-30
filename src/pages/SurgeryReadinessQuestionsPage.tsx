@@ -1,7 +1,7 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { useAssessmentAnalytics } from '../hooks/useAnalytics';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 const surgeryReadinessQuiz: QuizConfig = {
   title: 'Surgery Readiness Assessment',
@@ -90,6 +90,31 @@ const surgeryReadinessQuiz: QuizConfig = {
   ],
 };
 
+// Helper function to convert answer IDs to labels
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const convertedAnswers: Array<{ question: string; answer: string }> = [];
+
+  surgeryReadinessQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(", ");
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels =
+        q.options.find((o) => o.id === selectedId)?.label || selectedId || "";
+    }
+
+    convertedAnswers.push({ question: q.question, answer: labels });
+  });
+
+  return convertedAnswers;
+};
+
 export function SurgeryReadinessQuestionsPage() {
   // Initialize analytics for this specific assessment
   const { startAssessment, trackProgress, completeAssessment } = useAssessmentAnalytics(
@@ -98,73 +123,31 @@ export function SurgeryReadinessQuestionsPage() {
     37.00
   );
 
-  // Helper function to convert answer IDs to labels
-  const convertAnswersToLabels = (answers: Record<string, any>) => {
-    const convertedAnswers: Array<{ question: string; answer: string }> = [];
-
-    Object.entries(answers).forEach(([questionId, answerValue]) => {
-      // Find the question by ID
-      const question = surgeryReadinessQuiz.questions.find(q => q.id === questionId);
-      if (!question) return;
-
-      let answerLabels: string;
-
-      if (question.multiSelect && Array.isArray(answerValue)) {
-        // Handle multi-select questions
-        const labels = answerValue.map(answerId => {
-          const option = question.options.find(opt => opt.id === answerId);
-          return option ? option.label : answerId;
-        });
-        answerLabels = labels.join(', ');
-      } else {
-        // Handle single-select questions
-        const selectedAnswerId = Array.isArray(answerValue) ? answerValue[0] : answerValue;
-        const option = question.options.find(opt => opt.id === selectedAnswerId);
-        answerLabels = option ? option.label : selectedAnswerId || '';
-      }
-
-      convertedAnswers.push({
-        question: question.question,
-        answer: answerLabels
-      });
-    });
-
-    return convertedAnswers;
-  };
-
-  // Enhanced quiz configuration with analytics tracking
+  // Enhanced quiz configuration with sessionStorage mechanism
   const surgeryReadinessQuizWithAnalytics: QuizConfig = {
     ...surgeryReadinessQuiz,
     informationPageRoute: 'surgery-readiness-assessment-information',
     onComplete: async (answers) => {
-      console.log("Surgery Readiness Assessment completed with answers:", answers);
+      console.log("Surgery Readiness Assessment completed:", answers);
 
-      const user = JSON.parse(sessionStorage.getItem("currentUser") || "{}");
+      // Store converted answers in sessionStorage (same as anaesthesia flow)
+      sessionStorage.setItem(
+        "pendingAnswers",
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
 
-      try {
-        // Convert answers to use question text and answer labels
-        const convertedAnswers = convertAnswersToLabels(answers);
+      // Complete analytics tracking
+      completeAssessment();
 
-        await fetch("https://luther.health/api/assessments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            assessment_type: "Surgery Readiness",
-            answers: convertedAnswers,
-          }),
-        });
-
-        // ✅ Analytics + navigation
-        completeAssessment();
-        window.location.hash = "surgery-readiness-assessment-information";
-      } catch (err) {
-        console.error("Error saving assessment:", err);
-      }
+      // Navigate to information page
+      window.location.hash = "surgery-readiness-assessment-information";
     },
     onQuestionComplete: (questionIndex, totalQuestions) => {
       const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
       trackProgress(`question_${questionIndex + 1}`, completionPercentage);
+    },
+    onBack: () => {
+      window.location.hash = "surgery-readiness-assessment-learn-more";
     },
   };
 
@@ -172,6 +155,7 @@ export function SurgeryReadinessQuestionsPage() {
   React.useEffect(() => {
     startAssessment();
   }, [startAssessment]);
+
   return (
     <PaymentGate requiredFunnel="surgery-readiness">
       <QuizTemplate config={surgeryReadinessQuizWithAnalytics} />

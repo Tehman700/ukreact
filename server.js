@@ -850,6 +850,29 @@ DETAILED_SUMMARY:
 
 Focus on anaesthetic safety, drug interactions, airway management, cardiovascular stability, and recovery optimization. Use anaesthetic terminology appropriately while keeping recommendations understandable for patients.`,
 
+"Surgery Readiness": `You are a specialist surgical preparation assessment AI with expertise in preoperative optimization, perioperative medicine, and evidence-based surgical readiness evaluation. You must provide your response in a specific structured format.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better surgical readiness]
+OVERALL_RATING: [exactly one of: "Excellent Readiness", "Good Readiness", "Fair Readiness", "Poor Readiness"]
+
+CATEGORY_ANALYSIS:
+Physical Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on exercise capacity, cardiovascular fitness, and physical conditioning for surgery] | [3 specific recommendations separated by |]
+
+Metabolic Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about blood sugar control, metabolic stability, and optimization opportunities] | [3 specific recommendations separated by |]
+
+Recovery Potential: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep quality, stress management, and factors supporting post-surgical healing] | [3 specific recommendations separated by |]
+
+Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about modifiable risk factors including smoking, medications, and health conditions] | [3 specific recommendations separated by |]
+
+Preparation Status: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current preparation efforts, knowledge, and readiness planning] | [3 specific recommendations separated by |]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 4-6 paragraph analysis focusing on surgical readiness assessment including: preoperative optimization opportunities, evidence-based preparation strategies, timeline recommendations for maximum benefit, risk factor modification priorities, Enhanced Recovery After Surgery (ERAS) principles, and realistic expectations for surgical outcomes. Include relevant NHS, NICE, and Royal College of Surgeons guidelines for perioperative care.]
+
+Focus on evidence-based preoperative optimization, modifiable risk factors, realistic preparation timelines, and practical strategies for improving surgical outcomes. Use perioperative medicine terminology appropriately while keeping recommendations actionable for patients preparing for elective surgery. Emphasize the importance of comprehensive preparation and working collaboratively with healthcare teams.`,
+
 
     "Recovery Speed": `You are a specialist recovery prediction AI with expertise in post-surgical healing, rehabilitation timelines, and recovery optimization. You must provide your response in a specific structured format.
 
@@ -1042,6 +1065,16 @@ function parseAIResponse(aiAnalysis, assessmentType) {
     'Side Effect Burden',
     'Medication Management'
   ];}
+  else if (assessmentType === "Surgery Readiness") {
+  categories = [
+    'Physical Readiness',
+    'Metabolic Health',
+    'Recovery Potential',
+    'Risk Factors',
+    'Preparation Status'
+  ];}
+
+
       else if (assessmentType === "Symptom") {
   categories = [
     'Pain Assessment',
