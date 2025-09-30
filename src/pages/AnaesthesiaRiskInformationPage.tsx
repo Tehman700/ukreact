@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight } from 'lucide-react';
 
-// Import the LoadingPage component
-import { LoadingPage } from './LoadingPage';
+const AUTHORITY_STATEMENTS = [
+  "Checking NICE guidelines",
+  "Reviewing NHS clinical pathways",
+  "Consulting Royal College recommendations",
+  "Cross-checking Cochrane systematic reviews",
+  "Consulting British Medical Association statements",
+  "Reviewing Royal College of Surgeons protocols",
+  "Reviewing British Cardiovascular Society updates",
+  "Cross-checking Orthopaedic Society recommendations",
+  "Reviewing Royal College of Anaesthetists best practices",
+  "Verifying surgical safety checklists",
+  "Reviewing patient-reported outcome measures",
+  "Cross-checking long-term follow-up data",
+  "Running data quality assurance checks",
+  "Consulting national audit datasets",
+  "Reviewing clinical trial registries",
+  "Running population health analytics"
+];
 
 interface UserInformation {
   firstName: string;
@@ -25,7 +42,8 @@ export function AnaesthesiaRiskInformationPage() {
     age: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showLoadingPage, setShowLoadingPage] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStatementIndex, setCurrentStatementIndex] = useState(0);
 
   const handleInputChange = (field: keyof UserInformation, value: string) => {
     setUserInfo(prev => ({
@@ -41,13 +59,56 @@ export function AnaesthesiaRiskInformationPage() {
            userInfo.age !== '';
   };
 
+  // Progress animation effect
+  useEffect(() => {
+    if (!isSubmitting) {
+      setProgress(0);
+      setCurrentStatementIndex(0);
+      return;
+    }
+
+    const progressSteps = [
+      { progress: 8, delay: 300, statement: 0 },
+      { progress: 15, delay: 800, statement: 1 },
+      { progress: 23, delay: 600, statement: 2 },
+      { progress: 35, delay: 900, statement: 3 },
+      { progress: 42, delay: 500, statement: 4 },
+      { progress: 58, delay: 700, statement: 5 },
+      { progress: 67, delay: 800, statement: 6 },
+      { progress: 74, delay: 600, statement: 7 },
+      { progress: 82, delay: 900, statement: 8 },
+      { progress: 91, delay: 500, statement: 9 },
+      { progress: 100, delay: 700, statement: AUTHORITY_STATEMENTS.length - 1 }
+    ];
+
+    let cumulativeDelay = 0;
+    const timeouts: NodeJS.Timeout[] = [];
+
+    progressSteps.forEach((step, index) => {
+      if (index === 0) {
+        cumulativeDelay = step.delay;
+      } else {
+        cumulativeDelay += step.delay;
+      }
+
+      const timeout = setTimeout(() => {
+        setProgress(step.progress);
+        setCurrentStatementIndex(step.statement);
+      }, cumulativeDelay);
+
+      timeouts.push(timeout);
+    });
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [isSubmitting]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid()) return;
 
     setIsSubmitting(true);
-    setShowLoadingPage(true); // Show loading page immediately
-
     try {
       // Save user
       const response = await fetch("https://luther.health/api/users", {
@@ -97,36 +158,175 @@ export function AnaesthesiaRiskInformationPage() {
         }),
       });
 
-      // Only redirect after all API calls complete successfully
-      // The LoadingPage will handle the navigation via onComplete
-
+      // Redirect to results page
+      window.location.hash = "anaesthesia-risk-screener-results";
     } catch (err) {
       console.error("Error saving user info and generating report:", err);
-      // On error, hide loading page and show error
-      setShowLoadingPage(false);
+    } finally {
       setIsSubmitting(false);
-      alert("An error occurred while generating your report. Please try again.");
     }
   };
 
-  // This function will be called when LoadingPage completes its animation
-  const handleLoadingComplete = () => {
-    // Navigate to results only when loading animation is done
-    window.location.hash = "anaesthesia-risk-screener-results";
-  };
-
-  // Show LoadingPage if submitting
-  if (showLoadingPage) {
-    return (
-      <LoadingPage
-        onComplete={handleLoadingComplete}
-        assessmentTitle="your Anaesthesia Risk Assessment"
-      />
-    );
-  }
+  // Calculate the stroke dash array for the progress circle
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <div className="min-h-screen bg-background py-16 relative">
+      {/* Full-page loading overlay with LoadingPage UI */}
+      <AnimatePresence>
+        {isSubmitting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background flex flex-col items-center justify-center px-6 py-8 z-50"
+          >
+            <div className="w-full max-w-md mx-auto text-center space-y-8">
+
+              {/* Progress Circle */}
+              <div className="relative flex items-center justify-center">
+                <svg
+                  className="transform -rotate-90 w-36 h-36"
+                  width="144"
+                  height="144"
+                  viewBox="0 0 144 144"
+                >
+                  {/* Background circle */}
+                  <circle
+                    cx="72"
+                    cy="72"
+                    r={radius}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="transparent"
+                    className="text-muted/20"
+                  />
+                  {/* Progress circle */}
+                  <motion.circle
+                    cx="72"
+                    cy="72"
+                    r={radius}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="transparent"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="text-foreground"
+                    strokeLinecap="round"
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset }}
+                    transition={{
+                      duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1]
+                    }}
+                  />
+                </svg>
+
+                {/* Progress percentage */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-lg transition-all duration-300 ease-out">
+                      {Math.round(progress)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Please Wait Message */}
+              <div className="space-y-2 mt-[0px] mr-[0px] mb-[55px] ml-[0px]">
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="tracking-wide"
+                >
+                  Please wait...
+                </motion.h2>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-muted-foreground"
+                >
+                  Crafting your personalised report
+                </motion.p>
+              </div>
+
+              {/* Authority Statements Carousel */}
+              <div className="relative h-24 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <div className="space-y-0.5 text-center text-sm">
+                    {/* Previous statements (faded) */}
+                    {currentStatementIndex > 0 && (
+                      <motion.div
+                        key={`prev-${currentStatementIndex - 1}`}
+                        initial={{ opacity: 0.3, y: -10 }}
+                        animate={{ opacity: 0.2, y: -20 }}
+                        exit={{ opacity: 0, y: -30 }}
+                        transition={{ duration: 0.3 }}
+                        className="text-muted-foreground/60"
+                      >
+                        {AUTHORITY_STATEMENTS[currentStatementIndex - 1]}
+                        <span className="ml-2 text-green-600">✓</span>
+                      </motion.div>
+                    )}
+
+                    {/* Current active statement */}
+                    <motion.div
+                      key={`current-${currentStatementIndex}`}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        transition: {
+                          duration: 0.4,
+                          ease: [0.4, 0, 0.2, 1]
+                        }
+                      }}
+                      exit={{
+                        opacity: 0.3,
+                        y: -20,
+                        scale: 0.95,
+                        transition: { duration: 0.3 }
+                      }}
+                      className="text-foreground py-2"
+                    >
+                      {AUTHORITY_STATEMENTS[currentStatementIndex]}
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                        className="ml-2 text-green-600"
+                      >
+                        ✓
+                      </motion.span>
+                    </motion.div>
+
+                    {/* Next statements (preview, highly faded) */}
+                    {currentStatementIndex < AUTHORITY_STATEMENTS.length - 1 && (
+                      <motion.div
+                        key={`next-${currentStatementIndex + 1}`}
+                        initial={{ opacity: 0.1, y: 30 }}
+                        animate={{ opacity: 0.15, y: 20 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.3 }}
+                        className="text-muted-foreground/40"
+                      >
+                        {AUTHORITY_STATEMENTS[currentStatementIndex + 1]}
+                      </motion.div>
+                    )}
+                  </div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="container mx-auto px-4 max-w-2xl">
         <div>
           <div className="mb-6">
