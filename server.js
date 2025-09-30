@@ -163,6 +163,30 @@ app.post("/api/create-checkout-session", async (req, res) => {
       quantity: item.quantity || 1,
     }));
 
+    // Map funnel types to their question page routes
+    const funnelRouteMap = {
+      "complication-risk": "complication-risk-checker-questions",
+      "recovery-speed": "recovery-speed-predictor-questions",
+      "surgery-readiness": "surgery-readiness-assessment-questions",
+      "anesthesia": "anaesthesia-risk-screener-questions",
+      "mobility": "mobility-strength-score-questions",
+      "symptom": "symptom-severity-index-questions",
+      "inflammation": "inflammation-risk-score-questions",
+      "medication": "medication-burden-calculator-questions",
+      "energy": "daily-energy-audit-questions",
+      "lifestyle": "lifestyle-limiter-score-questions",
+      "bio": "biological-age-calculator-questions",
+      "card": "cardiometabolic-risk-score-questions",
+      "res": "resilience-index-questions",
+      "nutrition": "nutrition-body-composition-score-questions",
+      "functional": "functional-fitness-age-test-questions",
+      "surgery": "completed-surgery-preparation-bundle-questions",
+      "chronic": "completed-chronic-symptoms-bundle-questions",
+      "longevity": "longevity-wellness-bundle-questions"
+    };
+
+    const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
@@ -171,7 +195,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
       metadata: {
         funnel_type: funnel_type
       },
-      success_url: `https://luther.health/Health-Audit.html#success?session_id={CHECKOUT_SESSION_ID}&funnel=${funnel_type}`,
+      // Redirect directly to the questions page for this funnel
+      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
@@ -183,10 +208,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
-
-// ----------------------------
-// 4. Enhanced Stripe Webhook → Store Data + Send Meta Conversion API
-// ----------------------------
+// Update your existing webhook to store funnel_type
 app.post("/api/webhook", async (req, res) => {
   let event = req.body;
 

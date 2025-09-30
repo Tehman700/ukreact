@@ -333,32 +333,38 @@ const makePayment = async (funnelType = "complication-risk") => {
 
 <Button
   onClick={() => {
-    // use the first item’s id or category to decide funnel type
+    // Track checkout started
+    trackCheckoutStarted(totalPrice, items.map(i => i.assessment.id));
+
+    // Get the first item to determine funnel type
     const firstItem = items[0]?.assessment;
 
-    // map assessment IDs to funnels
+    // Map assessment IDs to funnel types (must match server's funnelRouteMap)
     const funnelMap: Record<string, string> = {
-      "6": "complication-risk",
-      "7": "recovery-speed",
-      "1": "surgery-readiness",
-      "8": "anesthesia",
-      "9": "mobility",
-      "10": "symptom",
-      "11": "inflammation",
-      "12": "medication",
-      "13": "energy",
-      "14": "lifestyle",
-      "2": "bio",
-      "17": "card",
-      "18": "res",
-      "19": "nutrition",
-      "20": "functional",
-      "21": "surgery",
-      "22": "chronic",
-      "23": "longevity"
+      "6": "complication-risk",      // Complication Risk Checker
+      "7": "recovery-speed",          // Recovery Speed Predictor
+      "1": "surgery-readiness",       // Surgery Readiness
+      "8": "anesthesia",              // Anaesthesia Risk
+      "9": "mobility",                // Mobility Recovery
+      "10": "symptom",                // Symptom Severity
+      "11": "inflammation",           // Inflammation
+      "12": "medication",             // Medication
+      "13": "energy",                 // Energy
+      "14": "lifestyle",              // Lifestyle
+      "2": "bio",                     // Biological Age
+      "17": "card",                   // Cardiometabolic
+      "18": "res",                    // Resilience
+      "19": "nutrition",              // Nutrition
+      "20": "functional",             // Functional Fitness
+      "21": "surgery",                // Surgery Bundle
+      "22": "chronic",                // Chronic Symptoms Bundle
+      "23": "longevity"               // Longevity Bundle
     };
 
     const funnelType = funnelMap[firstItem?.id] || "complication-risk";
+
+    console.log(`🛒 Checkout initiated for funnel: ${funnelType}`);
+    console.log(`📦 Items in basket:`, items.map(i => i.assessment.name));
 
     makePayment(funnelType);
   }}
@@ -366,7 +372,7 @@ const makePayment = async (funnelType = "complication-risk") => {
   size="lg"
 >
   <CreditCard className="w-4 h-4 mr-2" />
-  Checkout
+  Checkout - £{totalPrice.toFixed(2)}
 </Button>
 
 
