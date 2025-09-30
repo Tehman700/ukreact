@@ -188,17 +188,28 @@ import { AnalyticsTestPage } from './pages/AnalyticsTestPage';
 
 // Icons and Assets
 import { Shield, Clock, TrendingUp, Star, AlertTriangle, Zap, Heart, Activity, Thermometer, Pill, Battery, Users, Apple, Stethoscope } from 'lucide-react';
-// import surgeryReadinessImage from 'figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png';
-// import biologicalAgeImage from 'figma:asset/ae26560251861502d9f57c797cb56850e241396b.png';
+import surgeryReadinessImage from '/assests/surgery-hero.webp';
+import biologicalAgeImage from '/assests/bio-hero.webp';
 // import healthspanImage from 'figma:asset/4cabb8a4e6274a78708d8b568484f39d32dc28b7.png';
 // import redFlagImage from 'figma:asset/a163b0438899761e6de30773381158aa6a8fce3c.png';
-// import completedSurgeryPreparationBundleImage from 'figma:asset/8088340aa4717607fa0c0d6becc023c50f67cf1d.png';
+import completedSurgeryPreparationBundleImage from '/assests/completed02.webp';
 // import cardiometabolicRiskImage from 'figma:asset/fdc40145acfa322877cd1761f1bde47228465bbd.png';
-// import resilienceIndexImage from 'figma:asset/0e6c300fc81473157fa3db6ed6541ad03e8360cc.png';
-// import completeLongevityBundleImage from 'figma:asset/20e017b40595fdf2ccc94d3180dd4c8b03a9001c.png';
-// import nutritionBodyCompositionImage from 'figma:asset/4026497d103247d3a708420fed41bc90eebe8c1e.png';
-// import purpleGradientImage from 'figma:asset/9f2ac9e1545e8771deee20905b7e336ff2c75ab3.png';
+import resilienceIndexImage from '/assests/resi-hero.webp';
+import completeLongevityBundleImage from '/assests/long-hero.webp';
+import nutritionBodyCompositionImage from '/assests/nutrition-hero.webp';
+import purpleGradientImage from '/assests/complication-hero.webp';
 // import multiColorStripesImage from 'figma:asset/d746a8bd9d32934c155e6f367c1a324ba5d51655.png';
+import purplesGradientImage from '/assests/anaesthesia-hero.webp';
+import sympGradientImage from '/assests/symp-sever-hero.webp';
+import mobility from '/assests/mobility-hero.webp';
+import inflammation from '/assests/inflammation-hero.webp';
+import burden from '/assests/burden-hero.webp';
+import daily from '/assests/energy-hero.webp';
+import lifestyle from '/assests/lifestyle-hero.webp';
+import cardio from '/assests/cardio-hero.webp';
+import nut from '/assests/nutrition-hero.webp';
+import func from '/assests/functional-hero.webp';
+import chronic from '/assests/completed01.webp';
 
 // UI Components and Hooks
 import { Toaster } from './components/ui/sonner';
@@ -239,7 +250,7 @@ const globalAssessments: Assessment[] = [
     name: 'Surgery Readiness Score',
     description: "The first step to taking control of your surgery risks is understanding them. We'll help you get a clear picture of where you are right now, and show you the path toward where you want to be — with guidance and support at every step.",
     price: 37.00,
-    //image: surgeryReadinessImage,
+    image: surgeryReadinessImage,
     icon: <Shield className="w-6 h-6" />,
     features: ['Your personalized readiness score', 'An in-depth report detailing your current health status', 'Bespoke recommendations designed to reduce risks and optimise your outcome']
   },
@@ -248,7 +259,7 @@ const globalAssessments: Assessment[] = [
     name: 'Practical Biological Age Proxy',
     description: 'Advanced biomarker analysis to determine your true biological age compared to chronological age.',
     price: 49.99,
-   // image: biologicalAgeImage,
+   image: biologicalAgeImage,
     icon: <Clock className="w-6 h-6" />,
     features: ['Comprehensive biomarker testing', 'Age acceleration analysis', 'Personalized longevity insights']
   },
@@ -287,7 +298,7 @@ const globalAssessments: Assessment[] = [
     name: 'Complication Risk Checker',
     description: 'Comprehensive lifestyle and comorbidity analysis to predict and prevent surgical complications before they occur.',
     price: 40.00,
-  //  image: purpleGradientImage,
+   image: purpleGradientImage,
     icon: <AlertTriangle className="w-6 h-6" />,
     features: ['Lifestyle risk factor analysis', 'Comorbidity assessment scoring', 'Personalized prevention strategies']
   },
@@ -296,7 +307,7 @@ const globalAssessments: Assessment[] = [
     name: 'Recovery Speed Predictor',
     description: 'Personalized recovery timeline based on nutrition, mindset, and home support systems to optimize healing.',
     price: 45.00,
-   // image: nutritionBodyCompositionImage,
+   image: nutritionBodyCompositionImage,
     icon: <Zap className="w-6 h-6" />,
     features: ['Nutrition impact analysis', 'Mental readiness assessment', 'Support system optimization']
   },
@@ -305,7 +316,7 @@ const globalAssessments: Assessment[] = [
     name: 'Anaesthesia Risk Screener',
     description: 'Critical screening for anaesthesia complications based on sleep patterns, medications, and lifestyle factors.',
     price: 35.00,
-  //  image: purpleGradientImage,
+   image: purplesGradientImage,
     icon: <Heart className="w-6 h-6" />,
     features: ['Sleep apnoea risk assessment', 'Medication interaction analysis', 'Alcohol impact evaluation']
   },
@@ -314,7 +325,7 @@ const globalAssessments: Assessment[] = [
     name: 'Mobility & Strength Score',
     description: 'Baseline physical assessment to track post-operative recovery progress and optimize rehabilitation outcomes.',
     price: 50.00,
-  //  image: nutritionBodyCompositionImage,
+   image: mobility,
     icon: <Activity className="w-6 h-6" />,
     features: ['Baseline mobility measurement', 'Strength assessment scoring', 'Recovery milestone tracking']
   },
@@ -323,7 +334,7 @@ const globalAssessments: Assessment[] = [
     name: 'Symptom Severity Index',
     description: 'Comprehensive assessment capturing frequency and intensity of pain, fatigue, digestive or joint issues.',
     price: 43.00,
-  //  image: purpleGradientImage,
+   image: sympGradientImage,
     icon: <Thermometer className="w-6 h-6" />,
     features: ['Pain intensity scoring', 'Fatigue impact analysis', 'Digestive symptom tracking']
   },
@@ -332,7 +343,7 @@ const globalAssessments: Assessment[] = [
     name: 'Inflammation Risk Score',
     description: 'Evidence-based assessment rooted in diet, lifestyle, sleep patterns, and stress levels.',
     price: 39.00,
-  //  image: nutritionBodyCompositionImage,
+   image: inflammation,
     icon: <Heart className="w-6 h-6" />,
     features: ['Dietary inflammation analysis', 'Lifestyle factor assessment', 'Stress impact evaluation']
   },
@@ -341,7 +352,7 @@ const globalAssessments: Assessment[] = [
     name: 'Medication Burden Calculator',
     description: 'Comprehensive analysis weighing prescription load and potential drug interaction risks.',
     price: 47.00,
-   // image: purpleGradientImage,
+   image: burden,
     icon: <Pill className="w-6 h-6" />,
     features: ['Polypharmacy assessment', 'Drug interaction screening', 'Side effect burden analysis']
   },
@@ -350,7 +361,7 @@ const globalAssessments: Assessment[] = [
     name: 'Daily Energy Audit',
     description: 'Detailed snapshot of fatigue patterns, sleep quality metrics, and stamina optimization potential.',
     price: 42.00,
-  //  image: nutritionBodyCompositionImage,
+   image: daily,
     icon: <Battery className="w-6 h-6" />,
     features: ['Energy pattern analysis', 'Sleep quality assessment', 'Stamina optimization plan']
   },
@@ -359,7 +370,7 @@ const globalAssessments: Assessment[] = [
     name: 'Lifestyle Limiter Score',
     description: 'Quantifies real-world impact on work performance, social connections, and physical activities.',
     price: 45.00,
-  //  image: purpleGradientImage,
+   image: lifestyle,
     icon: <Users className="w-6 h-6" />,
     features: ['Work impact assessment', 'Social activity limitation analysis', 'Physical function scoring']
   },
@@ -388,7 +399,7 @@ const globalAssessments: Assessment[] = [
     name: 'Cardiometabolic Risk Score',
     description: 'Comprehensive heart and metabolic health assessment to identify cardiovascular disease and diabetes risk factors.',
     price: 39.99,
-  //  image: cardiometabolicRiskImage,
+   image: cardio,
     icon: <Heart className="w-6 h-6" />,
     features: ['Cardiovascular risk analysis', 'Metabolic health assessment', 'Personalized prevention strategies']
   },
@@ -397,7 +408,7 @@ const globalAssessments: Assessment[] = [
     name: 'Resilience Index',
     description: 'Comprehensive mental and physical resilience assessment to measure your ability to adapt, recover, and thrive under stress.',
     price: 49.99,
-  //  image: resilienceIndexImage,
+   image: resilienceIndexImage,
     icon: <Zap className="w-6 h-6" />,
     features: ['Stress resilience analysis', 'Recovery capacity assessment', 'Personalized resilience building strategies']
   },
@@ -406,7 +417,7 @@ const globalAssessments: Assessment[] = [
     name: 'Nutrition & Body Composition Score',
     description: 'Comprehensive nutritional and body composition assessment to optimize metabolic health, body composition, and nutritional status.',
     price: 49.99,
-  //  image: nutritionBodyCompositionImage,
+   image: nut,
     icon: <Apple className="w-6 h-6" />,
     features: ['Body composition analysis', 'Nutritional deficiency assessment', 'Personalized nutrition optimization strategies']
   },
@@ -415,7 +426,7 @@ const globalAssessments: Assessment[] = [
     name: 'Functional Fitness Age Test',
     description: 'Comprehensive physical capability assessment to determine your functional fitness age and identify movement quality decline patterns.',
     price: 44.99,
-  //  image: purpleGradientImage,
+   image: func,
     icon: <Activity className="w-6 h-6" />,
     features: ['Movement quality analysis', 'Physical capability assessment', 'Personalized fitness optimization strategies']
   },
@@ -424,7 +435,7 @@ const globalAssessments: Assessment[] = [
     name: 'Completed Surgery Preparation Bundle',
     description: 'Comprehensive surgical preparation assessment combining readiness, complication risk, recovery prediction, anaesthesia screening, and mobility evaluation in one complete bundle.',
     price: 120.00,
-  //  image: completedSurgeryPreparationBundleImage,
+   image: completedSurgeryPreparationBundleImage,
     icon: <Shield className="w-6 h-6" />,
     features: ['Complete surgical readiness assessment', 'Comprehensive risk factor analysis', 'Personalized preparation strategies']
   },
@@ -433,7 +444,7 @@ const globalAssessments: Assessment[] = [
     name: 'Completed Chronic Symptoms Bundle',
     description: 'Comprehensive chronic symptom management assessment combining severity analysis, inflammation risk, medication burden, energy patterns, and lifestyle impact evaluation in one complete bundle.',
     price: 125.40,
- //   image: multiColorStripesImage,
+   image: chronic,
     icon: <Stethoscope className="w-6 h-6" />,
     features: ['Complete chronic symptom assessment', 'Comprehensive lifestyle impact analysis', 'Personalized management strategies']
   },
@@ -442,7 +453,7 @@ const globalAssessments: Assessment[] = [
     name: 'Complete Longevity Bundle',
     description: 'Comprehensive longevity optimization assessment combining Biological Age Calculator, Cardiometabolic Risk Score, Resilience Index, Nutrition & Body Composition Score, and Functional Fitness Age Test in one complete bundle.',
     price: 138.00,
- //   image: completeLongevityBundleImage,
+   image: completeLongevityBundleImage,
     icon: <Clock className="w-6 h-6" />,
     features: ['Biological Age Calculator assessment', 'Cardiometabolic Risk Score analysis', 'Resilience Index & Nutrition evaluation', 'Functional Fitness Age testing', 'Personalized longevity optimization strategies']
   }

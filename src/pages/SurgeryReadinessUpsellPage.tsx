@@ -1,3 +1,4 @@
+// import image_4a5f1784fdc7c40f68ba0096922a990b7d6820a5 from 'figma:asset/4a5f1784fdc7c40f68ba0096922a990b7d6820a5.png';
 import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -6,28 +7,28 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ShoppingBasket } from '../components/ShoppingBasket';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
-
-import { 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
-  Shield, 
-  TrendingUp, 
-  Users, 
+import { Assessment, BasketItem } from './AssessmentsPage';
+import {
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  Shield,
+  TrendingUp,
+  Users,
   Star,
   ArrowRight,
   Play
 } from 'lucide-react';
 import surgeryReadinessImage from 'figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png';
-import heroImage from 'figma:asset/816df46b1563ebaa0e031d306f4b6df626181562.png';
+import heroImage from '/assests/surgery-hero.webp';
+import benefitsImage from '/assests/surgery-sec.webp';
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
   id: '1',
   name: 'Surgery Readiness Score',
   description: 'Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.',
-  price: 37.00, // Fixed: was 199.99, now matches globalAssessments
+  price: 199.99,
   image: surgeryReadinessImage,
   icon: <Shield className="w-6 h-6" />,
   category: 'Pre-Surgery',
@@ -85,46 +86,59 @@ export function SurgeryReadinessUpsellPage() {
   };
 
   return (
-          <PaymentGate requiredFunnel="surgery-readiness">
-
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-muted/20 to-background p-[0px] bg-[rgba(249,249,249,1)]">
-        <div className="container mx-auto px-4 bg-[rgba(249,249,249,1)]">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center m-[0px] pt-[0px] pr-[0px] pb-[58px] pl-[0px]">
-              {/* Left Content */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-medium tracking-tight text-muted-foreground">
-                  Surgery Readiness Assessment
-                </h2>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-                  Optimize Your Surgery.
-                  <span className="block text-primary">Minimize Risks.</span>
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-md">
-                  Get your personalized readiness score and evidence-based strategies for the best possible outcomes.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button onClick={handleTryDemo} size="lg" className="px-8">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
-                    Get my score now
-                  </Button>
-                </div>
-              </div>
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
+        <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
+          {/* Image */}
+          <div className="relative order-1 lg:order-2">
+            <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-none">
+              <ImageWithFallback
+                src={heroImage}
+                alt="Surgery Readiness Score Report"
+                width={1200}
+                height={1600}
+                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 50vw, 600px"
+                quality={90}
+                priority
+                className="w-full h-auto object-cover rounded-lg mt-[26px]"
+              />
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+            </div>
+          </div>
 
-              {/* Right Image */}
-
+          {/* Text */}
+          <div className="space-y-6 order-2 lg:order-1">
+            <h2 className="text-xl font-medium tracking-tight text-muted-foreground">
+              Surgery Readiness Assessment
+            </h2>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
+              Optimize Your Surgery.
+              <span className="block text-primary">Minimize Risks.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-md">
+              Get your personalized readiness score and evidence-based strategies for the best possible outcomes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button onClick={handleTryDemo} size="lg" className="px-8">
+                <Play className="w-4 h-4 mr-2" />
+                Try Demo Quiz
+              </Button>
+              <Button
+                onClick={handleStartAssessment}
+                variant="outline"
+                size="lg"
+                className="px-8"
+              >
+                Get my score now
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* New Heading Section */}
-      <section className="py-8 pt-[0px] pr-[0px] pb-[28px] pl-[0px]">
+      <section className="py-8 pt-[35px] pr-[0px] pb-[28px] pl-[0px]">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <h1 className="text-left mx-[0px] my-[14px] font-bold">Reduce Risks. Improve Recovery.</h1>
@@ -132,6 +146,144 @@ export function SurgeryReadinessUpsellPage() {
             <p className="text-left text-muted-foreground mt-6">
               This report has identifies factors unique to you that may affect your readiness for surgery. Knowing your surgery-specific risks is vital because it helps you make informed decisions, prepare for potential challenges, and work with your healthcare team to minimize complications and support a safer recovery.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section with Overlapping Cards */}
+      <section className="py-16 md:py-24 bg-muted/10">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="relative">
+              {/* Background Image */}
+              <div className="relative w-full max-w-2xl mx-auto mb-8 md:mb-0">
+                <ImageWithFallback
+                  src={benefitsImage}
+                  alt="Luther Health Surgery Benefits"
+                  className="w-200 h-auto object-cover rounded-lg"
+                />
+              </div>
+
+              {/* Overlapping Cards - Hidden on mobile */}
+              <div className="hidden md:block absolute inset-0">
+                {/* Top Left - Clarity at a Glance */}
+                <Card className="absolute top-25 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
+                    <h3 className="font-medium mb-2">Clarity at a Glance</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A single readiness score gives you an elegant, straightforward measure of where you stand.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Top Right - Accelerated Recovery */}
+                <Card className="absolute top-25 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Accelerated Recovery</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Optimised preparation ensures you return to the lifestyle you enjoy, faster.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Middle Left - Exclusive Insight */}
+                <Card className="absolute top-1/2 -translate-y-1/2 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Exclusive Insight</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Uncovers hidden risks so you can address them before they become obstacles.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Middle Right - Confidence Restored */}
+                <Card className="absolute top-1/2 -translate-y-1/2 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Confidence Restored</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Peace of mind knowing you're entering surgery at your very best.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Bottom Left - Premium Protection */}
+                <Card className="absolute bottom-25 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Premium Protection</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Reduced complications mean a smoother, safer surgical journey.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Bottom Right - Bespoke Planning */}
+                <Card className="absolute bottom-25 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Bespoke Planning</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A personalised improvement plan crafted around your top priorities.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Mobile Layout - Grid Below Image */}
+              <div className="md:hidden grid grid-cols-2 gap-4">
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Clarity at a Glance</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A single readiness score gives you an elegant, straightforward measure of where you stand.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Accelerated Recovery</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Optimised preparation ensures you return to the lifestyle you enjoy, faster.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Exclusive Insight</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Uncovers hidden risks so you can address them before they become obstacles.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Confidence Restored</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Peace of mind knowing you're entering surgery at your very best.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Premium Protection</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Reduced complications mean a smoother, safer surgical journey.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Bespoke Planning</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A personalised improvement plan crafted around your top priorities.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -249,6 +401,5 @@ export function SurgeryReadinessUpsellPage() {
         totalPrice={getTotalPrice()}
       />
     </div>
-        </PaymentGate>
   );
 }
