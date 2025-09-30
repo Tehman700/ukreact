@@ -930,7 +930,10 @@ useEffect(() => {
       case 'complication-risk-checker-upsell':
         return <ComplicationRiskUpsellPage />;
       case 'complication-risk-checker-learn-more':
-        return <ComplicationRiskUpsellPage />;
+  return <ComplicationRiskUpsellPage
+    onAddToBasket={addToBasket}
+    onOpenBasket={() => setIsBasketOpen(true)}
+  />;
       case 'complication-risk-checker-questions':
         return <ComplicationRiskQuestionsPage />;
       case 'complication-risk-checker-information':

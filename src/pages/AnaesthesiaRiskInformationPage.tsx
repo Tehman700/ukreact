@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight } from 'lucide-react';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const AUTHORITY_STATEMENTS = [
   "Checking NICE guidelines",
@@ -60,7 +59,7 @@ export function AnaesthesiaRiskInformationPage() {
            userInfo.age !== '';
   };
 
-  // Progress animation effect
+  // Progress animation effect - slowed down to match API response time
   useEffect(() => {
     if (!isSubmitting) {
       setProgress(0);
@@ -69,17 +68,20 @@ export function AnaesthesiaRiskInformationPage() {
     }
 
     const progressSteps = [
-      { progress: 8, delay: 300, statement: 0 },
-      { progress: 15, delay: 800, statement: 1 },
-      { progress: 23, delay: 600, statement: 2 },
-      { progress: 35, delay: 900, statement: 3 },
-      { progress: 42, delay: 500, statement: 4 },
-      { progress: 58, delay: 700, statement: 5 },
-      { progress: 67, delay: 800, statement: 6 },
-      { progress: 74, delay: 600, statement: 7 },
-      { progress: 82, delay: 900, statement: 8 },
-      { progress: 91, delay: 500, statement: 9 },
-      { progress: 100, delay: 700, statement: AUTHORITY_STATEMENTS.length - 1 }
+      { progress: 5, delay: 800, statement: 0 },
+      { progress: 10, delay: 1200, statement: 1 },
+      { progress: 18, delay: 1400, statement: 2 },
+      { progress: 25, delay: 1600, statement: 3 },
+      { progress: 32, delay: 1800, statement: 4 },
+      { progress: 40, delay: 2000, statement: 5 },
+      { progress: 48, delay: 2200, statement: 6 },
+      { progress: 56, delay: 2400, statement: 7 },
+      { progress: 65, delay: 2600, statement: 8 },
+      { progress: 73, delay: 2800, statement: 9 },
+      { progress: 82, delay: 3000, statement: 10 },
+      { progress: 90, delay: 3200, statement: 11 },
+      { progress: 95, delay: 3500, statement: 12 }
+      // Don't automatically go to 100% - let the actual API completion trigger that
     ];
 
     let cumulativeDelay = 0;
@@ -174,8 +176,6 @@ export function AnaesthesiaRiskInformationPage() {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-      <PaymentGate requiredFunnel="anesthesia">
-
     <div className="min-h-screen bg-background py-16 relative">
       {/* Full-page loading overlay with LoadingPage UI */}
       <AnimatePresence>
@@ -426,7 +426,5 @@ export function AnaesthesiaRiskInformationPage() {
         </div>
       </div>
     </div>
-    </PaymentGate>
-
   );
 }
