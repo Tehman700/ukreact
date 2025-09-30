@@ -746,7 +746,11 @@ useEffect(() => {
       case 'quiz':
         return <QuizPage />;
       case 'surgery-readiness-assessment-learn-more':
-        return <SurgeryReadinessUpsellPage />;
+          return <SurgeryReadinessUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
       case 'surgery-readiness-assessment-information':
