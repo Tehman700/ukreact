@@ -16,6 +16,27 @@ export function PaymentGate({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    // First, check if session_id is in URL (from Stripe redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    let urlSessionId = urlParams.get('session_id');
+
+    // Also check in hash parameters (for SPA routing)
+    if (!urlSessionId && window.location.hash.includes('?')) {
+      const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
+      urlSessionId = hashParams.get('session_id');
+    }
+
+    // If we have a session_id in URL, store it in sessionStorage
+    if (urlSessionId) {
+      sessionStorage.setItem("stripe_session_id", urlSessionId);
+      console.log(`✅ Stored session ID from URL: ${urlSessionId}`);
+
+      // Clean up URL by removing session_id parameter
+      const hashBase = window.location.hash.split('?')[0];
+      window.history.replaceState({}, document.title, window.location.pathname + hashBase);
+    }
+
+    // Now get session ID from sessionStorage
     const sessionId = sessionStorage.getItem("stripe_session_id");
 
     if (!sessionId) {
