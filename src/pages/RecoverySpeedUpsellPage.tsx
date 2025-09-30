@@ -67,17 +67,22 @@ export function RecoverySpeedUpsellPage() {
       {/* Hero Section (templated) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
-          {/* Image */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-none">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Recovery Speed Predictor Report"
-                className="w-full h-auto object-cover rounded-lg mt-[26px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
+{/* Image */}
+<div className="relative order-1 lg:order-2">
+  <div className="relative aspect-[3/4] max-w-2xl mx-auto lg:max-w-xl">
+    <ImageWithFallback
+      src={heroImage}
+      alt="Recovery Speed Predictor Report"
+      width={1600}
+      height={2000}
+      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 900px"
+      quality={90}
+      priority
+      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[900px]"
+    />
+    <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+  </div>
+</div>
 
           {/* Text */}
           <div className="space-y-6 order-2 lg:order-1">
@@ -135,56 +140,75 @@ export function RecoverySpeedUpsellPage() {
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Timeline */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Timeline</h3>
-                    <p className="text-sm text-muted-foreground">See your likely recovery phases.</p>
-                  </CardContent>
-                </Card>
+<div className="hidden md:block absolute inset-0">
+  {/* Top Left - Timeline */}
+  <Card className="absolute top-4 left-4 lg:left-8 xl:left-12 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Timeline</h3>
+      <p className="text-sm text-muted-foreground">
+        See your likely recovery for smoother healing <br />
+        Plan each stage with confidence.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Top Right - Nutrition */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Nutrition</h3>
-                    <p className="text-sm text-muted-foreground">Fuel healing day by day.</p>
-                  </CardContent>
-                </Card>
+  {/* Top Right - Nutrition */}
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Nutrition</h3>
+      <p className="text-sm text-muted-foreground">
+        Fuel your body with the right foods. <br />
+        Support steady healing every day.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Left - Mindset */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Mindset</h3>
-                    <p className="text-sm text-muted-foreground">Build resilience & focus.</p>
-                  </CardContent>
-                </Card>
+  {/* Middle Left - Mindset */}
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Mindset</h3>
+      <p className="text-sm text-muted-foreground">
+        Build resilience and focus to stay strong. <br />
+        Approach recovery with a clear outlook.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Right - Support */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Support</h3>
-                    <p className="text-sm text-muted-foreground">Optimise help at home.</p>
-                  </CardContent>
-                </Card>
+  {/* Middle Right - Support */}
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Support</h3>
+      <p className="text-sm text-muted-foreground">
+        Optimise help at home for peace of mind. <br />
+        Rely on care that eases recovery.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Left - Confidence */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Know what to expect.</p>
-                  </CardContent>
-                </Card>
+  {/* Bottom Left - Confidence */}
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground">
+        Know what to expect every step ahead. <br />
+        Face surgery with calm assurance.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+  {/* Bottom Right - Personal */}
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[190px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground">
+        A plan built around your unique needs. <br />
+        Tailored guidance for a smoother path.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
 
               {/* Mobile Layout - Grid Below Image */}
               <div className="md:hidden grid grid-cols-2 gap-4">

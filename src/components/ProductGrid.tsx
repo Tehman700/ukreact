@@ -130,17 +130,17 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
                 >
                   {category === 'Surgery Conditioning' ? (
                     <>
-                      <span className="hidden sm:inline">Surgery Conditioning</span>
+                      <span className="hidden sm:inline">Surgery</span>
                       <span className="sm:hidden">Surgery</span>
                     </>
                   ) : category === 'Longevity Focus' ? (
                     <>
-                      <span className="hidden sm:inline">Longevity Focus</span>
+                      <span className="hidden sm:inline">Conditioning</span>
                       <span className="sm:hidden">Longevity</span>
                     </>
                   ) : category === 'Symptom Control' ? (
                     <>
-                      <span className="hidden sm:inline">Symptom Control</span>
+                      <span className="hidden sm:inline">Longevity</span>
                       <span className="sm:hidden">Symptoms</span>
                     </>
                   ) : (

@@ -73,17 +73,23 @@ export function ComplicationRiskUpsellPage() {
       {/* Hero Section (templated layout) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
-          {/* Right Image */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-none">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Complication Risk Checker Report"
-                className="w-full h-auto object-cover rounded-lg mt-[26px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
+{/* Image */}
+<div className="relative order-1 lg:order-2">
+  <div className="relative aspect-[3/4] max-w-2xl mx-auto lg:max-w-xl">
+    <ImageWithFallback
+      src={heroImage}
+      alt="Complication Risk Checker Report"
+      width={1600}
+      height={2000}
+      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 900px"
+      quality={90}
+      priority
+      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[900px]"
+    />
+    <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+  </div>
+</div>
+
 
           {/* Left Text */}
           <div className="space-y-6 order-2 lg:order-1">
@@ -133,47 +139,51 @@ export function ComplicationRiskUpsellPage() {
               </div>
 
               {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
+              <div className="hidden md:block absolute inset-0 pointer-events-none">
                 {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground"> Your risk profile in one glance. </p>
-                  </CardContent>
-                </Card>
+<Card className="absolute top-4 left-4 lg:left-8 xl:left-12 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+  <CardContent className="p-6 h-full flex flex-col">
+    <h3 className="font-bold mb-3">Clarity</h3>
+    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+      Your risk profile in one glance, made simple.
+    </p>
+  </CardContent>
+</Card>
+
+
                 {/* Top Right - Speed */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground"> Act now, avoid setbacks. </p>
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Speed</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify"> Act now, avoid setbacks, with confidence. </p>
                   </CardContent>
                 </Card>
                 {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground"> Spot complications before they grow. </p>
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Insight</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify"> Spot complication before they grow, with clarity. </p>
                   </CardContent>
                 </Card>
                 {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground"> Go into surgery prepared. </p>
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Confidence</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify"> Go into surgery prepared, for recovery. </p>
                   </CardContent>
                 </Card>
                 {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground"> Lower risk, smoother recovery. </p>
+<Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Protection</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify"> Lower risk, smoother recovery, through insight. </p>
                   </CardContent>
                 </Card>
                 {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground"> Strategies tailored to you. </p>
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Personal</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify"> Strategies tailored to you, with precision. </p>
                   </CardContent>
                 </Card>
               </div>
@@ -183,37 +193,37 @@ export function ComplicationRiskUpsellPage() {
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground"> Your risk profile in one glance. </p>
+                    <p className="text-sm text-muted-foreground"> Your risk profile in one glance, made simple.</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground"> Act now, avoid setbacks. </p>
+                    <p className="text-sm text-muted-foreground"> Act now, avoid setbacks, with confidence. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground"> Spot complications before they grow. </p>
+                    <p className="text-sm text-muted-foreground"> Spot complication before they grow, with clarity. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground"> Go into surgery prepared. </p>
+                    <p className="text-sm text-muted-foreground"> Go into surgery prepared, for recovery. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground"> Lower risk, smoother recovery. </p>
+                    <p className="text-sm text-muted-foreground"> Lower risk, smoother recovery, through insight. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
                   <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
                     <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground"> Strategies tailored to you. </p>
+                    <p className="text-sm text-muted-foreground"> Strategies tailored to you, with precision. </p>
                   </CardContent>
                 </Card>
               </div>

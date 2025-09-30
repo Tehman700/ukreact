@@ -90,22 +90,25 @@ export function SurgeryReadinessUpsellPage() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
-          {/* Image */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-none">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Surgery Readiness Score Report"
-                width={1200}
-                height={1600}
-                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 50vw, 600px"
-                quality={90}
-                priority
-                className="w-full h-auto object-cover rounded-lg mt-[26px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
+{/* Image */}
+<div className="relative order-1 lg:order-2">
+  <div className="relative aspect-[3/4] max-w-2xl mx-auto lg:max-w-xl">
+    <ImageWithFallback
+      src={heroImage}
+      alt="Surgery Readiness Score Report"
+      width={1600}
+      height={2000}
+      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 900px"
+      quality={90}
+      priority
+      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[900px]"
+    />
+    <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+  </div>
+</div>
+
+
+
 
           {/* Text */}
           <div className="space-y-6 order-2 lg:order-1">
@@ -164,125 +167,71 @@ export function SurgeryReadinessUpsellPage() {
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity at a Glance */}
-                <Card className="absolute top-25 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity at a Glance</h3>
-                    <p className="text-sm text-muted-foreground">
-                      A single readiness score gives you an elegant, straightforward measure of where you stand.
-                    </p>
-                  </CardContent>
-                </Card>
+{/* Overlapping Cards - Hidden on mobile */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  {/* Left Side Cards */}
+  {/* Top Left - Clarity at a Glance */}
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity at a Glance</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        A single readiness score gives you an elegant <br /> straightforward measure of <br /> where you stand.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Top Right - Accelerated Recovery */}
-                <Card className="absolute top-25 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Accelerated Recovery</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Optimised preparation ensures you return to the lifestyle you enjoy, faster.
-                    </p>
-                  </CardContent>
-                </Card>
+  {/* Middle Left - Exclusive Insight */}
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Exclusive Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Uncovers hidden risks so you can address<br /> them before they become <br />obstacles.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Left - Exclusive Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Exclusive Insight</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Uncovers hidden risks so you can address them before they become obstacles.
-                    </p>
-                  </CardContent>
-                </Card>
+  {/* Bottom Left - Premium Protection */}
+<Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+  <CardContent className="p-6 h-full flex flex-col">
+    <h3 className="font-bold mb-3">Premium Protection</h3>
+    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+      Reduced complications mean a smoother<br /> safer surgical journey.
+    </p>
+  </CardContent>
+</Card>
 
-                {/* Middle Right - Confidence Restored */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence Restored</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Peace of mind knowing you're entering surgery at your very best.
-                    </p>
-                  </CardContent>
-                </Card>
 
-                {/* Bottom Left - Premium Protection */}
-                <Card className="absolute bottom-25 -left-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Premium Protection</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Reduced complications mean a smoother, safer surgical journey.
-                    </p>
-                  </CardContent>
-                </Card>
+  {/* Right Side Cards */}
+  {/* Top Right - Accelerated Recovery */}
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Accelerated Recovery</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Optimised preparation ensures you return<br /> to the lifestyle you enjoy, faster.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Right - Bespoke Planning */}
-                <Card className="absolute bottom-25 -right-10 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Bespoke Planning</h3>
-                    <p className="text-sm text-muted-foreground">
-                      A personalised improvement plan crafted around your top priorities.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+  {/* Middle Right - Confidence Restored */}
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence Restored</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Peace of mind knowing you're entering<br />surgery at your very best.
+      </p>
+    </CardContent>
+  </Card>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Clarity at a Glance</h3>
-                    <p className="text-sm text-muted-foreground">
-                      A single readiness score gives you an elegant, straightforward measure of where you stand.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Accelerated Recovery</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Optimised preparation ensures you return to the lifestyle you enjoy, faster.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Exclusive Insight</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Uncovers hidden risks so you can address them before they become obstacles.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence Restored</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Peace of mind knowing you're entering surgery at your very best.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Premium Protection</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Reduced complications mean a smoother, safer surgical journey.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Bespoke Planning</h3>
-                    <p className="text-sm text-muted-foreground">
-                      A personalised improvement plan crafted around your top priorities.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+  {/* Bottom Right - Bespoke Planning */}
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Bespoke Planning</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        A personalised improvement plan crafted<br /> around your top priorities.
+      </p>
+    </CardContent>
+  </Card>
+</div>
             </div>
           </div>
         </div>
@@ -369,7 +318,7 @@ export function SurgeryReadinessUpsellPage() {
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button 
+                  <Button
                     onClick={handleTryDemo}
                     className="w-full"
                     variant="default"
@@ -377,7 +326,7 @@ export function SurgeryReadinessUpsellPage() {
                     <Play className="w-4 h-4 mr-2" />
                     Try Demo Quiz
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleStartAssessment}
                     className="w-full"
                     variant="outline"
