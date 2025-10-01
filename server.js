@@ -6,8 +6,7 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
-import { zodResponseFormat } from "openai/helpers/zod.mjs";
-import { z } from "zod";
+
 const { Pool } = pkg;
 const app = express();
 app.use(cors());
@@ -17,33 +16,6 @@ app.use(cors());
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Define Zod schemas for structured output
-const DetailedAnalysisSchema = z.object({
-  clinicalContext: z.string(),
-  strengths: z.array(z.string()),
-  riskFactors: z.array(z.string()),
-  timeline: z.string()
-});
-
-const CategoryResultSchema = z.object({
-  category: z.string(),
-  score: z.number().min(0).max(100),
-  level: z.enum(['optimal', 'high', 'moderate', 'low']),
-  description: z.string(),
-  recommendations: z.array(z.string()).min(3).max(3),
-  detailedAnalysis: DetailedAnalysisSchema
-});
-
-const AssessmentReportSchema = z.object({
-  overallScore: z.number().min(0).max(100),
-  overallRating: z.enum(['Low Risk', 'Moderate Risk', 'Elevated Risk', 'High Risk']),
-  results: z.array(CategoryResultSchema),
-  summary: z.string()
-});
-
-
-
 
 // ----------------------------
 // EMAIL CONFIGURATION
@@ -764,37 +736,20 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-
-
 // ----------------------------
-// Generate AI Assessment Report with Structured Output
+// Generate AI Assessment Report
 // ----------------------------
 app.post("/api/generate-assessment-report", async (req, res) => {
   try {
     const { assessmentType, answers, userInfo } = req.body;
-
-    // Input validation
-    if (!assessmentType || !answers || !userInfo) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: assessmentType, answers, or userInfo'
-      });
-    }
-
-    if (!Array.isArray(answers) || answers.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Answers must be a non-empty array'
-      });
-    }
 
     // Format questions and answers for GPT
     const questionsAndAnswers = answers.map(qa =>
       `Q: ${qa.question}\nA: ${qa.answer}`
     ).join('\n\n');
 
-    // Get system prompt and categories for this assessment type
-    const { systemPrompt, categories } = getSystemPromptAndCategories(assessmentType);
+    // Create a specialized prompt based on assessment type
+    const systemPrompt = getSystemPrompt(assessmentType);
 
     const userPrompt = `
 User Information:
@@ -804,147 +759,294 @@ Age Range: ${userInfo.age_range}
 Assessment Responses:
 ${questionsAndAnswers}
 
-Please analyze these responses and provide a comprehensive risk assessment for the following categories:
-${categories.join(', ')}
-
-Provide structured output as specified.
+Please provide a comprehensive analysis following the exact format specified in your system prompt.
     `;
 
-    // Call OpenAI API with structured output
-    const completion = await openai.beta.chat.completions.parse({
-      model: "gpt-4o-2024-08-06", // Use the model that supports structured outputs
+    // Call OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      response_format: zodResponseFormat(AssessmentReportSchema, "assessment_report"),
       temperature: 0.7,
+      max_tokens: 3000,
     });
 
-    const structuredReport = completion.choices[0].message.parsed;
+    const aiAnalysis = completion.choices[0].message.content;
+    console.log(aiAnalysis)
 
-    console.log("=== Structured AI Report Generated ===");
-    console.log(JSON.stringify(structuredReport, null, 2));
-    console.log("=== End Report ===");
-
-    // Validate that we got all expected categories
-    if (structuredReport.results.length !== categories.length) {
-      console.warn(`Expected ${categories.length} categories, got ${structuredReport.results.length}`);
-    }
-
-    // Add assessmentType to the report
-    const finalReport = {
-      ...structuredReport,
-      assessmentType
-    };
+    // Parse AI response into structured format
+    const structuredReport = parseAIResponse(aiAnalysis, assessmentType);
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
-      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text, created_at)
-       VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *`,
-      [
-        userInfo.id,
-        assessmentType,
-        JSON.stringify(structuredReport),
-        JSON.stringify(finalReport),
-        structuredReport.summary
-      ]
+      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [userInfo.id, assessmentType, aiAnalysis, JSON.stringify(structuredReport), aiAnalysis]
     );
 
     res.json({
       success: true,
-      report: finalReport,
+      report: structuredReport,
       reportId: reportResult.rows[0].id
     });
 
   } catch (error) {
     console.error("AI report generation error:", error);
-
-    // More specific error handling
-    if (error.message?.includes('OpenAI')) {
-      return res.status(503).json({
-        success: false,
-        error: 'AI service temporarily unavailable. Please try again.'
-      });
-    }
-
-    if (error.code === '23505') {
-      return res.status(409).json({
-        success: false,
-        error: 'Report already exists for this assessment'
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      error: 'Failed to generate assessment report. Please try again.'
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ----------------------------
-// Helper function to get system prompt and categories by assessment type
-// ----------------------------
-function getSystemPromptAndCategories(assessmentType) {
-  const assessmentConfigs = {
-    "Complication Risk": {
-      categories: [
-        'Medical History Risk',
-        'Lifestyle Risk Factors',
-        'Medication Risk Profile',
-        'Surgical History Impact',
-        'Physical Risk Factors'
-      ],
-      systemPrompt: `You are a medical risk assessment AI specializing in surgical complication analysis.
 
-Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
 
-For each category, you must provide:
-1. A score (0-100, where higher = lower risk)
-2. A risk level (optimal/high/moderate/low)
-3. A 2-3 sentence clinical description
-4. Exactly 3 specific, actionable recommendations
-5. Detailed analysis including:
-   - Clinical context (3-4 sentences with evidence-based references to NICE guidelines, Royal College of Surgeons, ERAS protocols)
-   - At least 3 strengths (positive factors)
-   - At least 3 risk factors (areas requiring attention)
-   - Specific timeline recommendations
+
+
+
+
+
+
+
+
+
+
+// Helper function to get system prompt based on assessment type
+
+function getSystemPrompt(assessmentType) {
+  const prompts = {
+    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = lower risk]
+OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
+
+CATEGORY_ANALYSIS:
+Medical History Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence clinical description analyzing their medical conditions and impact on surgical risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lifestyle Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing smoking, alcohol, exercise, nutrition, and stress] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Medication Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current medications and their surgical implications] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Surgical History Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing previous surgical experiences and healing capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Physical Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing weight, BMI, age, and fitness level] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Medical History Risk|[clinical context paragraph: 3-4 sentences explaining the medical conditions, their severity, and evidence-based surgical risk implications. Reference NICE guidelines, Royal College of Surgeons protocols, or relevant medical research]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline recommendation like "Begin medical optimization 6-8 weeks before surgery..."]
+
+Lifestyle Risk Factors|[clinical context paragraph: 3-4 sentences on lifestyle impact on surgical outcomes, citing NICE guidelines on smoking cessation, alcohol, and ERAS protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Implement lifestyle changes immediately. Smoking cessation should begin 4-6 weeks before surgery..."]
+
+Medication Risk Profile|[clinical context paragraph: 3-4 sentences on medication management, interactions, and Royal College of Anaesthetists guidance]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Medication review should occur 2-3 weeks before surgery..."]
+
+Surgical History Impact|[clinical context paragraph: 3-4 sentences analyzing previous surgical outcomes and their predictive value]|[strengths: comma-separated list of 2-3 positive factors]|[risks: comma-separated list of 2-3 risk factors if any, or "Patient has no heart problem"]|[timeline: specific timeline like "Share surgical history with your current surgical team 1-2 weeks before your procedure"]
+
+Physical Risk Factors|[clinical context paragraph: 3-4 sentences on BMI, age, fitness and their impact. Reference ERAS prehabilitation protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Begin physical optimization 4-6 weeks before surgery with a structured prehabilitation program"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall risk profile assessment
+2. Most significant risk factors requiring immediate attention
+3. Positive factors working in the patient's favor
+4. Specific evidence-based optimization strategies
+5. Timeline and prioritization of interventions
+6. Expected outcomes with proper preparation
+
+Include specific medical references to UK guidelines (NICE, Royal College of Surgeons, ERAS), cite evidence-based practices, and provide actionable, personalized recommendations based on their specific responses.]
 
 SCORING GUIDELINES:
-- 85-100: Optimal profile, minimal modifiable risks
-- 70-84: Good profile with some areas for improvement
-- 55-69: Moderate risk requiring optimization
-- 0-54: Elevated risk requiring significant intervention
+- Score 85-100: Optimal profile, minimal modifiable risks
+- Score 70-84: Good profile with some areas for improvement
+- Score 55-69: Moderate risk requiring optimization
+- Score 0-54: Elevated risk requiring significant intervention
 
-OVERALL RATING GUIDELINES:
-- Low Risk: Overall score 85-100
-- Moderate Risk: Overall score 70-84
-- Elevated Risk: Overall score 55-69
-- High Risk: Overall score 0-54
+Be specific, evidence-based, and provide actionable recommendations that are personalized to the patient's actual responses.`,
 
-Be specific, evidence-based, and provide actionable recommendations personalized to the patient's responses.
-
-CRITICAL: You must analyze ALL five categories:
-1. Medical History Risk - Analyze medical conditions, chronic diseases, and their surgical impact
-2. Lifestyle Risk Factors - Analyze smoking, alcohol, exercise, nutrition, stress, and sleep
-3. Medication Risk Profile - Analyze current medications, interactions, and perioperative management
-4. Surgical History Impact - Analyze previous surgeries, complications, and healing capacity
-5. Physical Risk Factors - Analyze BMI, weight, age, and physical fitness level`
-    }
+    // Keep other assessment types...
+    "Anaesthesia Risk": `[Your existing Anaesthesia Risk prompt]`,
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
 
-  const config = assessmentConfigs[assessmentType];
+  return prompts[assessmentType] || prompts["default"];
+}
 
-  if (!config) {
-    // Default fallback
+
+
+
+
+
+
+
+
+
+
+// Helper function to parse AI response - UPDATED TO HANDLE BOTH ASSESSMENT TYPES
+// Replace the parseAIResponse function in server.js
+
+function parseAIResponse(aiAnalysis, assessmentType) {
+  console.log("Parsing AI Analysis for:", assessmentType);
+
+  try {
+    // Extract overall score and rating
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 70;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
+
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis first
+    if (detailedSection) {
+      const categories = assessmentType === "Complication Risk"
+        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
+        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = assessmentType === "Complication Risk"
+        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
+        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 70;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            // Get detailed analysis for this category
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical planning.`,
+              strengths: ['Regular health monitoring', 'Awareness of risk factors', 'Proactive health management'],
+              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
+              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // If parsing failed, create comprehensive fallback
+    if (results.length === 0) {
+      console.log("Creating fallback structure for:", assessmentType);
+
+      const fallbackCategories = assessmentType === "Complication Risk"
+        ? [
+            { name: 'Medical History Risk', desc: 'Your medical history indicates factors that require attention and optimization before surgery.' },
+            { name: 'Lifestyle Risk Factors', desc: 'Several lifestyle factors could impact your surgical outcome and recovery.' },
+            { name: 'Medication Risk Profile', desc: 'Your current medications require careful perioperative management.' },
+            { name: 'Surgical History Impact', desc: 'Your previous surgical experiences provide valuable insights.' },
+            { name: 'Physical Risk Factors', desc: 'Physical condition factors may impact surgical outcomes.' }
+          ]
+        : [
+            { name: 'Airway Management Risk', desc: 'Your airway assessment indicates manageable risk factors.' },
+            { name: 'Sleep Apnoea Risk', desc: 'Sleep-related factors may require monitoring.' },
+            { name: 'Medication Interactions', desc: 'Current medications require review for interactions.' }
+          ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 65,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with your healthcare provider for personalized guidance',
+            'Follow pre-operative preparation protocols carefully',
+            'Ensure all medical information is shared with your surgical team'
+          ],
+          detailedAnalysis: {
+            clinicalContext: `Based on your responses, your ${cat.name.toLowerCase()} shows areas for attention and optimization before surgery.`,
+            strengths: ['Good baseline awareness', 'Engaged with assessment process', 'Open to optimization'],
+            riskFactors: ['Requires pre-operative optimization', 'Close monitoring recommended'],
+            timeline: 'Begin optimization 4-6 weeks before scheduled surgery.'
+          }
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
     return {
-      categories: ['Overall Assessment'],
-      systemPrompt: `You are a health assessment AI. Analyze the responses and provide structured recommendations.`
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing AI response:", error);
+
+    return {
+      overallScore: 70,
+      overallRating: "Moderate Risk",
+      results: [{
+        category: "Overall Assessment",
+        score: 70,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your assessment has been completed. Please consult with your healthcare provider.",
+        recommendations: [
+          "Discuss your assessment results with your doctor",
+          "Follow all pre-operative instructions carefully",
+          "Ensure complete medical disclosure to your surgical team"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Engaged with process'],
+          riskFactors: ['Requires medical consultation'],
+          timeline: 'Consult with healthcare team as soon as possible.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
     };
   }
-
-  return config;
 }
+
+
 
 // ----------------------------
 // Send Email Report

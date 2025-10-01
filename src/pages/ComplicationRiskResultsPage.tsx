@@ -7,13 +7,6 @@ import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 
-interface DetailedAnalysis {
-  clinicalContext: string;
-  strengths: string[];
-  riskFactors: string[];
-  timeline: string;
-}
-
 interface AssessmentResult {
   category: string;
   score: number;
@@ -21,7 +14,12 @@ interface AssessmentResult {
   level: 'low' | 'moderate' | 'high' | 'optimal';
   description: string;
   recommendations: string[];
-  detailedAnalysis: DetailedAnalysis;
+  detailedAnalysis?: {
+    clinicalContext: string;
+    strengths: string[];
+    riskFactors: string[];
+    timeline: string;
+  };
 }
 
 interface AIReport {
@@ -29,7 +27,6 @@ interface AIReport {
   overallRating: string;
   results: AssessmentResult[];
   summary: string;
-  assessmentType: string;
 }
 
 export function ComplicationRiskResultsPage() {
@@ -80,16 +77,7 @@ export function ComplicationRiskResultsPage() {
         const data = await response.json();
 
         if (data.success && data.report) {
-          // Ensure maxScore is set for all results
-          const reportWithMaxScore = {
-            ...data.report,
-            results: data.report.results.map((result: AssessmentResult) => ({
-              ...result,
-              maxScore: 100
-            }))
-          };
-
-          setAiReport(reportWithMaxScore);
+          setAiReport(data.report);
           // Store report ID for later reference
           sessionStorage.setItem('currentReportId', data.reportId);
         } else {
@@ -111,8 +99,8 @@ export function ComplicationRiskResultsPage() {
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
     yourScore: result.score,
-    average: Math.min(Math.max(result.score - 3, 50), 85), // Slightly below user score
-    optimal: Math.min(result.score + 15, 95) // Higher for optimal
+    average: Math.min(result.score + 5, 85), // Slightly above user for average
+    optimal: Math.min(result.score + 20, 95) // Higher for optimal
   })) || [];
 
   const getScoreColor = (level: string) => {
