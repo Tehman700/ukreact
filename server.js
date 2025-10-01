@@ -735,21 +735,63 @@ app.get("/api/check-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Server error" });
   }
 });
+// Add these imports at the top of your server.js
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
+// Define Zod schemas for structured output
+const DetailedAnalysisSchema = z.object({
+  clinicalContext: z.string(),
+  strengths: z.array(z.string()),
+  riskFactors: z.array(z.string()),
+  timeline: z.string()
+});
+
+const CategoryResultSchema = z.object({
+  category: z.string(),
+  score: z.number().min(0).max(100),
+  level: z.enum(['optimal', 'high', 'moderate', 'low']),
+  description: z.string(),
+  recommendations: z.array(z.string()).min(3).max(3),
+  detailedAnalysis: DetailedAnalysisSchema
+});
+
+const AssessmentReportSchema = z.object({
+  overallScore: z.number().min(0).max(100),
+  overallRating: z.enum(['Low Risk', 'Moderate Risk', 'Elevated Risk', 'High Risk']),
+  results: z.array(CategoryResultSchema),
+  summary: z.string()
+});
 
 // ----------------------------
-// Generate AI Assessment Report
+// Generate AI Assessment Report with Structured Output
 // ----------------------------
 app.post("/api/generate-assessment-report", async (req, res) => {
   try {
     const { assessmentType, answers, userInfo } = req.body;
+
+    // Input validation
+    if (!assessmentType || !answers || !userInfo) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: assessmentType, answers, or userInfo'
+      });
+    }
+
+    if (!Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Answers must be a non-empty array'
+      });
+    }
 
     // Format questions and answers for GPT
     const questionsAndAnswers = answers.map(qa =>
       `Q: ${qa.question}\nA: ${qa.answer}`
     ).join('\n\n');
 
-    // Create a specialized prompt based on assessment type
-    const systemPrompt = getSystemPrompt(assessmentType);
+    // Get system prompt and categories for this assessment type
+    const { systemPrompt, categories } = getSystemPromptAndCategories(assessmentType);
 
     const userPrompt = `
 User Information:
@@ -759,115 +801,279 @@ Age Range: ${userInfo.age_range}
 Assessment Responses:
 ${questionsAndAnswers}
 
-Please provide a comprehensive analysis following the exact format specified in your system prompt.
+Please analyze these responses and provide a comprehensive risk assessment for the following categories:
+${categories.join(', ')}
+
+Provide structured output as specified.
     `;
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+    // Call OpenAI API with structured output
+    const completion = await openai.beta.chat.completions.parse({
+      model: "gpt-4o-2024-08-06", // Use the model that supports structured outputs
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
+      response_format: zodResponseFormat(AssessmentReportSchema, "assessment_report"),
       temperature: 0.7,
-      max_tokens: 3000,
     });
 
-    const aiAnalysis = completion.choices[0].message.content;
-    console.log(aiAnalysis)
+    const structuredReport = completion.choices[0].message.parsed;
 
-    // Parse AI response into structured format
-    const structuredReport = parseAIResponse(aiAnalysis, assessmentType);
+    console.log("=== Structured AI Report Generated ===");
+    console.log(JSON.stringify(structuredReport, null, 2));
+    console.log("=== End Report ===");
+
+    // Validate that we got all expected categories
+    if (structuredReport.results.length !== categories.length) {
+      console.warn(`Expected ${categories.length} categories, got ${structuredReport.results.length}`);
+    }
+
+    // Add assessmentType to the report
+    const finalReport = {
+      ...structuredReport,
+      assessmentType
+    };
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
-      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [userInfo.id, assessmentType, aiAnalysis, JSON.stringify(structuredReport), aiAnalysis]
+      `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *`,
+      [
+        userInfo.id,
+        assessmentType,
+        JSON.stringify(structuredReport),
+        JSON.stringify(finalReport),
+        structuredReport.summary
+      ]
     );
 
     res.json({
       success: true,
-      report: structuredReport,
+      report: finalReport,
       reportId: reportResult.rows[0].id
     });
 
   } catch (error) {
     console.error("AI report generation error:", error);
-    res.status(500).json({ success: false, error: error.message });
+
+    // More specific error handling
+    if (error.message?.includes('OpenAI')) {
+      return res.status(503).json({
+        success: false,
+        error: 'AI service temporarily unavailable. Please try again.'
+      });
+    }
+
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        error: 'Report already exists for this assessment'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate assessment report. Please try again.'
+    });
   }
 });
 
+// ----------------------------
+// Helper function to get system prompt and categories by assessment type
+// ----------------------------
+function getSystemPromptAndCategories(assessmentType) {
+  const assessmentConfigs = {
+    "Complication Risk": {
+      categories: [
+        'Medical History Risk',
+        'Lifestyle Risk Factors',
+        'Medication Risk Profile',
+        'Surgical History Impact',
+        'Physical Risk Factors'
+      ],
+      systemPrompt: `You are a medical risk assessment AI specializing in surgical complication analysis.
 
+Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
 
-
-
-
-
-
-
-
-
-
-
-// Helper function to get system prompt based on assessment type
-
-function getSystemPrompt(assessmentType) {
-  const prompts = {
-    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = lower risk]
-OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
-
-CATEGORY_ANALYSIS:
-Medical History Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence clinical description analyzing their medical conditions and impact on surgical risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Lifestyle Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing smoking, alcohol, exercise, nutrition, and stress] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Medication Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current medications and their surgical implications] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Surgical History Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing previous surgical experiences and healing capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Physical Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing weight, BMI, age, and fitness level] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-DETAILED_ANALYSIS:
-Medical History Risk|[clinical context paragraph: 3-4 sentences explaining the medical conditions, their severity, and evidence-based surgical risk implications. Reference NICE guidelines, Royal College of Surgeons protocols, or relevant medical research]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline recommendation like "Begin medical optimization 6-8 weeks before surgery..."]
-
-Lifestyle Risk Factors|[clinical context paragraph: 3-4 sentences on lifestyle impact on surgical outcomes, citing NICE guidelines on smoking cessation, alcohol, and ERAS protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Implement lifestyle changes immediately. Smoking cessation should begin 4-6 weeks before surgery..."]
-
-Medication Risk Profile|[clinical context paragraph: 3-4 sentences on medication management, interactions, and Royal College of Anaesthetists guidance]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Medication review should occur 2-3 weeks before surgery..."]
-
-Surgical History Impact|[clinical context paragraph: 3-4 sentences analyzing previous surgical outcomes and their predictive value]|[strengths: comma-separated list of 2-3 positive factors]|[risks: comma-separated list of 2-3 risk factors]|[timeline: specific timeline like "Share surgical history with your current surgical team 1-2 weeks before your procedure"]
-
-Physical Risk Factors|[clinical context paragraph: 3-4 sentences on BMI, age, fitness and their impact. Reference ERAS prehabilitation protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Begin physical optimization 4-6 weeks before surgery with a structured prehabilitation program"]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 5-6 paragraph analysis covering:
-1. Overall risk profile assessment
-2. Most significant risk factors requiring immediate attention
-3. Positive factors working in the patient's favor
-4. Specific evidence-based optimization strategies
-5. Timeline and prioritization of interventions
-6. Expected outcomes with proper preparation
-
-Include specific medical references to UK guidelines (NICE, Royal College of Surgeons, ERAS), cite evidence-based practices, and provide actionable, personalized recommendations based on their specific responses.]
+For each category, you must provide:
+1. A score (0-100, where higher = lower risk)
+2. A risk level (optimal/high/moderate/low)
+3. A 2-3 sentence clinical description
+4. Exactly 3 specific, actionable recommendations
+5. Detailed analysis including:
+   - Clinical context (3-4 sentences with evidence-based references to NICE guidelines, Royal College of Surgeons, ERAS protocols)
+   - At least 3 strengths (positive factors)
+   - At least 3 risk factors (areas requiring attention)
+   - Specific timeline recommendations
 
 SCORING GUIDELINES:
-- Score 85-100: Optimal profile, minimal modifiable risks
-- Score 70-84: Good profile with some areas for improvement
-- Score 55-69: Moderate risk requiring optimization
-- Score 0-54: Elevated risk requiring significant intervention
+- 85-100: Optimal profile, minimal modifiable risks
+- 70-84: Good profile with some areas for improvement
+- 55-69: Moderate risk requiring optimization
+- 0-54: Elevated risk requiring significant intervention
 
-Be specific, evidence-based, and provide actionable recommendations that are personalized to the patient's actual responses.`,
+OVERALL RATING GUIDELINES:
+- Low Risk: Overall score 85-100
+- Moderate Risk: Overall score 70-84
+- Elevated Risk: Overall score 55-69
+- High Risk: Overall score 0-54
 
-    // Keep other assessment types...
-    "Anaesthesia Risk": `[Your existing Anaesthesia Risk prompt]`,
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+Be specific, evidence-based, and provide actionable recommendations personalized to the patient's responses.
+
+CRITICAL: You must analyze ALL five categories:
+1. Medical History Risk - Analyze medical conditions, chronic diseases, and their surgical impact
+2. Lifestyle Risk Factors - Analyze smoking, alcohol, exercise, nutrition, stress, and sleep
+3. Medication Risk Profile - Analyze current medications, interactions, and perioperative management
+4. Surgical History Impact - Analyze previous surgeries, complications, and healing capacity
+5. Physical Risk Factors - Analyze BMI, weight, age, and physical fitness level`
+    },
+
+    "Anaesthesia Risk": {
+      categories: [
+        'Airway Management Risk',
+        'Sleep Apnoea Risk',
+        'Medication Interactions',
+        'Substance Use Impact',
+        'Previous Anaesthesia History',
+        'Allergy & Reaction Risk'
+      ],
+      systemPrompt: `You are a specialist anaesthesia risk assessment AI with expertise in perioperative safety.
+
+Analyze the patient's responses and provide a comprehensive anaesthetic risk assessment.
+
+For each category, provide the same structured analysis as described in the Complication Risk assessment.
+
+Focus on anaesthetic-specific risks including:
+- Airway management and intubation difficulty
+- Sleep-related breathing disorders
+- Drug metabolism and interactions
+- Cardiovascular stability during anaesthesia
+- Recovery predictions and post-operative monitoring
+
+Reference ASA guidelines, Royal College of Anaesthetists protocols, and evidence-based anaesthetic practices.
+
+CRITICAL: You must analyze ALL six categories with equal depth and detail.`
+    },
+
+    "Medication Burden": {
+      categories: [
+        'Polypharmacy Risk',
+        'Drug Interaction Risk',
+        'Side Effect Burden',
+        'Medication Management'
+      ],
+      systemPrompt: `You are a clinical pharmacology AI specializing in medication burden assessment.
+
+Analyze the patient's medication regimen and provide comprehensive risk assessment.
+
+Focus on polypharmacy risks, drug-drug interactions, side effect profiles, and medication management complexity.
+
+Reference British National Formulary, NICE prescribing guidelines, and evidence-based deprescribing protocols.`
+    },
+
+    "Surgery Readiness": {
+      categories: [
+        'Physical Readiness',
+        'Metabolic Health',
+        'Recovery Potential',
+        'Risk Factors',
+        'Preparation Status'
+      ],
+      systemPrompt: `You are a surgical preparation AI specializing in pre-operative optimization.
+
+Assess the patient's readiness for surgery across physical, metabolic, and preparation dimensions.
+
+Reference ERAS protocols, Royal College of Surgeons pre-operative guidance, and prehabilitation evidence.`
+    },
+
+    "Symptom": {
+      categories: [
+        'Pain Assessment',
+        'Fatigue Impact',
+        'Digestive Symptoms',
+        'Joint & Mobility'
+      ],
+      systemPrompt: `You are a symptom analysis AI specializing in quality of life assessment.
+
+Analyze the patient's symptom burden and its impact on daily functioning.
+
+Focus on pain levels, energy, digestive health, and mobility patterns.`
+    },
+
+    "Inflammation": {
+      categories: [
+        'Dietary Inflammation',
+        'Lifestyle Factors',
+        'Sleep Quality',
+        'Stress & Recovery'
+      ],
+      systemPrompt: `You are an inflammation assessment AI specializing in lifestyle medicine.
+
+Analyze inflammatory markers from diet, lifestyle, sleep, and stress patterns.
+
+Reference anti-inflammatory diet evidence, stress management research, and sleep hygiene protocols.`
+    },
+
+    "Recovery Speed": {
+      categories: [
+        'Nutritional Foundation',
+        'Mental Readiness',
+        'Support System Strength',
+        'Home Environment Readiness',
+        'Sleep Quality Impact',
+        'Physical Baseline'
+      ],
+      systemPrompt: `You are a recovery optimization AI specializing in post-operative outcomes.
+
+Assess factors that influence recovery speed including nutrition, mental health, social support, and environment.
+
+Reference Enhanced Recovery After Surgery (ERAS) guidelines and recovery optimization evidence.`
+    },
+
+    "Daily Energy": {
+      categories: [
+        'Sleep Quality & Recovery',
+        'Energy Pattern Stability',
+        'Stress & Recovery Balance',
+        'Nutritional Energy Support'
+      ],
+      systemPrompt: `You are an energy management AI specializing in fatigue assessment.
+
+Analyze patterns affecting daily energy levels including sleep, stress, and nutrition.
+
+Provide evidence-based strategies for energy optimization.`
+    },
+
+    "Mobility": {
+      categories: [
+        'Cardiovascular Endurance',
+        'Lower Body Strength',
+        'Balance & Stability',
+        'Functional Strength',
+        'Independence Level',
+        'Pain Management',
+        'Activity Baseline'
+      ],
+      systemPrompt: `You are a mobility assessment AI specializing in functional capacity.
+
+Analyze multiple dimensions of mobility including endurance, strength, balance, and independence.
+
+Reference physiotherapy guidelines and functional mobility evidence.`
+    }
   };
 
-  return prompts[assessmentType] || prompts["default"];
+  const config = assessmentConfigs[assessmentType];
+
+  if (!config) {
+    // Default fallback
+    return {
+      categories: ['Overall Assessment'],
+      systemPrompt: `You are a health assessment AI. Analyze the responses and provide structured recommendations.`
+    };
+  }
+
+  return config;
 }
 
 
