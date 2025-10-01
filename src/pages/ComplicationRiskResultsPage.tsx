@@ -6,7 +6,6 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -164,8 +163,6 @@ export function ComplicationRiskResultsPage() {
   // Error state
   if (error || !aiReport) {
     return (
-                                                   <PaymentGate requiredFunnel="complication-risk">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -182,8 +179,6 @@ export function ComplicationRiskResultsPage() {
           </CardContent>
         </Card>
       </div>
-          </PaymentGate>
-
     );
   }
 
@@ -191,8 +186,6 @@ export function ComplicationRiskResultsPage() {
   const rating = getOverallRating(overallRating);
 
   return (
-                                           <PaymentGate requiredFunnel="complication-risk">
-
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
@@ -304,21 +297,21 @@ export function ComplicationRiskResultsPage() {
             {/* Comparative Analysis Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
+                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   <span>Your Risk Profile vs Benchmarks</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   How your risk scores compare to average patients and optimal targets
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-16">
+              <CardContent className="px-3 sm:px-6">
+                <div className="space-y-12 sm:space-y-16">
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-6">{item.name}</h3>
+                      <h3 className="text-left font-medium mb-4 sm:mb-6 text-sm sm:text-base px-1">{item.name}</h3>
 
-                      <div className="relative max-w-lg mx-auto">
+                      <div className="relative w-full px-1">
                         {(() => {
                           const rangeStart = Math.max(0, item.average - 20);
                           const rangeEnd = 100;
@@ -330,20 +323,24 @@ export function ComplicationRiskResultsPage() {
 
                           return (
                             <>
+                              {/* Your Score Label Above */}
                               <div
-                                className="absolute -top-14 transform -translate-x-1/2 text-center"
+                                className="absolute -top-10 sm:-top-14 transform -translate-x-1/2 text-center z-10"
                                 style={{ left: `${yourScorePosition}%` }}
                               >
-                                <div className="text-xs text-muted-foreground mb-1">Your score</div>
-                                <div className="text-sm font-medium">{item.yourScore}%</div>
+                                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 whitespace-nowrap">Your score</div>
+                                <div className="text-xs sm:text-sm font-medium">{item.yourScore}%</div>
                               </div>
 
-                              <div className="relative h-2 bg-gray-300 rounded-full">
+                              {/* Main bar */}
+                              <div className="relative h-1.5 sm:h-2 bg-gray-300 rounded-full">
+                                {/* Your score fill */}
                                 <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
 
+                                {/* Benchmark markers - white lines on the bar */}
                                 <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
@@ -354,23 +351,27 @@ export function ComplicationRiskResultsPage() {
                                 />
                               </div>
 
-                              <div className="relative mt-3 h-12">
+                              {/* Labels - Responsive positioning */}
+                              <div className="relative mt-2 sm:mt-3 min-h-[40px] sm:min-h-[48px]">
+                                {/* Average Patient Label */}
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
                                   <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${averagePosition}%` }}
                                   >
-                                    <div className="text-sm font-medium">{item.average}%</div>
-                                    <div className="text-xs text-muted-foreground whitespace-nowrap">Average Patient</div>
+                                    <div className="text-xs sm:text-sm font-medium">{item.average}%</div>
+                                    <div className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Average</div>
                                   </div>
                                 )}
-                                {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
+
+                                {/* Optimal Label */}
+                                {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 10 && (
                                   <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${optimalPosition}%` }}
                                   >
-                                    <div className="text-sm font-medium">{item.optimal}%</div>
-                                    <div className="text-xs text-muted-foreground">Optimal</div>
+                                    <div className="text-xs sm:text-sm font-medium">{item.optimal}%</div>
+                                    <div className="text-[10px] sm:text-xs text-muted-foreground">Optimal</div>
                                   </div>
                                 )}
                               </div>
@@ -725,7 +726,5 @@ export function ComplicationRiskResultsPage() {
         </Card>
       </div>
     </div>
-    </PaymentGate>
-
   );
 }
