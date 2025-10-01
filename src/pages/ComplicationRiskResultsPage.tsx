@@ -310,7 +310,7 @@ export function ComplicationRiskResultsPage() {
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
                       {/* Category Title */}
-                      <h3 className="text-left font-medium pb-8 mb-2">{item.name}</h3>
+                      <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
 
                       {/* Chart */}
                       <div className="relative max-w-lg mx-auto">
