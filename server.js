@@ -839,7 +839,7 @@ Lifestyle Risk Factors|[clinical context paragraph: 3-4 sentences on lifestyle i
 
 Medication Risk Profile|[clinical context paragraph: 3-4 sentences on medication management, interactions, and Royal College of Anaesthetists guidance]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Medication review should occur 2-3 weeks before surgery..."]
 
-Surgical History Impact|[clinical context paragraph: 3-4 sentences analyzing previous surgical outcomes and their predictive value]|[strengths: comma-separated list of 2-3 positive factors]|[risks: comma-separated list of 2-3 risk factors if any, or "None identified"]|[timeline: specific timeline like "Share surgical history with your current surgical team 1-2 weeks before your procedure"]
+Surgical History Impact|[clinical context paragraph: 3-4 sentences analyzing previous surgical outcomes and their predictive value]|[strengths: comma-separated list of 2-3 positive factors]|[risks: comma-separated list of 2-3 risk factors]|[timeline: specific timeline like "Share surgical history with your current surgical team 1-2 weeks before your procedure"]
 
 Physical Risk Factors|[clinical context paragraph: 3-4 sentences on BMI, age, fitness and their impact. Reference ERAS prehabilitation protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Begin physical optimization 4-6 weeks before surgery with a structured prehabilitation program"]
 
