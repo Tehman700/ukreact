@@ -61,7 +61,7 @@ export function ComplicationRiskInformationPage() {
            userInfo.age !== '';
   };
 
-  // Progress animation effect - MUCH SLOWER
+  // Progress animation effect
   useEffect(() => {
     if (!isSubmitting) {
       setProgress(0);
@@ -69,7 +69,6 @@ export function ComplicationRiskInformationPage() {
       return;
     }
 
-    // Significantly slower progress steps - about 30-40 seconds total
     const progressSteps = [
       { progress: 5, delay: 1500, statement: 0 },
       { progress: 10, delay: 2000, statement: 1 },
@@ -84,7 +83,6 @@ export function ComplicationRiskInformationPage() {
       { progress: 78, delay: 2500, statement: 10 },
       { progress: 85, delay: 2000, statement: 11 },
       { progress: 92, delay: 2500, statement: 12 },
-      // Only go to 95% via animation, wait for report to finish
       { progress: 95, delay: 2000, statement: 13 }
     ];
 
@@ -111,7 +109,6 @@ export function ComplicationRiskInformationPage() {
     };
   }, [isSubmitting]);
 
-  // When report is ready, complete the progress bar
   useEffect(() => {
     if (reportReady && progress >= 95) {
       const timeout = setTimeout(() => {
@@ -132,7 +129,7 @@ export function ComplicationRiskInformationPage() {
 
     try {
       // Save user
-      const response = await fetch("https://luther.health/api/users", {
+      const userResponse = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -144,14 +141,30 @@ export function ComplicationRiskInformationPage() {
         }),
       });
 
-      const savedUser = await response.json();
-      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+      if (!userResponse.ok) {
+        throw new Error('Failed to save user information');
+      }
+
+      const savedUser = await userResponse.json();
+      console.log('User saved:', savedUser);
+
+      sessionStorage.setItem("userInfo", JSON.stringify(savedUser));
 
       // Get stored answers
       const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
 
+      if (pendingAnswers.length === 0) {
+        throw new Error('No assessment answers found');
+      }
+
+      console.log('Generating AI report with:', {
+        assessmentType: "Complication Risk",
+        answersCount: pendingAnswers.length,
+        userId: savedUser.id
+      });
+
       // Generate AI report
-      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+      const reportResponse = await fetch("/api/generate-assessment-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -161,22 +174,45 @@ export function ComplicationRiskInformationPage() {
         }),
       });
 
+      if (!reportResponse.ok) {
+        const errorData = await reportResponse.json();
+        console.error('Report generation failed:', errorData);
+        throw new Error(errorData.error || 'Failed to generate report');
+      }
+
       const reportData = await reportResponse.json();
+      console.log('Report generated successfully:', reportData);
+
+      if (!reportData.success || !reportData.report) {
+        throw new Error('Invalid report data received');
+      }
+
+      // Store report data in sessionStorage
       sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-      sessionStorage.setItem("reportId", reportData.reportId.toString());
+
+      // Handle reportId safely - it might be a number or undefined
+      if (reportData.reportId) {
+        sessionStorage.setItem("reportId", String(reportData.reportId));
+      }
+
       sessionStorage.setItem("assessmentType", "Complication Risk");
 
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Complication Risk",
-          report: reportData.report,
-          reportId: reportData.reportId,
-        }),
-      });
+      // Send email report (optional - don't fail if this errors)
+      try {
+        await fetch("/api/send-email-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userEmail: savedUser.email,
+            userName: `${savedUser.first_name} ${savedUser.last_name}`,
+            assessmentType: "Complication Risk",
+            report: reportData.report,
+            reportId: reportData.reportId || null,
+          }),
+        });
+      } catch (emailError) {
+        console.warn('Email sending failed, but continuing:', emailError);
+      }
 
       // Mark report as ready
       setReportReady(true);
@@ -187,8 +223,10 @@ export function ComplicationRiskInformationPage() {
       }, 1500);
 
     } catch (err) {
-      console.error("Error saving user info and generating report:", err);
+      console.error("Error in form submission:", err);
+      alert(err instanceof Error ? err.message : 'An error occurred. Please try again.');
       setIsSubmitting(false);
+      setReportReady(false);
     }
   };
 
@@ -200,7 +238,7 @@ export function ComplicationRiskInformationPage() {
   return (
     <PaymentGate requiredFunnel="complication-risk">
       <div className="min-h-screen bg-background py-16 relative">
-        {/* Full-page loading overlay with LoadingPage UI */}
+        {/* Full-page loading overlay */}
         <AnimatePresence>
           {isSubmitting && (
             <motion.div
@@ -210,7 +248,6 @@ export function ComplicationRiskInformationPage() {
               className="fixed inset-0 bg-background flex flex-col items-center justify-center px-6 py-8 z-50"
             >
               <div className="w-full max-w-md mx-auto text-center space-y-8">
-
                 {/* Progress Circle */}
                 <div className="relative flex items-center justify-center">
                   <svg
@@ -219,7 +256,6 @@ export function ComplicationRiskInformationPage() {
                     height="144"
                     viewBox="0 0 144 144"
                   >
-                    {/* Background circle */}
                     <circle
                       cx="72"
                       cy="72"
@@ -229,7 +265,6 @@ export function ComplicationRiskInformationPage() {
                       fill="transparent"
                       className="text-muted/20"
                     />
-                    {/* Progress circle */}
                     <motion.circle
                       cx="72"
                       cy="72"
@@ -250,7 +285,6 @@ export function ComplicationRiskInformationPage() {
                     />
                   </svg>
 
-                  {/* Progress percentage */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <div className="text-lg transition-all duration-300 ease-out">
@@ -261,7 +295,7 @@ export function ComplicationRiskInformationPage() {
                 </div>
 
                 {/* Please Wait Message */}
-                <div className="space-y-2 mt-[0px] mr-[0px] mb-[55px] ml-[0px]">
+                <div className="space-y-2 mb-14">
                   <motion.h2
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -285,7 +319,6 @@ export function ComplicationRiskInformationPage() {
                 <div className="relative h-24 overflow-hidden">
                   <AnimatePresence mode="wait">
                     <div className="space-y-0.5 text-center text-sm">
-                      {/* Previous statements (faded) */}
                       {currentStatementIndex > 0 && (
                         <motion.div
                           key={`prev-${currentStatementIndex - 1}`}
@@ -300,7 +333,6 @@ export function ComplicationRiskInformationPage() {
                         </motion.div>
                       )}
 
-                      {/* Current active statement */}
                       <motion.div
                         key={`current-${currentStatementIndex}`}
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -332,7 +364,6 @@ export function ComplicationRiskInformationPage() {
                         </motion.span>
                       </motion.div>
 
-                      {/* Next statements (preview, highly faded) */}
                       {currentStatementIndex < AUTHORITY_STATEMENTS.length - 1 && (
                         <motion.div
                           key={`next-${currentStatementIndex + 1}`}
@@ -369,6 +400,7 @@ export function ComplicationRiskInformationPage() {
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     placeholder="Enter your first name"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -380,6 +412,7 @@ export function ComplicationRiskInformationPage() {
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     placeholder="Enter your last name"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -393,6 +426,7 @@ export function ComplicationRiskInformationPage() {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="your.email@example.com"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -404,12 +438,17 @@ export function ComplicationRiskInformationPage() {
                   value={userInfo.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="(555) 123-4567"
+                  disabled={isSubmitting}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="age">Age Range *</Label>
-                <Select value={userInfo.age} onValueChange={(value) => handleInputChange('age', value)}>
+                <Select
+                  value={userInfo.age}
+                  onValueChange={(value) => handleInputChange('age', value)}
+                  disabled={isSubmitting}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select your age range" />
                   </SelectTrigger>
@@ -429,9 +468,9 @@ export function ComplicationRiskInformationPage() {
                 <Button
                   type="submit"
                   disabled={!isFormValid() || isSubmitting}
-                  className="mx-auto my-[0px] px-[60px] py-[7px]"
+                  className="mx-auto px-[60px] py-[7px]"
                 >
-                  Next <ArrowRight className="w-4 h-4 ml-2" />
+                  {isSubmitting ? 'Processing...' : 'Next'} <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </form>
@@ -439,7 +478,7 @@ export function ComplicationRiskInformationPage() {
 
           <div className="mt-8">
             <div className="text-center mb-4">
-              <h3 className="pt-[20px] font-bold">Privacy & Confidentiality</h3>
+              <h3 className="pt-5 font-bold">Privacy & Confidentiality</h3>
             </div>
             <div className="bg-muted/30 p-6 rounded-lg text-center">
               <p className="text-sm text-muted-foreground">
