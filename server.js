@@ -6,7 +6,8 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
-
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
 const { Pool } = pkg;
 const app = express();
 app.use(cors());
@@ -16,6 +17,33 @@ app.use(cors());
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Define Zod schemas for structured output
+const DetailedAnalysisSchema = z.object({
+  clinicalContext: z.string(),
+  strengths: z.array(z.string()),
+  riskFactors: z.array(z.string()),
+  timeline: z.string()
+});
+
+const CategoryResultSchema = z.object({
+  category: z.string(),
+  score: z.number().min(0).max(100),
+  level: z.enum(['optimal', 'high', 'moderate', 'low']),
+  description: z.string(),
+  recommendations: z.array(z.string()).min(3).max(3),
+  detailedAnalysis: DetailedAnalysisSchema
+});
+
+const AssessmentReportSchema = z.object({
+  overallScore: z.number().min(0).max(100),
+  overallRating: z.enum(['Low Risk', 'Moderate Risk', 'Elevated Risk', 'High Risk']),
+  results: z.array(CategoryResultSchema),
+  summary: z.string()
+});
+
+
+
 
 // ----------------------------
 // EMAIL CONFIGURATION
@@ -735,33 +763,8 @@ app.get("/api/check-payment", async (req, res) => {
     res.status(500).json({ success: false, error: "Server error" });
   }
 });
-// Add these imports at the top of your server.js
-import { zodResponseFormat } from "openai/helpers/zod";
-import { z } from "zod";
 
-// Define Zod schemas for structured output
-const DetailedAnalysisSchema = z.object({
-  clinicalContext: z.string(),
-  strengths: z.array(z.string()),
-  riskFactors: z.array(z.string()),
-  timeline: z.string()
-});
 
-const CategoryResultSchema = z.object({
-  category: z.string(),
-  score: z.number().min(0).max(100),
-  level: z.enum(['optimal', 'high', 'moderate', 'low']),
-  description: z.string(),
-  recommendations: z.array(z.string()).min(3).max(3),
-  detailedAnalysis: DetailedAnalysisSchema
-});
-
-const AssessmentReportSchema = z.object({
-  overallScore: z.number().min(0).max(100),
-  overallRating: z.enum(['Low Risk', 'Moderate Risk', 'Elevated Risk', 'High Risk']),
-  results: z.array(CategoryResultSchema),
-  summary: z.string()
-});
 
 // ----------------------------
 // Generate AI Assessment Report with Structured Output
@@ -927,139 +930,6 @@ CRITICAL: You must analyze ALL five categories:
 3. Medication Risk Profile - Analyze current medications, interactions, and perioperative management
 4. Surgical History Impact - Analyze previous surgeries, complications, and healing capacity
 5. Physical Risk Factors - Analyze BMI, weight, age, and physical fitness level`
-    },
-
-    "Anaesthesia Risk": {
-      categories: [
-        'Airway Management Risk',
-        'Sleep Apnoea Risk',
-        'Medication Interactions',
-        'Substance Use Impact',
-        'Previous Anaesthesia History',
-        'Allergy & Reaction Risk'
-      ],
-      systemPrompt: `You are a specialist anaesthesia risk assessment AI with expertise in perioperative safety.
-
-Analyze the patient's responses and provide a comprehensive anaesthetic risk assessment.
-
-For each category, provide the same structured analysis as described in the Complication Risk assessment.
-
-Focus on anaesthetic-specific risks including:
-- Airway management and intubation difficulty
-- Sleep-related breathing disorders
-- Drug metabolism and interactions
-- Cardiovascular stability during anaesthesia
-- Recovery predictions and post-operative monitoring
-
-Reference ASA guidelines, Royal College of Anaesthetists protocols, and evidence-based anaesthetic practices.
-
-CRITICAL: You must analyze ALL six categories with equal depth and detail.`
-    },
-
-    "Medication Burden": {
-      categories: [
-        'Polypharmacy Risk',
-        'Drug Interaction Risk',
-        'Side Effect Burden',
-        'Medication Management'
-      ],
-      systemPrompt: `You are a clinical pharmacology AI specializing in medication burden assessment.
-
-Analyze the patient's medication regimen and provide comprehensive risk assessment.
-
-Focus on polypharmacy risks, drug-drug interactions, side effect profiles, and medication management complexity.
-
-Reference British National Formulary, NICE prescribing guidelines, and evidence-based deprescribing protocols.`
-    },
-
-    "Surgery Readiness": {
-      categories: [
-        'Physical Readiness',
-        'Metabolic Health',
-        'Recovery Potential',
-        'Risk Factors',
-        'Preparation Status'
-      ],
-      systemPrompt: `You are a surgical preparation AI specializing in pre-operative optimization.
-
-Assess the patient's readiness for surgery across physical, metabolic, and preparation dimensions.
-
-Reference ERAS protocols, Royal College of Surgeons pre-operative guidance, and prehabilitation evidence.`
-    },
-
-    "Symptom": {
-      categories: [
-        'Pain Assessment',
-        'Fatigue Impact',
-        'Digestive Symptoms',
-        'Joint & Mobility'
-      ],
-      systemPrompt: `You are a symptom analysis AI specializing in quality of life assessment.
-
-Analyze the patient's symptom burden and its impact on daily functioning.
-
-Focus on pain levels, energy, digestive health, and mobility patterns.`
-    },
-
-    "Inflammation": {
-      categories: [
-        'Dietary Inflammation',
-        'Lifestyle Factors',
-        'Sleep Quality',
-        'Stress & Recovery'
-      ],
-      systemPrompt: `You are an inflammation assessment AI specializing in lifestyle medicine.
-
-Analyze inflammatory markers from diet, lifestyle, sleep, and stress patterns.
-
-Reference anti-inflammatory diet evidence, stress management research, and sleep hygiene protocols.`
-    },
-
-    "Recovery Speed": {
-      categories: [
-        'Nutritional Foundation',
-        'Mental Readiness',
-        'Support System Strength',
-        'Home Environment Readiness',
-        'Sleep Quality Impact',
-        'Physical Baseline'
-      ],
-      systemPrompt: `You are a recovery optimization AI specializing in post-operative outcomes.
-
-Assess factors that influence recovery speed including nutrition, mental health, social support, and environment.
-
-Reference Enhanced Recovery After Surgery (ERAS) guidelines and recovery optimization evidence.`
-    },
-
-    "Daily Energy": {
-      categories: [
-        'Sleep Quality & Recovery',
-        'Energy Pattern Stability',
-        'Stress & Recovery Balance',
-        'Nutritional Energy Support'
-      ],
-      systemPrompt: `You are an energy management AI specializing in fatigue assessment.
-
-Analyze patterns affecting daily energy levels including sleep, stress, and nutrition.
-
-Provide evidence-based strategies for energy optimization.`
-    },
-
-    "Mobility": {
-      categories: [
-        'Cardiovascular Endurance',
-        'Lower Body Strength',
-        'Balance & Stability',
-        'Functional Strength',
-        'Independence Level',
-        'Pain Management',
-        'Activity Baseline'
-      ],
-      systemPrompt: `You are a mobility assessment AI specializing in functional capacity.
-
-Analyze multiple dimensions of mobility including endurance, strength, balance, and independence.
-
-Reference physiotherapy guidelines and functional mobility evidence.`
     }
   };
 
@@ -1075,184 +945,6 @@ Reference physiotherapy guidelines and functional mobility evidence.`
 
   return config;
 }
-
-
-
-
-
-
-
-
-
-
-
-// Helper function to parse AI response - UPDATED TO HANDLE BOTH ASSESSMENT TYPES
-// Replace the parseAIResponse function in server.js
-
-function parseAIResponse(aiAnalysis, assessmentType) {
-  console.log("Parsing AI Analysis for:", assessmentType);
-
-  try {
-    // Extract overall score and rating
-    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
-    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 70;
-
-    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
-
-    // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
-    const results = [];
-
-    // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
-    const detailedAnalysisMap = new Map();
-
-    // Parse detailed analysis first
-    if (detailedSection) {
-      const categories = assessmentType === "Complication Risk"
-        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
-        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
-
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
-        const match = detailedSection[1].match(regex);
-
-        if (match) {
-          detailedAnalysisMap.set(category, {
-            clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
-          });
-        }
-      });
-    }
-
-    // Parse category analysis
-    if (categorySection) {
-      const categories = assessmentType === "Complication Risk"
-        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
-        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
-
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
-        const categoryMatch = categorySection[1].match(categoryRegex);
-
-        if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
-
-          if (parts.length >= 4) {
-            const score = parseInt(parts[0]) || 70;
-            const level = parts[1].toLowerCase();
-            const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
-
-            // Get detailed analysis for this category
-            const detailedAnalysis = detailedAnalysisMap.get(category) || {
-              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical planning.`,
-              strengths: ['Regular health monitoring', 'Awareness of risk factors', 'Proactive health management'],
-              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
-              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
-            };
-
-            results.push({
-              category,
-              score,
-              maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
-              description,
-              recommendations,
-              detailedAnalysis
-            });
-          }
-        }
-      });
-    }
-
-    // If parsing failed, create comprehensive fallback
-    if (results.length === 0) {
-      console.log("Creating fallback structure for:", assessmentType);
-
-      const fallbackCategories = assessmentType === "Complication Risk"
-        ? [
-            { name: 'Medical History Risk', desc: 'Your medical history indicates factors that require attention and optimization before surgery.' },
-            { name: 'Lifestyle Risk Factors', desc: 'Several lifestyle factors could impact your surgical outcome and recovery.' },
-            { name: 'Medication Risk Profile', desc: 'Your current medications require careful perioperative management.' },
-            { name: 'Surgical History Impact', desc: 'Your previous surgical experiences provide valuable insights.' },
-            { name: 'Physical Risk Factors', desc: 'Physical condition factors may impact surgical outcomes.' }
-          ]
-        : [
-            { name: 'Airway Management Risk', desc: 'Your airway assessment indicates manageable risk factors.' },
-            { name: 'Sleep Apnoea Risk', desc: 'Sleep-related factors may require monitoring.' },
-            { name: 'Medication Interactions', desc: 'Current medications require review for interactions.' }
-          ];
-
-      fallbackCategories.forEach(cat => {
-        results.push({
-          category: cat.name,
-          score: Math.floor(Math.random() * 20) + 65,
-          maxScore: 100,
-          level: 'moderate',
-          description: cat.desc,
-          recommendations: [
-            'Consult with your healthcare provider for personalized guidance',
-            'Follow pre-operative preparation protocols carefully',
-            'Ensure all medical information is shared with your surgical team'
-          ],
-          detailedAnalysis: {
-            clinicalContext: `Based on your responses, your ${cat.name.toLowerCase()} shows areas for attention and optimization before surgery.`,
-            strengths: ['Good baseline awareness', 'Engaged with assessment process', 'Open to optimization'],
-            riskFactors: ['Requires pre-operative optimization', 'Close monitoring recommended'],
-            timeline: 'Begin optimization 4-6 weeks before scheduled surgery.'
-          }
-        });
-      });
-    }
-
-    // Extract detailed summary
-    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
-    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
-
-    return {
-      overallScore,
-      overallRating,
-      results,
-      summary,
-      assessmentType
-    };
-
-  } catch (error) {
-    console.error("Error parsing AI response:", error);
-
-    return {
-      overallScore: 70,
-      overallRating: "Moderate Risk",
-      results: [{
-        category: "Overall Assessment",
-        score: 70,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your assessment has been completed. Please consult with your healthcare provider.",
-        recommendations: [
-          "Discuss your assessment results with your doctor",
-          "Follow all pre-operative instructions carefully",
-          "Ensure complete medical disclosure to your surgical team"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Engaged with process'],
-          riskFactors: ['Requires medical consultation'],
-          timeline: 'Consult with healthcare team as soon as possible.'
-        }
-      }],
-      summary: aiAnalysis,
-      assessmentType
-    };
-  }
-}
-
-
 
 // ----------------------------
 // Send Email Report
