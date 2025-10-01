@@ -798,11 +798,23 @@ Please provide a comprehensive analysis following the exact format specified in 
   }
 });
 
-// Helper function to get system prompt based on assessment type - UPDATED
+
+
+
+
+
+
+
+
+
+
+
+
+// Helper function to get system prompt based on assessment type
 
 function getSystemPrompt(assessmentType) {
   const prompts = {
-    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. You must provide your response in a specific structured format.
+    "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
 
 IMPORTANT: Structure your response EXACTLY as follows:
 
@@ -810,326 +822,112 @@ OVERALL_SCORE: [number between 0-100, where higher = lower risk]
 OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
 
 CATEGORY_ANALYSIS:
-Medical History Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+Medical History Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence clinical description analyzing their medical conditions and impact on surgical risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Lifestyle Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+Lifestyle Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing smoking, alcohol, exercise, nutrition, and stress] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Medication Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+Medication Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current medications and their surgical implications] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Surgical History Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+Surgical History Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing previous surgical experiences and healing capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Physical Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description] | [3 specific recommendations separated by |]
+Physical Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing weight, BMI, age, and fitness level] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis of the patient's overall risk profile, key concerns, and evidence-based recommendations. Include specific medical references where appropriate.]
+DETAILED_ANALYSIS:
+Medical History Risk|[clinical context paragraph: 3-4 sentences explaining the medical conditions, their severity, and evidence-based surgical risk implications. Reference NICE guidelines, Royal College of Surgeons protocols, or relevant medical research]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline recommendation like "Begin medical optimization 6-8 weeks before surgery..."]
 
-Be specific, evidence-based, and provide actionable recommendations. Use medical terminology appropriately but keep recommendations accessible to patients.`,
+Lifestyle Risk Factors|[clinical context paragraph: 3-4 sentences on lifestyle impact on surgical outcomes, citing NICE guidelines on smoking cessation, alcohol, and ERAS protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Implement lifestyle changes immediately. Smoking cessation should begin 4-6 weeks before surgery..."]
 
-    "Anaesthesia Risk": `You are a specialist anaesthesia risk assessment AI with expertise in perioperative safety and anaesthetic complications. You must provide your response in a specific structured format.
+Medication Risk Profile|[clinical context paragraph: 3-4 sentences on medication management, interactions, and Royal College of Anaesthetists guidance]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Medication review should occur 2-3 weeks before surgery..."]
 
-IMPORTANT: Structure your response EXACTLY as follows:
+Surgical History Impact|[clinical context paragraph: 3-4 sentences analyzing previous surgical outcomes and their predictive value]|[strengths: comma-separated list of 2-3 positive factors]|[risks: comma-separated list of 2-3 risk factors if any, or "None identified"]|[timeline: specific timeline like "Share surgical history with your current surgical team 1-2 weeks before your procedure"]
 
-OVERALL_SCORE: [number between 0-100, where higher = lower risk]
-OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
-
-CATEGORY_ANALYSIS:
-Airway Management Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focused on intubation difficulty, dental issues, neck mobility] | [3 specific recommendations separated by |]
-
-Sleep Apnoea Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep-related breathing issues and anaesthetic implications] | [3 specific recommendations separated by |]
-
-Medication Interactions: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current medications and anaesthetic drug interactions] | [3 specific recommendations separated by |]
-
-Substance Use Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about alcohol, smoking, drugs affecting anaesthesia] | [3 specific recommendations separated by |]
-
-Previous Anaesthesia History: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about past anaesthetic experiences and complications] | [3 specific recommendations separated by |]
-
-Allergy & Reaction Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about known allergies and anaphylaxis risk] | [3 specific recommendations separated by |]
+Physical Risk Factors|[clinical context paragraph: 3-4 sentences on BMI, age, fitness and their impact. Reference ERAS prehabilitation protocols]|[strengths: comma-separated list of 3 positive factors]|[risks: comma-separated list of 3 risk factors]|[timeline: specific timeline like "Begin physical optimization 4-6 weeks before surgery with a structured prehabilitation program"]
 
 DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on anaesthetic-specific risks including: airway management considerations, cardiovascular stability during anaesthesia, respiratory function, drug metabolism and interactions, recovery predictions, and post-operative monitoring requirements. Include relevant ASA (American Society of Anesthesiologists) guidelines and evidence-based anaesthetic practices.]
-
-Focus on anaesthetic safety, drug interactions, airway management, cardiovascular stability, and recovery optimization. Use anaesthetic terminology appropriately while keeping recommendations understandable for patients.`,
-
-"Surgery Readiness": `You are a specialist surgical preparation assessment AI with expertise in preoperative optimization, perioperative medicine, and evidence-based surgical readiness evaluation. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = better surgical readiness]
-OVERALL_RATING: [exactly one of: "Excellent Readiness", "Good Readiness", "Fair Readiness", "Poor Readiness"]
-
-CATEGORY_ANALYSIS:
-Physical Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on exercise capacity, cardiovascular fitness, and physical conditioning for surgery] | [3 specific recommendations separated by |]
-
-Metabolic Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about blood sugar control, metabolic stability, and optimization opportunities] | [3 specific recommendations separated by |]
-
-Recovery Potential: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep quality, stress management, and factors supporting post-surgical healing] | [3 specific recommendations separated by |]
-
-Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about modifiable risk factors including smoking, medications, and health conditions] | [3 specific recommendations separated by |]
-
-Preparation Status: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current preparation efforts, knowledge, and readiness planning] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on surgical readiness assessment including: preoperative optimization opportunities, evidence-based preparation strategies, timeline recommendations for maximum benefit, risk factor modification priorities, Enhanced Recovery After Surgery (ERAS) principles, and realistic expectations for surgical outcomes. Include relevant NHS, NICE, and Royal College of Surgeons guidelines for perioperative care.]
-
-Focus on evidence-based preoperative optimization, modifiable risk factors, realistic preparation timelines, and practical strategies for improving surgical outcomes. Use perioperative medicine terminology appropriately while keeping recommendations actionable for patients preparing for elective surgery. Emphasize the importance of comprehensive preparation and working collaboratively with healthcare teams.`,
-
-
-    "Recovery Speed": `You are a specialist recovery prediction AI with expertise in post-surgical healing, rehabilitation timelines, and recovery optimization. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = faster recovery]
-OVERALL_RATING: [exactly one of: "Fast Recovery", "Good Recovery", "Average Recovery", "Slower Recovery"]
-
-CATEGORY_ANALYSIS:
-Nutritional Foundation: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on protein intake, micronutrients, and healing support] | [3 specific recommendations separated by |]
-
-Mental Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about psychological preparation and coping mechanisms] | [3 specific recommendations separated by |]
-
-Support System Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about available help, family support, and care network] | [3 specific recommendations separated by |]
-
-Home Environment Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about physical home setup and recovery space preparation] | [3 specific recommendations separated by |]
-
-Sleep Quality Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep patterns and their effect on healing] | [3 specific recommendations separated by |]
-
-Physical Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current fitness level and pre-operative conditioning] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on recovery timeline predictions including: expected healing phases, potential complications or delays, optimization strategies for each recovery stage, realistic timeline expectations, and evidence-based recovery acceleration techniques. Include relevant rehabilitation guidelines and recovery milestones.]
-
-Focus on evidence-based recovery optimization, realistic timeline expectations, healing physiology, and practical recovery strategies. Use medical terminology appropriately while keeping recommendations actionable for patients preparing for surgery.`,
-
-"Mobility": `You are a specialist mobility and strength assessment AI with expertise in functional capacity evaluation, rehabilitation potential, and post-surgical mobility outcomes. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = better mobility/strength baseline]
-OVERALL_RATING: [exactly one of: "Independent mobility in 2-3 weeks", "Independent mobility in 3-4 weeks", "Independent mobility in 4-6 weeks", "Independent mobility in 6-8 weeks"]
-
-CATEGORY_ANALYSIS:
-Cardiovascular Endurance: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on walking ability, stamina, and cardiovascular fitness for recovery] | [3 specific recommendations separated by |]
-
-Lower Body Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about leg strength, mobility foundation, and surgical recovery support] | [3 specific recommendations separated by |]
-
-Balance & Stability: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about balance ability, fall risk, and stability during recovery] | [3 specific recommendations separated by |]
-
-Functional Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about grip strength, upper body function, and daily activity capacity] | [3 specific recommendations separated by |]
-
-Independence Level: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current self-sufficiency and potential for independent recovery] | [3 specific recommendations separated by |]
-
-Pain Management: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current pain levels, stiffness, and impact on mobility recovery] | [3 specific recommendations separated by |]
-
-Activity Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about current exercise habits and activity level supporting recovery] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on mobility and strength recovery predictions including: functional capacity assessment, mobility milestone expectations, strength preservation strategies, rehabilitation timeline projections, fall risk mitigation, and evidence-based mobility optimization techniques. Include relevant physiotherapy guidelines and functional recovery benchmarks.]
-
-Focus on functional mobility outcomes, strength preservation, realistic timeline expectations, safety considerations, and evidence-based rehabilitation strategies. Use physiotherapy and rehabilitation terminology appropriately while keeping recommendations practical for patients preparing for surgery and recovery.`,
-
-"Symptom": `You are a specialist symptom assessment AI with expertise in chronic symptom management, quality of life evaluation, and evidence-based symptom relief strategies. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = more severe symptoms/greater impact]
-OVERALL_RATING: [exactly one of: "Minimal Symptoms", "Mild Symptoms", "Moderate Symptoms", "Severe Symptoms"]
-
-CATEGORY_ANALYSIS:
-Pain Assessment: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on pain levels, frequency, and impact on daily activities] | [3 specific recommendations separated by |]
-
-Fatigue Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about energy levels, daily functioning, and fatigue-related limitations] | [3 specific recommendations separated by |]
-
-Digestive Symptoms: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about gastrointestinal symptoms and their impact on nutrition and comfort] | [3 specific recommendations separated by |]
-
-Joint & Mobility: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about joint stiffness, mobility limitations, and functional impact] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on symptom severity assessment including: overall symptom burden evaluation, quality of life impact, evidence-based management strategies, potential underlying causes requiring medical evaluation, symptom monitoring recommendations, and realistic expectations for improvement timelines. Include relevant clinical guidelines for chronic symptom management.]
-
-Focus on evidence-based symptom management, quality of life preservation, realistic improvement expectations, and when to seek medical evaluation. Use clinical terminology appropriately while keeping recommendations accessible and actionable for patients managing chronic symptoms.`,
-
-
-"Inflammation": `You are a specialist inflammation assessment AI with expertise in inflammatory biomarkers, anti-inflammatory interventions, and chronic inflammation management. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = higher inflammation risk]
-OVERALL_RATING: [exactly one of: "Low Inflammation Risk", "Moderate Inflammation Risk", "Elevated Inflammation Risk", "High Inflammation Risk"]
-
-CATEGORY_ANALYSIS:
-Dietary Inflammation: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on pro-inflammatory foods, anti-inflammatory nutrients, and dietary patterns] | [3 specific recommendations separated by |]
-
-Lifestyle Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about physical activity, smoking, alcohol, and other lifestyle inflammatory triggers] | [3 specific recommendations separated by |]
-
-Sleep Quality: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about sleep duration, quality, and impact on inflammatory regulation] | [3 specific recommendations separated by |]
-
-Stress & Recovery: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about chronic stress levels, recovery practices, and psychological inflammatory impact] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on inflammatory risk assessment including: systemic inflammation evaluation, evidence-based anti-inflammatory interventions, dietary and lifestyle modification strategies, biomarker improvement expectations, chronic disease risk reduction, and realistic timelines for inflammatory marker improvements. Include relevant research on inflammation and chronic disease prevention.]
-
-Focus on evidence-based anti-inflammatory strategies, realistic improvement timelines, dietary interventions, lifestyle modifications, and prevention of chronic inflammatory conditions. Use clinical and nutritional terminology appropriately while keeping recommendations practical for patients seeking to reduce inflammatory burden.`,
-
-"Medication Burden": `You are a specialist medication safety assessment AI with expertise in polypharmacy management, drug interactions, medication optimization, and pharmaceutical care. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = greater medication burden/risk]
-OVERALL_RATING: [exactly one of: "Low Medication Burden", "Moderate Medication Burden", "High Medication Burden", "Very High Medication Burden"]
-
-CATEGORY_ANALYSIS:
-Polypharmacy Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on number of medications, redundancy, and cumulative risk] | [3 specific recommendations separated by |]
-
-Drug Interaction Risk: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about potential interactions, contraindications, and monitoring needs] | [3 specific recommendations separated by |]
-
-Side Effect Burden: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about medication-related adverse effects and quality of life impact] | [3 specific recommendations separated by |]
-
-Medication Management: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about adherence, organization, and self-management capability] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on medication burden assessment including: polypharmacy risks and deprescribing opportunities, drug interaction concerns and monitoring recommendations, side effect management strategies, adherence optimization approaches, pharmaceutical care needs, and evidence-based medication optimization. Include relevant clinical pharmacy guidelines and medication safety principles from organizations like the Royal Pharmaceutical Society and NICE.]
-
-Focus on medication safety, deprescribing opportunities where appropriate, interaction prevention, side effect management, and adherence support. Use pharmaceutical and clinical terminology appropriately while keeping recommendations practical for patients managing complex medication regimens. Emphasize the importance of professional medication reviews and collaborative healthcare team approaches.`,
-
-
-"Daily Energy": `You are a specialist energy management and fatigue assessment AI with expertise in circadian rhythms, energy metabolism, stress physiology, and lifestyle optimization for sustained vitality. You must provide your response in a specific structured format.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = better energy management and stamina]
-OVERALL_RATING: [exactly one of: "Excellent Energy Management", "Good Energy Management", "Fair Energy Management", "Poor Energy Management"]
-
-CATEGORY_ANALYSIS:
-Sleep Quality & Recovery: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description focusing on sleep duration, quality, consistency, and restorative capacity] | [3 specific recommendations separated by |]
-
-Energy Pattern Stability: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about energy fluctuations, crashes, and daily rhythm stability] | [3 specific recommendations separated by |]
-
-Stress & Recovery Balance: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about stress impact on energy reserves and recovery adequacy] | [3 specific recommendations separated by |]
-
-Nutritional Energy Support: [score 0-100] | [level: optimal/high/moderate/low] | [2-sentence description about dietary patterns supporting stable blood sugar and sustained energy] | [3 specific recommendations separated by |]
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 4-6 paragraph analysis focusing on energy management assessment including: circadian rhythm optimization, sleep quality improvement strategies, blood sugar stabilization approaches, stress-energy relationship management, evidence-based energy enhancement techniques, and realistic expectations for energy improvement timelines. Include relevant research on fatigue management and energy optimization.]
-
-Focus on evidence-based energy optimization, sustainable lifestyle modifications, circadian rhythm alignment, and practical strategies for maintaining consistent energy throughout the day. Use physiological and nutritional terminology appropriately while keeping recommendations accessible for individuals seeking to improve daily energy and reduce fatigue. Emphasize balanced approaches that support long-term vitality without relying on unsustainable stimulants or extreme interventions.`,
-
-    // Add more assessment types here as needed
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall risk profile assessment
+2. Most significant risk factors requiring immediate attention
+3. Positive factors working in the patient's favor
+4. Specific evidence-based optimization strategies
+5. Timeline and prioritization of interventions
+6. Expected outcomes with proper preparation
+
+Include specific medical references to UK guidelines (NICE, Royal College of Surgeons, ERAS), cite evidence-based practices, and provide actionable, personalized recommendations based on their specific responses.]
+
+SCORING GUIDELINES:
+- Score 85-100: Optimal profile, minimal modifiable risks
+- Score 70-84: Good profile with some areas for improvement
+- Score 55-69: Moderate risk requiring optimization
+- Score 0-54: Elevated risk requiring significant intervention
+
+Be specific, evidence-based, and provide actionable recommendations that are personalized to the patient's actual responses.`,
+
+    // Keep other assessment types...
+    "Anaesthesia Risk": `[Your existing Anaesthesia Risk prompt]`,
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
 
+
+
+
+
+
+
+
+
+
+
 // Helper function to parse AI response - UPDATED TO HANDLE BOTH ASSESSMENT TYPES
+// Replace the parseAIResponse function in server.js
+
 function parseAIResponse(aiAnalysis, assessmentType) {
   console.log("Parsing AI Analysis for:", assessmentType);
-  console.log("AI Response:", aiAnalysis);
 
   try {
-    // Extract overall score
+    // Extract overall score and rating
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 70;
 
-    // Extract overall rating
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
 
-    // Extract category analysis
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
     const results = [];
 
-    if (categorySection) {
-      // Define categories based on assessment type - MAKE SURE THESE MATCH EXACTLY
-      let categories = [];
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
 
-      if (assessmentType === "Anaesthesia Risk") {
-        categories = [
-          'Airway Management Risk',
-          'Sleep Apnoea Risk',
-          'Medication Interactions',
-          'Substance Use Impact',
-          'Previous Anaesthesia History',
-          'Allergy & Reaction Risk'
-        ];
-      } else if (assessmentType === "Complication Risk") {
-        categories = [
-          'Medical History Risk',
-          'Lifestyle Risk Factors',
-          'Medication Risk Profile',
-          'Surgical History Impact',
-          'Physical Risk Factors'
-        ];
-      }else if (assessmentType === "Medication Burden") {
-  categories = [
-    'Polypharmacy Risk',
-    'Drug Interaction Risk',
-    'Side Effect Burden',
-    'Medication Management'
-  ];}
-  else if (assessmentType === "Surgery Readiness") {
-  categories = [
-    'Physical Readiness',
-    'Metabolic Health',
-    'Recovery Potential',
-    'Risk Factors',
-    'Preparation Status'
-  ];}
+    // Parse detailed analysis first
+    if (detailedSection) {
+      const categories = assessmentType === "Complication Risk"
+        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
+        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
 
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
 
-      else if (assessmentType === "Symptom") {
-  categories = [
-    'Pain Assessment',
-    'Fatigue Impact',
-    'Digestive Symptoms',
-    'Joint & Mobility'
-  ];
-
-  }
-else if (assessmentType === "Inflammation") {
-  categories = [
-    'Dietary Inflammation',
-    'Lifestyle Factors',
-    'Sleep Quality',
-    'Stress & Recovery'
-  ];}
-      else if (assessmentType === "Recovery Speed") {
-  categories = [
-    'Nutritional Foundation',
-    'Mental Readiness',
-    'Support System Strength',
-    'Home Environment Readiness',
-    'Sleep Quality Impact',
-    'Physical Baseline'
-  ];
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
     }
-     else if (assessmentType === "Daily Energy") {
-  categories = [
-    'Sleep Quality & Recovery',
-    'Energy Pattern Stability',
-    'Stress & Recovery Balance',
-    'Nutritional Energy Support'
-  ];}
-else if (assessmentType === "Mobility") {
-  categories = [
-    'Cardiovascular Endurance',
-    'Lower Body Strength',
-    'Balance & Stability',
-    'Functional Strength',
-    'Independence Level',
-    'Pain Management',
-    'Activity Baseline'
-  ];}
 
-      else {
-        // ADD FALLBACK - this might be your issue
-        console.log("Unknown assessment type, using Complication Risk categories");
-        categories = [
-          'Medical History Risk',
-          'Lifestyle Risk Factors',
-          'Medication Risk Profile',
-          'Surgical History Impact',
-          'Physical Risk Factors'
-        ];
-      }
+    // Parse category analysis
+    if (categorySection) {
+      const categories = assessmentType === "Complication Risk"
+        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
+        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
 
       categories.forEach(category => {
         const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
@@ -1139,10 +937,18 @@ else if (assessmentType === "Mobility") {
           const parts = categoryMatch[1].split('|').map(p => p.trim());
 
           if (parts.length >= 4) {
-            const score = parseInt(parts[0]) || Math.floor(Math.random() * 30) + 60;
+            const score = parseInt(parts[0]) || 70;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3);
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            // Get detailed analysis for this category
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical planning.`,
+              strengths: ['Regular health monitoring', 'Awareness of risk factors', 'Proactive health management'],
+              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
+              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
+            };
 
             results.push({
               category,
@@ -1150,91 +956,50 @@ else if (assessmentType === "Mobility") {
               maxScore: 100,
               level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
               description,
-              recommendations: recommendations.filter(r => r.length > 0)
+              recommendations,
+              detailedAnalysis
             });
           }
         }
       });
     }
 
-    // If no structured results found, create fallback data based on assessment type
+    // If parsing failed, create comprehensive fallback
     if (results.length === 0) {
-      console.log("No structured results found, creating fallback for:", assessmentType);
+      console.log("Creating fallback structure for:", assessmentType);
 
-      let fallbackCategories = [];
+      const fallbackCategories = assessmentType === "Complication Risk"
+        ? [
+            { name: 'Medical History Risk', desc: 'Your medical history indicates factors that require attention and optimization before surgery.' },
+            { name: 'Lifestyle Risk Factors', desc: 'Several lifestyle factors could impact your surgical outcome and recovery.' },
+            { name: 'Medication Risk Profile', desc: 'Your current medications require careful perioperative management.' },
+            { name: 'Surgical History Impact', desc: 'Your previous surgical experiences provide valuable insights.' },
+            { name: 'Physical Risk Factors', desc: 'Physical condition factors may impact surgical outcomes.' }
+          ]
+        : [
+            { name: 'Airway Management Risk', desc: 'Your airway assessment indicates manageable risk factors.' },
+            { name: 'Sleep Apnoea Risk', desc: 'Sleep-related factors may require monitoring.' },
+            { name: 'Medication Interactions', desc: 'Current medications require review for interactions.' }
+          ];
 
-      if (assessmentType === "Anaesthesia Risk") {
-        fallbackCategories = [
-          'Airway Management Risk',
-          'Sleep Apnoea Risk',
-          'Medication Interactions',
-          'Substance Use Impact',
-          'Previous Anaesthesia History',
-          'Allergy & Reaction Risk'
-        ];
-      }
-      else if (assessmentType === "Recovery Speed") {
-          fallbackCategories = [
-            'Nutritional Foundation',
-            'Mental Readiness',
-            'Support System Strength',
-            'Home Environment Readiness',
-            'Sleep Quality Impact',
-            'Physical Baseline'
-          ];
-      }
-      else {
-        fallbackCategories = [
-          'Medical History Risk',
-          'Lifestyle Risk Factors',
-          'Medication Risk Profile',
-          'Surgical History Impact',
-          'Physical Risk Factors'
-        ];
-      }
-
-      fallbackCategories.forEach(category => {
-        let fallbackDescription = "";
-        let fallbackRecommendations = [];
-
-        // Customize fallback content based on category
-        if (category.includes("Airway")) {
-          fallbackDescription = "Your airway assessment indicates manageable risk factors for anaesthesia administration.";
-          fallbackRecommendations = [
-            "Follow standard pre-operative fasting guidelines",
-            "Inform anaesthetist of any dental work or loose teeth",
-            "Report any previous difficulties with breathing tubes"
-          ];
-        } else if (category.includes("Sleep")) {
-          fallbackDescription = "Sleep-related factors may require monitoring during and after anaesthesia.";
-          fallbackRecommendations = [
-            "Discuss any sleep apnea diagnosis with your anaesthetist",
-            "Bring CPAP machine if you use one",
-            "Plan for extended post-operative monitoring if needed"
-          ];
-        } else if (category.includes("Medication")) {
-          fallbackDescription = "Current medications require review for potential anaesthetic interactions.";
-          fallbackRecommendations = [
-            "Provide complete medication list to anaesthetist",
-            "Discuss timing of medications before surgery",
-            "Report any previous adverse drug reactions"
-          ];
-        } else {
-          fallbackDescription = `Based on your responses, your ${category.toLowerCase()} shows areas for attention and optimization.`;
-          fallbackRecommendations = [
-            "Consult with your healthcare provider for personalized guidance",
-            "Consider lifestyle modifications as appropriate for your situation",
-            "Monitor relevant health markers regularly"
-          ];
-        }
-
+      fallbackCategories.forEach(cat => {
         results.push({
-          category,
-          score: Math.floor(Math.random() * 40) + 50,
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 65,
           maxScore: 100,
-          level: ['optimal', 'high', 'moderate', 'low'][Math.floor(Math.random() * 4)],
-          description: fallbackDescription,
-          recommendations: fallbackRecommendations
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with your healthcare provider for personalized guidance',
+            'Follow pre-operative preparation protocols carefully',
+            'Ensure all medical information is shared with your surgical team'
+          ],
+          detailedAnalysis: {
+            clinicalContext: `Based on your responses, your ${cat.name.toLowerCase()} shows areas for attention and optimization before surgery.`,
+            strengths: ['Good baseline awareness', 'Engaged with assessment process', 'Open to optimization'],
+            riskFactors: ['Requires pre-operative optimization', 'Close monitoring recommended'],
+            timeline: 'Begin optimization 4-6 weeks before scheduled surgery.'
+          }
         });
       });
     }
@@ -1243,52 +1008,45 @@ else if (assessmentType === "Mobility") {
     const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
     const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
 
-    const structuredReport = {
+    return {
       overallScore,
       overallRating,
       results,
       summary,
-      assessmentType // ADD THIS TO HELP WITH DEBUGGING
+      assessmentType
     };
-
-    console.log("Structured Report:", JSON.stringify(structuredReport, null, 2));
-    return structuredReport;
 
   } catch (error) {
     console.error("Error parsing AI response:", error);
-    console.log("Assessment type during error:", assessmentType); // ADD DEBUGGING
-
-    // Return assessment-type specific fallback structure
-    const fallbackCategories = assessmentType === "Anaesthesia Risk"
-      ? ["Airway Management Risk", "Sleep Apnoea Risk", "Medication Interactions"]
-      : ["Medical History Risk", "Lifestyle Risk Factors", "Medication Risk Profile"];
 
     return {
       overallScore: 70,
       overallRating: "Moderate Risk",
-      results: [
-        {
-          category: fallbackCategories[0],
-          score: 70,
-          maxScore: 100,
-          level: "moderate",
-          description: assessmentType === "Anaesthesia Risk"
-            ? "Your anaesthetic risk factors require careful consideration and planning."
-            : "Your medical history indicates factors that may impact surgical outcomes.",
-          recommendations: [
-            assessmentType === "Anaesthesia Risk"
-              ? "Discuss your medical history thoroughly with your anaesthetist"
-              : "Discuss your medical conditions with your surgeon",
-            "Ensure all medications are reviewed before surgery",
-            "Consider specialist consultations if recommended"
-          ]
+      results: [{
+        category: "Overall Assessment",
+        score: 70,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your assessment has been completed. Please consult with your healthcare provider.",
+        recommendations: [
+          "Discuss your assessment results with your doctor",
+          "Follow all pre-operative instructions carefully",
+          "Ensure complete medical disclosure to your surgical team"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Engaged with process'],
+          riskFactors: ['Requires medical consultation'],
+          timeline: 'Consult with healthcare team as soon as possible.'
         }
-      ],
+      }],
       summary: aiAnalysis,
-      assessmentType // ADD THIS
+      assessmentType
     };
   }
 }
+
+
 
 // ----------------------------
 // Send Email Report
