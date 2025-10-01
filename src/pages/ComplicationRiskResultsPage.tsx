@@ -297,26 +297,30 @@ export function ComplicationRiskResultsPage() {
             {/* Comparative Analysis Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5" />
                   <span>Your Risk Profile vs Benchmarks</span>
                 </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
+                <CardDescription>
                   How your risk scores compare to average patients and optimal targets
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="space-y-12 sm:space-y-16">
+              <CardContent>
+                <div className="space-y-16">
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-4 sm:mb-6 text-sm sm:text-base px-1">{item.name}</h3>
+                      {/* Category Title */}
+                      <h3 className="text-left font-medium mb-6">{item.name}</h3>
 
-                      <div className="relative w-full px-1">
+                      {/* Chart */}
+                      <div className="relative max-w-lg mx-auto">
                         {(() => {
+                          // Calculate dynamic range: start 20 points below average, end at 100
                           const rangeStart = Math.max(0, item.average - 20);
                           const rangeEnd = 100;
                           const rangeSize = rangeEnd - rangeStart;
 
+                          // Convert actual percentages to display percentages within our range
                           const yourScorePosition = ((item.yourScore - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((item.average - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((item.optimal - rangeStart) / rangeSize) * 100;
@@ -325,15 +329,15 @@ export function ComplicationRiskResultsPage() {
                             <>
                               {/* Your Score Label Above */}
                               <div
-                                className="absolute -top-10 sm:-top-14 transform -translate-x-1/2 text-center z-10"
+                                className="absolute -top-14 transform -translate-x-1/2 text-center"
                                 style={{ left: `${yourScorePosition}%` }}
                               >
-                                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 whitespace-nowrap">Your score</div>
-                                <div className="text-xs sm:text-sm font-medium">{item.yourScore}%</div>
+                                <div className="text-xs text-muted-foreground mb-1">Your score</div>
+                                <div className="text-sm font-medium">{item.yourScore}%</div>
                               </div>
 
                               {/* Main bar */}
-                              <div className="relative h-1.5 sm:h-2 bg-gray-300 rounded-full">
+                              <div className="relative h-2 bg-gray-300 rounded-full">
                                 {/* Your score fill */}
                                 <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
@@ -351,27 +355,25 @@ export function ComplicationRiskResultsPage() {
                                 />
                               </div>
 
-                              {/* Labels - Responsive positioning */}
-                              <div className="relative mt-2 sm:mt-3 min-h-[40px] sm:min-h-[48px]">
-                                {/* Average Patient Label */}
+                              {/* Labels */}
+                              <div className="relative mt-3 h-12">
+                                {/* Always show labels unless they would really overlap */}
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
                                   <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${averagePosition}%` }}
                                   >
-                                    <div className="text-xs sm:text-sm font-medium">{item.average}%</div>
-                                    <div className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Average</div>
+                                    <div className="text-sm font-medium">{item.average}%</div>
+                                    <div className="text-xs text-muted-foreground whitespace-nowrap">Average Patient</div>
                                   </div>
                                 )}
-
-                                {/* Optimal Label */}
-                                {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 10 && (
+                                {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
                                   <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${optimalPosition}%` }}
                                   >
-                                    <div className="text-xs sm:text-sm font-medium">{item.optimal}%</div>
-                                    <div className="text-[10px] sm:text-xs text-muted-foreground">Optimal</div>
+                                    <div className="text-sm font-medium">{item.optimal}%</div>
+                                    <div className="text-xs text-muted-foreground">Optimal</div>
                                   </div>
                                 )}
                               </div>
