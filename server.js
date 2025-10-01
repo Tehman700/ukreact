@@ -6,7 +6,7 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
-import { zodResponseFormat } from "openai/helpers/zod";
+import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 const { Pool } = pkg;
 const app = express();
