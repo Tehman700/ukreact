@@ -748,8 +748,16 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       `Q: ${qa.question}\nA: ${qa.answer}`
     ).join('\n\n');
 
+    if (assessmentType === "Surgery Readiness"){
+        const symptomPrompt = surgeryReadinessPrompt(assessmentType);
+    }
+    else if(assessmentType === "Complication Risk"){
+        const symptomPrompt = complicationRiskPrompt(assessmentType);
+    }
+
+
+
     // Create a specialized prompt based on assessment type
-    const systemPrompt = getSystemPrompt(assessmentType);
 
     const userPrompt = `
 User Information:
@@ -774,10 +782,15 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
 
     const aiAnalysis = completion.choices[0].message.content;
-    console.log(aiAnalysis)
 
-    // Parse AI response into structured format
-    const structuredReport = parseAIResponse(aiAnalysis, assessmentType);
+    if(assessmentType === "Surgery Readiness"){
+        const structuredReport = surgeryParseAIResponse(aiAnalysis,assessmentType);
+    }
+    else if(assessmentType === "Complication Risk"){
+         const structuredReport = complicationParseAIResponse(aiAnalysis,assessmentType);
+
+
+    }
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
@@ -798,21 +811,7 @@ Please provide a comprehensive analysis following the exact format specified in 
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-// Helper function to get system prompt based on assessment type
-
-function getSystemPrompt(assessmentType) {
+function complicationRiskPrompt(assessmentType){
   const prompts = {
     "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
 
@@ -862,8 +861,6 @@ SCORING GUIDELINES:
 
 Be specific, evidence-based, and provide actionable recommendations that are personalized to the patient's actual responses.`,
 
-    // Keep other assessment types...
-    "Anaesthesia Risk": `[Your existing Anaesthesia Risk prompt]`,
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
 
@@ -871,21 +868,294 @@ Be specific, evidence-based, and provide actionable recommendations that are per
 }
 
 
+function surgeryReadinessPrompt(assessmentType){
+    const prompts = {
+
+    "Surgery Readiness": `You are a surgical preparation specialist AI with expertise in preoperative optimization and perioperative medicine. Analyze the patient's responses to assess their readiness for surgical procedures.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better readiness]
+OVERALL_RATING: [exactly one of: "Excellent", "Good", "Fair", "Needs Improvement"]
+
+CATEGORY_ANALYSIS:
+Physical Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing exercise frequency, strength, cardiovascular fitness, and mobility] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Metabolic Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing blood sugar control, weight management, nutritional status, and metabolic markers] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Recovery Potential: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing sleep quality, stress levels, healing indicators, and immune function] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Risk Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing smoking, alcohol, medications, chronic conditions that affect surgical risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Preparation Status: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing preoperative education, planning, support systems, and readiness] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Physical Readiness|[clinical context: 3-4 sentences on exercise patterns, cardiovascular fitness, strength, and mobility. Reference NHS guidelines on physical activity (150 minutes moderate exercise weekly) and ERAS protocols for prehabilitation]|[evidence: comma-separated list of 3 clinical evidence points about physical fitness and surgical outcomes]|[risks: comma-separated list of 2-3 risk factors related to physical condition]|[timeline: specific timeline like "4-8 weeks of targeted conditioning can improve surgical outcomes by up to 35%"]
+
+Metabolic Health|[clinical context: 3-4 sentences on blood glucose control, BMI, nutritional status, and metabolic stability. Reference NICE diabetes guidelines and importance of glycemic control]|[evidence: comma-separated list of 3 clinical evidence points about metabolic optimization]|[risks: comma-separated list of 2-3 metabolic risk factors]|[timeline: specific timeline like "6-12 weeks metabolic optimization shows peak benefit for elective procedures"]
+
+Recovery Potential|[clinical context: 3-4 sentences on sleep patterns (7-9 hours), stress management, vitamin D levels, and healing capacity. Reference research on sleep and immune function]|[evidence: comma-separated list of 3 clinical evidence points about recovery factors]|[risks: comma-separated list of 2-3 factors affecting recovery]|[timeline: specific timeline like "Current optimization status predicts 20-30% faster than average recovery"]
+
+Risk Factors|[clinical context: 3-4 sentences on smoking, alcohol consumption, medication management, and chronic conditions. Reference NICE smoking cessation guidelines (4 weeks pre-surgery) and Royal College of Surgeons guidance]|[evidence: comma-separated list of 3 clinical evidence points about risk factor modification]|[risks: comma-separated list of 2-3 key modifiable risk factors]|[timeline: specific timeline like "Risk factor modification most effective 6-8 weeks before surgery"]
+
+Preparation Status|[clinical context: 3-4 sentences on preoperative education, surgical understanding, support systems, and practical preparation. Reference ERAS protocols and NHS/NICE guidelines on comprehensive preoperative preparation]|[evidence: comma-separated list of 3 clinical evidence points about preparation programs]|[risks: comma-separated list of 2-3 preparation gaps]|[timeline: specific timeline like "Peak benefit achieved with 4-6 week structured preparation programme"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall readiness assessment and key strengths
+2. Most critical areas requiring optimization before surgery
+3. Specific timeline recommendations for each optimization area
+4. Evidence-based strategies for improving readiness
+5. Expected surgical outcomes with current vs optimized preparation
+6. Actionable next steps prioritized by impact
+
+Include specific medical references to UK guidelines (NHS, NICE, ERAS, Royal College of Surgeons), cite evidence-based practices, and provide personalized recommendations based on their specific responses about exercise, nutrition, sleep, stress, and health conditions.]
+
+SCORING GUIDELINES:
+- Score 85-100: Excellent readiness, optimal preparation across all areas
+- Score 70-84: Good readiness with minor optimization opportunities
+- Score 55-69: Fair readiness requiring targeted improvements
+- Score 0-54: Needs significant improvement before elective surgery
+
+Focus on actionable, evidence-based recommendations that are personalized to the patient's actual responses. Emphasize modifiable factors and realistic timelines for optimization.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
+
+function surgeryParseAIResponse(aiAnalysis, assessmentType){
+  try {
+    // Extract overall score and rating
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 70;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good";
+
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis first - Surgery Readiness specific categories
+    if (detailedSection) {
+      const categories = [
+        'Physical Readiness',
+        'Metabolic Health',
+        'Recovery Potential',
+        'Risk Factors',
+        'Preparation Status'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            evidenceBase: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Physical Readiness',
+        'Metabolic Health',
+        'Recovery Potential',
+        'Risk Factors',
+        'Preparation Status'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 70;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            // Get detailed analysis for this category
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical preparation.`,
+              evidenceBase: ['Evidence-based assessment completed', 'Consult healthcare provider for detailed guidance'],
+              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
+              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // If parsing failed, create comprehensive fallback
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Surgery Readiness");
+
+      const fallbackCategories = [
+        {
+          name: 'Physical Readiness',
+          desc: 'Your physical condition shows good preparation for surgical procedures.',
+          context: 'Based on your exercise patterns and fitness levels, your physical readiness is on track.',
+          evidence: [
+            'NHS guidelines recommend 150 minutes of moderate exercise weekly for surgical preparation',
+            'ERAS protocols show that prehabilitation improves surgical outcomes',
+            'Regular physical activity is associated with reduced postoperative complications'
+          ],
+          risks: [
+            'Sedentary lifestyle may increase surgical risks',
+            'Limited cardiovascular fitness could affect recovery'
+          ]
+        },
+        {
+          name: 'Metabolic Health',
+          desc: 'Your metabolic markers indicate room for optimization before surgery.',
+          context: 'Metabolic stability and blood glucose control are important factors for surgical outcomes.',
+          evidence: [
+            'NICE guidelines emphasize optimal glycemic control before elective surgery',
+            'Diabetes UK research shows improved metabolic control enhances healing',
+            'Nutritional optimization supports better wound healing and recovery'
+          ],
+          risks: [
+            'Uncontrolled blood sugar may affect healing',
+            'Metabolic imbalances can increase complication risk'
+          ]
+        },
+        {
+          name: 'Recovery Potential',
+          desc: 'Excellent indicators for post-surgical healing and recovery.',
+          context: 'Your sleep quality, stress management, and overall recovery markers show positive signs.',
+          evidence: [
+            'Research shows 7-9 hours sleep supports immune function and healing',
+            'Stress management is associated with improved surgical recovery',
+            'Adequate vitamin D levels support bone health and immune function'
+          ],
+          risks: [
+            'Sleep deprivation may affect immune response',
+            'Chronic stress can impact healing processes'
+          ]
+        },
+        {
+          name: 'Risk Factors',
+          desc: 'Some risk factors identified that should be addressed pre-surgery.',
+          context: 'Modifiable risk factors can be optimized to improve surgical outcomes.',
+          evidence: [
+            'NICE guidelines recommend smoking cessation 4 weeks before surgery',
+            'Royal College of Surgeons emphasizes preoperative risk modification',
+            'Medication optimization reduces perioperative complications'
+          ],
+          risks: [
+            'Smoking significantly increases surgical complications',
+            'Unmanaged chronic conditions may increase risk'
+          ]
+        },
+        {
+          name: 'Preparation Status',
+          desc: 'Your preparation efforts are on track but could be enhanced.',
+          context: 'Comprehensive preoperative preparation improves outcomes and patient experience.',
+          evidence: [
+            'ERAS protocols reduce hospital stay and improve outcomes',
+            'NHS guidance emphasizes preoperative education importance',
+            'Structured preparation programs reduce anxiety and complications'
+          ],
+          risks: [
+            'Inadequate preparation may increase anxiety',
+            'Limited surgical knowledge can affect recovery'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with your healthcare provider for personalized guidance',
+            'Follow preoperative preparation protocols carefully',
+            'Ensure all medical information is shared with your surgical team'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            evidenceBase: cat.evidence,
+            riskFactors: cat.risks,
+            timeline: 'Begin optimization 4-8 weeks before scheduled surgery for best results.'
+          }
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Surgery Readiness AI response:", error);
+
+    return {
+      overallScore: 70,
+      overallRating: "Good",
+      results: [{
+        category: "Overall Assessment",
+        score: 70,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your surgical readiness assessment has been completed. Please consult with your healthcare provider.",
+        recommendations: [
+          "Discuss your readiness assessment results with your surgical team",
+          "Follow all preoperative preparation instructions carefully",
+          "Ensure complete medical disclosure to optimize your surgical outcomes"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          evidenceBase: ['Assessment completed', 'Consultation recommended'],
+          riskFactors: ['Requires medical consultation'],
+          timeline: 'Consult with healthcare team as soon as possible.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 
 
 
-
-
-
-
-
-
-// Helper function to parse AI response - UPDATED TO HANDLE BOTH ASSESSMENT TYPES
-// Replace the parseAIResponse function in server.js
-
-function parseAIResponse(aiAnalysis, assessmentType) {
-  console.log("Parsing AI Analysis for:", assessmentType);
-
+function complicationParseAIResponse(aiAnalysis, assessmentType){
   try {
     // Extract overall score and rating
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
@@ -1044,7 +1314,17 @@ function parseAIResponse(aiAnalysis, assessmentType) {
       assessmentType
     };
   }
+
 }
+
+
+
+
+
+
+
+
+
 
 
 

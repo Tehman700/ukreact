@@ -22,6 +22,8 @@ interface AssessmentResult {
   };
 }
 
+
+
 interface AIReport {
   overallScore: number;
   overallRating: string;
