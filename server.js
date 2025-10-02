@@ -830,7 +830,7 @@ Please provide a comprehensive analysis following the exact format specified in 
 
 function mobilityStrengthPrompt(assessmentType) {
   const prompts = {
-    "Mobility & Strength": `You are a specialist physiotherapy and rehabilitation assessment AI with expertise in pre-operative functional capacity evaluation and post-surgical recovery prediction. Analyze the patient's responses to evaluate their baseline mobility, strength, and functional capacity to predict recovery outcomes.
+    "Mobility Strength": `You are a specialist physiotherapy and rehabilitation assessment AI with expertise in pre-operative functional capacity evaluation and post-surgical recovery prediction. Analyze the patient's responses to evaluate their baseline mobility, strength, and functional capacity to predict recovery outcomes.
 
 IMPORTANT: Structure your response EXACTLY as follows:
 
