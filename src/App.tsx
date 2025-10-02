@@ -957,8 +957,10 @@ useEffect(() => {
       case 'recovery-speed-predictor-feedback':
         return <RecoverySpeedReviewPage />;
       case 'anaesthesia-risk-screener-learn-more':
-        return <AnaesthesiaRiskUpsellPage />;
-      case 'anaesthesia-risk-screener-questions':
+  return <AnaesthesiaRiskUpsellPage
+    onAddToBasket={addToBasket}
+    onOpenBasket={() => setIsBasketOpen(true)}
+  />;      case 'anaesthesia-risk-screener-questions':
         return <AnaesthesiaRiskQuestionsPage />;
       case 'anaesthesia-risk-screener-information':
         return <AnaesthesiaRiskInformationPage />;
