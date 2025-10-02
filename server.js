@@ -748,16 +748,15 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       `Q: ${qa.question}\nA: ${qa.answer}`
     ).join('\n\n');
 
-    if (assessmentType === "Surgery Readiness"){
-        const symptomPrompt = surgeryReadinessPrompt(assessmentType);
+    // Get the correct system prompt based on assessment type
+    let systemPrompt;
+    if (assessmentType === "Surgery Readiness") {
+      systemPrompt = surgeryReadinessPrompt(assessmentType);
+    } else if (assessmentType === "Complication Risk") {
+      systemPrompt = complicationRiskPrompt(assessmentType);
+    } else {
+      systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
-    else if(assessmentType === "Complication Risk"){
-        const symptomPrompt = complicationRiskPrompt(assessmentType);
-    }
-
-
-
-    // Create a specialized prompt based on assessment type
 
     const userPrompt = `
 User Information:
@@ -782,15 +781,20 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
 
     const aiAnalysis = completion.choices[0].message.content;
+    console.log("AI Analysis received:", aiAnalysis.substring(0, 200)); // Log first 200 chars
 
-    if(assessmentType === "Surgery Readiness"){
-        const structuredReport = surgeryParseAIResponse(aiAnalysis,assessmentType);
+    // Parse the AI response based on assessment type
+    let structuredReport;
+    if (assessmentType === "Surgery Readiness") {
+      structuredReport = surgeryParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Complication Risk") {
+      structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
+    } else {
+      // Default fallback
+      structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
-    else if(assessmentType === "Complication Risk"){
-         const structuredReport = complicationParseAIResponse(aiAnalysis,assessmentType);
 
-
-    }
+    console.log("Structured report created:", JSON.stringify(structuredReport, null, 2));
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
@@ -807,7 +811,12 @@ Please provide a comprehensive analysis following the exact format specified in 
 
   } catch (error) {
     console.error("AI report generation error:", error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("Error stack:", error.stack); // More detailed error logging
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
