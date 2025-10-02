@@ -969,7 +969,11 @@ useEffect(() => {
       case 'anaesthesia-risk-screener-feedback':
         return <AnaesthesiaRiskReviewPage />;
       case 'mobility-strength-score-learn-more':
-        return <MobilityStrengthUpsellPage />;
+          return <MobilityStrengthUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'mobility-strength-score-questions':
         return <MobilityStrengthQuestionsPage />;
       case 'mobility-strength-score-information':

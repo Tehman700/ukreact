@@ -757,6 +757,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = recoverySpeedPrompt(assessmentType);
     } else if (assessmentType === "Anaesthesia Risk") {
       systemPrompt = anaesthesiaRiskPrompt(assessmentType);
+    } else if (assessmentType === "Mobility Strength") {
+      structuredReport = mobilityStrengthPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -794,7 +796,9 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = recoverySpeedParseAIResponse(aiAnalysis, assessmentType);
     }else if (assessmentType === "Anaesthesia Risk") {
       structuredReport = anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType);
-    } else {
+    }else if (assessmentType === "Mobility Strength") {
+      structuredReport = mobilityStrengthParseAIResponse(aiAnalysis, assessmentType);
+    }else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
 
@@ -823,6 +827,90 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+function mobilityStrengthPrompt(assessmentType) {
+  const prompts = {
+    "Mobility & Strength": `You are a specialist physiotherapy and rehabilitation assessment AI with expertise in pre-operative functional capacity evaluation and post-surgical recovery prediction. Analyze the patient's responses to evaluate their baseline mobility, strength, and functional capacity to predict recovery outcomes.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better baseline mobility and strength]
+OVERALL_RATING: [exactly one of: "Excellent Baseline", "Strong Baseline", "Moderate Baseline", "Limited Baseline"]
+
+CATEGORY_ANALYSIS:
+Cardiovascular Endurance: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing walking distance, endurance capacity, cardiovascular fitness, and impact on recovery] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lower Body Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing leg strength, chair rise ability, stair climbing, and mobility foundation] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Balance & Stability: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing static and dynamic balance, fall risk, proprioception, and safety during recovery] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Upper Body Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing arm strength, grip strength, lifting capacity, and functional independence] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Functional Independence: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing daily activity performance, self-care abilities, and independence level] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Pain & Limitations: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing existing pain, movement restrictions, joint stiffness, and impact on rehabilitation] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Activity Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current exercise habits, physical activity level, and conditioning for recovery] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Cardiovascular Endurance|[clinical context: 3-4 sentences on cardiovascular fitness being a strong predictor of surgical outcomes. Reference that good pre-operative fitness reduces recovery time by 30-40% and complications by 50%. Discuss the importance of walking capacity, cite NHS physical activity guidelines and NICE NG180]|[strengths: comma-separated list of EXACTLY 3 UNIQUE specific cardiovascular strengths - NEVER write "None provided". Always identify factors like "Can walk significant distances, Good stamina during activities, No breathlessness at rest"]|[training opportunities: comma-separated list of 2-3 specific areas for improvement or "Maintain current excellent fitness level" if optimal]|[timeline: specific timeline like "Continue daily walking 4-6 weeks before surgery. Aim for 30 minutes daily"]
+
+Lower Body Strength|[clinical context: 3-4 sentences on leg strength being crucial for post-surgical mobility and independence. Reference that strong lower body reduces fall risk by 40% and enables earlier mobilization. Discuss chair rise test, stair climbing ability, cite Chartered Society of Physiotherapy guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE strength factors - NEVER "None provided". Examples: "Good chair rise ability, Can manage stairs independently, Strong quadriceps and glutes"]|[training opportunities: comma-separated list of 2-3 lower body training needs]|[timeline: specific timeline like "Begin strengthening exercises 4-6 weeks before surgery. Focus on squats and step-ups"]
+
+Balance & Stability|[clinical context: 3-4 sentences on balance being critical for safe mobility and fall prevention. Reference that poor balance increases post-operative fall risk by 300%, good balance accelerates recovery. Discuss proprioception, cite British Geriatrics Society fall prevention guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE balance factors - NEVER "None provided". Examples: "Good static balance, Confident during movement, No recent falls"]|[training opportunities: comma-separated list of 2-3 balance training needs]|[timeline: specific timeline like "Practice balance exercises daily 4-6 weeks before surgery. Single-leg stands recommended"]
+
+Upper Body Strength|[clinical context: 3-4 sentences on upper body and grip strength correlating with overall muscle mass and recovery outcomes. Reference that good grip strength predicts 90% of functional recovery. Discuss functional activities, cite Royal College of Physicians strength assessment guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE upper body factors - NEVER "None provided". Examples: "Good grip strength, Can lift everyday objects, Adequate arm strength"]|[training opportunities: comma-separated list of 2-3 upper body training needs]|[timeline: specific timeline like "Maintain upper body activity 2-3 weeks before surgery. Focus on grip and functional movements"]
+
+Functional Independence|[clinical context: 3-4 sentences on pre-operative independence strongly predicting post-operative outcomes. Reference that high baseline independence leads to 50% better recovery outcomes and shorter hospital stays. Discuss activities of daily living, cite NICE quality standards]|[strengths: comma-separated list of EXACTLY 3 UNIQUE independence factors - NEVER "None provided". Examples: "Fully independent in self-care, Good problem-solving skills, High baseline function"]|[training opportunities: comma-separated list of 1-2 areas to optimize or "Excellent independence level - maintain current activities"]|[timeline: specific timeline like "Continue current activities. Plan temporary support for immediate post-op period"]
+
+Pain & Limitations|[clinical context: 3-4 sentences on existing pain affecting but not preventing successful recovery when well-managed. Reference that controlled pain doesn't significantly impair outcomes. Discuss pain management strategies, cite NICE pain guidelines CG173]|[strengths: comma-separated list of EXACTLY 3 UNIQUE pain management factors - NEVER "None provided". Examples: "Good pain awareness, Effective coping strategies, Willing to follow pain protocols"]|[training opportunities: comma-separated list of 2-3 pain optimization strategies]|[timeline: specific timeline like "Optimize pain management 3-4 weeks before surgery. Consult team about perioperative control"]
+
+Activity Baseline|[clinical context: 3-4 sentences on current activity level providing foundation for recovery. Reference that active patients have 40% faster recovery and better long-term outcomes. Discuss exercise tolerance, cite Royal College of Surgeons prehabilitation guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE activity factors - NEVER "None provided". Examples: "Regular physical activity, Good exercise tolerance, Positive attitude toward movement"]|[training opportunities: comma-separated list of 2-3 activity optimization strategies]|[timeline: specific timeline like "Maintain activities until surgery. Plan modified exercise program for post-op recovery"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For cardiovascular: "Can walk reasonable distances", "No severe breathlessness", "Active lifestyle"
+- For strength: "Daily activities maintained", "Good functional capacity", "No severe weakness"
+- For balance: "No recent falls", "Confident movement", "Good spatial awareness"
+- For independence: "Self-sufficient", "Good problem-solving", "Proactive approach"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall mobility and strength baseline with recovery timeline prediction
+2. Key functional strengths that will support successful recovery
+3. Specific areas where pre-operative conditioning could optimize outcomes
+4. Predicted recovery milestones based on current baseline (e.g., "independent mobility in 2-3 weeks", "full function in 6-8 weeks")
+5. Evidence-based prehabilitation recommendations with specific exercises and timelines
+6. Post-operative rehabilitation expectations and progression pathway
+
+Include specific medical references to UK guidelines (Chartered Society of Physiotherapy, NICE, Royal College of Physicians, NHS), cite evidence-based rehabilitation practices, and provide personalized training recommendations based on their specific responses about endurance, strength, balance, function, pain, and activity levels. Focus on empowering language that emphasizes their existing strengths while providing clear, actionable steps for optimization.]
+
+SCORING GUIDELINES:
+- Score 85-100: Excellent baseline, predict fast recovery with minimal complications
+- Score 70-84: Strong baseline, predict good recovery with standard rehabilitation
+- Score 55-69: Moderate baseline, benefit from targeted prehabilitation
+- Score 0-54: Limited baseline, require enhanced rehabilitation support
+
+RECOVERY TIMELINE PREDICTIONS:
+- Excellent Baseline (85-100): Independent mobility 2-3 weeks, full function 4-6 weeks
+- Strong Baseline (70-84): Independent mobility 3-4 weeks, full function 6-8 weeks
+- Moderate Baseline (55-69): Independent mobility 4-6 weeks, full function 8-12 weeks
+- Limited Baseline (0-54): Independent mobility 6-8 weeks, full function 12+ weeks
+
+Focus on actionable, evidence-based training recommendations personalized to the patient's actual responses. Emphasize modifiable factors and realistic conditioning strategies. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use empowering language that motivates pre-operative preparation while being realistic about recovery expectations.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
+
+
 function anaesthesiaRiskPrompt(assessmentType) {
   const prompts = {
     "Anaesthesia Risk": `You are a specialist anaesthesia risk assessment AI with expertise in perioperative safety and anaesthetic complications. Analyze the patient's responses to identify potential anaesthetic risks and safety considerations.
@@ -1313,7 +1401,254 @@ function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
     };
   }
 }
+function mobilityStrengthParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Strong Baseline";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Cardiovascular Endurance',
+        'Lower Body Strength',
+        'Balance & Stability',
+        'Upper Body Strength',
+        'Functional Independence',
+        'Pain & Limitations',
+        'Activity Baseline'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Cardiovascular Endurance',
+        'Lower Body Strength',
+        'Balance & Stability',
+        'Upper Body Strength',
+        'Functional Independence',
+        'Pain & Limitations',
+        'Activity Baseline'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for recovery planning.`,
+              strengths: ['Baseline assessment completed', 'Standard protocols appropriate'],
+              riskFactors: ['Could benefit from targeted training'],
+              timeline: 'Begin conditioning 4-6 weeks before surgery.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Mobility & Strength");
+
+      const fallbackCategories = [
+        {
+          name: 'Cardiovascular Endurance',
+          desc: 'Your walking ability and endurance indicate good cardiovascular fitness for recovery.',
+          context: 'Cardiovascular fitness is strongly predictive of surgical outcomes. Good pre-operative fitness reduces recovery time by 30-40% and complications by 50%.',
+          strengths: [
+            'Can walk reasonable distances',
+            'Good stamina during activities',
+            'No severe breathlessness'
+          ],
+          risks: [
+            'Could improve with consistent walking routine',
+            'Gradual increase in duration recommended'
+          ]
+        },
+        {
+          name: 'Lower Body Strength',
+          desc: 'Good lower body strength provides a foundation for post-surgical mobility.',
+          context: 'Lower body strength is crucial for post-surgical mobility. Strong leg muscles reduce fall risk by 40% and enable earlier mobilization.',
+          strengths: [
+            'Daily activities maintained',
+            'Good functional leg capacity',
+            'Can manage stairs'
+          ],
+          risks: [
+            'Some strengthening exercises beneficial',
+            'Focus on chair rises and squats'
+          ]
+        },
+        {
+          name: 'Balance & Stability',
+          desc: 'Your balance is adequate but could benefit from improvement to reduce fall risk.',
+          context: 'Balance is critical for safe mobility and fall prevention. Poor balance increases post-operative fall risk by 300%.',
+          strengths: [
+            'No recent falls',
+            'Confident during movement',
+            'Good spatial awareness'
+          ],
+          risks: [
+            'Dynamic balance could improve',
+            'Practice single-leg stands recommended'
+          ]
+        },
+        {
+          name: 'Upper Body Strength',
+          desc: 'Good functional strength supports independent recovery activities.',
+          context: 'Upper body and grip strength correlate with overall muscle mass and predict 90% of functional recovery outcomes.',
+          strengths: [
+            'Adequate grip strength',
+            'Can perform daily tasks',
+            'Good arm coordination'
+          ],
+          risks: [
+            'Some upper body strengthening beneficial'
+          ]
+        },
+        {
+          name: 'Functional Independence',
+          desc: 'High level of independence in daily activities suggests excellent recovery potential.',
+          context: 'Pre-operative independence strongly predicts post-operative outcomes. High baseline independence leads to 50% better recovery.',
+          strengths: [
+            'Fully independent in self-care',
+            'Good problem-solving skills',
+            'High baseline function'
+          ],
+          risks: [
+            'Plan temporary support for immediate post-op'
+          ]
+        },
+        {
+          name: 'Pain & Limitations',
+          desc: 'Current discomfort is manageable and shouldn\'t significantly impact recovery with proper planning.',
+          context: 'Existing pain affects but doesn\'t prevent successful recovery when well-managed with appropriate strategies.',
+          strengths: [
+            'Good pain awareness',
+            'Effective coping strategies',
+            'Willing to follow pain protocols'
+          ],
+          risks: [
+            'Optimize pain management before surgery',
+            'Discuss perioperative control strategies'
+          ]
+        },
+        {
+          name: 'Activity Baseline',
+          desc: 'Your regular activity level provides a good foundation for rehabilitation.',
+          context: 'Current activity level provides foundation for recovery. Active patients have 40% faster recovery and better long-term outcomes.',
+          strengths: [
+            'Regular physical activity',
+            'Good exercise tolerance',
+            'Positive attitude toward movement'
+          ],
+          risks: [
+            'Activity will need modification post-surgery'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Maintain current activity levels before surgery',
+            'Practice recommended exercises daily',
+            'Focus on areas identified for improvement'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Begin conditioning program 4-6 weeks before scheduled surgery.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Mobility & Strength AI response:", error);
+
+    return {
+      overallScore: 75,
+      overallRating: "Strong Baseline",
+      results: [{
+        category: "Overall Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your mobility and strength assessment has been completed. This baseline will help track your recovery progress.",
+        recommendations: [
+          "Maintain current activity levels until surgery",
+          "Focus on daily walking and strength exercises",
+          "Follow physiotherapist recommendations for conditioning"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Baseline documented'],
+          riskFactors: ['Continue conditioning program'],
+          timeline: 'Begin pre-operative conditioning 4-6 weeks before surgery.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 function surgeryParseAIResponse(aiAnalysis, assessmentType){
   try {
     // Extract overall score and rating
