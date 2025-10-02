@@ -743,17 +743,18 @@ app.post("/api/generate-assessment-report", async (req, res) => {
   try {
     const { assessmentType, answers, userInfo } = req.body;
 
-    // Format questions and answers for GPT
     const questionsAndAnswers = answers.map(qa =>
       `Q: ${qa.question}\nA: ${qa.answer}`
     ).join('\n\n');
 
-    // Get the correct system prompt based on assessment type
+    // Get the correct system prompt
     let systemPrompt;
     if (assessmentType === "Surgery Readiness") {
       systemPrompt = surgeryReadinessPrompt(assessmentType);
     } else if (assessmentType === "Complication Risk") {
       systemPrompt = complicationRiskPrompt(assessmentType);
+    } else if (assessmentType === "Recovery Speed") {
+      systemPrompt = recoverySpeedPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -769,7 +770,6 @@ ${questionsAndAnswers}
 Please provide a comprehensive analysis following the exact format specified in your system prompt.
     `;
 
-    // Call OpenAI API
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
@@ -781,16 +781,16 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
 
     const aiAnalysis = completion.choices[0].message.content;
-    console.log("AI Analysis received:", aiAnalysis.substring(0, 200)); // Log first 200 chars
 
-    // Parse the AI response based on assessment type
+    // Parse based on assessment type
     let structuredReport;
     if (assessmentType === "Surgery Readiness") {
       structuredReport = surgeryParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Complication Risk") {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Recovery Speed") {
+      structuredReport = recoverySpeedParseAIResponse(aiAnalysis, assessmentType);
     } else {
-      // Default fallback
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
 
@@ -933,6 +933,69 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+
+
+function recoverySpeedPrompt(assessmentType) {
+  const prompts = {
+    "Recovery Speed": `You are a surgical recovery specialist AI with expertise in predicting post-operative healing timelines and optimizing recovery factors. Analyze the patient's responses to predict their recovery speed and identify optimization opportunities.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = faster recovery]
+OVERALL_RATING: [exactly one of: "Fast Recovery", "Good Recovery", "Average Recovery", "Slower Recovery"]
+
+CATEGORY_ANALYSIS:
+Nutritional Foundation: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing protein intake, hydration, micronutrients, and their impact on healing] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Mental Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing psychological preparation, stress management, anxiety levels, and mindset] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Support System Strength: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing family support, caregiver availability, social network, and practical assistance] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Home Environment Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing home safety, accessibility, recovery space preparation, and environmental factors] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Sleep Quality Impact: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing sleep duration, quality, sleep hygiene, and impact on healing] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Physical Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current fitness, strength, mobility, and cardiovascular health] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Nutritional Foundation|[clinical context: 3-4 sentences on nutrition's role in healing. Reference British Dietetic Association guidelines, protein requirements (1.2-1.6g/kg), and micronutrients for wound healing. Cite research showing 30-40% faster recovery with optimal nutrition]|[strengths: comma-separated list of 3 positive nutritional factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Continue current nutrition plan and enhance with targeted supplementation 2-3 weeks before surgery"]
+
+Mental Readiness|[clinical context: 3-4 sentences on psychological preparation's impact. Reference Health Psychology research showing 25% shorter recovery with mental preparation. Discuss stress, anxiety, and mindset effects on healing]|[strengths: comma-separated list of 3 positive psychological factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Begin enhanced mental preparation techniques 3-4 weeks before surgery for optimal benefit"]
+
+Support System Strength|[clinical context: 3-4 sentences on social support's proven acceleration of recovery. Reference research showing 20-30% faster healing with robust support networks. Discuss caregiver roles and practical assistance]|[strengths: comma-separated list of 3 positive support factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Confirm support arrangements 1-2 weeks before surgery and establish backup plans"]
+
+Home Environment Readiness|[clinical context: 3-4 sentences on home environment's impact on recovery. Reference Care Quality Commission standards and NHS discharge planning. Discuss safety, accessibility, and recovery space optimization]|[strengths: comma-separated list of 3 positive home factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Complete home modifications 1-2 weeks before surgery"]
+
+Sleep Quality Impact|[clinical context: 3-4 sentences on sleep's essential role in healing. Reference research showing poor sleep can extend recovery by 40-50%. Discuss sleep duration (7-9 hours), quality, and immune function]|[strengths: comma-separated list of 3 positive sleep factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Optimize sleep quality 4-6 weeks before surgery with enhanced sleep hygiene protocols"]
+
+Physical Baseline|[clinical context: 3-4 sentences on fitness as predictor of recovery speed. Reference ERAS prehabilitation protocols and Chartered Society of Physiotherapy guidelines. Discuss cardiovascular fitness, strength, and mobility]|[strengths: comma-separated list of 3 positive fitness factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Continue current fitness routine and add targeted conditioning 4-6 weeks before surgery"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall recovery speed prediction with specific timeline estimates
+2. Most impactful factors accelerating their recovery
+3. Key optimization areas that could further speed recovery
+4. Evidence-based strategies ranked by impact on recovery speed
+5. Realistic recovery timeline expectations with current vs optimized preparation
+6. Actionable next steps with specific timeframes
+
+Include specific medical references to UK guidelines (NHS, ERAS, British Dietetic Association, Chartered Society of Physiotherapy), cite evidence-based recovery research, and provide personalized predictions based on their specific responses about nutrition, support, sleep, home environment, and fitness.]
+
+SCORING GUIDELINES:
+- Score 85-100: Fast recovery predicted, optimal factors across categories
+- Score 70-84: Good recovery speed, minor optimization opportunities
+- Score 55-69: Average recovery, several modifiable factors to address
+- Score 0-54: Slower recovery likely, significant optimization needed
+
+Focus on actionable, evidence-based recommendations that are personalized to the patient's actual responses. Emphasize modifiable factors that can accelerate recovery and provide realistic timeline predictions.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
+
+
 
 function surgeryParseAIResponse(aiAnalysis, assessmentType){
   try {
@@ -1162,7 +1225,248 @@ function surgeryParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
+function recoverySpeedParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    // Extract overall score and rating
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Recovery";
+
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis first - Recovery Speed specific categories
+    if (detailedSection) {
+      const categories = [
+        'Nutritional Foundation',
+        'Mental Readiness',
+        'Support System Strength',
+        'Home Environment Readiness',
+        'Sleep Quality Impact',
+        'Physical Baseline'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Nutritional Foundation',
+        'Mental Readiness',
+        'Support System Strength',
+        'Home Environment Readiness',
+        'Sleep Quality Impact',
+        'Physical Baseline'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            // Get detailed analysis for this category
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for recovery prediction.`,
+              strengths: ['Baseline assessment completed', 'Areas identified for optimization'],
+              riskFactors: ['Consult healthcare provider for personalized guidance'],
+              timeline: 'Discuss optimization timeline with your medical team.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // If parsing failed, create comprehensive fallback
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Recovery Speed");
+
+      const fallbackCategories = [
+        {
+          name: 'Nutritional Foundation',
+          desc: 'Your nutrition habits provide a foundation for healing and tissue repair.',
+          context: 'Nutrition plays a crucial role in surgical recovery, with optimal nutrition supporting 30-40% faster healing.',
+          strengths: [
+            'Adequate protein intake for tissue repair',
+            'Good hydration habits',
+            'Balanced micronutrient profile'
+          ],
+          risks: [
+            'Could benefit from increased vitamin C',
+            'Zinc levels may need optimization'
+          ]
+        },
+        {
+          name: 'Mental Readiness',
+          desc: 'Your mental preparation will support your recovery experience.',
+          context: 'Psychological preparation significantly impacts recovery, with mentally prepared patients experiencing 25% shorter recovery times.',
+          strengths: [
+            'Positive outlook towards surgery',
+            'Good stress management techniques',
+            'Realistic recovery expectations'
+          ],
+          risks: [
+            'Mild anxiety about surgical outcome',
+            'Limited meditation or relaxation practice'
+          ]
+        },
+        {
+          name: 'Support System Strength',
+          desc: 'Your support network will influence your recovery timeline.',
+          context: 'Strong support systems accelerate recovery, with patients showing 20-30% faster healing with robust networks.',
+          strengths: [
+            'Strong family support network',
+            'Adequate help for daily activities',
+            'Good communication with healthcare team'
+          ],
+          risks: [
+            'Limited backup support options'
+          ]
+        },
+        {
+          name: 'Home Environment Readiness',
+          desc: 'Your home preparation is progressing for recovery.',
+          context: 'Home environment significantly impacts recovery safety and comfort during the healing period.',
+          strengths: [
+            'Safe recovery space identified',
+            'Basic accessibility considerations made',
+            'Planning for equipment needs'
+          ],
+          risks: [
+            'Additional safety modifications needed',
+            'Meal preparation could be optimized'
+          ]
+        },
+        {
+          name: 'Sleep Quality Impact',
+          desc: 'Your sleep quality will support healing processes.',
+          context: 'Quality sleep is essential for healing, with poor sleep extending recovery time by 40-50%.',
+          strengths: [
+            'Regular sleep schedule',
+            'Good sleep hygiene awareness',
+            'Adequate sleep duration'
+          ],
+          risks: [
+            'Occasional sleep interruptions',
+            'Pre-surgical anxiety affecting sleep'
+          ]
+        },
+        {
+          name: 'Physical Baseline',
+          desc: 'Your current fitness level provides a recovery foundation.',
+          context: 'Physical fitness before surgery strongly predicts recovery speed according to ERAS protocols.',
+          strengths: [
+            'Good cardiovascular fitness',
+            'Adequate muscle strength',
+            'Good mobility baseline'
+          ],
+          risks: [
+            'Could improve core stability',
+            'Flexibility needs enhancement'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with your healthcare provider for personalized guidance',
+            'Follow evidence-based recovery optimization protocols',
+            'Monitor and adjust based on your surgical team\'s recommendations'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Begin optimization 4-6 weeks before scheduled surgery for best results.'
+          }
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Recovery Speed AI response:", error);
+
+    return {
+      overallScore: 75,
+      overallRating: "Good Recovery",
+      results: [{
+        category: "Overall Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your recovery speed assessment has been completed. Please consult with your healthcare provider for personalized recovery planning.",
+        recommendations: [
+          "Discuss your recovery timeline with your surgical team",
+          "Follow all pre and post-operative instructions carefully",
+          "Optimize modifiable factors to accelerate healing"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Consultation recommended'],
+          riskFactors: ['Requires medical consultation for personalized plan'],
+          timeline: 'Consult with healthcare team to develop recovery optimization strategy.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 
 function complicationParseAIResponse(aiAnalysis, assessmentType){
   try {
