@@ -43,53 +43,43 @@ export function SurgeryReadinessResultsPage() {
   });
 
   useEffect(() => {
-    const fetchAIReport = async () => {
+    const loadReport = () => {
       try {
         setLoading(true);
 
-        const pendingAnswers = sessionStorage.getItem('pendingAnswers');
-        const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
+        // Read the report that was already generated on the Information page
+        const storedReport = sessionStorage.getItem('assessmentReport');
+        const storedAssessmentType = sessionStorage.getItem('assessmentType');
 
-        if (!pendingAnswers) {
-          throw new Error('No assessment data found');
+        console.log('Loading stored report:', storedReport ? 'Found' : 'Not found');
+
+        if (!storedReport) {
+          throw new Error('No assessment report found. Please complete the assessment first.');
         }
 
-        const answers = JSON.parse(pendingAnswers);
+        const report = JSON.parse(storedReport);
 
-        const response = await fetch('/api/generate-assessment-report', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            assessmentType: 'Surgery Readiness',
-            answers,
-            userInfo
-          }),
+        // Verify it's the correct assessment type
+        if (storedAssessmentType !== 'Surgery Readiness') {
+          console.warn('Assessment type mismatch:', storedAssessmentType);
+        }
+
+        console.log('Report loaded successfully:', {
+          overallScore: report.overallScore,
+          categoriesCount: report.results?.length || 0
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to generate assessment report');
-        }
-
-        const data = await response.json();
-
-        if (data.success && data.report) {
-          setAiReport(data.report);
-          sessionStorage.setItem('currentReportId', data.reportId);
-        } else {
-          throw new Error('Invalid report data received');
-        }
+        setAiReport(report);
 
       } catch (err) {
-        console.error('Error fetching AI report:', err);
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error loading report:', err);
+        setError(err instanceof Error ? err.message : 'Unable to load report');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAIReport();
+    loadReport();
   }, []);
 
   const comparisonData = aiReport?.results.map(result => ({
