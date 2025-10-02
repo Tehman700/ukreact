@@ -30,7 +30,29 @@ export function CookieConsent() {
     analytics: false,
   });
 
+  // List of page patterns where cookie consent should NOT appear
+  const excludedPages = [
+    'questions', // Any page with "questions" in the hash
+    'information', // Any page with "information" in the hash
+    'questionnaire', // Additional common patterns
+    'assessment',
+    'results',
+    'feedback',
+    'screener'
+  ];
+
+  const isExcludedPage = () => {
+    const currentHash = window.location.hash.toLowerCase();
+    return excludedPages.some(pattern => currentHash.includes(pattern));
+  };
+
   useEffect(() => {
+    // Don't show banner on excluded pages
+    if (isExcludedPage()) {
+      setShowBanner(false);
+      return;
+    }
+
     // Check if user has already made a cookie choice
     const cookieConsent = localStorage.getItem('lutherhealth-cookie-consent');
     if (!cookieConsent) {
@@ -46,6 +68,19 @@ export function CookieConsent() {
         console.error('Error parsing cookie preferences:', error);
       }
     }
+  }, []);
+
+  // Listen for hash changes to hide banner if user navigates to excluded page
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (isExcludedPage()) {
+        setShowBanner(false);
+        setShowPreferences(false);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const savePreferences = (prefs: CookiePreferences) => {

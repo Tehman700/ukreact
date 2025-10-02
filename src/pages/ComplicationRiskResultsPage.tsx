@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, AlertTriangle, BookOpen, BarChart3, Target, Clock, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -140,18 +141,24 @@ export function ComplicationRiskResultsPage() {
   // Loading state
   if (loading) {
     return (
+            <PaymentGate requiredFunnel="complication-risk">
+
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Generating your personalized assessment...</p>
         </div>
       </div>
+          </PaymentGate>
+
     );
   }
 
   // Error state
   if (error || !aiReport) {
     return (
+                    <PaymentGate requiredFunnel="complication-risk">
+
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -168,6 +175,8 @@ export function ComplicationRiskResultsPage() {
           </CardContent>
         </Card>
       </div>
+                </PaymentGate>
+
     );
   }
 
@@ -175,6 +184,8 @@ export function ComplicationRiskResultsPage() {
   const rating = getOverallRating(overallRating);
 
   return (
+                  <PaymentGate requiredFunnel="complication-risk">
+
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
@@ -717,5 +728,7 @@ export function ComplicationRiskResultsPage() {
         </Card>
       </div>
     </div>
+                    </PaymentGate>
+
   );
 }
