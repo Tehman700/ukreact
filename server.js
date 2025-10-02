@@ -1385,18 +1385,15 @@ function generateEmailContent(userName, assessmentType, reportData) {
   // Handle the report data structure correctly
   let report;
   if (reportData.structured_report) {
-    // If it's from database with structured_report field
     report = typeof reportData.structured_report === "string"
       ? JSON.parse(reportData.structured_report)
       : reportData.structured_report;
   } else if (reportData.results) {
-    // If it's the direct report object
     report = reportData;
   } else {
-    // Fallback
     report = {
       overallScore: 75,
-      overallRating: "Moderate Risk",
+      overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
       results: [],
       summary: "Your assessment has been completed. Please consult with a healthcare provider for detailed interpretation."
     };
@@ -1408,21 +1405,11 @@ function generateEmailContent(userName, assessmentType, reportData) {
     year: 'numeric'
   });
 
-  const getBadgeClass = (level) => {
-    switch(level?.toLowerCase()) {
-      case 'optimal': return 'badge-optimal';
-      case 'high': return 'badge-high';
-      case 'moderate': return 'badge-moderate';
-      case 'low': return 'badge-low';
-      default: return 'badge-moderate';
-    }
-  };
-
   const getScoreColor = (score) => {
-    if (score >= 80) return '#28a745'; // Green
-    if (score >= 60) return '#ffc107'; // Yellow
-    if (score >= 40) return '#fd7e14'; // Orange
-    return '#dc3545'; // Red
+    if (score >= 80) return '#28a745';
+    if (score >= 60) return '#ffc107';
+    if (score >= 40) return '#fd7e14';
+    return '#dc3545';
   };
 
   const getIcon = (level) => {
@@ -1433,6 +1420,90 @@ function generateEmailContent(userName, assessmentType, reportData) {
       case 'low': return '⚠';
       default: return '•';
     }
+  };
+
+
+  // Helper function to render detailed analysis based on assessment type
+  const renderDetailedAnalysis = (result) => {
+    if (!result.detailedAnalysis) return '';
+
+    const analysis = result.detailedAnalysis;
+
+    // Check if this is Surgery Readiness (has evidenceBase) or Complication Risk (has strengths)
+    const isSurgeryReadiness = analysis.evidenceBase !== undefined;
+    const isComplicationRisk = analysis.strengths !== undefined;
+
+    let detailedHtml = `
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 15px 0;">
+        <h4 style="color: var(--primary); font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
+          📋 Clinical Context
+        </h4>
+        <p style="margin: 0 0 15px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+          ${analysis.clinicalContext || 'Analysis details not available.'}
+        </p>
+    `;
+
+    // Render evidence base (Surgery Readiness) or strengths (Complication Risk)
+    if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
+      detailedHtml += `
+        <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
+          ✓ Clinical Evidence
+        </h5>
+        <ul style="margin: 0; padding-left: 20px; list-style: none;">
+          ${analysis.evidenceBase.map(evidence => `
+            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
+              <span style="color: #16a34a; position: absolute; left: -10px;">•</span>
+              ${evidence}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
+      detailedHtml += `
+        <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
+          ✓ Current Strengths
+        </h5>
+        <ul style="margin: 0; padding-left: 20px; list-style: none;">
+          ${analysis.strengths.map(strength => `
+            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
+              <span style="color: #16a34a; position: absolute; left: -10px;">✓</span>
+              ${strength}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+
+    // Render risk factors (both assessment types)
+    if (analysis.riskFactors && analysis.riskFactors.length > 0) {
+      detailedHtml += `
+        <h5 style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
+          ⚠ Key Risk Factors
+        </h5>
+        <ul style="margin: 0; padding-left: 20px; list-style: none;">
+          ${analysis.riskFactors.map(risk => `
+            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
+              <span style="color: #dc2626; position: absolute; left: -10px;">⚠</span>
+              ${risk}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+
+    // Render timeline (both assessment types)
+    if (analysis.timeline) {
+      detailedHtml += `
+        <div style="background-color: #dbeafe; padding: 12px; border-radius: 6px; margin: 15px 0 0 0; border-left: 3px solid #0284c7;">
+          <p style="margin: 0; color: #1e40af; font-size: 13px; font-weight: 500;">
+            ⏱ Timeline: ${analysis.timeline}
+          </p>
+        </div>
+      `;
+    }
+
+    detailedHtml += `</div>`;
+    return detailedHtml;
   };
 
   return `
@@ -1778,32 +1849,27 @@ function generateEmailContent(userName, assessmentType, reportData) {
     </head>
     <body>
         <div class="email-container">
-            <!-- Header -->
             <div class="header">
                 <h1>Luther Health</h1>
                 <h2>Your ${assessmentType} Assessment Results</h2>
                 <p class="date">Completed on ${completionDate}</p>
             </div>
 
-            <!-- Content -->
             <div class="content">
-                <!-- Greeting -->
                 <div class="greeting">
                     <h3>Dear ${userName},</h3>
                     <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and evidence-based recommendations.</p>
                 </div>
 
-                <!-- Overall Score -->
                 <div class="score-section">
                     <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 22px;">Overall Assessment Score</h3>
                     <div class="score-number">${report.overallScore || 'N/A'}%</div>
-                    <div class="score-rating">${report.overallRating || 'Moderate Risk'}</div>
+                    <div class="score-rating">${report.overallRating || 'Assessment Complete'}</div>
                     <p class="score-description">
-                        This score reflects your overall risk profile based on your assessment responses and clinical evidence.
+                        This score reflects your overall ${assessmentType === "Surgery Readiness" ? "surgical readiness" : "risk profile"} based on your assessment responses and clinical evidence.
                     </p>
                 </div>
 
-                <!-- Categories -->
                 <div class="categories-section">
                     <h3 class="categories-title">Category Breakdown & Analysis</h3>
 
@@ -1818,7 +1884,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
                             </div>
 
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%"></div>
+                                <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%; background: ${getScoreColor(result.score || 0)};"></div>
                             </div>
 
                             <p class="category-description">
@@ -1833,23 +1899,23 @@ function generateEmailContent(userName, assessmentType, reportData) {
                                     </ul>
                                 </div>
                             ` : ''}
+
+                            ${renderDetailedAnalysis(result)}
                         </div>
                     `).join('')}
                 </div>
 
-                <!-- Summary -->
                 ${report.summary ? `
                     <div class="summary-section">
                         <h3 class="summary-title">
                             📊 Detailed Clinical Analysis
                         </h3>
                         <div class="summary-content">
-                            ${report.summary.replace(/\n/g, '<br>').substring(0, 1200)}${report.summary.length > 1200 ? '...' : ''}
+                            ${report.summary.replace(/\n/g, '<br>').substring(0, 1500)}${report.summary.length > 1500 ? '...' : ''}
                         </div>
                     </div>
                 ` : ''}
 
-                <!-- Important Medical Disclaimer -->
                 <div class="important-notice">
                     <h4>⚠️ Important Medical Disclaimer</h4>
                     <p>
@@ -1859,7 +1925,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                     </p>
                 </div>
 
-                <!-- Contact Information -->
                 <div style="text-align: center; margin: 30px 0;">
                     <p style="color: #4b5563; margin: 0 0 20px 0;">
                         Questions about your results? Our support team is here to help.
@@ -1871,14 +1936,12 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="footer">
                 <div class="logo">Luther Health</div>
                 <div class="tagline">AI-powered health assessments and clinical insights</div>
                 <div class="copyright">
                     © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
-                    This email was sent because you completed an assessment on our platform.<br>
-                    For support, please contact our team or visit our website.
+                    This email was sent because you completed an assessment on our platform.
                 </div>
             </div>
         </div>
