@@ -943,7 +943,11 @@ useEffect(() => {
       case 'complication-risk-checker-feedback':
         return <ComplicationRiskReviewPage />;
       case 'recovery-speed-predictor-learn-more':
-        return <RecoverySpeedUpsellPage />;
+  return <RecoverySpeedUpsellPage
+    onAddToBasket={addToBasket}
+    onOpenBasket={() => setIsBasketOpen(true)}
+  />;
+
       case 'recovery-speed-predictor-questions':
         return <RecoverySpeedQuestionsPage />;
       case 'recovery-speed-predictor-information':
