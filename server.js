@@ -819,7 +819,6 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
-
 function complicationRiskPrompt(assessmentType){
   const prompts = {
     "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
