@@ -758,7 +758,7 @@ app.post("/api/generate-assessment-report", async (req, res) => {
     } else if (assessmentType === "Anaesthesia Risk") {
       systemPrompt = anaesthesiaRiskPrompt(assessmentType);
     } else if (assessmentType === "Mobility Strength") {
-      structuredReport = mobilityStrengthPrompt(assessmentType);
+      systemPrompt = mobilityStrengthPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }

@@ -61,7 +61,7 @@ export function MobilityStrengthResultsPage() {
         const report = JSON.parse(storedReport);
 
         // Verify it's the correct assessment type
-        if (storedAssessmentType !== 'Mobility & Strength') {
+        if (storedAssessmentType !== 'Mobility Strength') {
           console.warn('Assessment type mismatch:', storedAssessmentType);
         }
 
@@ -597,7 +597,7 @@ export function MobilityStrengthResultsPage() {
           {/* Next Button - Only shown when all tabs have been viewed */}
           {allTabsViewed && (
             <div className="flex justify-center">
-              <Button onClick={() => window.location.hash = 'mobility-strength-feedback'} size="lg" className="px-8">
+              <Button onClick={() => window.location.hash = 'mobility-strength-score-feedback'} size="lg" className="px-8">
                 Next
               </Button>
             </div>
