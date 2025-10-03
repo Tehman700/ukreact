@@ -116,7 +116,6 @@ export function SymptomSeverityResultsPage() {
     const levelMap: Record<string, 'low' | 'moderate' | 'high' | 'severe'> = {
       'Mild Symptoms': 'low',
       'Moderate Symptoms': 'moderate',
-      'Moderate Symptoms': 'moderate',
       'High Symptoms': 'high',
       'Severe Symptoms': 'severe'
     };
