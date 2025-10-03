@@ -1855,7 +1855,7 @@ function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
         level: "moderate",
         description: "Your energy assessment has been completed. This provides insights into your daily energy patterns and optimization opportunities.",
         recommendations: [
-          "Focus on sleep quality as foundation of energy',
+          'Focus on sleep quality as foundation of energy',
           'Establish consistent daily routines',
           'Implement stress management practices'
         ],
