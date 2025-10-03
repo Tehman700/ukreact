@@ -35,7 +35,6 @@ export function ComplicationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Surg
   const handleStartAssessment = () => {
     onAddToBasket(complicationRiskAssessment);
     onOpenBasket();
-
   };
 
   const handleTryDemo = () => {

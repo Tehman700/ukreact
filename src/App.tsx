@@ -997,7 +997,11 @@ useEffect(() => {
       case 'symptom-severity-index-feedback':
         return <SymptomSeverityReviewPage />;
       case 'inflammation-risk-score-learn-more':
-        return <InflammationRiskUpsellPage />;
+          return <InflammationRiskUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'inflammation-risk-score-questions':
         return <InflammationRiskQuestionsPage />;
       case 'inflammation-risk-score-information':

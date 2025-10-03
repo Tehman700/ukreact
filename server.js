@@ -761,7 +761,9 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = mobilityStrengthPrompt(assessmentType);
     } else if (assessmentType === "Symptom Severity") {
       systemPrompt = symptomSeverityPrompt(assessmentType);
-    }else {
+    } else if (assessmentType === "Inflammation Risk") {
+      systemPrompt = inflammationRiskPrompt(assessmentType);
+    } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
 
@@ -802,7 +804,9 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = mobilityStrengthParseAIResponse(aiAnalysis, assessmentType);
     }else if (assessmentType === "Symptom Severity") {
       structuredReport = symptomSeverityParseAIResponse(aiAnalysis, assessmentType);
-    }else {
+    } else if (assessmentType === "Inflammation Risk") {
+      structuredReport =  inflammationRiskParseAIResponse(aiAnalysis, assessmentType);
+    } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
 
@@ -1182,7 +1186,80 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 }
 
 
-// Add this to server.js in the prompt functions
+function inflammationRiskPrompt(assessmentType) {
+  const prompts = {
+    "Inflammation Risk": `You are a specialist inflammation assessment AI with expertise in chronic inflammation evaluation, lifestyle factors, and evidence-based anti-inflammatory interventions. Analyze the patient's responses to assess inflammation risk across multiple domains and provide actionable strategies for reducing inflammatory burden.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = higher inflammation risk, 0-25 is low risk, 26-50 is moderate risk, 51-75 is high risk, 76-100 is very high risk]
+OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "High Risk", "Very High Risk"]
+
+CATEGORY_ANALYSIS:
+Dietary Inflammation: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing dietary inflammatory triggers, processed food intake, anti-inflammatory food consumption, and nutritional balance] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lifestyle Factors: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing physical activity levels, sedentary time, movement patterns, and exercise anti-inflammatory benefits] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Sleep Quality: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing sleep duration, quality, consistency, and impact on inflammatory regulation] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Stress & Recovery: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing stress levels, recovery practices, relaxation techniques, and cortisol-inflammation connection] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Body Composition: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing weight status, body composition, visceral fat implications, and metabolic inflammation] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Environmental Factors: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing toxin exposure, air quality, chemical exposure, and environmental inflammatory triggers] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Dietary Inflammation|[clinical context: 3-4 sentences on diet being a primary modifiable inflammation driver. Reference that anti-inflammatory diets reduce CRP by 30-40% within 6-8 weeks, cite British Dietetic Association and Mediterranean Diet Foundation guidelines. Discuss processed foods increasing inflammatory markers while whole foods, omega-3s, and polyphenols reduce inflammation]|[strengths: comma-separated list of EXACTLY 3 UNIQUE dietary strengths - NEVER write "None provided". Examples: "Includes some anti-inflammatory foods", "Aware of dietary impact on health", "Willing to modify eating patterns"]|[optimization opportunities: comma-separated list of 2-3 dietary improvements]|[timeline: specific timeline like "Dietary inflammation improvements typically seen within 4-6 weeks of consistent changes"]
+
+Lifestyle Factors|[clinical context: 3-4 sentences on physical activity being one of most powerful anti-inflammatory interventions. Reference that regular exercise reduces inflammatory markers by 20-30%, cite NHS physical activity guidelines and British Heart Foundation research. Discuss sedentary behavior increasing inflammation while movement promotes anti-inflammatory cytokines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE activity factors - NEVER "None provided". Examples: "Maintains some physical activity", "Understands exercise benefits", "Willing to increase movement"]|[optimization opportunities: comma-separated list of 2-3 lifestyle improvements]|[timeline: specific timeline like "Exercise anti-inflammatory benefits begin within 2-3 weeks of regular activity"]
+
+Sleep Quality|[clinical context: 3-4 sentences on sleep being crucial for inflammatory regulation. Reference that poor sleep increases IL-6 and TNF-alpha by 40-60%, cite British Sleep Society guidelines and NICE sleep recommendations. Discuss how sleep deprivation disrupts circadian inflammatory rhythms while quality sleep promotes anti-inflammatory recovery]|[strengths: comma-separated list of EXACTLY 3 UNIQUE sleep factors - NEVER "None provided". Examples: "Recognizes sleep importance", "Some good sleep habits", "Willing to optimize sleep routine"]|[optimization opportunities: comma-separated list of 2-3 sleep improvements]|[timeline: specific timeline like "Sleep optimization shows inflammatory benefits within 2-3 weeks"]
+
+Stress & Recovery|[clinical context: 3-4 sentences on chronic stress being major inflammation driver. Reference that stress management reduces inflammatory markers by 25-35%, cite British Psychological Society and NICE stress guidelines. Discuss cortisol-inflammation connection and how relaxation practices activate anti-inflammatory pathways]|[strengths: comma-separated list of EXACTLY 3 UNIQUE stress management factors - NEVER "None provided". Examples: "Some stress awareness", "Uses coping strategies", "Seeks stress reduction"]|[optimization opportunities: comma-separated list of 2-3 stress management improvements]|[timeline: specific timeline like "Stress reduction shows inflammatory benefits within 4-6 weeks"]
+
+Body Composition|[clinical context: 3-4 sentences on adipose tissue being metabolically active and producing inflammatory cytokines. Reference that modest weight loss (5-10%) reduces CRP by 20-30%, cite NICE obesity guidelines and British Nutrition Foundation. Discuss visceral fat producing pro-inflammatory factors while lean mass supports anti-inflammatory metabolism]|[strengths: comma-separated list of EXACTLY 3 UNIQUE body composition factors - NEVER "None provided". Examples: "Aware of weight impact", "Willing to optimize composition", "Takes health-oriented approach"]|[optimization opportunities: comma-separated list of 2-3 body composition strategies]|[timeline: specific timeline like "Body composition improvements show inflammatory benefits within 8-12 weeks"]
+
+Environmental Factors|[clinical context: 3-4 sentences on environmental toxins contributing to inflammatory burden. Reference that reducing toxin exposure improves inflammatory markers, cite Public Health England and Royal College of Physicians. Discuss air pollution, chemicals, and environmental triggers activating inflammatory pathways]|[strengths: comma-separated list of EXACTLY 3 UNIQUE environmental factors - NEVER "None provided". Examples: "Aware of environmental impacts", "Takes some protective measures", "Willing to reduce exposures"]|[optimization opportunities: comma-separated list of 2-3 environmental improvements]|[timeline: specific timeline like "Environmental optimization shows benefits within 4-8 weeks"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For diet: "Includes some whole foods", "Aware of nutrition", "Willing to improve diet"
+- For lifestyle: "Some physical activity", "Understands exercise benefits", "Willing to move more"
+- For sleep: "Values quality sleep", "Some good habits", "Willing to optimize"
+- For stress: "Some stress awareness", "Uses coping tools", "Seeks balance"
+- For body: "Health-conscious approach", "Willing to optimize", "Understands importance"
+- For environment: "Some awareness", "Takes precautions", "Open to changes"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall inflammation risk profile and primary drivers identified
+2. Key modifiable factors with highest impact potential for inflammation reduction
+3. Interconnections between factors (e.g., sleep affecting stress affecting diet)
+4. Evidence-based anti-inflammatory strategies prioritized by effectiveness
+5. Realistic timeline for inflammatory marker improvements with interventions
+6. Holistic lifestyle approach emphasizing sustainable changes over quick fixes
+
+Include specific medical references to UK guidelines (British Dietetic Association, NHS, NICE, British Heart Foundation, British Sleep Society), cite evidence-based anti-inflammatory practices including inflammatory biomarkers like CRP and IL-6, and provide practical, actionable recommendations based on their specific responses. Use empowering language that emphasizes controllable factors and realistic improvements.]
+
+SCORING GUIDELINES:
+- Score 0-25: Low inflammation risk, excellent anti-inflammatory practices
+- Score 26-50: Moderate risk, good baseline with optimization opportunities
+- Score 51-75: High risk, significant inflammatory burden requiring intervention
+- Score 76-100: Very high risk, urgent lifestyle modifications needed
+
+Focus on empowering, evidence-based, practical recommendations personalized to the patient's actual responses. Emphasize that inflammation is highly modifiable through lifestyle changes. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use motivating language that promotes sustainable anti-inflammatory lifestyle changes.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
+
 
 function recoverySpeedPrompt(assessmentType) {
   const prompts = {
@@ -1251,6 +1328,243 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+
+function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 32;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Dietary Inflammation',
+        'Lifestyle Factors',
+        'Sleep Quality',
+        'Stress & Recovery',
+        'Body Composition',
+        'Environmental Factors'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Dietary Inflammation',
+        'Lifestyle Factors',
+        'Sleep Quality',
+        'Stress & Recovery',
+        'Body Composition',
+        'Environmental Factors'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 32;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors influencing inflammatory burden.`,
+              strengths: ['Baseline assessment completed', 'Some awareness of inflammatory factors'],
+              riskFactors: ['Could benefit from targeted anti-inflammatory strategies'],
+              timeline: 'Improvements typically seen within 4-8 weeks of consistent changes.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Inflammation Risk");
+
+      const fallbackCategories = [
+        {
+          name: 'Dietary Inflammation',
+          desc: 'Your diet contains moderate inflammatory triggers that could be optimized.',
+          context: 'Diet is a primary modifiable inflammation driver. Anti-inflammatory diets reduce CRP by 30-40% within 6-8 weeks according to British Dietetic Association guidelines.',
+          strengths: [
+            'Includes some anti-inflammatory foods in diet',
+            'Aware of dietary impact on health',
+            'Willing to modify eating patterns'
+          ],
+          risks: [
+            'Reduce processed food consumption',
+            'Increase omega-3 rich foods intake'
+          ]
+        },
+        {
+          name: 'Lifestyle Factors',
+          desc: 'Your lifestyle choices support manageable inflammation levels with some room for improvement.',
+          context: 'Physical activity is one of the most powerful anti-inflammatory interventions. Regular exercise reduces inflammatory markers by 20-30% according to NHS guidelines.',
+          strengths: [
+            'Maintains some regular physical activity',
+            'Understands exercise health benefits',
+            'Willing to increase daily movement'
+          ],
+          risks: [
+            'Reduce sedentary time throughout day',
+            'Consider adding structured exercise routine'
+          ]
+        },
+        {
+          name: 'Sleep Quality',
+          desc: 'Sleep patterns are moderately impacting your inflammatory regulation.',
+          context: 'Sleep is crucial for inflammatory regulation. Poor sleep increases IL-6 and TNF-alpha by 40-60% according to British Sleep Society research.',
+          strengths: [
+            'Recognizes importance of quality sleep',
+            'Has some good sleep habits established',
+            'Willing to optimize sleep routine'
+          ],
+          risks: [
+            'Establish more consistent sleep schedule',
+            'Optimize bedroom environment for sleep'
+          ]
+        },
+        {
+          name: 'Stress & Recovery',
+          desc: 'You\'re managing stress reasonably well with opportunities for optimization.',
+          context: 'Chronic stress is a major inflammation driver. Stress management reduces inflammatory markers by 25-35% according to British Psychological Society guidelines.',
+          strengths: [
+            'Has some stress awareness and monitoring',
+            'Uses stress coping strategies',
+            'Seeks stress reduction when possible'
+          ],
+          risks: [
+            'Develop more structured stress management practice',
+            'Consider mindfulness or relaxation techniques'
+          ]
+        },
+        {
+          name: 'Body Composition',
+          desc: 'Body composition is a factor in your inflammatory profile.',
+          context: 'Adipose tissue produces inflammatory cytokines. Modest weight loss (5-10%) reduces CRP by 20-30% according to NICE obesity guidelines.',
+          strengths: [
+            'Aware of weight impact on health',
+            'Willing to optimize body composition',
+            'Takes health-oriented approach'
+          ],
+          risks: [
+            'Focus on gradual sustainable changes',
+            'Consider body recomposition strategies'
+          ]
+        },
+        {
+          name: 'Environmental Factors',
+          desc: 'Environmental exposures may be contributing to your inflammatory burden.',
+          context: 'Environmental toxins contribute to inflammatory burden. Reducing toxin exposure improves inflammatory markers according to Public Health England.',
+          strengths: [
+            'Some awareness of environmental impacts',
+            'Takes protective measures when possible',
+            'Willing to reduce harmful exposures'
+          ],
+          risks: [
+            'Minimize exposure to air pollutants',
+            'Reduce chemical exposure in daily products'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 30) + 20,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Implement evidence-based anti-inflammatory strategies',
+            'Track inflammatory indicators over time',
+            'Consult healthcare provider about inflammatory markers'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Anti-inflammatory improvements typically seen within 4-8 weeks of consistent lifestyle changes.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Inflammation Risk AI response:", error);
+
+    return {
+      overallScore: 32,
+      overallRating: "Moderate Risk",
+      results: [{
+        category: "Overall Assessment",
+        score: 32,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your inflammation risk assessment has been completed. This provides insight into modifiable factors affecting your inflammatory burden.",
+        recommendations: [
+          "Implement evidence-based anti-inflammatory lifestyle strategies",
+          "Share results with healthcare provider for inflammatory marker testing",
+          "Focus on sustainable changes with highest impact potential"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Baseline inflammatory profile documented'],
+          riskFactors: ['Continue anti-inflammatory lifestyle practices'],
+          timeline: 'Review inflammatory status with healthcare team within 8-12 weeks.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
+
 function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
   try {
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
