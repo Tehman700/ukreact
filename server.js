@@ -856,10 +856,6 @@ Please provide a comprehensive analysis following the exact format specified in 
   }
 });
 
-
-
-// Add this to server.js in the prompt functions
-
 function biologicalAgePrompt(assessmentType) {
   const prompts = {
     "Biological Age": `You are a longevity and biological aging specialist AI with expertise in epigenetic clocks, aging biomarkers, and healthspan optimization. Analyze the patient's responses to calculate their biological age and identify aging acceleration or deceleration factors.
@@ -882,15 +878,29 @@ Cognitive Function: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 se
 Physical Vitality: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing physical aging markers, muscle mass, mobility, strength, energy levels, and functional capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
 DETAILED_ANALYSIS:
-Cardiovascular Health|[clinical context: 3-4 sentences on cardiovascular aging and heart age. Reference British Heart Foundation research, European Heart Journal studies showing cardiovascular fitness as key longevity predictor. Discuss VO2 max, arterial health, and heart rate variability]|[strengths: comma-separated list of 3 positive cardiovascular factors]|[aging accelerators: comma-separated list of 2-3 factors accelerating cardiovascular aging]|[timeline: specific timeline like "Improvements in cardiovascular fitness can reduce biological age by 3-5 years within 6-12 months"]
+Cardiovascular Health|[clinical context: 3-4 sentences on cardiovascular aging and heart age. Reference British Heart Foundation research, European Heart Journal studies showing cardiovascular fitness as key longevity predictor. Discuss VO2 max, arterial health, and heart rate variability]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cardiovascular health factors - NEVER write "None provided". Examples: "Regular activity maintained", "Heart health awareness", "Aerobic baseline present"]|[aging accelerators: comma-separated list of 2-3 factors accelerating cardiovascular aging]|[timeline: specific timeline like "Improvements in cardiovascular fitness can reduce biological age by 3-5 years within 6-12 months"]
 
-Metabolic Function|[clinical context: 3-4 sentences on metabolic aging and insulin sensitivity. Reference Nature Metabolism research on metabolic health as aging biomarker. Discuss glucose control, lipid profiles, body composition, and metabolic flexibility impact on longevity]|[strengths: comma-separated list of 3 positive metabolic factors]|[aging accelerators: comma-separated list of 2-3 factors accelerating metabolic aging]|[timeline: specific timeline like "Metabolic optimization can reverse biological age by 2-4 years within 3-6 months with lifestyle intervention"]
+Metabolic Function|[clinical context: 3-4 sentences on metabolic aging and insulin sensitivity. Reference Nature Metabolism research on metabolic health as aging biomarker. Discuss glucose control, lipid profiles, body composition, and metabolic flexibility impact on longevity]|[strengths: comma-separated list of EXACTLY 3 UNIQUE metabolic strengths - NEVER "None provided". Examples: "Stable energy patterns", "Metabolic awareness", "Dietary consciousness"]|[aging accelerators: comma-separated list of 2-3 factors accelerating metabolic aging]|[timeline: specific timeline like "Metabolic optimization can reverse biological age by 2-4 years within 3-6 months with lifestyle intervention"]
 
-Cellular Health|[clinical context: 3-4 sentences on cellular aging, telomeres, and senescence. Reference Nature Cell Biology research on cellular aging hallmarks. Discuss oxidative stress, inflammation, autophagy, and mitochondrial function]|[strengths: comma-separated list of 3 positive cellular health factors]|[aging accelerators: comma-separated list of 2-3 factors accelerating cellular aging]|[timeline: specific timeline like "Cellular health improvements through lifestyle factors can be measured within 12-16 weeks"]
+Cellular Health|[clinical context: 3-4 sentences on cellular aging, telomeres, and senescence. Reference Nature Cell Biology research on cellular aging hallmarks. Discuss oxidative stress, inflammation, autophagy, and mitochondrial function]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cellular health factors - NEVER "None provided". Examples: "Adequate antioxidant intake", "Sleep supports repair", "Low inflammation markers"]|[aging accelerators: comma-separated list of 2-3 factors accelerating cellular aging]|[timeline: specific timeline like "Cellular health improvements through lifestyle factors can be measured within 12-16 weeks"]
 
-Cognitive Function|[clinical context: 3-4 sentences on brain aging and cognitive reserve. Reference Lancet Neurology research on modifiable dementia risk factors. Discuss neuroplasticity, cognitive training, sleep quality, and neuroprotective factors]|[strengths: comma-separated list of 3 positive cognitive factors]|[aging accelerators: comma-separated list of 2-3 factors accelerating brain aging]|[timeline: specific timeline like "Cognitive optimization strategies show measurable improvements in 8-12 weeks and long-term neuroprotection"]
+Cognitive Function|[clinical context: 3-4 sentences on brain aging and cognitive reserve. Reference Lancet Neurology research on modifiable dementia risk factors. Discuss neuroplasticity, cognitive training, sleep quality, and neuroprotective factors]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cognitive strengths - NEVER "None provided". Examples: "Mental engagement maintained", "Cognitive awareness", "Learning continues"]|[aging accelerators: comma-separated list of 2-3 factors accelerating brain aging]|[timeline: specific timeline like "Cognitive optimization strategies show measurable improvements in 8-12 weeks and long-term neuroprotection"]
 
-Physical Vitality|[clinical context: 3-4 sentences on physical aging, sarcopenia, and functional capacity. Reference Journal of Gerontology research on muscle mass and longevity. Discuss strength, mobility, balance, and physical resilience as aging biomarkers]|[strengths: comma-separated list of 3 positive physical factors]|[aging accelerators: comma-separated list of 2-3 factors accelerating physical aging]|[timeline: specific timeline like "Resistance training and mobility work can improve biological age markers within 12-16 weeks"]
+Physical Vitality|[clinical context: 3-4 sentences on physical aging, sarcopenia, and functional capacity. Reference Journal of Gerontology research on muscle mass and longevity. Discuss strength, mobility, balance, and physical resilience as aging biomarkers]|[strengths: comma-separated list of EXACTLY 3 UNIQUE physical vitality factors - NEVER "None provided". Examples: "Baseline activity level", "Functional mobility", "Movement consistency"]|[aging accelerators: comma-separated list of 2-3 factors accelerating physical aging]|[timeline: specific timeline like "Resistance training and mobility work can improve biological age markers within 12-16 weeks"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For cardiovascular: "Regular activity", "Heart health awareness", "Aerobic capacity maintained"
+- For metabolic: "Stable energy", "Dietary mindfulness", "Weight awareness"
+- For cellular: "Antioxidant intake", "Sleep quality", "Stress management"
+- For cognitive: "Mental engagement", "Social connections", "Continuous learning"
+- For physical: "Daily movement", "Functional strength", "Mobility maintained"
+- Make strengths actionable and meaningful, not generic
+- Always acknowledge positive aging factors present in their lifestyle
 
 DETAILED_SUMMARY:
 [Provide a comprehensive 5-6 paragraph analysis covering:
@@ -901,7 +911,7 @@ DETAILED_SUMMARY:
 5. Realistic expectations for biological age reversal with optimal interventions
 6. Specific, actionable longevity optimization plan with timelines
 
-Include specific medical references to aging research (Nature Aging, Cell, Science, Lancet Healthy Longevity, British Society for Research on Ageing), cite validated aging biomarkers and epigenetic clocks, and provide personalized predictions based on their specific lifestyle, health, and behavioral responses.]
+Include specific medical references to aging research (Nature Aging, Cell, Science, Lancet Healthy Longevity, British Society for Research on Ageing), cite validated aging biomarkers and epigenetic clocks, and provide personalized predictions based on their specific lifestyle, health, and behavioral responses. Use encouraging, empowering language that acknowledges current aging status while emphasizing modifiable factors and realistic improvement potential.]
 
 SCORING GUIDELINES FOR BIOLOGICAL AGE CALCULATION:
 - Analyze responses holistically to estimate biological vs chronological age
@@ -913,7 +923,7 @@ SCORING GUIDELINES FOR BIOLOGICAL AGE CALCULATION:
 
 Consider: exercise frequency, sleep quality, stress levels, nutrition, social connections, cognitive engagement, alcohol/smoking, metabolic markers, and inflammation indicators.
 
-Focus on validated aging biomarkers and provide evidence-based longevity recommendations personalized to their responses. Emphasize modifiable factors that can reverse biological aging.`,
+Focus on validated aging biomarkers and provide evidence-based longevity recommendations personalized to their responses. Emphasize modifiable factors that can reverse biological aging. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use validating, empowering language that acknowledges their current status while promoting evidence-based optimization strategies.`,
 
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
