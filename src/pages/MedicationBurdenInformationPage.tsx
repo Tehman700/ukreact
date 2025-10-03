@@ -71,45 +71,39 @@ export function MedicationBurdenInformationPage() {
 
     // Significantly slower progress steps - about 30-40 seconds total
     const progressSteps = [
-      { progress: 5, delay: 1500, statement: 0 },
-      { progress: 10, delay: 2000, statement: 1 },
-      { progress: 18, delay: 2500, statement: 2 },
-      { progress: 25, delay: 2000, statement: 3 },
-      { progress: 32, delay: 2500, statement: 4 },
-      { progress: 40, delay: 2000, statement: 5 },
-      { progress: 48, delay: 2500, statement: 6 },
-      { progress: 55, delay: 2000, statement: 7 },
-      { progress: 63, delay: 2500, statement: 8 },
-      { progress: 70, delay: 2000, statement: 9 },
-      { progress: 78, delay: 2500, statement: 10 },
-      { progress: 85, delay: 2000, statement: 11 },
-      { progress: 92, delay: 2500, statement: 12 },
-      // Only go to 95% via animation, wait for report to finish
-      { progress: 95, delay: 2000, statement: 13 }
-    ];
+    { progress: 3, delay: 2000, statement: 0 },
+    { progress: 6, delay: 3000, statement: 1 },
+    { progress: 10, delay: 3000, statement: 2 },
+    { progress: 15, delay: 2500, statement: 3 },
+    { progress: 20, delay: 4000, statement: 4 },
+    { progress: 28, delay: 2500, statement: 5 },
+    { progress: 35, delay: 3000, statement: 6 },
+    { progress: 42, delay: 3500, statement: 7 },
+    { progress: 50, delay: 3000, statement: 8 },
+    { progress: 58, delay: 5500, statement: 9 },
+    { progress: 65, delay: 3000, statement: 10 },
+    { progress: 72, delay: 2500, statement: 11 },
+    { progress: 80, delay: 3000, statement: 12 },
+    { progress: 88, delay: 2500, statement: 13 },
+    { progress: 95, delay: 3000, statement: 14 } // stop here until reportReady
+  ];
 
-    let cumulativeDelay = 0;
-    const timeouts: NodeJS.Timeout[] = [];
+  let cumulativeDelay = 0;
+  const timeouts: NodeJS.Timeout[] = [];
 
-    progressSteps.forEach((step, index) => {
-      if (index === 0) {
-        cumulativeDelay = step.delay;
-      } else {
-        cumulativeDelay += step.delay;
-      }
+  progressSteps.forEach((step, index) => {
+    cumulativeDelay += step.delay;
+    const timeout = setTimeout(() => {
+      setProgress(step.progress);
+      setCurrentStatementIndex(step.statement);
+    }, cumulativeDelay);
+    timeouts.push(timeout);
+  });
 
-      const timeout = setTimeout(() => {
-        setProgress(step.progress);
-        setCurrentStatementIndex(step.statement);
-      }, cumulativeDelay);
-
-      timeouts.push(timeout);
-    });
-
-    return () => {
-      timeouts.forEach(timeout => clearTimeout(timeout));
-    };
-  }, [isSubmitting]);
+  return () => {
+    timeouts.forEach(timeout => clearTimeout(timeout));
+  };
+}, [isSubmitting]);
 
   // When report is ready, complete the progress bar
   useEffect(() => {
