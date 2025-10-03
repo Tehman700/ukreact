@@ -1,13 +1,11 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 import { useAssessmentAnalytics } from '../hooks/useAnalytics';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
+// Base quiz config
 const biologicalAgeQuiz: QuizConfig = {
   title: 'Biological Age Calculator',
-  onComplete: () => {
-    window.location.hash = 'biological-age-calculator-information';
-  },
   questions: [
     {
       id: 'chronological-age',
@@ -149,20 +147,41 @@ const biologicalAgeQuiz: QuizConfig = {
   ],
 };
 
+// Converts answers into human-readable format
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  biologicalAgeQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(', ');
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels = q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
+};
+
 export function BiologicalAgeQuestionsPage() {
-  // Initialize analytics for this specific assessment
   const { startAssessment, trackProgress, completeAssessment } = useAssessmentAnalytics(
     '2',
     'Practical Biological Age Proxy',
     49.99
   );
 
-  // Enhanced quiz configuration with analytics tracking
-  const biologicalAgeQuizWithAnalytics: QuizConfig = {
+  const biologicalAgeQuizWithSubmit: QuizConfig = {
     ...biologicalAgeQuiz,
-    informationPageRoute: 'biological-age-calculator-information',
+    informationPageRoute: 'biological-age-calculator-results',
     onComplete: (answers) => {
       console.log('Biological Age Assessment completed with answers:', answers);
+      sessionStorage.setItem('pendingAnswers', JSON.stringify(convertAnswersToLabels(answers)));
       completeAssessment();
       window.location.hash = 'biological-age-calculator-information';
     },
@@ -170,16 +189,18 @@ export function BiologicalAgeQuestionsPage() {
       const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
       trackProgress(`question_${questionIndex + 1}`, completionPercentage);
     },
+    onBack: () => {
+      window.location.hash = 'biological-age-calculator-learn-more';
+    },
   };
 
-  // Start assessment tracking when component mounts
   React.useEffect(() => {
     startAssessment();
   }, [startAssessment]);
 
   return (
     <PaymentGate requiredFunnel="bio">
-      <QuizTemplate config={biologicalAgeQuizWithAnalytics} />
+      <QuizTemplate config={biologicalAgeQuizWithSubmit} />
     </PaymentGate>
   );
 }

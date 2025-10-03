@@ -3,8 +3,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import {
   Play,
   Activity,
@@ -34,47 +33,18 @@ const functionalFitnessAgeAssessment: Assessment = {
   ],
 };
 
-export function FunctionalFitnessAgeUpsellPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+interface FunctionalFitnessAgeUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems((prev) => {
-      const existingItem = prev.find((item) => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.assessment.id === assessment.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
-
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems((prev) => prev.filter((item) => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems((prev) =>
-      prev.map((item) => (item.assessment.id === assessmentId ? { ...item, quantity } : item))
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
-  };
+export function FunctionalFitnessAgeUpsellPage({ onAddToBasket, onOpenBasket }: FunctionalFitnessAgeUpsellPageProps) {
+    const [isHovered, setIsHovered] = useState(false);
 
   const handleStartAssessment = () => {
-    addToBasket(functionalFitnessAgeAssessment);
+    onAddToBasket(functionalFitnessAgeAssessment);
+    onOpenBasket();
   };
-
   const handleTryDemo = () => {
     window.location.hash = 'functional-fitness-age-test-questions';
   };
@@ -337,16 +307,6 @@ export function FunctionalFitnessAgeUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }

@@ -5,8 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import { CheckCircle2, AlertTriangle, Clock, Shield, TrendingUp, Users, Star, ArrowRight, Play, Apple } from 'lucide-react';
 import biologicalAgeImage from '/assests/nutrition-sec.webp';
 import heroImage from '/assests/nutrition-hero.webp';
@@ -24,46 +23,18 @@ const nutritionBodyCompositionAssessment: Assessment = {
   features: ['Body composition analysis', 'Nutritional deficiency assessment', 'Personalised nutrition optimisation strategies']
 };
 
-export function NutritionBodyCompositionUpsellPage() {
-  const [isHovered, setIsHovered] = useState(false);
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+interface NutritionBodyCompositionUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems(prev => {
-      const existingItem = prev.find(item => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map(item =>
-          item.assessment.id === assessment.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
+export function NutritionBodyCompositionUpsellPage({ onAddToBasket, onOpenBasket }: NutritionBodyCompositionUpsellPageProps) {
+    const [isHovered, setIsHovered] = useState(false);
 
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems(prev => prev.filter(item => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems(prev =>
-      prev.map(item => (item.assessment.id === assessmentId ? { ...item, quantity } : item))
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
-  };
 
   const handleStartAssessment = () => {
-    addToBasket(nutritionBodyCompositionAssessment);
+    onAddToBasket(nutritionBodyCompositionAssessment);
+    onOpenBasket();
   };
 
   const handleTryDemo = () => {
@@ -311,16 +282,6 @@ export function NutritionBodyCompositionUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }

@@ -3,8 +3,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import { Play, Zap } from 'lucide-react';
 import biologicalAgeImage from '/assests/resi-sec.webp';
 import heroImage from '/assests/resi-hero.webp';
@@ -26,45 +25,18 @@ const resilienceIndexAssessment: Assessment = {
   ],
 };
 
-export function ResilienceIndexUpsellPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems((prev) => {
-      const existingItem = prev.find((item) => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.assessment.id === assessment.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
+interface ResilienceIndexUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
+export function ResilienceIndexUpsellPage({ onAddToBasket, onOpenBasket }: ResilienceIndexUpsellPageProps) {
 
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems((prev) => prev.filter((item) => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems((prev) =>
-      prev.map((item) => (item.assessment.id === assessmentId ? { ...item, quantity } : item))
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
-  };
+    const [isHovered, setIsHovered] = useState(false);
 
   const handleStartAssessment = () => {
-    addToBasket(resilienceIndexAssessment);
+    onAddToBasket(resilienceIndexAssessment);
+    onOpenBasket();
   };
 
   const handleTryDemo = () => {
@@ -329,16 +301,6 @@ export function ResilienceIndexUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }

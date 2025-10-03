@@ -5,8 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import biologicalAgeImage from '/assests/cardio-sec.webp';
 import heroImage from '/assests/cardio-hero.webp';
 import {
@@ -36,43 +35,17 @@ const cardiometabolicRiskAssessment: Assessment = {
   features: ['Cardiovascular risk analysis', 'Metabolic health assessment', 'Personalized prevention strategies'],
 };
 
-export function CardiometabolicRiskUpsellPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+interface CardiometabolicRiskUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems((prev) => {
-      const existingItem = prev.find((item) => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.assessment.id === assessment.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
-
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems((prev) => prev.filter((item) => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems((prev) =>
-      prev.map((item) => (item.assessment.id === assessmentId ? { ...item, quantity } : item)),
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
-  };
+export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: CardiometabolicRiskUpsellPageProps) {
+    const [isHovered, setIsHovered] = useState(false);
 
   const handleStartAssessment = () => {
-    addToBasket(cardiometabolicRiskAssessment);
+    onAddToBasket(cardiometabolicRiskAssessment);
+    onOpenBasket();
   };
 
   const handleTryDemo = () => {
@@ -343,16 +316,6 @@ export function CardiometabolicRiskUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }

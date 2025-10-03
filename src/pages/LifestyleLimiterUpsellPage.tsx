@@ -3,8 +3,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import { Users, Play } from 'lucide-react';
 import heroImage from '/assests/lifestyle-hero.webp';
 import sec from '/assests/lifestyle-sec.webp';
@@ -29,44 +28,19 @@ const lifestyleLimiterAssessment: Assessment = {
     'Independence and daily function score',
   ],
 };
+interface LifestyleLimiterUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
 
-export function LifestyleLimiterUpsellPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+export function LifestyleLimiterUpsellPage({ onAddToBasket, onOpenBasket }: LifestyleLimiterUpsellPageProps) {
+    const [isHovered, setIsHovered] = useState(false);
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems((prev) => {
-      const existingItem = prev.find((item) => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.assessment.id === assessment.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
+  const handleStartAssessment = () => {
+    onAddToBasket(lifestyleLimiterAssessment);
+    onOpenBasket();
   };
 
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems((prev) => prev.filter((item) => item.assessment.id !== assessmentId));
-  };
-
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems((prev) =>
-      prev.map((item) => (item.assessment.id === assessmentId ? { ...item, quantity } : item))
-    );
-  };
-
-  const totalPrice = useMemo(
-    () => basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0),
-    [basketItems]
-  );
-
-  const handleStartAssessment = () => addToBasket(lifestyleLimiterAssessment);
   const handleTryDemo = () => {
     window.location.hash = 'lifestyle-limiter-score-questions';
   };
@@ -302,16 +276,6 @@ export function LifestyleLimiterUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={totalPrice}
-      />
     </div>
   );
 }

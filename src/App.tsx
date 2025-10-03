@@ -756,13 +756,19 @@ useEffect(() => {
       case 'surgery-readiness-assessment-information':
         return <SurgeryReadinessInformationPage />;
       case 'biological-age-calculator-learn-more':
-        return <BiologicalAgeUpsellPage />;
+          return <BiologicalAgeUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'biological-age-calculator-questions':
         return <BiologicalAgeQuestionsPage />;
       case 'biological-age-calculator-information':
         return <BiologicalAgeInformationPage />;
       case 'cardiometabolic-risk-score-learn-more':
-        return <CardiometabolicRiskUpsellPage />;
+          return <CardiometabolicRiskUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'cardiometabolic-risk-score-questions':
         return <CardiometabolicRiskQuestionsPage />;
       case 'cardiometabolic-risk-score-information':
@@ -828,7 +834,10 @@ useEffect(() => {
       case 'cardiometabolic-risk-score-feedback':
         return <CardiometabolicRiskReviewPage />;
       case 'resilience-index-learn-more':
-        return <ResilienceIndexUpsellPage />;
+          return <ResilienceIndexUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'resilience-index-questions':
         return <ResilienceIndexQuestionsPage />;
       case 'resilience-index-information':
@@ -838,7 +847,11 @@ useEffect(() => {
       case 'resilience-index-feedback':
         return <ResilienceIndexReviewPage />;
       case 'nutrition-body-composition-score-learn-more':
-        return <NutritionBodyCompositionUpsellPage />;
+          return <NutritionBodyCompositionUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'nutrition-body-composition-score-questions':
         return <NutritionBodyCompositionQuestionsPage />;
       case 'nutrition-body-composition-score-information':
@@ -848,7 +861,10 @@ useEffect(() => {
       case 'nutrition-body-composition-score-feedback':
         return <NutritionBodyCompositionReviewPage />;
       case 'functional-fitness-age-test-learn-more':
-        return <FunctionalFitnessAgeUpsellPage />;
+          return <FunctionalFitnessAgeUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'functional-fitness-age-test-questions':
         return <FunctionalFitnessAgeQuestionsPage />;
       case 'functional-fitness-age-test-information':
@@ -1038,7 +1054,10 @@ useEffect(() => {
       case 'daily-energy-audit-feedback':
         return <DailyEnergyReviewPage />;
       case 'lifestyle-limiter-score-learn-more':
-        return <LifestyleLimiterUpsellPage />;
+          return <LifestyleLimiterUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'lifestyle-limiter-score-questions':
         return <LifestyleLimiterQuestionsPage />;
       case 'lifestyle-limiter-score-information':
