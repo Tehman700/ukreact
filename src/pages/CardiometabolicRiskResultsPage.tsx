@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Heart } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, BarChart3, Target, Clock, BookOpen, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -15,84 +15,78 @@ interface AssessmentResult {
   level: 'low' | 'moderate' | 'high' | 'optimal';
   description: string;
   recommendations: string[];
+  detailedAnalysis?: {
+    clinicalContext: string;
+    strengths: string[];
+    riskFactors: string[];
+    timeline: string;
+  };
+}
+
+interface AIReport {
+  overallScore: number; // Risk score (lower is better)
+  overallRating: string;
+  results: AssessmentResult[];
+  summary: string;
 }
 
 export function CardiometabolicRiskResultsPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations'>('overview');
   const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['overview']));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiReport, setAiReport] = useState<AIReport | null>(null);
 
-  const assessmentTitle = "Cardiometabolic Risk Score";
-  const assessmentType = "Comprehensive Heart & Metabolic Health Assessment";
-  const completionDate = new Date().toLocaleDateString('en-GB', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
   });
-  const overallRiskScore = 15; // Lower is better for risk scores
-  const riskLevel = "Low";
 
-  const results: AssessmentResult[] = [
-    {
-      category: "Cardiovascular Risk",
-      score: 88,
-      maxScore: 100,
-      level: "optimal",
-      description: "Your cardiovascular risk profile shows excellent heart health with minimal disease risk factors.",
-      recommendations: [
-        "Continue regular cardiovascular exercise routine",
-        "Maintain heart-healthy Mediterranean diet pattern",
-        "Monitor blood pressure and cholesterol annually"
-      ]
-    },
-    {
-      category: "Metabolic Health",
-      score: 75,
-      maxScore: 100,
-      level: "high",
-      description: "Good metabolic function with some areas for diabetes and metabolic syndrome prevention.",
-      recommendations: [
-        "Implement time-restricted eating to improve insulin sensitivity",
-        "Focus on complex carbs and fiber-rich foods",
-        "Consider regular glucose monitoring"
-      ]
-    },
-    {
-      category: "Blood Pressure Control",
-      score: 82,
-      maxScore: 100,
-      level: "high",
-      description: "Blood pressure levels are well-controlled with good cardiovascular protection.",
-      recommendations: [
-        "Maintain current physical activity levels",
-        "Continue low-sodium dietary approach",
-        "Manage stress through regular relaxation practices"
-      ]
-    },
-    {
-      category: "Lipid Profile",
-      score: 90,
-      maxScore: 100,
-      level: "optimal",
-      description: "Excellent cholesterol levels with optimal HDL/LDL ratio for cardiovascular protection.",
-      recommendations: [
-        "Continue omega-3 rich foods and healthy fats",
-        "Maintain current exercise routine for HDL support",
-        "Annual lipid panel monitoring"
-      ]
-    },
-    {
-      category: "Inflammation Markers",
-      score: 70,
-      maxScore: 100,
-      level: "moderate",
-      description: "Moderate inflammatory status with potential for cardiovascular risk reduction.",
-      recommendations: [
-        "Increase anti-inflammatory foods (berries, leafy greens)",
-        "Consider curcumin and omega-3 supplementation",
-        "Optimize sleep quality to reduce systemic inflammation"
-      ]
-    }
-  ];
+  useEffect(() => {
+    const loadReport = () => {
+      try {
+        setLoading(true);
+
+        const storedReport = sessionStorage.getItem('assessmentReport');
+        const storedAssessmentType = sessionStorage.getItem('assessmentType');
+
+        console.log('Loading stored report:', storedReport ? 'Found' : 'Not found');
+
+        if (!storedReport) {
+          throw new Error('No assessment report found. Please complete the assessment first.');
+        }
+
+        const report = JSON.parse(storedReport);
+
+        if (storedAssessmentType !== 'Cardiometabolic Risk') {
+          console.warn('Assessment type mismatch:', storedAssessmentType);
+        }
+
+        console.log('Report loaded successfully:', {
+          overallScore: report.overallScore,
+          categoriesCount: report.results?.length || 0
+        });
+
+        setAiReport(report);
+
+      } catch (err) {
+        console.error('Error loading report:', err);
+        setError(err instanceof Error ? err.message : 'Unable to load report');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReport();
+  }, []);
+
+  const comparisonData = aiReport?.results.map(result => ({
+    name: result.category,
+    yourScore: result.score,
+    average: 70,
+    optimal: 90
+  })) || [];
 
   const getScoreColor = (level: string) => {
     switch (level) {
@@ -102,6 +96,27 @@ export function CardiometabolicRiskResultsPage() {
       case 'low': return 'badge-level-high';
       default: return 'badge-level-moderate';
     }
+  };
+
+  const getRiskColor = (riskScore: number) => {
+    if (riskScore <= 20) return 'text-green-600';
+    if (riskScore <= 40) return 'text-blue-600';
+    if (riskScore <= 60) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
+  const getRiskBadgeClass = (riskScore: number) => {
+    if (riskScore <= 20) return 'bg-green-100 text-green-800';
+    if (riskScore <= 40) return 'bg-blue-100 text-blue-800';
+    if (riskScore <= 60) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  const getRiskDescription = (riskScore: number) => {
+    if (riskScore <= 20) return 'Excellent cardiovascular protection';
+    if (riskScore <= 40) return 'Good heart health with minor improvements possible';
+    if (riskScore <= 60) return 'Moderate risk - optimization beneficial';
+    return 'Elevated risk - intervention recommended';
   };
 
   const getScoreBadgeVariant = (level: string) => {
@@ -129,469 +144,559 @@ export function CardiometabolicRiskResultsPage() {
 
   const allTabsViewed = viewedTabs.size === 3;
 
-  return (
-                  <PaymentGate requiredFunnel="card">
+  if (loading) {
+    return (
+      <PaymentGate requiredFunnel="card">
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Calculating your cardiometabolic risk profile...</p>
+          </div>
+        </div>
+      </PaymentGate>
+    );
+  }
 
-    <div className="min-h-screen bg-background">
-      {/* Simplified Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" onClick={handleBackToAssessments}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="font-medium">Back</h1>
+  if (error || !aiReport) {
+    return (
+      <PaymentGate requiredFunnel="card">
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                <span>Error Loading Report</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">{error || 'Unable to load your assessment report.'}</p>
+              <Button onClick={() => window.location.hash = 'assessments'}>
+                Return to Assessments
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </PaymentGate>
+    );
+  }
+
+  const { overallScore: overallRiskScore, overallRating, results } = aiReport;
+
+  return (
+    <PaymentGate requiredFunnel="card">
+      <div className="min-h-screen bg-background">
+        <div className="border-b bg-card">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="icon" onClick={handleBackToAssessments}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="font-medium">Back</h1>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Overall Score Section */}
-        <Card className="mb-8">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-              <CardTitle>Assessment Complete</CardTitle>
-            </div>
-            <CardDescription>
-              Completed on {completionDate} • {results.length} risk factors assessed
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="space-y-4">
-              <div>
-                <div className="text-4xl font-bold mb-2 text-green-600">{overallRiskScore}%</div>
-                <p className="text-muted-foreground mb-2">Overall Cardiometabolic Risk</p>
-                <div className="flex items-center justify-center gap-4 text-sm">
-                  <Badge variant="default" className="bg-green-100 text-green-800">
-                    {riskLevel} Risk
-                  </Badge>
-                  <span className="text-muted-foreground">Optimal protection level</span>
-                </div>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <Card className="mb-8">
+            <CardHeader className="text-center">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <CardTitle>Cardiometabolic Assessment Complete</CardTitle>
               </div>
-              <Progress value={85} className="w-full max-w-md mx-auto" />
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Your cardiometabolic risk assessment reveals excellent heart and metabolic health protection.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
-          <Button
-            variant={activeTab === 'overview' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('overview');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Overview
-          </Button>
-          <Button
-            variant={activeTab === 'detailed' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('detailed');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Detailed Results
-          </Button>
-          <Button
-            variant={activeTab === 'recommendations' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('recommendations');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Prevention Plan
-          </Button>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {results.map((result, index) => (
-              <Card key={index}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{result.category}</CardTitle>
-                    <div className="flex items-center space-x-2">
-                      {getLevelIcon(result.level)}
-                      <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
-                        {result.score}/{result.maxScore}
-                      </Badge>
-                    </div>
+              <CardDescription>
+                Completed on {completionDate} • {results.length} health factors assessed
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="space-y-4">
+                <div>
+                  <div className={`text-4xl font-bold mb-2 ${getRiskColor(overallRiskScore)}`}>
+                    {overallRiskScore}%
                   </div>
+                  <p className="text-muted-foreground mb-2">Overall Cardiometabolic Risk Score</p>
+                  <div className="flex items-center justify-center gap-4 text-sm">
+                    <Badge variant="default" className={getRiskBadgeClass(overallRiskScore)}>
+                      {overallRating}
+                    </Badge>
+                    <span className="text-muted-foreground">
+                      {getRiskDescription(overallRiskScore)}
+                    </span>
+                  </div>
+                </div>
+                <Progress value={100 - overallRiskScore} className="w-full max-w-md mx-auto" />
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Your assessment reveals key insights into your cardiovascular and metabolic health status.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
+            <Button
+              variant={activeTab === 'overview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('overview');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Overview
+            </Button>
+            <Button
+              variant={activeTab === 'detailed' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('detailed');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Detailed Results
+            </Button>
+            <Button
+              variant={activeTab === 'recommendations' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('recommendations');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Prevention Plan
+            </Button>
+          </div>
+
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {results.map((result, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{result.category}</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        {getLevelIcon(result.level)}
+                        <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
+                          {result.score}/{result.maxScore}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Progress value={(result.score / result.maxScore) * 100} />
+                      <p className="text-sm text-muted-foreground">{result.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'detailed' && (
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <span>Your Health Profile vs Population Benchmarks</span>
+                  </CardTitle>
+                  <CardDescription>
+                    How your cardiometabolic health compares to typical population patterns
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <Progress value={(result.score / result.maxScore) * 100} />
-                    <p className="text-sm text-muted-foreground">
-                      {result.description}
-                    </p>
+                  <div className="space-y-16">
+                    {comparisonData.map((item, index) => (
+                      <div key={index} className="space-y-4">
+                        <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
+
+                        <div className="relative max-w-lg mx-auto">
+                          {(() => {
+                            const rangeStart = Math.max(0, 40);
+                            const rangeEnd = 100;
+                            const rangeSize = rangeEnd - rangeStart;
+
+                            const yourScorePosition = ((item.yourScore - rangeStart) / rangeSize) * 100;
+                            const averagePosition = ((item.average - rangeStart) / rangeSize) * 100;
+                            const optimalPosition = ((item.optimal - rangeStart) / rangeSize) * 100;
+
+                            return (
+                              <>
+                                <div
+                                  className="absolute -top-14 transform -translate-x-1/2 text-center"
+                                  style={{ left: `${yourScorePosition}%` }}
+                                >
+                                  <div className="text-xs text-muted-foreground mb-1">Your score</div>
+                                  <div className="text-sm font-medium">{item.yourScore}%</div>
+                                </div>
+
+                                <div className="relative h-2 bg-gray-300 rounded-full">
+                                  <div
+                                    className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
+                                    style={{ width: `${yourScorePosition}%` }}
+                                  />
+
+                                  <div
+                                    className="absolute top-0 h-full w-0.5 bg-white rounded-full"
+                                    style={{ left: `${averagePosition}%` }}
+                                  />
+                                  <div
+                                    className="absolute top-0 h-full w-0.5 bg-white rounded-full"
+                                    style={{ left: `${optimalPosition}%` }}
+                                  />
+                                </div>
+
+                                <div className="relative mt-3 h-12">
+                                  {Math.abs(averagePosition - yourScorePosition) > 8 && (
+                                    <div
+                                      className="absolute text-center transform -translate-x-1/2"
+                                      style={{ left: `${averagePosition}%` }}
+                                    >
+                                      <div className="text-sm font-medium">{item.average}%</div>
+                                      <div className="text-xs text-muted-foreground whitespace-nowrap">Average Health</div>
+                                    </div>
+                                  )}
+                                  {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
+                                    <div
+                                      className="absolute text-center transform -translate-x-1/2"
+                                      style={{ left: `${optimalPosition}%` }}
+                                    >
+                                      <div className="text-sm font-medium">{item.optimal}%</div>
+                                      <div className="text-xs text-muted-foreground">Optimal Health</div>
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
 
-        {activeTab === 'detailed' && (
-          <div className="space-y-8">
-            {/* Comparative Analysis Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Your Risk Profile vs Population Benchmarks</span>
-                </CardTitle>
-                <CardDescription>
-                  How your cardiometabolic health compares to typical risk patterns
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-16">
-                  {results.map((result, index) => (
-                    <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-[50px] mt-[0px] mr-[0px] ml-[0px]">{result.category}</h3>
-                      
-                      <div className="relative max-w-lg mx-auto">
-                        {(() => {
-                          const rangeStart = 40;
-                          const rangeEnd = 100;
-                          const rangeSize = rangeEnd - rangeStart;
-                          
-                          const yourScorePosition = ((result.score - rangeStart) / rangeSize) * 100;
-                          const averagePosition = ((70 - rangeStart) / rangeSize) * 100;
-                          const optimalPosition = ((90 - rangeStart) / rangeSize) * 100;
-                          
-                          return (
-                            <>
-                              <div 
-                                className="absolute -top-14 transform -translate-x-1/2 text-center"
-                                style={{ left: `${yourScorePosition}%` }}
-                              >
-                                <div className="text-xs text-muted-foreground mb-1">Your score</div>
-                                <div className="text-sm font-medium">{result.score}%</div>
-                              </div>
+              {results.map((result, index) => {
+                const analysis = result.detailedAnalysis || {
+                  clinicalContext: result.description,
+                  strengths: ['Health awareness established'],
+                  riskFactors: ['Requires optimization'],
+                  timeline: 'Improvements typically measurable within 8-12 weeks with lifestyle intervention.'
+                };
 
-                              <div className="relative h-2 bg-gray-300 rounded-full">
-                                <div 
-                                  className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
-                                  style={{ width: `${yourScorePosition}%` }}
-                                />
-                                
-                                <div 
-                                  className="absolute top-0 h-full w-0.5 bg-white rounded-full"
-                                  style={{ left: `${averagePosition}%` }}
-                                />
-                                <div 
-                                  className="absolute top-0 h-full w-0.5 bg-white rounded-full"
-                                  style={{ left: `${optimalPosition}%` }}
-                                />
-                              </div>
-
-                              <div className="relative mt-3 h-12">
-                                {Math.abs(averagePosition - yourScorePosition) > 8 && (
-                                  <div 
-                                    className="absolute text-center transform -translate-x-1/2"
-                                    style={{ left: `${averagePosition}%` }}
-                                  >
-                                    <div className="text-sm font-medium">70%</div>
-                                    <div className="text-xs text-muted-foreground whitespace-nowrap">Population Average</div>
-                                  </div>
-                                )}
-                                {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
-                                  <div 
-                                    className="absolute text-center transform -translate-x-1/2"
-                                    style={{ left: `${optimalPosition}%` }}
-                                  >
-                                    <div className="text-sm font-medium">90%</div>
-                                    <div className="text-xs text-muted-foreground">Optimal Health</div>
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          );
-                        })()}
+                return (
+                  <Card key={index}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center space-x-2">
+                            {getLevelIcon(result.level)}
+                            <span>{result.category}</span>
+                          </CardTitle>
+                          <CardDescription>
+                            Protection Score: {result.score}/{result.maxScore} • Level: {result.level}
+                          </CardDescription>
+                        </div>
+                        <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
+                          {result.level.charAt(0).toUpperCase() + result.level.slice(1)}
+                        </Badge>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
 
-            {/* Detailed Category Analysis */}
-            {results.map((result, index) => (
-              <Card key={index}>
+                        <div>
+                          <h4 className="font-medium mb-2 flex items-center space-x-2">
+                            <Target className="h-4 w-4" />
+                            <span>Clinical Assessment</span>
+                          </h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {analysis.clinicalContext}
+                          </p>
+                        </div>
+
+                        {analysis.strengths.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-2 flex items-center space-x-2 text-green-600">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span>Protective Factors</span>
+                              </h4>
+                              <ul className="space-y-1">
+                                {analysis.strengths.map((strength, strengthIndex) => (
+                                  <li key={strengthIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                                    <span className="text-green-500 mt-1">✓</span>
+                                    <span>{strength}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+
+                        {analysis.riskFactors.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-2 flex items-center space-x-2 text-orange-600">
+                                <AlertCircle className="h-4 w-4" />
+                                <span>Modifiable Risk Factors</span>
+                              </h4>
+                              <ul className="space-y-1">
+                                {analysis.riskFactors.map((risk, riskIndex) => (
+                                  <li key={riskIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                                    <span className="text-orange-500 mt-1">⚠</span>
+                                    <span>{risk}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+
+                        <Separator />
+
+                        <div>
+                          <h4 className="font-medium mb-2 flex items-center space-x-2">
+                            <Clock className="h-4 w-4" />
+                            <span>Expected Timeline</span>
+                          </h4>
+                          <p className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
+                            {analysis.timeline}
+                          </p>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                          <h4 className="font-medium mb-2">Evidence-Based Recommendations</h4>
+                          <ul className="space-y-1">
+                            {result.recommendations.map((rec, recIndex) => (
+                              <li key={recIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                                <span className="text-primary mt-1">•</span>
+                                <span>{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {activeTab === 'recommendations' && (
+            <div className="space-y-6">
+              <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center space-x-2">
-                        {getLevelIcon(result.level)}
-                        <span>{result.category}</span>
-                      </CardTitle>
-                      <CardDescription>Score: {result.score}/{result.maxScore} • Level: {result.level}</CardDescription>
-                    </div>
-                    <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
-                      {result.level.charAt(0).toUpperCase() + result.level.slice(1)}
-                    </Badge>
-                  </div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Heart className="h-5 w-5" />
+                    <span>Personalized Prevention Plan</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Evidence-based strategies to optimize your cardiovascular and metabolic health
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
-                    
-                    <div>
-                      <h4 className="font-medium mb-2 flex items-center space-x-2">
-                        <Target className="h-4 w-4" />
-                        <span>Risk Assessment</span>
-                      </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {result.description} Optimizing this area can significantly reduce your long-term cardiovascular and metabolic disease risk.
-                      </p>
-                    </div>
+                    {results.map((result, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          {getLevelIcon(result.level)}
+                          <h4 className="font-medium">{result.category}</h4>
+                        </div>
+                        <div className="pl-6 space-y-2">
+                          {result.recommendations.map((rec, recIndex) => (
+                            <div key={recIndex} className="flex items-start space-x-3">
+                              <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">{rec}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
 
-                    <div>
-                      <h4 className="font-medium mb-2">Key Prevention Strategies</h4>
-                      <div className="space-y-2">
-                        {result.recommendations.slice(0, 2).map((rec, recIndex) => (
-                          <div key={recIndex} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground">{rec}</span>
+                    {aiReport.summary && (
+                      <>
+                        <Separator className="my-6" />
+                        <div>
+                          <h4 className="font-medium mb-3">Comprehensive Analysis</h4>
+                          <div className="prose prose-sm max-w-none">
+                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                              {aiReport.summary}
+                            </p>
                           </div>
-                        ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Next Steps for Heart Health</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">1</div>
+                      <div>
+                        <h4 className="font-medium">Consult Your Healthcare Provider</h4>
+                        <p className="text-sm text-muted-foreground">Share these results with your doctor for comprehensive cardiovascular risk assessment and personalized guidance.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">2</div>
+                      <div>
+                        <h4 className="font-medium">Implement High-Priority Changes</h4>
+                        <p className="text-sm text-muted-foreground">Focus on the recommendations with highest impact on reducing your cardiovascular risk.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">3</div>
+                      <div>
+                        <h4 className="font-medium">Monitor Key Biomarkers</h4>
+                        <p className="text-sm text-muted-foreground">Track blood pressure, cholesterol, and blood glucose regularly to measure progress.</p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
 
-        {activeTab === 'recommendations' && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personalized Cardiometabolic Prevention Plan</CardTitle>
-                <CardDescription>
-                  Evidence-based strategies to prevent heart disease and diabetes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="space-y-4">
-                  {results.map((result, index) => (
-                    <AccordionItem key={index} value={`item-${index}`} className="border border-border rounded-lg px-6">
-                      <AccordionTrigger className="hover:no-underline">
-                        <div className="flex items-center gap-3">
-                          <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
-                            {result.level}
-                          </Badge>
-                          <span>{result.category}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-3 pt-4">
-                          {result.recommendations.map((rec, recIndex) => (
-                            <div key={recIndex} className="flex items-start gap-3">
-                              <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm">{rec}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
-
-            {/* Next Steps */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Next Steps</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">1</div>
-                    <div>
-                      <h4 className="font-medium">Focus on Priority Risk Factors</h4>
-                      <p className="text-sm text-muted-foreground">Start with the areas where you scored lowest for maximum cardiovascular protection.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">2</div>
-                    <div>
-                      <h4 className="font-medium">Monitor Key Biomarkers</h4>
-                      <p className="text-sm text-muted-foreground">Track blood pressure, cholesterol, glucose, and inflammatory markers regularly.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">3</div>
-                    <div>
-                      <h4 className="font-medium">Consider Comprehensive Longevity Support</h4>
-                      <p className="text-sm text-muted-foreground">Our Longevity Focus Protocol includes advanced cardiometabolic optimization and ongoing health support.</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Bottom Navigation Tabs */}
-        <div className="flex space-x-1 mt-8 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
-          <Button
-            variant={activeTab === 'overview' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('overview');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Overview
-          </Button>
-          <Button
-            variant={activeTab === 'detailed' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('detailed');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Detailed Results
-          </Button>
-          <Button
-            variant={activeTab === 'recommendations' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              handleTabChange('recommendations');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Prevention Plan
-          </Button>
-        </div>
-
-        {/* Next Button - Only shown when all tabs have been viewed */}
-        {allTabsViewed && (
-          <div className="flex justify-center">
-            <Button onClick={() => window.location.hash = 'cardiometabolic-risk-score-feedback'} size="lg" className="px-8">
-              Next
+          <div className="flex space-x-1 mt-8 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
+            <Button
+              variant={activeTab === 'overview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('overview');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Overview
+            </Button>
+            <Button
+              variant={activeTab === 'detailed' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('detailed');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Detailed Results
+            </Button>
+            <Button
+              variant={activeTab === 'recommendations' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                handleTabChange('recommendations');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Prevention Plan
             </Button>
           </div>
-        )}
 
-        {/* Footer Info */}
-        <Card className="mt-8 bg-muted/50">
-          <CardContent className="pt-6">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div className="space-y-1">
-                <p className="font-medium">Important Note</p>
-                <p className="text-sm text-muted-foreground">
-                  This cardiometabolic risk assessment provides insights into cardiovascular and metabolic health patterns but does not diagnose medical conditions. 
-                  Consult healthcare providers for comprehensive health evaluation and personalized medical advice.
-                </p>
-              </div>
+          {allTabsViewed && (
+            <div className="flex justify-center">
+              <Button onClick={() => window.location.hash = 'cardiometabolic-risk-score-feedback'} size="lg" className="px-8">
+                Next
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          )}
 
-        {/* Sources & References */}
-        <Card className="mt-6 bg-background border-muted">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="sources-references">
-                  <AccordionTrigger className="font-medium hover:no-underline">
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className="h-4 w-4" />
-                      <span>Sources & References</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-              
-              <Accordion type="multiple" className="w-full">
-                <AccordionItem value="cardiovascular-risk">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Cardiovascular Risk Assessment
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• European Heart Journal: Cardiovascular risk prediction models</li>
-                      <li>• Circulation: Framingham Risk Score and modern adaptations</li>
-                      <li>• British Heart Foundation: UK cardiovascular disease prevention guidelines</li>
-                      <li>• NICE Guidelines: Cardiovascular disease risk assessment and management</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="metabolic-health">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Metabolic Health & Diabetes Prevention
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Diabetes Care: Metabolic syndrome and diabetes risk factors</li>
-                      <li>• Nature Metabolism: Insulin resistance and metabolic health</li>
-                      <li>• Diabetes UK: Type 2 diabetes prevention and risk assessment</li>
-                      <li>• British Journal of Diabetes: Metabolic health optimization</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="blood-pressure">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Blood Pressure & Hypertension
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Hypertension Journal: Blood pressure targets and cardiovascular outcomes</li>
-                      <li>• British Hypertension Society: UK blood pressure management guidelines</li>
-                      <li>• NICE Hypertension Guidelines: Diagnosis and management protocols</li>
-                      <li>• American Heart Association: Blood pressure classification standards</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="prevention-strategies">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Prevention Strategies & Interventions
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Lancet: Primary prevention of cardiovascular disease</li>
-                      <li>• British Nutrition Foundation: Diet and cardiovascular health</li>
-                      <li>• Exercise Medicine: Physical activity for cardiometabolic health</li>
-                      <li>• Preventive Medicine: Lifestyle interventions for disease prevention</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              
-              <div className="pt-4 border-t border-muted">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Disclaimer:</strong> This cardiometabolic risk assessment is based on validated research methodologies and clinical risk factors. Results are for informational purposes and should not replace professional medical advice. Individual risk may vary based on genetic factors, medical history, and environmental influences not captured in this assessment.
-                </p>
+          <Card className="mt-8 bg-muted/50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium">Important Medical Notice</p>
+                  <p className="text-sm text-muted-foreground">
+                    This assessment provides insights into cardiovascular and metabolic risk factors but does not diagnose medical conditions.
+                    Consult healthcare professionals for comprehensive cardiovascular evaluation and personalized medical advice.
+                  </p>
+                </div>
               </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6 bg-background border-muted">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="sources-references">
+                    <AccordionTrigger className="font-medium hover:no-underline">
+                      <div className="flex items-center space-x-2">
+                        <BookOpen className="h-4 w-4" />
+                        <span>Sources & References</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+
+                <Accordion type="multiple" className="w-full">
+                  <AccordionItem value="cardiovascular-risk">
+                    <AccordionTrigger className="text-sm font-medium">
+                      Cardiovascular Disease Risk Assessment
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li>• NICE Guideline CG181: Lipid modification for cardiovascular disease</li>
+                        <li>• British National Formulary: Statin therapy guidelines</li>
+                        <li>• Journal of American College of Cardiology: LDL reduction outcomes</li>
+                        <li>• European Atherosclerosis Society: Dyslipidaemia management</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="inflammation">
+                    <AccordionTrigger className="text-sm font-medium">
+                      Inflammation & Cardiometabolic Health
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li>• Nature Reviews Cardiology: Inflammation and atherosclerosis</li>
+                        <li>• British Journal of Nutrition: Anti-inflammatory dietary patterns</li>
+                        <li>• Circulation Research: CRP and cardiovascular risk</li>
+                        <li>• Journal of Clinical Investigation: Metabolic inflammation</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="lifestyle-prevention">
+                    <AccordionTrigger className="text-sm font-medium">
+                      Lifestyle Modification & Disease Prevention
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li>• NICE Public Health Guideline PH25: Cardiovascular disease prevention</li>
+                        <li>• American Heart Association: Life's Essential 8 guidelines</li>
+                        <li>• British Association for Cardiovascular Prevention: Exercise recommendations</li>
+                        <li>• Mediterranean Diet and cardiovascular outcomes trials</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
+                <div className="pt-4 border-t border-muted">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Disclaimer:</strong> All information provided is based on current UK and international medical guidelines and evidence-based medicine.
+                    Individual circumstances may vary, and professional medical advice should always be sought for specific health concerns.
+                  </p>
+                </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-                </PaymentGate>
-
+    </PaymentGate>
   );
 }
