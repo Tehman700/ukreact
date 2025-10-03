@@ -763,6 +763,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = symptomSeverityPrompt(assessmentType);
     } else if (assessmentType === "Inflammation Risk") {
       systemPrompt = inflammationRiskPrompt(assessmentType);
+    } else if (assessmentType === "Medication Burden") {
+      systemPrompt = medicationBurdenPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -806,6 +808,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = symptomSeverityParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Inflammation Risk") {
       structuredReport =  inflammationRiskParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Medication Burden") {
+      structuredReport = medicationBurdenParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -835,6 +839,70 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+function medicationBurdenPrompt(assessmentType) {
+  const prompts = {
+    "Medication Burden": `You are a specialist medication safety assessment AI with expertise in polypharmacy, drug interactions, medication burden evaluation, and pharmaceutical care optimization. Analyze the patient's responses to assess medication-related risks and provide evidence-based recommendations for safer medication use.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = higher medication burden and risk, 0-25 is low burden, 26-50 is moderate burden, 51-75 is high burden, 76-100 is severe burden]
+OVERALL_RATING: [exactly one of: "Low Burden", "Moderate Burden", "High Burden", "Severe Burden"]
+
+CATEGORY_ANALYSIS:
+Polypharmacy Risk: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing number of medications, complexity of regimen, exponential interaction risk, and polypharmacy-related complications] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Drug Interaction Risk: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing potential drug-drug interactions, supplement interactions, OTC medication risks, and interaction monitoring needs] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Side Effect Burden: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing medication-related side effects, quality of life impact, tolerability issues, and side effect management strategies] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Medication Management: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing adherence patterns, organization systems, complexity management, and medication administration skills] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Polypharmacy Risk|[clinical context: 3-4 sentences on polypharmacy being major patient safety concern. Reference that 5+ medications exponentially increase adverse drug event risk, medication reviews can reduce inappropriate prescribing by 40-60%. Cite Royal Pharmaceutical Society polypharmacy guidance and NICE medicines optimization guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE medication management strengths - NEVER write "None provided". Examples: "Aware of medication list", "Uses single pharmacy", "Willing to discuss medication optimization"]|[optimization opportunities: comma-separated list of 2-3 polypharmacy reduction strategies]|[timeline: specific timeline like "Medication review benefits typically seen immediately with reduced side effects within 2-4 weeks"]
+
+Drug Interaction Risk|[clinical context: 3-4 sentences on drug interactions being responsible for significant morbidity. Reference that complete medication lists including OTC drugs prevent 60% of interaction problems, electronic screening reduces significant interactions. Cite MHRA guidance and British Pharmacological Society interaction guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE interaction safety factors - NEVER "None provided". Examples: "Maintains medication list", "Communicates with prescribers", "Uses interaction checking"]|[optimization opportunities: comma-separated list of 2-3 interaction risk reduction strategies]|[timeline: specific timeline like "Interaction prevention strategies provide immediate safety benefits"]
+
+Side Effect Burden|[clinical context: 3-4 sentences on medication side effects impacting quality of life and adherence. Reference that proactive side effect discussion improves adherence by 30-40%, timing adjustments and formulation changes reduce burden while maintaining efficacy. Cite patient safety research and pharmaceutical care guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE side effect management factors - NEVER "None provided". Examples: "Reports side effects to providers", "Willing to optimize therapy", "Understands importance of communication"]|[optimization opportunities: comma-separated list of 2-3 side effect reduction strategies]|[timeline: specific timeline like "Side effect improvements typically seen within 1-2 weeks of medication adjustments"]
+
+Medication Management|[clinical context: 3-4 sentences on effective medication management being crucial for treatment success. Reference that organized systems improve adherence by 20-30%, backup reminders reduce missed doses. Cite NHS medication safety guidance and pharmacy adherence research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE management system factors - NEVER "None provided". Examples: "Uses organization system", "Plans ahead for refills", "Maintains routine"]|[optimization opportunities: comma-separated list of 2-3 management improvement strategies]|[timeline: specific timeline like "Management improvements provide immediate benefits in adherence and safety"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For polypharmacy: "Aware of medication count", "Uses single pharmacy", "Willing to review"
+- For interactions: "Maintains medication list", "Informs providers", "Checks interactions"
+- For side effects: "Reports problems", "Communicates concerns", "Seeks solutions"
+- For management: "Has system in place", "Organized approach", "Plans ahead"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall medication burden assessment and primary risk factors identified
+2. Key safety concerns requiring immediate pharmaceutical or medical attention
+3. Opportunities for medication optimization and deprescribing consideration
+4. Evidence-based strategies for reducing medication burden safely
+5. Realistic expectations for medication regimen optimization timeline
+6. Holistic approach emphasizing professional pharmaceutical care and medication reviews
+
+Include specific medical references to UK guidelines (Royal Pharmaceutical Society, NICE medicines optimization, MHRA, British National Formulary, NHS medication safety), cite evidence-based pharmaceutical care practices, and provide practical, actionable recommendations based on their specific responses. Use clear, non-judgmental language that empowers patients while emphasizing the importance of professional pharmaceutical guidance.]
+
+SCORING GUIDELINES:
+- Score 0-25: Low burden, well-managed medications with minimal risk
+- Score 26-50: Moderate burden, good baseline with optimization opportunities
+- Score 51-75: High burden, significant medication-related risks requiring review
+- Score 76-100: Severe burden, urgent pharmaceutical intervention needed
+
+Focus on patient safety, evidence-based pharmaceutical care, and practical recommendations personalized to the patient's actual responses. Emphasize that medication burden is modifiable through professional review and optimization. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use empowering language while stressing the importance of professional pharmaceutical involvement in any medication changes.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function symptomSeverityPrompt(assessmentType) {
   const prompts = {
@@ -1327,6 +1395,210 @@ Focus on actionable, evidence-based recommendations that are personalized to the
   };
 
   return prompts[assessmentType] || prompts["default"];
+}
+
+function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 58;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Burden";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Polypharmacy Risk',
+        'Drug Interaction Risk',
+        'Side Effect Burden',
+        'Medication Management'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Polypharmacy Risk',
+        'Drug Interaction Risk',
+        'Side Effect Burden',
+        'Medication Management'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 58;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors requiring pharmaceutical attention.`,
+              strengths: ['Baseline assessment completed', 'Some medication awareness'],
+              riskFactors: ['Could benefit from medication review'],
+              timeline: 'Medication optimization benefits typically seen within 2-4 weeks.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Medication Burden");
+
+      const fallbackCategories = [
+        {
+          name: 'Polypharmacy Risk',
+          desc: 'You are taking multiple medications which increases the risk of drug interactions and side effects.',
+          context: 'Polypharmacy is a major patient safety concern. Patients taking 5+ medications have exponentially increased adverse drug event risk. Medication reviews can reduce inappropriate prescribing by 40-60% according to Royal Pharmaceutical Society guidance.',
+          strengths: [
+            'Aware of complete medication list',
+            'Uses single pharmacy for dispensing',
+            'Willing to discuss medication optimization'
+          ],
+          risks: [
+            'Request comprehensive medication review',
+            'Ask about discontinuing unnecessary medications'
+          ]
+        },
+        {
+          name: 'Drug Interaction Risk',
+          desc: 'Moderate risk of drug interactions based on your current medication profile.',
+          context: 'Drug interactions are responsible for significant morbidity. Complete medication lists including OTC drugs prevent 60% of interaction problems according to MHRA guidance.',
+          strengths: [
+            'Maintains updated medication list',
+            'Communicates with healthcare prescribers',
+            'Uses interaction checking when possible'
+          ],
+          risks: [
+            'Include supplements and OTC drugs in medication list',
+            'Use interaction checking tools before adding medications'
+          ]
+        },
+        {
+          name: 'Side Effect Burden',
+          desc: 'You experience some medication-related side effects that may impact your quality of life.',
+          context: 'Medication side effects significantly impact quality of life. Proactive side effect discussion improves adherence by 30-40% and timing adjustments can reduce burden.',
+          strengths: [
+            'Reports side effects to healthcare providers',
+            'Willing to optimize medication therapy',
+            'Understands importance of communication'
+          ],
+          risks: [
+            'Discuss bothersome side effects with providers',
+            'Consider timing adjustments or alternatives'
+          ]
+        },
+        {
+          name: 'Medication Management',
+          desc: 'Your medication management skills are good with occasional missed doses.',
+          context: 'Effective medication management is crucial for treatment success. Organized systems improve adherence by 20-30% according to NHS medication safety guidance.',
+          strengths: [
+            'Has organization system in place',
+            'Plans ahead for medication refills',
+            'Maintains regular routine'
+          ],
+          risks: [
+            'Consider backup reminder systems',
+            'Update system as medications change'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 30) + 35,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Request comprehensive medication review with pharmacist',
+            'Maintain complete and updated medication list',
+            'Communicate regularly with healthcare providers about medications'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Medication optimization benefits typically seen within 2-4 weeks of intervention.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Medication Burden AI response:", error);
+
+    return {
+      overallScore: 58,
+      overallRating: "Moderate Burden",
+      results: [{
+        category: "Overall Assessment",
+        score: 58,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your medication burden assessment has been completed. This provides insight into medication safety and optimization opportunities.",
+        recommendations: [
+          "Request comprehensive medication review with pharmacist",
+          "Share results with healthcare providers",
+          "Focus on safe medication optimization with professional guidance"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Medication profile documented'],
+          riskFactors: ['Professional medication review recommended'],
+          timeline: 'Schedule medication review within 2-4 weeks for optimization.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
 }
 
 function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {

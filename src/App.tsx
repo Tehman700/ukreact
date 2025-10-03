@@ -1011,7 +1011,11 @@ useEffect(() => {
       case 'inflammation-risk-score-feedback':
         return <InflammationRiskReviewPage />;
       case 'medication-burden-calculator-learn-more':
-        return <MedicationBurdenUpsellPage />;
+          return <MedicationBurdenUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'medication-burden-calculator-questions':
         return <MedicationBurdenQuestionsPage />;
       case 'medication-burden-calculator-information':
