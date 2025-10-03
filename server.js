@@ -759,7 +759,9 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = anaesthesiaRiskPrompt(assessmentType);
     } else if (assessmentType === "Mobility Strength") {
       systemPrompt = mobilityStrengthPrompt(assessmentType);
-    } else {
+    } else if (assessmentType === "Symptom Severity") {
+      systemPrompt = symptomSeverityPrompt(assessmentType);
+    }else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
 
@@ -798,6 +800,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType);
     }else if (assessmentType === "Mobility Strength") {
       structuredReport = mobilityStrengthParseAIResponse(aiAnalysis, assessmentType);
+    }else if (assessmentType === "Symptom Severity") {
+      structuredReport = symptomSeverityParseAIResponse(aiAnalysis, assessmentType);
     }else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -827,6 +831,86 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+function symptomSeverityPrompt(assessmentType) {
+  const prompts = {
+    "Symptom Severity": `You are a specialist symptom assessment AI with expertise in chronic symptom evaluation, quality of life impact analysis, and evidence-based symptom management. Analyze the patient's responses to assess symptom severity across multiple domains and provide actionable management strategies.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = more severe symptoms, 0-25 is mild, 26-50 is moderate, 51-75 is high, 76-100 is severe]
+OVERALL_RATING: [exactly one of: "Mild Symptoms", "Moderate Symptoms", "High Symptoms", "Severe Symptoms"]
+
+CATEGORY_ANALYSIS:
+Pain Assessment: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing pain intensity, frequency, impact on daily life, and quality of life effects] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Fatigue Impact: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing energy levels, daytime functioning, sleep quality, and fatigue-related limitations] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Digestive Symptoms: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing digestive discomfort, dietary impacts, bowel patterns, and nutritional concerns] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Joint & Mobility: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing joint stiffness, movement limitations, daily activity impacts, and functional restrictions] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Sleep Quality: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing sleep duration, quality, disruptions, and restorative sleep effectiveness] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Cognitive Function: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing mental clarity, concentration, memory, and cognitive fatigue] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Emotional Wellbeing: [score 0-100] | [level: low/moderate/high/severe] | [2-3 sentence description analyzing mood stability, stress management, anxiety levels, and emotional resilience] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Pain Assessment|[clinical context: 3-4 sentences on chronic pain affecting 20-30% of adults with significant quality of life impact. Reference NICE chronic pain guidelines CG173, discuss multimodal pain management approaches showing 30-40% improvement, and importance of individualized treatment plans]|[strengths: comma-separated list of EXACTLY 3 UNIQUE pain management factors - NEVER write "None provided". Examples: "Good pain awareness and self-monitoring", "Willing to try multiple approaches", "Maintains activity despite discomfort"]|[management opportunities: comma-separated list of 2-3 pain reduction strategies]|[timeline: specific timeline like "Pain improvements typically seen within 4-8 weeks with consistent multimodal approach"]
+
+Fatigue Impact|[clinical context: 3-4 sentences on chronic fatigue being multifactorial with sleep, stress, and medical causes. Reference Royal College of Physicians fatigue guidelines, discuss that targeted interventions improve energy by 40-50%, importance of identifying underlying causes]|[strengths: comma-separated list of EXACTLY 3 UNIQUE energy management factors - NEVER "None provided". Examples: "Awareness of energy patterns", "Willing to prioritize rest", "Seeks to understand causes"]|[management opportunities: comma-separated list of 2-3 fatigue reduction strategies]|[timeline: specific timeline like "Initial energy improvements typically seen within 2-4 weeks of sleep optimization"]
+
+Digestive Symptoms|[clinical context: 3-4 sentences on functional digestive disorders affecting 10-20% of population. Reference British Society of Gastroenterology guidelines, discuss dietary modifications helping 70-80% of patients, importance of food trigger identification]|[strengths: comma-separated list of EXACTLY 3 UNIQUE digestive health factors - NEVER "None provided". Examples: "Attentive to dietary patterns", "Willing to track symptoms", "Open to dietary modifications"]|[management opportunities: comma-separated list of 2-3 digestive optimization strategies]|[timeline: specific timeline like "Digestive improvements typically seen within 2-4 weeks of dietary modifications"]
+
+Joint & Mobility|[clinical context: 3-4 sentences on joint symptoms affecting mobility and quality of life. Reference NICE osteoarthritis guidelines, discuss that exercise and lifestyle modifications reduce pain by 25-40%, importance of maintaining movement]|[strengths: comma-separated list of EXACTLY 3 UNIQUE mobility factors - NEVER "None provided". Examples: "Maintains some level of activity", "Understands importance of movement", "Willing to try gentle exercise"]|[management opportunities: comma-separated list of 2-3 joint health strategies]|[timeline: specific timeline like "Joint mobility improvements typically seen within 3-6 weeks of consistent gentle exercise"]
+
+Sleep Quality|[clinical context: 3-4 sentences on sleep disorders affecting 30-40% of adults with significant health impacts. Reference NICE insomnia guidelines, discuss sleep hygiene improving quality by 50-60%, importance of addressing underlying causes]|[strengths: comma-separated list of EXACTLY 3 UNIQUE sleep factors - NEVER "None provided". Examples: "Recognizes importance of sleep", "Willing to modify habits", "Tracks sleep patterns"]|[management opportunities: comma-separated list of 2-3 sleep optimization strategies]|[timeline: specific timeline like "Sleep quality improvements typically seen within 2-3 weeks of consistent sleep hygiene"]
+
+Cognitive Function|[clinical context: 3-4 sentences on brain fog and cognitive symptoms being common in chronic conditions. Reference research on cognitive rehabilitation, discuss that mental health, sleep, and lifestyle factors impact cognition significantly]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cognitive factors - NEVER "None provided". Examples: "Aware of cognitive patterns", "Uses compensatory strategies", "Seeks cognitive optimization"]|[management opportunities: comma-separated list of 2-3 cognitive enhancement strategies]|[timeline: specific timeline like "Cognitive clarity improvements typically seen within 3-6 weeks of targeted interventions"]
+
+Emotional Wellbeing|[clinical context: 3-4 sentences on emotional health being integral to physical symptom management. Reference NICE mental health guidelines, discuss that psychological interventions reduce symptom burden by 30-50%, importance of holistic care]|[strengths: comma-separated list of EXACTLY 3 UNIQUE emotional resilience factors - NEVER "None provided". Examples: "Self-aware of emotional patterns", "Uses coping strategies", "Seeks support when needed"]|[management opportunities: comma-separated list of 2-3 emotional wellbeing strategies]|[timeline: specific timeline like "Emotional wellbeing improvements typically seen within 4-8 weeks with consistent practices"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For pain: "Good self-awareness", "Maintains function", "Proactive about management"
+- For fatigue: "Recognizes patterns", "Prioritizes rest", "Seeks solutions"
+- For digestive: "Attentive to triggers", "Willing to modify diet", "Good hydration habits"
+- For joints: "Stays mobile", "Understands benefits of movement", "Seeks gentle activity"
+- For sleep: "Values sleep quality", "Willing to change routines", "Tracks patterns"
+- For cognitive: "Uses memory aids", "Paces mental tasks", "Seeks clarity"
+- For emotional: "Self-aware", "Uses coping tools", "Open to support"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall symptom burden and quality of life impact assessment
+2. Primary symptom drivers requiring immediate attention and management
+3. Interconnections between symptoms (e.g., how poor sleep worsens fatigue and pain)
+4. Evidence-based management strategies prioritized by impact potential
+5. Realistic timeline for symptom improvement with consistent intervention
+6. Holistic approach emphasizing self-management alongside medical care
+
+Include specific medical references to UK guidelines (NICE, British Pain Society, Royal College of Physicians, British Society of Gastroenterology), cite evidence-based symptom management practices, and provide compassionate, empowering recommendations based on their specific responses. Use validating language that acknowledges symptom impact while emphasizing hope and actionable steps for improvement.]
+
+SCORING GUIDELINES:
+- Score 0-25: Mild symptoms, good quality of life, minimal intervention needed
+- Score 26-50: Moderate symptoms, some impact on quality of life, benefit from targeted management
+- Score 51-75: High symptom burden, significant quality of life impact, require comprehensive intervention
+- Score 76-100: Severe symptoms, major quality of life impact, need urgent medical evaluation and intensive management
+
+Focus on compassionate, empowering, evidence-based recommendations personalized to the patient's actual responses. Balance acknowledgment of symptom burden with realistic hope for improvement. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use language that validates their experience while promoting active symptom self-management.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
+
 
 function mobilityStrengthPrompt(assessmentType) {
   const prompts = {
@@ -1167,7 +1251,257 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 42;
 
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Symptoms";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Pain Assessment',
+        'Fatigue Impact',
+        'Digestive Symptoms',
+        'Joint & Mobility',
+        'Sleep Quality',
+        'Cognitive Function',
+        'Emotional Wellbeing'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Pain Assessment',
+        'Fatigue Impact',
+        'Digestive Symptoms',
+        'Joint & Mobility',
+        'Sleep Quality',
+        'Cognitive Function',
+        'Emotional Wellbeing'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 42;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important patterns for symptom management planning.`,
+              strengths: ['Baseline assessment completed', 'Awareness of symptoms'],
+              riskFactors: ['Could benefit from targeted management strategies'],
+              timeline: 'Improvements typically seen within 4-8 weeks of consistent intervention.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Symptom Severity");
+
+      const fallbackCategories = [
+        {
+          name: 'Pain Assessment',
+          desc: 'Your pain levels indicate moderate discomfort that may benefit from management strategies.',
+          context: 'Chronic pain affects 20-30% of adults with significant quality of life impact. Multimodal pain management approaches show 30-40% improvement with consistent application.',
+          strengths: [
+            'Good pain awareness and self-monitoring',
+            'Willing to try multiple approaches',
+            'Maintains activity despite discomfort'
+          ],
+          risks: [
+            'Consider anti-inflammatory dietary modifications',
+            'Explore mind-body pain management techniques'
+          ]
+        },
+        {
+          name: 'Fatigue Impact',
+          desc: 'Fatigue is impacting your daily activities and may require targeted intervention.',
+          context: 'Chronic fatigue is multifactorial involving sleep, stress, and medical causes. Targeted interventions improve energy by 40-50% within weeks.',
+          strengths: [
+            'Awareness of energy patterns throughout day',
+            'Willing to prioritize rest and recovery',
+            'Seeks to understand underlying causes'
+          ],
+          risks: [
+            'Optimize sleep hygiene and duration',
+            'Consider energy conservation techniques'
+          ]
+        },
+        {
+          name: 'Digestive Symptoms',
+          desc: 'Your digestive symptoms warrant monitoring and dietary attention.',
+          context: 'Functional digestive disorders affect 10-20% of population. Dietary modifications help 70-80% of patients identify and manage triggers.',
+          strengths: [
+            'Attentive to dietary patterns and triggers',
+            'Willing to track symptoms systematically',
+            'Open to dietary modifications'
+          ],
+          risks: [
+            'Keep detailed food diary to identify triggers',
+            'Consider gradual increase in fiber intake'
+          ]
+        },
+        {
+          name: 'Joint & Mobility',
+          desc: 'Joint stiffness and mobility issues are affecting your daily function.',
+          context: 'Joint symptoms affect mobility and quality of life. Exercise and lifestyle modifications reduce pain by 25-40% with consistent practice.',
+          strengths: [
+            'Maintains some level of daily activity',
+            'Understands importance of movement',
+            'Willing to try gentle exercise approaches'
+          ],
+          risks: [
+            'Incorporate gentle stretching into routine',
+            'Consider low-impact exercises like swimming'
+          ]
+        },
+        {
+          name: 'Sleep Quality',
+          desc: 'Sleep quality issues may be contributing to other symptoms.',
+          context: 'Sleep disorders affect 30-40% of adults with significant health impacts. Sleep hygiene improvements increase quality by 50-60%.',
+          strengths: [
+            'Recognizes importance of quality sleep',
+            'Willing to modify evening habits',
+            'Tracks sleep patterns'
+          ],
+          risks: [
+            'Establish consistent sleep-wake schedule',
+            'Optimize bedroom environment for sleep'
+          ]
+        },
+        {
+          name: 'Cognitive Function',
+          desc: 'Mental clarity and focus may benefit from targeted support.',
+          context: 'Brain fog and cognitive symptoms are common in chronic conditions. Mental health, sleep, and lifestyle factors significantly impact cognition.',
+          strengths: [
+            'Aware of cognitive patterns and triggers',
+            'Uses compensatory strategies effectively',
+            'Seeks cognitive optimization'
+          ],
+          risks: [
+            'Practice cognitive pacing techniques',
+            'Address sleep and stress as cognitive factors'
+          ]
+        },
+        {
+          name: 'Emotional Wellbeing',
+          desc: 'Emotional health is an important component of overall symptom management.',
+          context: 'Emotional health is integral to physical symptom management. Psychological interventions reduce symptom burden by 30-50%.',
+          strengths: [
+            'Self-aware of emotional patterns',
+            'Uses healthy coping strategies',
+            'Seeks support when needed'
+          ],
+          risks: [
+            'Consider stress reduction techniques',
+            'Explore mind-body practices like meditation'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 30) + 25,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Track symptom patterns in a journal',
+            'Discuss findings with healthcare provider',
+            'Implement recommended lifestyle modifications'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Symptom improvements typically seen within 4-8 weeks of consistent management.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Symptom Severity AI response:", error);
+
+    return {
+      overallScore: 42,
+      overallRating: "Moderate Symptoms",
+      results: [{
+        category: "Overall Assessment",
+        score: 42,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your symptom severity assessment has been completed. This provides a baseline for tracking symptom patterns and management effectiveness.",
+        recommendations: [
+          "Share these results with your healthcare provider",
+          "Begin implementing priority symptom management strategies",
+          "Track symptom patterns over time to assess improvement"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Symptom awareness documented'],
+          riskFactors: ['Continue monitoring symptoms'],
+          timeline: 'Review symptom patterns with healthcare team within 4-8 weeks.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
   try {
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);

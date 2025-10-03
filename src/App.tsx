@@ -983,7 +983,11 @@ useEffect(() => {
       case 'mobility-strength-score-feedback':
         return <MobilityStrengthReviewPage />;
       case 'symptom-severity-index-learn-more':
-        return <SymptomSeverityUpsellPage />;
+          return <SymptomSeverityUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
       case 'symptom-severity-index-questions':
         return <SymptomSeverityQuestionsPage />;
       case 'symptom-severity-index-information':
