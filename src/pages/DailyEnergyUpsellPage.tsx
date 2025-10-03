@@ -3,8 +3,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ShoppingBasket } from '../components/ShoppingBasket';
-import { Assessment, BasketItem } from './AssessmentsPage';
+import { Assessment} from './AssessmentsPage';
 import { Battery, Play } from 'lucide-react';
 import heroImage from '/assests/energy-hero.webp';
 import sec from '/assests/energy-sec.webp';
@@ -22,43 +21,19 @@ const dailyEnergyAssessment: Assessment = {
   features: ['Energy pattern analysis', 'Sleep quality assessment', 'Stamina optimization plan'],
 };
 
-export function DailyEnergyUpsellPage() {
-  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [isBasketOpen, setIsBasketOpen] = useState(false);
+interface DailyEnergyUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
+}
 
-  const addToBasket = (assessment: Assessment) => {
-    setBasketItems((prev) => {
-      const existingItem = prev.find((item) => item.assessment.id === assessment.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.assessment.id === assessment.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-      return [...prev, { assessment, quantity: 1 }];
-    });
-    setIsBasketOpen(true);
-  };
 
-  const removeFromBasket = (assessmentId: string) => {
-    setBasketItems((prev) => prev.filter((item) => item.assessment.id !== assessmentId));
-  };
+export function DailyEnergyUpsellPage({ onAddToBasket, onOpenBasket }: DailyEnergyUpsellPageProps) {
+    const [isHovered, setIsHovered] = useState(false);
 
-  const updateQuantity = (assessmentId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromBasket(assessmentId);
-      return;
-    }
-    setBasketItems((prev) =>
-      prev.map((item) => (item.assessment.id === assessmentId ? { ...item, quantity } : item)),
-    );
-  };
-
-  const getTotalPrice = () => {
-    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
-  };
 
   const handleStartAssessment = () => {
-    addToBasket(dailyEnergyAssessment);
+    onAddToBasket(dailyEnergyAssessment);
+    onOpenBasket();
   };
 
   const handleTryDemo = () => {
@@ -329,16 +304,6 @@ export function DailyEnergyUpsellPage() {
           </div>
         </div>
       </section>
-
-      {/* Shopping Basket */}
-      <ShoppingBasket
-        isOpen={isBasketOpen}
-        onClose={() => setIsBasketOpen(false)}
-        items={basketItems}
-        onRemoveItem={removeFromBasket}
-        onUpdateQuantity={updateQuantity}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 }

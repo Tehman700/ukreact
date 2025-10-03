@@ -1025,7 +1025,10 @@ useEffect(() => {
       case 'medication-burden-calculator-feedback':
         return <MedicationBurdenReviewPage />;
       case 'daily-energy-audit-learn-more':
-        return <DailyEnergyUpsellPage />;
+          return <DailyEnergyUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
       case 'daily-energy-audit-questions':
         return <DailyEnergyQuestionsPage />;
       case 'daily-energy-audit-information':

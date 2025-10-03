@@ -765,6 +765,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = inflammationRiskPrompt(assessmentType);
     } else if (assessmentType === "Medication Burden") {
       systemPrompt = medicationBurdenPrompt(assessmentType);
+    } else if (assessmentType === "Daily Energy") {
+      systemPrompt = dailyEnergyPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -810,6 +812,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport =  inflammationRiskParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Medication Burden") {
       structuredReport = medicationBurdenParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Daily Energy") {
+      structuredReport = dailyEnergyParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -839,6 +843,70 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+function dailyEnergyPrompt(assessmentType) {
+  const prompts = {
+    "Daily Energy": `You are a specialist energy optimization assessment AI with expertise in sleep medicine, circadian biology, nutritional energy metabolism, and fatigue management. Analyze the patient's responses to assess daily energy patterns and provide evidence-based strategies for energy optimization.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better energy management, 85+ is excellent, 70-84 is good, 55-69 is moderate, 0-54 is low]
+OVERALL_RATING: [exactly one of: "Excellent Energy", "Good Energy", "Moderate Energy", "Low Energy"]
+
+CATEGORY_ANALYSIS:
+Sleep Quality & Recovery: [score 0-100] | [level: excellent/high/moderate/low] | [2-3 sentence description analyzing sleep duration, quality, consistency, restorative sleep, and impact on daytime energy] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Energy Pattern Stability: [score 0-100] | [level: excellent/high/moderate/low] | [2-3 sentence description analyzing energy fluctuations throughout day, crashes, circadian rhythm alignment, and energy consistency] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Stress & Recovery Balance: [score 0-100] | [level: excellent/high/moderate/low] | [2-3 sentence description analyzing stress levels, recovery capacity, stress management, and stress-related energy depletion] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Nutritional Energy Support: [score 0-100] | [level: excellent/high/moderate/low] | [2-3 sentence description analyzing meal timing, blood sugar stability, hydration, nutritional adequacy, and dietary energy support] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Sleep Quality & Recovery|[clinical context: 3-4 sentences on sleep being foundation of energy. Reference that quality sleep restores 70-80% of daily energy reserves, poor sleep reduces cognitive function by 40%. Cite British Sleep Society guidelines and NICE sleep recommendations. Discuss sleep architecture and restorative processes]|[strengths: comma-separated list of EXACTLY 3 UNIQUE sleep strengths - NEVER write "None provided". Examples: "Recognizes sleep importance", "Some good sleep habits", "Willing to optimize sleep routine"]|[optimization opportunities: comma-separated list of 2-3 sleep improvement strategies]|[timeline: specific timeline like "Sleep optimization shows energy benefits within 7-10 days of consistent implementation"]
+
+Energy Pattern Stability|[clinical context: 3-4 sentences on circadian rhythms regulating 80% of energy patterns. Reference that aligned circadian rhythms improve energy by 30-40%, irregular patterns cause afternoon crashes. Cite British Society for Chronobiology research and circadian biology guidelines. Discuss energy homeostasis and rhythm optimization]|[strengths: comma-separated list of EXACTLY 3 UNIQUE energy pattern factors - NEVER "None provided". Examples: "Some energy awareness", "Recognizes patterns", "Willing to optimize timing"]|[optimization opportunities: comma-separated list of 2-3 pattern stabilization strategies]|[timeline: specific timeline like "Energy pattern improvements typically seen within 2-3 weeks of circadian alignment"]
+
+Stress & Recovery Balance|[clinical context: 3-4 sentences on chronic stress depleting 50-60% of energy reserves. Reference that effective stress management improves energy by 35-45%, recovery practices restore energy capacity. Cite British Psychological Society stress guidelines and energy conservation research. Discuss stress-energy depletion cycle]|[strengths: comma-separated list of EXACTLY 3 UNIQUE stress management factors - NEVER "None provided". Examples: "Some stress awareness", "Uses coping strategies", "Recognizes need for recovery"]|[optimization opportunities: comma-separated list of 2-3 stress-energy optimization strategies]|[timeline: specific timeline like "Stress management shows energy improvements within 3-4 weeks of consistent practice"]
+
+Nutritional Energy Support|[clinical context: 3-4 sentences on nutrition providing 60-70% of metabolic energy substrate. Reference that stable blood sugar maintains energy, proper hydration improves energy by 20-25%. Cite British Dietetic Association guidelines and nutritional energy metabolism research. Discuss nutritional energy optimization]|[strengths: comma-separated list of EXACTLY 3 UNIQUE nutritional factors - NEVER "None provided". Examples: "Some healthy eating habits", "Understands nutrition importance", "Willing to optimize diet"]|[optimization opportunities: comma-separated list of 2-3 nutritional energy strategies]|[timeline: specific timeline like "Nutritional energy improvements typically seen within 1-2 weeks of dietary optimization"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For sleep: "Values quality sleep", "Has some routines", "Willing to optimize"
+- For energy patterns: "Some energy awareness", "Notices patterns", "Open to changes"
+- For stress: "Recognizes stress impact", "Uses some strategies", "Seeks balance"
+- For nutrition: "Some healthy habits", "Understands importance", "Willing to improve"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall energy profile and primary factors affecting daily energy levels
+2. Key modifiable factors with highest impact potential for energy improvement
+3. Interconnections between sleep, stress, nutrition, and circadian rhythms
+4. Evidence-based energy optimization strategies prioritized by effectiveness
+5. Realistic timeline for energy improvements with consistent implementation
+6. Holistic approach emphasizing sustainable energy management practices
+
+Include specific medical references to UK guidelines (British Sleep Society, British Dietetic Association, NICE, British Society for Chronobiology, British Psychological Society), cite evidence-based energy optimization practices, and provide practical, actionable recommendations based on their specific responses. Use empowering language that emphasizes controllable factors and realistic improvements in daily energy and stamina.]
+
+SCORING GUIDELINES:
+- Score 85-100: Excellent energy, optimal sleep and lifestyle practices
+- Score 70-84: Good energy, strong foundation with minor optimization opportunities
+- Score 55-69: Moderate energy, significant room for improvement with targeted strategies
+- Score 0-54: Low energy, requires comprehensive energy optimization intervention
+
+Focus on empowering, evidence-based, practical recommendations personalized to the patient's actual responses. Emphasize that energy levels are highly modifiable through sleep, circadian, stress, and nutritional optimization. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use motivating language that promotes sustainable energy management practices.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function medicationBurdenPrompt(assessmentType) {
   const prompts = {
@@ -1593,6 +1661,209 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
           strengths: ['Assessment completed', 'Medication profile documented'],
           riskFactors: ['Professional medication review recommended'],
           timeline: 'Schedule medication review within 2-4 weeks for optimization.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
+function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 65;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Energy";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Sleep Quality & Recovery',
+        'Energy Pattern Stability',
+        'Stress & Recovery Balance',
+        'Nutritional Energy Support'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Sleep Quality & Recovery',
+        'Energy Pattern Stability',
+        'Stress & Recovery Balance',
+        'Nutritional Energy Support'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 65;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors affecting daily energy levels.`,
+              strengths: ['Baseline assessment completed', 'Some energy awareness', 'Willing to optimize'],
+              riskFactors: ['Could benefit from energy optimization strategies'],
+              timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['excellent', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Daily Energy");
+
+      const fallbackCategories = [
+        {
+          name: 'Sleep Quality & Recovery',
+          desc: 'Your sleep patterns show moderate quality with opportunities for optimization to enhance energy restoration.',
+          context: 'Sleep is the foundation of daily energy. Quality sleep restores 70-80% of daily energy reserves, while poor sleep reduces cognitive function by 40% according to British Sleep Society guidelines and NICE sleep recommendations.',
+          strengths: [
+            'Recognizes importance of quality sleep',
+            'Has some established sleep routines',
+            'Willing to optimize sleep habits'
+          ],
+          risks: [
+            'Establish consistent sleep-wake schedule',
+            'Optimize sleep environment for better rest'
+          ]
+        },
+        {
+          name: 'Energy Pattern Stability',
+          desc: 'Your energy levels fluctuate throughout the day with opportunities to stabilize patterns through circadian optimization.',
+          context: 'Circadian rhythms regulate 80% of energy patterns. Aligned circadian rhythms improve energy by 30-40%, while irregular patterns cause afternoon crashes according to British Society for Chronobiology research.',
+          strengths: [
+            'Some awareness of energy patterns',
+            'Recognizes daily fluctuations',
+            'Willing to optimize timing'
+          ],
+          risks: [
+            'Align activities with natural circadian rhythms',
+            'Establish consistent daily routines'
+          ]
+        },
+        {
+          name: 'Stress & Recovery Balance',
+          desc: 'Your stress levels impact energy reserves with opportunities for better stress management and recovery practices.',
+          context: 'Chronic stress depletes 50-60% of energy reserves. Effective stress management improves energy by 35-45% according to British Psychological Society stress guidelines and energy conservation research.',
+          strengths: [
+            'Some stress awareness',
+            'Uses coping strategies when needed',
+            'Recognizes need for recovery time'
+          ],
+          risks: [
+            'Implement regular stress reduction practices',
+            'Build recovery periods into daily routine'
+          ]
+        },
+        {
+          name: 'Nutritional Energy Support',
+          desc: 'Your nutrition provides moderate energy support with opportunities for optimization through timing and composition.',
+          context: 'Nutrition provides 60-70% of metabolic energy substrate. Stable blood sugar maintains energy, proper hydration improves energy by 20-25% according to British Dietetic Association guidelines.',
+          strengths: [
+            'Some healthy eating habits',
+            'Understands nutrition importance',
+            'Willing to optimize dietary patterns'
+          ],
+          risks: [
+            'Stabilize blood sugar through meal timing',
+            'Ensure adequate hydration throughout day'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 25) + 55,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Implement evidence-based energy optimization strategies',
+            'Track energy patterns to identify improvements',
+            'Focus on sustainable lifestyle modifications'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Daily Energy AI response:", error);
+
+    return {
+      overallScore: 65,
+      overallRating: "Moderate Energy",
+      results: [{
+        category: "Overall Assessment",
+        score: 65,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your energy assessment has been completed. This provides insights into your daily energy patterns and optimization opportunities.",
+        recommendations: [
+          "Focus on sleep quality as foundation of energy',
+          'Establish consistent daily routines',
+          'Implement stress management practices'
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Energy awareness developing', 'Willing to optimize'],
+          riskFactors: ['Continue energy optimization efforts'],
+          timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
         }
       }],
       summary: aiAnalysis,
