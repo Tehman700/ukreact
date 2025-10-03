@@ -767,6 +767,10 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = medicationBurdenPrompt(assessmentType);
     } else if (assessmentType === "Daily Energy") {
       systemPrompt = dailyEnergyPrompt(assessmentType);
+    } else if (assessmentType === "Daily Energy") {
+      systemPrompt = dailyEnergyPrompt(assessmentType);
+    } else if (assessmentType === "Lifestyle Limiter") {
+      systemPrompt = lifestyleLimiterPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -814,6 +818,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = medicationBurdenParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Daily Energy") {
       structuredReport = dailyEnergyParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Lifestyle Limiter") {
+      structuredReport = lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -843,7 +849,70 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+function lifestyleLimiterPrompt(assessmentType) {
+  const prompts = {
+    "Lifestyle Limiter": `You are a specialist quality of life assessment AI with expertise in functional limitation evaluation, lifestyle impact analysis, and adaptation strategy development. Analyze the patient's responses to assess how health issues are limiting different life domains and provide evidence-based strategies for improving daily functioning.
 
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = greater lifestyle limitation, 0-20 is minimal, 21-40 is mild, 41-60 is moderate, 61-80 is significant, 81-100 is severe]
+OVERALL_RATING: [exactly one of: "Minimal Impact", "Mild Impact", "Moderate Impact", "Significant Impact", "Severe Impact"]
+
+CATEGORY_ANALYSIS:
+Work & Professional Life: [score 0-100] | [level: minimal/mild/moderate/significant/severe] | [2-3 sentence description analyzing work performance impact, professional activity limitations, career effects, and workplace functioning] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Social & Relationship Impact: [score 0-100] | [level: minimal/mild/moderate/significant/severe] | [2-3 sentence description analyzing social activity participation, relationship quality, social isolation risk, and interpersonal functioning] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Physical Activity & Recreation: [score 0-100] | [level: minimal/mild/moderate/significant/severe] | [2-3 sentence description analyzing exercise limitations, recreational activity restrictions, physical mobility, and activity tolerance] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Independence & Daily Living: [score 0-100] | [level: minimal/mild/moderate/significant/severe] | [2-3 sentence description analyzing self-care abilities, daily task completion, independence level, and functional autonomy] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Work & Professional Life|[clinical context: 3-4 sentences on health impacting work productivity and professional functioning. Reference that chronic conditions affect 20-30% of workforce productivity, workplace accommodations improve functioning by 40-50%. Cite Health and Safety Executive guidelines and occupational health research. Discuss work-health balance importance]|[strengths: comma-separated list of EXACTLY 3 UNIQUE work-related strengths - NEVER write "None provided". Examples: "Maintains work commitment", "Communicates needs", "Seeks workplace solutions"]|[adaptation opportunities: comma-separated list of 2-3 workplace optimization strategies]|[timeline: specific timeline like "Workplace accommodations typically show productivity benefits within 2-4 weeks"]
+
+Social & Relationship Impact|[clinical context: 3-4 sentences on health affecting social participation and relationships. Reference that social isolation increases health risks by 30%, maintaining social connections improves outcomes. Cite British Psychological Society research and social functioning guidelines. Discuss relationship adaptation importance]|[strengths: comma-separated list of EXACTLY 3 UNIQUE social strengths - NEVER "None provided". Examples: "Values relationships", "Communicates openly", "Maintains connections"]|[adaptation opportunities: comma-separated list of 2-3 social optimization strategies]|[timeline: specific timeline like "Social adaptation strategies show relationship benefits within 4-6 weeks"]
+
+Physical Activity & Recreation|[clinical context: 3-4 sentences on activity limitations affecting quality of life. Reference that modified physical activity maintains function, adaptive recreation improves wellbeing. Cite Chartered Society of Physiotherapy guidelines and activity adaptation research. Discuss importance of staying active within capabilities]|[strengths: comma-separated list of EXACTLY 3 UNIQUE activity strengths - NEVER "None provided". Examples: "Willing to adapt activities", "Seeks appropriate options", "Maintains movement"]|[adaptation opportunities: comma-separated list of 2-3 activity optimization strategies]|[timeline: specific timeline like "Adaptive activity programs show functional benefits within 3-6 weeks"]
+
+Independence & Daily Living|[clinical context: 3-4 sentences on maintaining independence despite limitations. Reference that assistive devices and strategies maintain 70-80% independence, support systems enable functioning. Cite Royal College of Occupational Therapists guidelines and independence research. Discuss autonomy preservation importance]|[strengths: comma-separated list of EXACTLY 3 UNIQUE independence factors - NEVER "None provided". Examples: "Maintains self-care", "Uses adaptive strategies", "Seeks appropriate support"]|[adaptation opportunities: comma-separated list of 2-3 independence optimization strategies]|[timeline: specific timeline like "Independence adaptations show functional benefits within 2-4 weeks"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For work: "Maintains commitment", "Communicates needs", "Problem-solves"
+- For social: "Values connections", "Stays engaged", "Adapts activities"
+- For physical: "Stays active", "Seeks modifications", "Willing to adapt"
+- For independence: "Maintains autonomy", "Uses tools", "Plans ahead"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall lifestyle impact profile and primary limitation domains identified
+2. Key modifiable factors with highest potential for functional improvement
+3. Interconnections between work, social, physical, and independence limitations
+4. Evidence-based adaptation strategies prioritized by impact potential
+5. Realistic timeline for quality of life improvements with interventions
+6. Holistic approach emphasizing maintained function and adaptive strategies
+
+Include specific medical references to UK guidelines (Health and Safety Executive, Royal College of Occupational Therapists, Chartered Society of Physiotherapy, British Psychological Society, WHO International Classification of Functioning), cite evidence-based adaptation practices, and provide practical, empowering recommendations based on their specific responses. Use validating language that acknowledges limitations while emphasizing adaptive strategies and maintained functioning.]
+
+SCORING GUIDELINES:
+- Score 0-20: Minimal impact, excellent functional maintenance
+- Score 21-40: Mild impact, good function with minor adaptations needed
+- Score 41-60: Moderate impact, noticeable limitations requiring adaptation strategies
+- Score 61-80: Significant impact, major limitations requiring comprehensive support
+- Score 81-100: Severe impact, extensive limitations requiring intensive intervention
+
+Focus on empowering, validating, evidence-based recommendations personalized to the patient's actual responses. Acknowledge limitations while emphasizing adaptive strategies and maintained functioning. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use compassionate language that validates impact while promoting active adaptation and quality of life optimization.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 function dailyEnergyPrompt(assessmentType) {
   const prompts = {
     "Daily Energy": `You are a specialist energy optimization assessment AI with expertise in sleep medicine, circadian biology, nutritional energy metabolism, and fatigue management. Analyze the patient's responses to assess daily energy patterns and provide evidence-based strategies for energy optimization.
@@ -1668,6 +1737,180 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
     };
   }
 }
+
+function lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 45;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Impact";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Work & Professional Life',
+        'Social & Relationship Impact',
+        'Physical Activity & Recreation',
+        'Independence & Daily Living'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Work & Professional Life',
+        'Social & Relationship Impact',
+        'Physical Activity & Recreation',
+        'Independence & Daily Living'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 45;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors affecting daily functioning in this life domain.`,
+              strengths: ['Maintains awareness of limitations', 'Seeks adaptive strategies'],
+              riskFactors: ['Could benefit from targeted adaptation approaches'],
+              timeline: 'Functional improvements typically seen within 3-6 weeks of implementing strategies.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['minimal', 'mild', 'moderate', 'significant', 'severe'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Lifestyle Limiter");
+
+      const fallbackCategories = [
+        {
+          name: 'Work & Professional Life',
+          desc: 'Health issues are moderately impacting your work performance and professional activities.',
+          context: 'Chronic conditions affect 20-30% of workforce productivity. Workplace accommodations improve functioning by 40-50% according to Health and Safety Executive research.',
+          strengths: ['Maintains work commitment despite challenges', 'Communicates needs with employers', 'Seeks workplace solutions']
+        },
+        {
+          name: 'Social & Relationship Impact',
+          desc: 'Some impact on social activities and relationships, but manageable with planning.',
+          context: 'Social isolation increases health risks by 30%. Maintaining social connections improves health outcomes according to British Psychological Society research.',
+          strengths: ['Values important relationships', 'Stays socially engaged when possible', 'Adapts social activities appropriately']
+        },
+        {
+          name: 'Physical Activity & Recreation',
+          desc: 'Noticeable limitations in physical activities and recreational pursuits.',
+          context: 'Modified physical activity maintains function. Adaptive recreation improves wellbeing according to Chartered Society of Physiotherapy guidelines.',
+          strengths: ['Willing to adapt physical activities', 'Seeks appropriate exercise options', 'Maintains movement within capabilities']
+        },
+        {
+          name: 'Independence & Daily Living',
+          desc: 'Generally maintaining independence with some assistance needed for certain activities.',
+          context: 'Assistive devices and strategies maintain 70-80% independence. Support systems enable functioning according to occupational therapy research.',
+          strengths: ['Maintains daily self-care routines', 'Uses adaptive strategies effectively', 'Seeks appropriate support when needed']
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 25) + 35,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Implement adaptive strategies in affected life areas',
+            'Build support systems for managing limitations',
+            'Focus on maintaining function with appropriate accommodations'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: ['Explore additional adaptation strategies', 'Consider professional support services'],
+            timeline: 'Lifestyle adaptations show quality of life benefits within 3-6 weeks of implementation.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Lifestyle Limiter AI response:", error);
+
+    return {
+      overallScore: 45,
+      overallRating: "Moderate Impact",
+      results: [{
+        category: "Overall Assessment",
+        score: 45,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your lifestyle limitation assessment has been completed. This provides insight into how health issues may be affecting different life domains.",
+        recommendations: [
+          "Implement adaptive strategies in high-impact areas",
+          "Build support systems for managing limitations",
+          "Focus on quality of life optimization with professional guidance"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Lifestyle impact documented'],
+          riskFactors: ['Continue adaptation strategies'],
+          timeline: 'Review functional status within 4-6 weeks of implementing adaptations.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
+
+
 function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
   try {
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);

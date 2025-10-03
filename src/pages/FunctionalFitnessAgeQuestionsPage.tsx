@@ -1,12 +1,9 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 const functionalFitnessAgeQuiz: QuizConfig = {
   title: 'Functional Fitness Age Test',
-  onComplete: () => {
-    window.location.hash = 'functional-fitness-age-test-information';
-  },
   questions: [
     {
       id: 'age-range',
@@ -147,9 +144,46 @@ const functionalFitnessAgeQuiz: QuizConfig = {
 };
 
 export function FunctionalFitnessAgeQuestionsPage() {
-    return (
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    functionalFitnessAgeQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  const quizWithSubmit: QuizConfig = {
+    ...functionalFitnessAgeQuiz,
+    informationPageRoute: "functional-fitness-age-test-results",
+    onComplete: async (answers) => {
+      console.log("Functional Fitness Age Assessment completed:", answers);
+      sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+      window.location.hash = "functional-fitness-age-test-information";
+    },
+    onBack: () => {
+      window.location.hash = "functional-fitness-age-test-learn-more";
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="functional">
-      <QuizTemplate config={functionalFitnessAgeQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

@@ -1,12 +1,9 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 const nutritionBodyCompositionQuiz: QuizConfig = {
   title: 'Nutrition & Body Composition Score',
-  onComplete: () => {
-    window.location.hash = 'nutrition-body-composition-score-information';
-  },
   questions: [
     {
       id: 'age-range',
@@ -150,9 +147,46 @@ const nutritionBodyCompositionQuiz: QuizConfig = {
 };
 
 export function NutritionBodyCompositionQuestionsPage() {
-    return (
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    nutritionBodyCompositionQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  const quizWithSubmit: QuizConfig = {
+    ...nutritionBodyCompositionQuiz,
+    informationPageRoute: "nutrition-body-composition-score-results",
+    onComplete: async (answers) => {
+      console.log("Nutrition & Body Composition Assessment completed:", answers);
+      sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+      window.location.hash = "nutrition-body-composition-score-information";
+    },
+    onBack: () => {
+      window.location.hash = "nutrition-body-composition-score-learn-more";
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="nutrition">
-      <QuizTemplate config={nutritionBodyCompositionQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

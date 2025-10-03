@@ -1,13 +1,9 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { useAssessmentAnalytics } from '../hooks/useAnalytics';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 const cardiometabolicRiskQuiz: QuizConfig = {
   title: 'Cardiometabolic Risk Score',
-  onComplete: () => {
-    window.location.hash = 'cardiometabolic-risk-score-information';
-  },
   questions: [
     {
       id: 'age-range',
@@ -150,36 +146,46 @@ const cardiometabolicRiskQuiz: QuizConfig = {
 };
 
 export function CardiometabolicRiskQuestionsPage() {
-  // Initialize analytics for this specific assessment
-  const { startAssessment, trackProgress, completeAssessment } = useAssessmentAnalytics(
-    '17',
-    'Cardiometabolic Risk Score',
-    39.99
-  );
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    cardiometabolicRiskQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
 
-  // Enhanced quiz configuration with analytics tracking
-  const cardiometabolicRiskQuizWithAnalytics: QuizConfig = {
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  const quizWithSubmit: QuizConfig = {
     ...cardiometabolicRiskQuiz,
-    informationPageRoute: 'cardiometabolic-risk-score-information',
-    onComplete: (answers) => {
-      console.log('Cardiometabolic Risk Assessment completed with answers:', answers);
-      completeAssessment();
-      window.location.hash = 'cardiometabolic-risk-score-information';
+    informationPageRoute: "cardiometabolic-risk-score-results",
+    onComplete: async (answers) => {
+      console.log("Cardiometabolic Risk Assessment completed:", answers);
+      sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+      window.location.hash = "cardiometabolic-risk-score-information";
     },
-    onQuestionComplete: (questionIndex, totalQuestions) => {
-      const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-      trackProgress(`question_${questionIndex + 1}`, completionPercentage);
+    onBack: () => {
+      window.location.hash = "cardiometabolic-risk-score-learn-more";
     },
   };
 
-  // Start assessment tracking when component mounts
-  React.useEffect(() => {
-    startAssessment();
-  }, [startAssessment]);
-
-      return (
+  return (
     <PaymentGate requiredFunnel="card">
-      <QuizTemplate config={cardiometabolicRiskQuizWithAnalytics} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }

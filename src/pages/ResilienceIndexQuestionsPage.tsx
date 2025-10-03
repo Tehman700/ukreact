@@ -1,12 +1,9 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
+import { PaymentGate } from '../components/PaymentGate';
 
 const resilienceIndexQuiz: QuizConfig = {
   title: 'Resilience Index',
-  onComplete: () => {
-    window.location.hash = 'resilience-index-information';
-  },
   questions: [
     {
       id: 'age-range',
@@ -148,9 +145,46 @@ const resilienceIndexQuiz: QuizConfig = {
 };
 
 export function ResilienceIndexQuestionsPage() {
-    return (
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    resilienceIndexQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  const quizWithSubmit: QuizConfig = {
+    ...resilienceIndexQuiz,
+    informationPageRoute: "resilience-index-results",
+    onComplete: async (answers) => {
+      console.log("Resilience Index Assessment completed:", answers);
+      sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+      window.location.hash = "resilience-index-information";
+    },
+    onBack: () => {
+      window.location.hash = "resilience-index-learn-more";
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="res">
-      <QuizTemplate config={resilienceIndexQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }
