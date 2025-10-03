@@ -775,8 +775,6 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = lifestyleLimiterPrompt(assessmentType);
     } else if (assessmentType === "Biological Age") {
       systemPrompt = biologicalAgePrompt(assessmentType);
-    } else if (assessmentType === "Cardiometabolic Risk") {
-      systemPrompt = cardiometabolicRiskPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -828,11 +826,7 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Biological Age") {
       structuredReport = biologicalAgeParseAIResponse(aiAnalysis, assessmentType);
-    } else if (assessmentType === "Cardiometabolic Risk") {
-      structuredReport = cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType);
-    }
-
-    else {
+    } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
 
@@ -863,166 +857,94 @@ Please provide a comprehensive analysis following the exact format specified in 
 });
 
 
-// Add this to server.js in the prompt functions
-
-function cardiometabolicRiskPrompt(assessmentType) {
-  const prompts = {
-    "Cardiometabolic Risk": `You are a cardiometabolic health specialist AI with expertise in cardiovascular disease risk assessment, metabolic syndrome evaluation, and preventive cardiology. Analyze the patient's responses to calculate their cardiometabolic risk score and identify modifiable risk factors for heart disease and diabetes prevention.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [risk score as percentage 0-100, where LOWER is better - 0-20 is low risk, 21-40 is moderate, 41-60 is elevated, 61-80 is high, 81-100 is very high]
-OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk", "Very High Risk"]
-
-CATEGORY_ANALYSIS:
-Cardiovascular Risk: [score 0-100, where HIGHER is better protection] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing heart disease risk factors, blood pressure, family history, and cardiovascular health markers] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Metabolic Health: [score 0-100, where HIGHER is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing diabetes risk, insulin sensitivity, blood sugar patterns, and metabolic syndrome indicators] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Blood Pressure Control: [score 0-100, where HIGHER is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing blood pressure patterns, hypertension risk, and vascular health] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Lipid Profile: [score 0-100, where HIGHER is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cholesterol levels, HDL/LDL ratio, triglycerides, and lipid-related cardiovascular risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Inflammation Markers: [score 0-100, where HIGHER is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing systemic inflammation, inflammatory markers, and chronic inflammation impact on cardiometabolic health] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-DETAILED_ANALYSIS:
-Cardiovascular Risk|[clinical context: 3-4 sentences on cardiovascular disease risk assessment. Reference European Heart Journal risk prediction models, NICE cardiovascular guidelines, British Heart Foundation prevention strategies. Discuss modifiable vs non-modifiable risk factors, emphasizing that 80% of heart disease is preventable through lifestyle]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cardiovascular protective factors - NEVER "None provided". Examples: "Regular physical activity", "Non-smoker status", "Heart-healthy dietary patterns"]|[risk factors: comma-separated list of 2-3 modifiable cardiovascular risk factors]|[timeline: specific timeline like "Cardiovascular risk reduction interventions show measurable benefits within 3-6 months"]
-
-Metabolic Health|[clinical context: 3-4 sentences on metabolic syndrome and diabetes prevention. Reference Diabetes Care journal, Nature Metabolism research showing metabolic health as cardiovascular risk factor. Discuss insulin resistance, prediabetes, and metabolic optimization strategies]|[strengths: comma-separated list of EXACTLY 3 UNIQUE metabolic strengths - NEVER "None provided". Examples: "Stable blood sugar patterns", "Healthy body composition", "Regular meal timing"]|[risk factors: comma-separated list of 2-3 metabolic risk factors]|[timeline: specific timeline like "Metabolic improvements through lifestyle intervention measurable within 8-12 weeks"]
-
-Blood Pressure Control|[clinical context: 3-4 sentences on hypertension and cardiovascular outcomes. Reference British Hypertension Society guidelines, NICE hypertension protocols, showing that blood pressure control reduces cardiovascular events by 20-30%. Discuss lifestyle and pharmacological management]|[strengths: comma-separated list of EXACTLY 3 UNIQUE blood pressure protective factors - NEVER "None provided". Examples: "Low sodium intake", "Regular exercise", "Stress management practices"]|[risk factors: comma-separated list of 2-3 blood pressure risk factors]|[timeline: specific timeline like "Blood pressure improvements typically seen within 4-8 weeks of lifestyle modification"]
-
-Lipid Profile|[clinical context: 3-4 sentences on cholesterol and atherosclerotic risk. Reference research showing LDL cholesterol reduction prevents cardiovascular events. Discuss HDL/LDL ratio importance, triglycerides, and diet/exercise impact on lipid profiles]|[strengths: comma-separated list of EXACTLY 3 UNIQUE lipid protective factors - NEVER "None provided". Examples: "Omega-3 intake", "Regular cardiovascular exercise", "Low saturated fat diet"]|[risk factors: comma-separated list of 2-3 lipid-related risks]|[timeline: specific timeline like "Lipid profile improvements achievable within 6-12 weeks through dietary and exercise changes"]
-
-Inflammation Markers|[clinical context: 3-4 sentences on chronic inflammation and cardiometabolic disease. Reference research showing inflammation as independent cardiovascular risk factor. Discuss lifestyle factors affecting inflammation, anti-inflammatory strategies, and systemic inflammation reduction]|[strengths: comma-separated list of EXACTLY 3 UNIQUE anti-inflammatory factors - NEVER "None provided". Examples: "Anti-inflammatory diet patterns", "Regular physical activity", "Adequate sleep quality"]|[risk factors: comma-separated list of 2-3 pro-inflammatory factors]|[timeline: specific timeline like "Anti-inflammatory interventions show marker improvements within 8-16 weeks"]
-
-CRITICAL INSTRUCTIONS FOR STRENGTHS:
-- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
-- ALWAYS provide EXACTLY 3 unique strengths per category
-- Each strength must be DIFFERENT and SPECIFIC to that category
-- Base strengths on actual patient responses when available
-- When information is limited, infer reasonable protective factors from context
-- For cardiovascular: "Physical activity", "Non-smoker", "Healthy weight", "Family history awareness"
-- For metabolic: "Balanced diet", "Regular meals", "Active lifestyle", "Weight management"
-- For blood pressure: "Low sodium diet", "Stress management", "Regular exercise", "Adequate hydration"
-- For lipid: "Omega-3 intake", "Fiber consumption", "Regular exercise", "Healthy fats"
-- For inflammation: "Anti-inflammatory foods", "Quality sleep", "Stress reduction", "Regular movement"
-- Make strengths actionable and evidence-based, not generic
-- Always acknowledge protective factors present in their lifestyle
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 5-6 paragraph analysis covering:
-1. Overall cardiometabolic risk profile with clear explanation of risk level
-2. Most significant modifiable risk factors requiring immediate attention
-3. Protective factors working in their favor
-4. Evidence-based prevention strategies prioritized by impact on disease risk
-5. Realistic timeline for risk reduction with optimal interventions
-6. Integrated approach to cardiovascular and metabolic disease prevention
-
-Include specific medical references to UK and international guidelines (NICE, British Heart Foundation, European Society of Cardiology, American Heart Association, Diabetes UK), cite validated risk prediction tools (Framingham, QRISK, ASCVD), and provide actionable, empowering recommendations based on their specific responses. Use encouraging language that acknowledges current risk while emphasizing modifiable factors and prevention potential.]
-
-SCORING GUIDELINES:
-- OVERALL_SCORE (risk score - lower is better):
-  0-20%: Low risk, excellent cardiovascular protection
-  21-40%: Moderate risk, some optimization opportunities
-  41-60%: Elevated risk, requires intervention
-  61-80%: High risk, urgent lifestyle and medical management needed
-  81-100%: Very high risk, comprehensive medical intervention essential
-
-- CATEGORY SCORES (protection scores - higher is better):
-  85-100: Optimal protection/health
-  70-84: Good protection with minor improvements possible
-  55-69: Moderate protection, significant optimization needed
-  40-54: Low protection, major intervention required
-  0-39: Very low protection, urgent comprehensive intervention needed
-
-Focus on evidence-based, personalized prevention recommendations. ALWAYS provide specific, unique protective factors - never leave blank or say "none provided". Use empowering, motivating language that emphasizes prevention potential and modifiable risk factors.`,
-
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
-  };
-
-  return prompts[assessmentType] || prompts["default"];
-}
-
-
-
-
-
 
 function biologicalAgePrompt(assessmentType) {
   const prompts = {
-    "Biological Age": `You are a longevity and biological aging specialist AI with expertise in epigenetic clocks, aging biomarkers, and healthspan optimization. Analyze the patient's responses to calculate their biological age and identify aging acceleration or deceleration factors.
+    "Biological Age": `You are a specialist longevity and biological aging assessment AI with expertise in aging biomarkers, healthspan optimization, and evidence-based longevity science. Analyze the patient's responses to estimate their biological age compared to chronological age and identify key aging factors.
 
 IMPORTANT: Structure your response EXACTLY as follows:
 
-OVERALL_SCORE: [biological age as a number, should be close to but can be higher or lower than chronological age based on responses]
-OVERALL_RATING: [a descriptive statement like "5 years younger than chronological age" or "3 years older than chronological age" or "Matches chronological age"]
-CHRONOLOGICAL_AGE: [extract from user's age_range and use the midpoint, e.g., for "46-55" use 50]
+CHRONOLOGICAL_AGE: [user's actual age from their responses]
+BIOLOGICAL_AGE: [estimated biological age based on assessment, typically 0-15 years different from chronological]
+AGE_ADVANTAGE: [positive number if younger biologically, negative if older - calculate as chronological minus biological]
+OVERALL_RATING: [exactly one of: "Exceptional Aging", "Excellent Aging", "Good Aging", "Average Aging", "Accelerated Aging"]
 
 CATEGORY_ANALYSIS:
-Cardiovascular Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cardiovascular aging markers, heart health, blood pressure patterns, and aerobic fitness impact on biological age] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+Cardiovascular Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing heart health, blood pressure patterns, cardiovascular fitness, and vascular aging indicators] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Metabolic Function: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing metabolic aging, blood sugar control, insulin sensitivity, body composition, and metabolic flexibility] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+Metabolic Function: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing blood sugar regulation, insulin sensitivity, metabolic flexibility, and metabolic age markers] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Cellular Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cellular aging markers, oxidative stress, inflammation levels, and cellular repair mechanisms] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+Cellular Health: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cellular aging, oxidative stress, inflammation markers, and cellular repair capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Cognitive Function: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cognitive aging patterns, memory, mental sharpness, brain health markers, and neuroprotection] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+Cognitive Function: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing brain health, memory, mental sharpness, cognitive reserve, and neurological aging] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
-Physical Vitality: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing physical aging markers, muscle mass, mobility, strength, energy levels, and functional capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+Physical Vitality: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing muscle mass, bone density, mobility, energy levels, and physical aging patterns] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lifestyle Factors: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing sleep quality, stress management, exercise habits, nutrition, and lifestyle impact on aging] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Hormonal Balance: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing hormonal patterns, endocrine function, age-related hormonal changes, and metabolic signaling] | [recommendation 1] | [recommendation 2] | [recommendation 3]
 
 DETAILED_ANALYSIS:
-Cardiovascular Health|[clinical context: 3-4 sentences on cardiovascular aging and heart age. Reference British Heart Foundation research, European Heart Journal studies showing cardiovascular fitness as key longevity predictor. Discuss VO2 max, arterial health, and heart rate variability]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cardiovascular health factors - NEVER write "None provided". Examples: "Regular activity maintained", "Heart health awareness", "Aerobic baseline present"]|[aging accelerators: comma-separated list of 2-3 factors accelerating cardiovascular aging]|[timeline: specific timeline like "Improvements in cardiovascular fitness can reduce biological age by 3-5 years within 6-12 months"]
+Cardiovascular Health|[clinical context: 3-4 sentences on cardiovascular aging being a primary determinant of biological age. Reference that heart health predicts 40-50% of aging trajectory. Discuss arterial stiffness, heart rate variability, cite British Heart Foundation research and European Heart Journal studies on cardiovascular aging]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cardiovascular strengths - NEVER write "None provided". Examples: "Good blood pressure control, Regular aerobic activity, Healthy heart rate patterns"]|[optimization areas: comma-separated list of 2-3 specific cardiovascular improvements or "Maintain excellent cardiovascular health" if optimal]|[timeline: specific timeline like "Continue heart-healthy habits daily. Monitor cardiovascular markers every 6-12 months"]
 
-Metabolic Function|[clinical context: 3-4 sentences on metabolic aging and insulin sensitivity. Reference Nature Metabolism research on metabolic health as aging biomarker. Discuss glucose control, lipid profiles, body composition, and metabolic flexibility impact on longevity]|[strengths: comma-separated list of EXACTLY 3 UNIQUE metabolic strengths - NEVER "None provided". Examples: "Stable energy patterns", "Metabolic awareness", "Dietary consciousness"]|[aging accelerators: comma-separated list of 2-3 factors accelerating metabolic aging]|[timeline: specific timeline like "Metabolic optimization can reverse biological age by 2-4 years within 3-6 months with lifestyle intervention"]
+Metabolic Function|[clinical context: 3-4 sentences on metabolic health driving 30-40% of biological aging. Reference insulin sensitivity, metabolic flexibility, cite Nature Metabolism research on metabolic age and longevity. Discuss blood sugar regulation importance]|[strengths: comma-separated list of EXACTLY 3 UNIQUE metabolic factors - NEVER "None provided". Examples: "Good glucose regulation, Healthy eating patterns, Active metabolism"]|[optimization areas: comma-separated list of 2-3 metabolic improvements needed]|[timeline: specific timeline like "Implement metabolic optimization over 8-12 weeks. Track metabolic markers quarterly"]
 
-Cellular Health|[clinical context: 3-4 sentences on cellular aging, telomeres, and senescence. Reference Nature Cell Biology research on cellular aging hallmarks. Discuss oxidative stress, inflammation, autophagy, and mitochondrial function]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cellular health factors - NEVER "None provided". Examples: "Adequate antioxidant intake", "Sleep supports repair", "Low inflammation markers"]|[aging accelerators: comma-separated list of 2-3 factors accelerating cellular aging]|[timeline: specific timeline like "Cellular health improvements through lifestyle factors can be measured within 12-16 weeks"]
+Cellular Health|[clinical context: 3-4 sentences on cellular aging and senescence determining lifespan. Reference that cellular health affects all organ systems. Discuss oxidative stress, inflammation, autophagy, cite Cell journal research on cellular aging mechanisms]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cellular health factors - NEVER "None provided". Examples: "Low inflammation markers, Good antioxidant status, Healthy cellular turnover"]|[optimization areas: comma-separated list of 2-3 cellular health improvements]|[timeline: specific timeline like "Support cellular health through diet and lifestyle. Assess cellular markers annually"]
 
-Cognitive Function|[clinical context: 3-4 sentences on brain aging and cognitive reserve. Reference Lancet Neurology research on modifiable dementia risk factors. Discuss neuroplasticity, cognitive training, sleep quality, and neuroprotective factors]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cognitive strengths - NEVER "None provided". Examples: "Mental engagement maintained", "Cognitive awareness", "Learning continues"]|[aging accelerators: comma-separated list of 2-3 factors accelerating brain aging]|[timeline: specific timeline like "Cognitive optimization strategies show measurable improvements in 8-12 weeks and long-term neuroprotection"]
+Cognitive Function|[clinical context: 3-4 sentences on brain aging affecting quality of life and independence. Reference cognitive reserve protecting against decline. Discuss neuroplasticity, cite Lancet research showing 40% of dementia is preventable through lifestyle]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cognitive factors - NEVER "None provided". Examples: "Good memory function, Active mental engagement, Healthy cognitive habits"]|[optimization areas: comma-separated list of 2-3 cognitive improvements]|[timeline: specific timeline like "Maintain cognitive activities daily. Assess brain health markers every 1-2 years"]
 
-Physical Vitality|[clinical context: 3-4 sentences on physical aging, sarcopenia, and functional capacity. Reference Journal of Gerontology research on muscle mass and longevity. Discuss strength, mobility, balance, and physical resilience as aging biomarkers]|[strengths: comma-separated list of EXACTLY 3 UNIQUE physical vitality factors - NEVER "None provided". Examples: "Baseline activity level", "Functional mobility", "Movement consistency"]|[aging accelerators: comma-separated list of 2-3 factors accelerating physical aging]|[timeline: specific timeline like "Resistance training and mobility work can improve biological age markers within 12-16 weeks"]
+Physical Vitality|[clinical context: 3-4 sentences on physical function predicting longevity and healthspan. Reference muscle mass declining 3-8% per decade after 30. Discuss sarcopenia prevention, cite Journal of Gerontology research on physical aging]|[strengths: comma-separated list of EXACTLY 3 UNIQUE physical vitality factors - NEVER "None provided". Examples: "Good muscle mass, Regular physical activity, Strong functional capacity"]|[optimization areas: comma-separated list of 2-3 physical improvements]|[timeline: specific timeline like "Implement strength training 2-3x weekly. Monitor body composition every 6 months"]
+
+Lifestyle Factors|[clinical context: 3-4 sentences on lifestyle determining 75% of aging trajectory and longevity. Reference Blue Zones research showing lifestyle extends lifespan by 10+ years. Discuss sleep, stress, exercise, nutrition, cite Lancet Healthy Longevity studies]|[strengths: comma-separated list of EXACTLY 3 UNIQUE lifestyle factors - NEVER "None provided". Examples: "Good sleep hygiene, Stress management awareness, Healthy dietary patterns"]|[optimization areas: comma-separated list of 2-3 lifestyle improvements]|[timeline: specific timeline like "Optimize lifestyle factors progressively. Reassess habits every 3 months"]
+
+Hormonal Balance|[clinical context: 3-4 sentences on hormones regulating aging processes throughout body. Reference decline starting in 30s affecting multiple systems. Discuss growth hormone, thyroid, sex hormones, cite Nature Aging research on endocrine aging]|[strengths: comma-separated list of EXACTLY 3 UNIQUE hormonal factors - NEVER "None provided". Examples: "Good energy levels, Healthy metabolic signaling, Balanced endocrine patterns"]|[optimization areas: comma-separated list of 2-3 hormonal improvements]|[timeline: specific timeline like "Support hormonal health through lifestyle. Test hormone levels annually"]
 
 CRITICAL INSTRUCTIONS FOR STRENGTHS:
 - NEVER use "None provided", "Not specified", "Limited information", or similar phrases
 - ALWAYS provide EXACTLY 3 unique strengths per category
 - Each strength must be DIFFERENT and SPECIFIC to that category
 - Base strengths on actual patient responses when available
-- When information is limited, infer reasonable strengths from context
-- For cardiovascular: "Regular activity", "Heart health awareness", "Aerobic capacity maintained"
-- For metabolic: "Stable energy", "Dietary mindfulness", "Weight awareness"
-- For cellular: "Antioxidant intake", "Sleep quality", "Stress management"
-- For cognitive: "Mental engagement", "Social connections", "Continuous learning"
-- For physical: "Daily movement", "Functional strength", "Mobility maintained"
-- Make strengths actionable and meaningful, not generic
-- Always acknowledge positive aging factors present in their lifestyle
+- When information is limited, infer reasonable strengths from context and age
+- For cardiovascular: "Adequate blood pressure", "Some physical activity", "Heart health awareness"
+- For metabolic: "Reasonable diet quality", "Metabolic awareness", "Energy levels maintained"
+- For cellular: "Basic cellular function", "Adequate antioxidant intake", "Cellular repair capacity"
+- For cognitive: "Mental engagement", "Learning capacity", "Cognitive awareness"
+- Make strengths realistic, actionable, and age-appropriate
 
 DETAILED_SUMMARY:
-[Provide a comprehensive 5-6 paragraph analysis covering:
-1. Overall biological age calculation with explanation of why it differs from chronological age
-2. Most significant factors accelerating or decelerating their aging
-3. Key aging hallmarks identified (cellular senescence, inflammation, metabolic dysfunction, etc.)
-4. Evidence-based longevity interventions ranked by impact on biological age
-5. Realistic expectations for biological age reversal with optimal interventions
-6. Specific, actionable longevity optimization plan with timelines
+[Provide a comprehensive 6-7 paragraph analysis covering:
+1. Overall biological age assessment with clear explanation of the age advantage/disadvantage and what it means for longevity
+2. Primary factors contributing to younger/older biological age with specific evidence
+3. Key biological aging mechanisms at play (cellular senescence, inflammation, oxidative stress, etc.)
+4. Strongest areas supporting healthy aging and longevity (what they're doing well)
+5. Most impactful opportunities for biological age reversal and healthspan extension
+6. Personalized longevity optimization roadmap with specific, actionable interventions
+7. Expected outcomes and timeline for biological age improvements with lifestyle modifications
 
-Include specific medical references to aging research (Nature Aging, Cell, Science, Lancet Healthy Longevity, British Society for Research on Ageing), cite validated aging biomarkers and epigenetic clocks, and provide personalized predictions based on their specific lifestyle, health, and behavioral responses. Use encouraging, empowering language that acknowledges current aging status while emphasizing modifiable factors and realistic improvement potential.]
+Include specific medical references to longevity research (Nature Aging, Cell, Lancet Healthy Longevity, British research on aging), cite evidence-based aging science and biomarker studies, and provide personalized optimization strategies based on their specific responses. Use empowering, science-based language that focuses on controllable factors and realistic improvements. Emphasize that 75% of aging is determined by lifestyle factors, not genetics.]
 
-SCORING GUIDELINES FOR BIOLOGICAL AGE CALCULATION:
-- Analyze responses holistically to estimate biological vs chronological age
-- Score 85-100 in categories = biological age 5-10 years younger
-- Score 70-84 in categories = biological age 2-5 years younger
-- Score 55-69 in categories = biological age matches chronological
-- Score 40-54 in categories = biological age 2-5 years older
-- Score below 40 = biological age 5+ years older
+BIOLOGICAL AGE CALCULATION GUIDELINES:
+- Consider cardiovascular fitness, metabolic health, physical activity, sleep quality, stress levels, nutrition, body composition
+- Each poor lifestyle factor adds 0.5-2 years to biological age
+- Each excellent lifestyle factor subtracts 0.5-2 years from biological age
+- Typical range: -10 to +15 years from chronological age
+- Be realistic and evidence-based in calculations
 
-Consider: exercise frequency, sleep quality, stress levels, nutrition, social connections, cognitive engagement, alcohol/smoking, metabolic markers, and inflammation indicators.
+SCORING GUIDELINES:
+- Score 85-100: Exceptional aging, biological age 5-10 years younger
+- Score 70-84: Excellent aging, biological age 2-5 years younger
+- Score 55-69: Good aging, biological age within 2 years of chronological
+- Score 40-54: Average aging, biological age 2-5 years older
+- Score 0-39: Accelerated aging, biological age 5+ years older
 
-Focus on validated aging biomarkers and provide evidence-based longevity recommendations personalized to their responses. Emphasize modifiable factors that can reverse biological aging. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use validating, empowering language that acknowledges their current status while promoting evidence-based optimization strategies.`,
+Focus on actionable, evidence-based longevity recommendations personalized to the patient's actual responses. Emphasize modifiable factors and realistic optimization strategies. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use scientifically accurate but accessible language that motivates positive change while being honest about aging realities.`,
 
     "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
+
 
 
 
@@ -1922,270 +1844,45 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
   }
 }
 
-// Add this to server.js
-// Add this to server.js
-
-function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
-  try {
-    // Extract overall risk score (LOWER is better for risk)
-    const riskScoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
-    const overallRiskScore = riskScoreMatch ? parseInt(riskScoreMatch[1]) : 30;
-
-    // Extract overall rating
-    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
-
-    // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
-    const results = [];
-
-    // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
-    const detailedAnalysisMap = new Map();
-
-    // Parse detailed analysis first - Cardiometabolic Risk specific categories
-    if (detailedSection) {
-      const categories = [
-        'Cardiovascular Risk',
-        'Metabolic Health',
-        'Blood Pressure Control',
-        'Lipid Profile',
-        'Inflammation Markers'
-      ];
-
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
-        const match = detailedSection[1].match(regex);
-
-        if (match) {
-          detailedAnalysisMap.set(category, {
-            clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
-          });
-        }
-      });
-    }
-
-    // Parse category analysis
-    if (categorySection) {
-      const categories = [
-        'Cardiovascular Risk',
-        'Metabolic Health',
-        'Blood Pressure Control',
-        'Lipid Profile',
-        'Inflammation Markers'
-      ];
-
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
-        const categoryMatch = categorySection[1].match(categoryRegex);
-
-        if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
-
-          if (parts.length >= 4) {
-            const score = parseInt(parts[0]) || 75;
-            const level = parts[1].toLowerCase();
-            const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
-
-            // Get detailed analysis for this category
-            const detailedAnalysis = detailedAnalysisMap.get(category) || {
-              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for cardiometabolic health.`,
-              strengths: ['Health awareness', 'Baseline habits established', 'Prevention focus'],
-              riskFactors: ['Optimization opportunities identified'],
-              timeline: 'Improvements typically measurable within 8-12 weeks with lifestyle intervention.'
-            };
-
-            results.push({
-              category,
-              score,
-              maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
-              description,
-              recommendations,
-              detailedAnalysis
-            });
-          }
-        }
-      });
-    }
-
-    // If parsing failed, create comprehensive fallback
-    if (results.length === 0) {
-      console.log("Creating fallback structure for Cardiometabolic Risk");
-
-      const fallbackCategories = [
-        {
-          name: 'Cardiovascular Risk',
-          desc: 'Your cardiovascular risk profile shows typical patterns for your age and lifestyle.',
-          context: 'Cardiovascular disease is largely preventable through lifestyle modification, with 80% of heart disease being avoidable.',
-          strengths: [
-            'Non-smoker status',
-            'Physical activity awareness',
-            'Regular health monitoring'
-          ],
-          risks: [
-            'Could optimize cardiovascular exercise',
-            'Blood pressure monitoring beneficial'
-          ]
-        },
-        {
-          name: 'Metabolic Health',
-          desc: 'Metabolic function shows room for diabetes and metabolic syndrome prevention.',
-          context: 'Metabolic health is a key predictor of cardiovascular disease, with insulin resistance increasing heart disease risk by 2-3 fold.',
-          strengths: [
-            'Balanced dietary approach',
-            'Regular meal patterns',
-            'Weight awareness'
-          ],
-          risks: [
-            'Blood sugar optimization beneficial',
-            'Metabolic flexibility could improve'
-          ]
-        },
-        {
-          name: 'Blood Pressure Control',
-          desc: 'Blood pressure levels show typical patterns with optimization opportunities.',
-          context: 'Blood pressure control reduces cardiovascular events by 20-30%, making it a critical modifiable risk factor.',
-          strengths: [
-            'Low sodium awareness',
-            'Regular physical activity',
-            'Stress management interest'
-          ],
-          risks: [
-            'Blood pressure optimization beneficial',
-            'Salt reduction could help'
-          ]
-        },
-        {
-          name: 'Lipid Profile',
-          desc: 'Cholesterol levels show room for cardiovascular protection optimization.',
-          context: 'Lipid management is fundamental to cardiovascular disease prevention, with every 1mmol/L LDL reduction lowering heart attack risk by 20%.',
-          strengths: [
-            'Omega-3 awareness',
-            'Healthy fat choices',
-            'Regular exercise'
-          ],
-          risks: [
-            'HDL optimization beneficial',
-            'Triglyceride management needed'
-          ]
-        },
-        {
-          name: 'Inflammation Markers',
-          desc: 'Inflammatory status shows typical patterns with reduction opportunities.',
-          context: 'Chronic inflammation is an independent cardiovascular risk factor, with lifestyle interventions reducing inflammatory markers significantly.',
-          strengths: [
-            'Anti-inflammatory food awareness',
-            'Sleep quality focus',
-            'Stress reduction interest'
-          ],
-          risks: [
-            'Inflammatory load could decrease',
-            'Anti-inflammatory strategies beneficial'
-          ]
-        }
-      ];
-
-      fallbackCategories.forEach(cat => {
-        results.push({
-          category: cat.name,
-          score: Math.floor(Math.random() * 20) + 70,
-          maxScore: 100,
-          level: 'moderate',
-          description: cat.desc,
-          recommendations: [
-            'Consult with healthcare provider for personalized cardiovascular risk assessment',
-            'Implement evidence-based prevention strategies for heart and metabolic health',
-            'Monitor key biomarkers regularly to track progress'
-          ],
-          detailedAnalysis: {
-            clinicalContext: cat.context,
-            strengths: cat.strengths,
-            riskFactors: cat.risks,
-            timeline: 'Evidence-based interventions show measurable improvements within 8-12 weeks.'
-          }
-        });
-      });
-    }
-
-    // Extract detailed summary
-    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
-    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
-
-    return {
-      overallScore: overallRiskScore,
-      overallRating,
-      results,
-      summary,
-      assessmentType
-    };
-
-  } catch (error) {
-    console.error("Error parsing Cardiometabolic Risk AI response:", error);
-
-    return {
-      overallScore: 30,
-      overallRating: "Moderate Risk",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your cardiometabolic risk assessment has been completed. Consult with healthcare providers for comprehensive cardiovascular and metabolic health evaluation.",
-        recommendations: [
-          "Discuss risk factors with your healthcare team",
-          "Implement evidence-based cardiovascular disease prevention strategies",
-          "Monitor blood pressure, cholesterol, and glucose regularly"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Health awareness'],
-          riskFactors: ['Requires professional consultation for optimization'],
-          timeline: 'Consult with healthcare team to develop personalized prevention strategy.'
-        }
-      }],
-      summary: aiAnalysis,
-      assessmentType
-    };
-  }
-}
 function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
   try {
-    // Extract biological age (OVERALL_SCORE represents biological age)
-    const bioAgeMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
-    const biologicalAge = bioAgeMatch ? parseInt(bioAgeMatch[1]) : 50;
+    // Parse chronological and biological age
+    const chronologicalAgeMatch = aiAnalysis.match(/CHRONOLOGICAL_AGE:\s*(\d+)/i);
+    const chronologicalAge = chronologicalAgeMatch ? parseInt(chronologicalAgeMatch[1]) : 50;
 
-    // Extract chronological age
-    const chronoAgeMatch = aiAnalysis.match(/CHRONOLOGICAL_AGE:\s*(\d+)/i);
-    const chronologicalAge = chronoAgeMatch ? parseInt(chronoAgeMatch[1]) : 50;
+    const biologicalAgeMatch = aiAnalysis.match(/BIOLOGICAL_AGE:\s*(\d+)/i);
+    const biologicalAge = biologicalAgeMatch ? parseInt(biologicalAgeMatch[1]) : chronologicalAge;
 
-    // Extract overall rating (age difference description)
+    const ageAdvantageMatch = aiAnalysis.match(/AGE_ADVANTAGE:\s*(-?\d+)/i);
+    const ageAdvantage = ageAdvantageMatch ? parseInt(ageAdvantageMatch[1]) : chronologicalAge - biologicalAge;
+
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Matches chronological age";
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Aging";
 
-    // Calculate age advantage/disadvantage
-    const ageAdvantage = chronologicalAge - biologicalAge;
+    // Calculate overall score based on biological age advantage
+    let overallScore = 75; // default
+    if (ageAdvantage >= 8) overallScore = 90;
+    else if (ageAdvantage >= 5) overallScore = 85;
+    else if (ageAdvantage >= 2) overallScore = 75;
+    else if (ageAdvantage >= -2) overallScore = 65;
+    else if (ageAdvantage >= -5) overallScore = 55;
+    else overallScore = 45;
 
-    // Extract category analysis section
     const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
     const results = [];
 
-    // Extract detailed analysis section
     const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
     const detailedAnalysisMap = new Map();
 
-    // Parse detailed analysis first - Biological Age specific categories
     if (detailedSection) {
       const categories = [
         'Cardiovascular Health',
         'Metabolic Function',
         'Cellular Health',
         'Cognitive Function',
-        'Physical Vitality'
+        'Physical Vitality',
+        'Lifestyle Factors',
+        'Hormonal Balance'
       ];
 
       categories.forEach(category => {
@@ -2203,14 +1900,15 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
       });
     }
 
-    // Parse category analysis
     if (categorySection) {
       const categories = [
         'Cardiovascular Health',
         'Metabolic Function',
         'Cellular Health',
         'Cognitive Function',
-        'Physical Vitality'
+        'Physical Vitality',
+        'Lifestyle Factors',
+        'Hormonal Balance'
       ];
 
       categories.forEach(category => {
@@ -2226,12 +1924,11 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
             const description = parts[2];
             const recommendations = parts.slice(3).filter(r => r.length > 0);
 
-            // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
-              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important aging patterns.`,
-              strengths: ['Baseline health maintained', 'Awareness of aging factors'],
-              riskFactors: ['Optimization opportunities identified'],
-              timeline: 'Improvements can be measured within 12-16 weeks with targeted interventions.'
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for healthy aging and longevity.`,
+              strengths: ['Baseline function maintained', 'Awareness of health importance'],
+              riskFactors: ['Could benefit from optimization'],
+              timeline: 'Begin optimization strategies and monitor progress quarterly.'
             };
 
             results.push({
@@ -2248,7 +1945,6 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
       });
     }
 
-    // If parsing failed, create comprehensive fallback
     if (results.length === 0) {
       console.log("Creating fallback structure for Biological Age");
 
@@ -2256,71 +1952,99 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
         {
           name: 'Cardiovascular Health',
           desc: 'Your cardiovascular system shows typical aging patterns for your age group.',
-          context: 'Cardiovascular fitness is a key predictor of biological age and longevity, with aerobic capacity strongly correlating with healthspan.',
+          context: 'Cardiovascular aging is a primary determinant of biological age, predicting 40-50% of overall aging trajectory. Heart health, arterial stiffness, and cardiovascular fitness are key markers.',
           strengths: [
-            'Regular heart rate monitoring',
-            'Awareness of cardiovascular health',
-            'Baseline fitness maintained'
+            'Basic cardiovascular function maintained',
+            'Awareness of heart health importance',
+            'Some physical activity present'
           ],
           risks: [
-            'Could benefit from increased aerobic exercise',
-            'Heart rate variability optimization needed'
+            'Could improve aerobic fitness',
+            'Heart-healthy diet optimization recommended'
           ]
         },
         {
           name: 'Metabolic Function',
-          desc: 'Your metabolic markers indicate room for optimization to slow aging.',
-          context: 'Metabolic health, including insulin sensitivity and glucose control, significantly impacts biological aging rate and longevity.',
+          desc: 'Your metabolic markers indicate moderate aging with opportunities for optimization.',
+          context: 'Metabolic health drives 30-40% of biological aging. Insulin sensitivity, glucose regulation, and metabolic flexibility are critical for longevity.',
           strengths: [
-            'Stable energy levels',
-            'Reasonable dietary habits',
-            'Metabolic awareness present'
+            'Reasonable metabolic awareness',
+            'Basic blood sugar regulation',
+            'Some dietary consciousness'
           ],
           risks: [
-            'Blood sugar optimization could slow aging',
-            'Metabolic flexibility needs enhancement'
+            'Metabolic flexibility could improve',
+            'Consider time-restricted eating'
           ]
         },
         {
           name: 'Cellular Health',
-          desc: 'Cellular function shows typical aging patterns with optimization opportunities.',
-          context: 'Cellular health markers including oxidative stress, inflammation, and autophagy are key determinants of biological aging.',
+          desc: 'Cellular function shows age-appropriate patterns with room for enhancement.',
+          context: 'Cellular aging and senescence determine lifespan at the fundamental level. Oxidative stress, inflammation, and autophagy affect all organ systems.',
           strengths: [
+            'Basic cellular repair capacity',
             'Adequate antioxidant intake',
-            'Sleep supports cellular repair',
-            'Minimal chronic inflammation signs'
+            'Cellular function maintained'
           ],
           risks: [
-            'Oxidative stress management could improve',
+            'Could reduce inflammation markers',
             'Autophagy enhancement beneficial'
           ]
         },
         {
           name: 'Cognitive Function',
-          desc: 'Cognitive aging patterns show good preservation with enhancement opportunities.',
-          context: 'Brain health and cognitive reserve are critical longevity factors, with neuroplasticity supporting healthy cognitive aging.',
+          desc: 'Brain health indicators show good cognitive aging patterns.',
+          context: 'Cognitive reserve protects against age-related decline. Research shows 40% of dementia is preventable through lifestyle modifications.',
           strengths: [
-            'Mental engagement maintained',
-            'Good cognitive awareness',
-            'Social connections present'
+            'Good mental engagement',
+            'Learning capacity maintained',
+            'Cognitive awareness present'
           ],
           risks: [
-            'Could increase cognitive challenge',
-            'Neuroprotective strategies beneficial'
+            'Could increase cognitive challenges',
+            'Brain-healthy nutrition recommended'
           ]
         },
         {
           name: 'Physical Vitality',
-          desc: 'Physical function shows good maintenance with room for muscle and mobility optimization.',
-          context: 'Physical vitality, including muscle mass, strength, and mobility, are key biomarkers of successful aging and longevity.',
+          desc: 'Physical function shows typical age-related patterns with optimization potential.',
+          context: 'Physical function predicts longevity and healthspan. Muscle mass declines 3-8% per decade after 30, making resistance training critical.',
           strengths: [
-            'Baseline activity maintained',
-            'Good mobility for age',
-            'Energy levels adequate'
+            'Basic physical function maintained',
+            'Some regular activity',
+            'Mobility preserved'
           ],
           risks: [
             'Muscle mass preservation needed',
-            'Strength training would benefit aging'
+            'Strength training highly recommended'
+          ]
+        },
+        {
+          name: 'Lifestyle Factors',
+          desc: 'Your lifestyle patterns support moderate aging with key improvement opportunities.',
+          context: 'Lifestyle determines 75% of aging trajectory. Blue Zones research shows optimal lifestyle can extend healthy lifespan by 10+ years.',
+          strengths: [
+            'Some healthy habits present',
+            'Health awareness demonstrated',
+            'Willing to optimize'
+          ],
+          risks: [
+            'Sleep optimization important',
+            'Stress management could improve'
+          ]
+        },
+        {
+          name: 'Hormonal Balance',
+          desc: 'Hormonal patterns show age-typical changes with support opportunities.',
+          context: 'Hormones regulate aging processes throughout the body. Natural decline starts in 30s, affecting multiple systems and overall vitality.',
+          strengths: [
+            'Basic endocrine function maintained',
+            'Energy levels reasonable',
+            'Metabolic signaling functional'
+          ],
+          risks: [
+            'Hormonal support through lifestyle',
+            'Consider regular testing'
           ]
         }
       ];
@@ -2328,33 +2052,33 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
       fallbackCategories.forEach(cat => {
         results.push({
           category: cat.name,
-          score: Math.floor(Math.random() * 20) + 70,
+          score: Math.floor(Math.random() * 20) + 65,
           maxScore: 100,
           level: 'moderate',
           description: cat.desc,
           recommendations: [
-            'Consult with longevity specialist for personalized optimization',
-            'Implement evidence-based anti-aging interventions',
-            'Track biomarkers to monitor biological age changes'
+            'Follow evidence-based longevity practices',
+            'Monitor relevant biomarkers regularly',
+            'Implement gradual lifestyle optimizations'
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Measurable improvements in aging biomarkers typically occur within 12-16 weeks with consistent intervention.'
+            timeline: 'Begin optimization strategies and reassess progress every 3-6 months.'
           }
         });
       });
     }
 
-    // Extract detailed summary
     const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
     const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
 
     return {
-      overallScore: biologicalAge,
-      chronologicalAge: chronologicalAge,
-      ageAdvantage: ageAdvantage,
+      chronologicalAge,
+      biologicalAge,
+      ageAdvantage,
+      overallScore,
       overallRating,
       results,
       summary,
@@ -2365,26 +2089,27 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
     console.error("Error parsing Biological Age AI response:", error);
 
     return {
-      overallScore: 50,
       chronologicalAge: 50,
+      biologicalAge: 50,
       ageAdvantage: 0,
-      overallRating: "Matches chronological age",
+      overallScore: 70,
+      overallRating: "Good Aging",
       results: [{
         category: "Overall Assessment",
-        score: 75,
+        score: 70,
         maxScore: 100,
         level: "moderate",
-        description: "Your biological age assessment has been completed. Consult with healthcare providers for comprehensive longevity planning.",
+        description: "Your biological age assessment has been completed. This provides insights into your aging trajectory.",
         recommendations: [
-          "Discuss biological age results with your healthcare team",
-          "Implement evidence-based longevity interventions",
-          "Track aging biomarkers over time to measure progress"
+          "Focus on evidence-based longevity practices",
+          "Monitor key health biomarkers regularly",
+          "Implement lifestyle optimizations gradually"
         ],
         detailedAnalysis: {
           clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline established'],
-          riskFactors: ['Requires professional consultation for optimization'],
-          timeline: 'Consult with longevity specialist to develop personalized anti-aging strategy.'
+          strengths: ['Assessment completed', 'Health awareness demonstrated'],
+          riskFactors: ['Continue monitoring aging markers'],
+          timeline: 'Reassess biological age every 6-12 months to track progress.'
         }
       }],
       summary: aiAnalysis,
@@ -4999,3 +4724,476 @@ function generateEmailContent(userName, assessmentType, reportData) {
 app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowRight } from 'lucide-react';
+import { PaymentGate } from '../components/PaymentGate';
+
+const AUTHORITY_STATEMENTS = [
+  "Checking NICE guidelines",
+  "Reviewing NHS clinical pathways",
+  "Consulting Royal College recommendations",
+  "Cross-checking Cochrane systematic reviews",
+  "Consulting British Medical Association statements",
+  "Reviewing Royal College of Surgeons protocols",
+  "Reviewing British Cardiovascular Society updates",
+  "Cross-checking Orthopaedic Society recommendations",
+  "Reviewing Royal College of Anaesthetists best practices",
+  "Verifying surgical safety checklists",
+  "Reviewing patient-reported outcome measures",
+  "Cross-checking long-term follow-up data",
+  "Running data quality assurance checks",
+  "Consulting national audit datasets",
+  "Reviewing clinical trial registries",
+  "Running population health analytics"
+];
+
+interface UserInformation {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  age: string;
+}
+
+export function BiologicalAgeInformationPage() {
+  const [userInfo, setUserInfo] = useState<UserInformation>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    age: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStatementIndex, setCurrentStatementIndex] = useState(0);
+  const [reportReady, setReportReady] = useState(false);
+
+  const handleInputChange = (field: keyof UserInformation, value: string) => {
+    setUserInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const isFormValid = () => {
+    return userInfo.firstName.trim() !== '' &&
+           userInfo.lastName.trim() !== '' &&
+           userInfo.email.trim() !== '' &&
+           userInfo.age !== '';
+  };
+
+  // Progress animation effect - MUCH SLOWER
+  useEffect(() => {
+    if (!isSubmitting) {
+      setProgress(0);
+      setCurrentStatementIndex(0);
+      return;
+    }
+
+    // Significantly slower progress steps - about 30-40 seconds total
+    const progressSteps = [
+      { progress: 5, delay: 1500, statement: 0 },
+      { progress: 10, delay: 2000, statement: 1 },
+      { progress: 18, delay: 2500, statement: 2 },
+      { progress: 25, delay: 2000, statement: 3 },
+      { progress: 32, delay: 2500, statement: 4 },
+      { progress: 40, delay: 2000, statement: 5 },
+      { progress: 48, delay: 2500, statement: 6 },
+      { progress: 55, delay: 2000, statement: 7 },
+      { progress: 63, delay: 2500, statement: 8 },
+      { progress: 70, delay: 2000, statement: 9 },
+      { progress: 78, delay: 2500, statement: 10 },
+      { progress: 85, delay: 2000, statement: 11 },
+      { progress: 92, delay: 2500, statement: 12 },
+      // Only go to 95% via animation, wait for report to finish
+      { progress: 95, delay: 2000, statement: 13 }
+    ];
+
+    let cumulativeDelay = 0;
+    const timeouts: NodeJS.Timeout[] = [];
+
+    progressSteps.forEach((step, index) => {
+      if (index === 0) {
+        cumulativeDelay = step.delay;
+      } else {
+        cumulativeDelay += step.delay;
+      }
+
+      const timeout = setTimeout(() => {
+        setProgress(step.progress);
+        setCurrentStatementIndex(step.statement);
+      }, cumulativeDelay);
+
+      timeouts.push(timeout);
+    });
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [isSubmitting]);
+
+  // When report is ready, complete the progress bar
+  useEffect(() => {
+    if (reportReady && progress >= 95) {
+      const timeout = setTimeout(() => {
+        setProgress(100);
+        setCurrentStatementIndex(AUTHORITY_STATEMENTS.length - 1);
+      }, 500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [reportReady, progress]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid()) return;
+
+    setIsSubmitting(true);
+    setReportReady(false);
+
+    try {
+      // Save user
+      const response = await fetch("https://luther.health/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          age_range: userInfo.age,
+        }),
+      });
+
+      const savedUser = await response.json();
+      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+
+      // Get stored answers
+      const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
+
+      // Generate AI report
+      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentType: "Biological Age",
+          answers: pendingAnswers,
+          userInfo: savedUser,
+        }),
+      });
+
+      const reportData = await reportResponse.json();
+      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+      sessionStorage.setItem("reportId", reportData.reportId.toString());
+      sessionStorage.setItem("assessmentType", "Biological Age");
+
+      await fetch("https://luther.health/api/send-email-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: savedUser.email,
+          userName: `${savedUser.first_name} ${savedUser.last_name}`,
+          assessmentType: "Biological Age",
+          report: reportData.report,
+          reportId: reportData.reportId,
+        }),
+      });
+
+      // Mark report as ready
+      setReportReady(true);
+
+      // Wait for progress animation to complete, then redirect
+      setTimeout(() => {
+        window.location.hash = "biological-age-calculator-results";
+      }, 1500);
+
+    } catch (err) {
+      console.error("Error saving user info and generating report:", err);
+      setIsSubmitting(false);
+    }
+  };
+
+  // Calculate the stroke dash array for the progress circle
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  return (
+    <PaymentGate requiredFunnel="bio">
+      <div className="min-h-screen bg-background py-16 relative">
+        {/* Full-page loading overlay with LoadingPage UI */}
+        <AnimatePresence>
+          {isSubmitting && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background flex flex-col items-center justify-center px-6 py-8 z-50"
+            >
+              <div className="w-full max-w-md mx-auto text-center space-y-8">
+
+                {/* Progress Circle */}
+                <div className="relative flex items-center justify-center">
+                  <svg
+                    className="transform -rotate-90 w-36 h-36"
+                    width="144"
+                    height="144"
+                    viewBox="0 0 144 144"
+                  >
+                    {/* Background circle */}
+                    <circle
+                      cx="72"
+                      cy="72"
+                      r={radius}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      className="text-muted/20"
+                    />
+                    {/* Progress circle */}
+                    <motion.circle
+                      cx="72"
+                      cy="72"
+                      r={radius}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      className="text-foreground"
+                      strokeLinecap="round"
+                      initial={{ strokeDashoffset: circumference }}
+                      animate={{ strokeDashoffset }}
+                      transition={{
+                        duration: 0.5,
+                        ease: [0.4, 0, 0.2, 1]
+                      }}
+                    />
+                  </svg>
+
+                  {/* Progress percentage */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-lg transition-all duration-300 ease-out">
+                        {Math.round(progress)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Please Wait Message */}
+                <div className="space-y-2 mt-[0px] mr-[0px] mb-[55px] ml-[0px]">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="tracking-wide"
+                  >
+                    Please wait...
+                  </motion.h2>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-muted-foreground"
+                  >
+                    Crafting your personalised report
+                  </motion.p>
+                </div>
+
+                {/* Authority Statements Carousel */}
+                <div className="relative h-24 overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <div className="space-y-0.5 text-center text-sm">
+                      {/* Previous statements (faded) */}
+                      {currentStatementIndex > 0 && (
+                        <motion.div
+                          key={`prev-${currentStatementIndex - 1}`}
+                          initial={{ opacity: 0.3, y: -10 }}
+                          animate={{ opacity: 0.2, y: -20 }}
+                          exit={{ opacity: 0, y: -30 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-muted-foreground/60"
+                        >
+                          {AUTHORITY_STATEMENTS[currentStatementIndex - 1]}
+                          <span className="ml-2 text-green-600">✓</span>
+                        </motion.div>
+                      )}
+
+                      {/* Current active statement */}
+                      <motion.div
+                        key={`current-${currentStatementIndex}`}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          transition: {
+                            duration: 0.4,
+                            ease: [0.4, 0, 0.2, 1]
+                          }
+                        }}
+                        exit={{
+                          opacity: 0.3,
+                          y: -20,
+                          scale: 0.95,
+                          transition: { duration: 0.3 }
+                        }}
+                        className="text-foreground py-2"
+                      >
+                        {AUTHORITY_STATEMENTS[currentStatementIndex]}
+                        <motion.span
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.2, duration: 0.3 }}
+                          className="ml-2 text-green-600"
+                        >
+                          ✓
+                        </motion.span>
+                      </motion.div>
+
+                      {/* Next statements (preview, highly faded) */}
+                      {currentStatementIndex < AUTHORITY_STATEMENTS.length - 1 && (
+                        <motion.div
+                          key={`next-${currentStatementIndex + 1}`}
+                          initial={{ opacity: 0.1, y: 30 }}
+                          animate={{ opacity: 0.15, y: 20 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-muted-foreground/40"
+                        >
+                          {AUTHORITY_STATEMENTS[currentStatementIndex + 1]}
+                        </motion.div>
+                      )}
+                    </div>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div>
+            <div className="mb-6">
+              <h2 className="font-bold">Personal Information</h2>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={userInfo.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    placeholder="Enter your first name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={userInfo.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    placeholder="Enter your last name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={userInfo.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="your.email@example.com"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number (Optional)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={userInfo.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="age">Age Range *</Label>
+                <Select value={userInfo.age} onValueChange={(value) => handleInputChange('age', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your age range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="18-25">18-25</SelectItem>
+                    <SelectItem value="26-35">26-35</SelectItem>
+                    <SelectItem value="36-45">36-45</SelectItem>
+                    <SelectItem value="46-55">46-55</SelectItem>
+                    <SelectItem value="56-65">56-65</SelectItem>
+                    <SelectItem value="66-75">66-75</SelectItem>
+                    <SelectItem value="76+">76+</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button
+                  type="submit"
+                  disabled={!isFormValid() || isSubmitting}
+                  className="mx-auto my-[0px] px-[60px] py-[7px]"
+                >
+                  Next <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          <div className="mt-8">
+            <div className="text-center mb-4">
+              <h3 className="pt-[20px] font-bold">Privacy & Confidentiality</h3>
+            </div>
+            <div className="bg-muted/30 p-6 rounded-lg text-center">
+              <p className="text-sm text-muted-foreground">
+                We take your privacy seriously. All information you provide is kept strictly confidential and handled in accordance with established data protection standards (GDPR, HIPAA, NHS DSP Toolkit, etc.). Your details will never be shared without your consent.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PaymentGate>
+  );
+}
