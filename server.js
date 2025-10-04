@@ -49,7 +49,6 @@ app.use('/api/webhook', express.raw({ type: 'application/json' }));
 
 // JSON parsing for other routes
 app.use(express.json());
-
 // ----------------------------
 // FACEBOOK BUSINESS SDK SETUP
 // ----------------------------
