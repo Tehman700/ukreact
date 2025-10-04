@@ -7,6 +7,7 @@ import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
 
+
 const { Pool } = pkg;
 const app = express();
 app.use(cors());
