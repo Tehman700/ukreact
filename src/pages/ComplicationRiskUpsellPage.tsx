@@ -28,8 +28,6 @@ interface ComplicationRiskUpsellPageProps {
 }
 
 export function ComplicationRiskUpsellPage({ onAddToBasket, onOpenBasket }: SurgeryReadinessUpsellPageProps) {
-//   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-//   const [isBasketOpen, setIsBasketOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
   const handleStartAssessment = () => {

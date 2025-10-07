@@ -433,7 +433,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '21',
     name: 'Completed Surgery Preparation Bundle',
-    description: 'Comprehensive surgical preparation assessment combining readiness, complication risk, recovery prediction, anaesthesia screening, and mobility evaluation in one complete bundle.',
+    description: 'The smarter way to prepare for surgery. This premium package brings every essential check together in one streamlined experience, helping you feel informed, confident, and fully prepared—while saving on the total cost.',
     price: 120.00,
    image: completedSurgeryPreparationBundleImage,
     icon: <Shield className="w-6 h-6" />,

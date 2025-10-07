@@ -174,33 +174,23 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with navigation */}
+{/* Header with navigation */}
       <div className="border-b border-border">
         <div className="container mx-auto px-4 max-w-4xl">
-          <div className="flex items-center justify-between py-4 sm:py-6">
-            <Button variant="ghost" size="icon" onClick={handlePrevious} className="hover:bg-muted">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-center text-sm sm:text-base">Your next steps</h1>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => window.location.hash = config.informationPageRoute || 'assessments'}
-              className="text-muted-foreground hover:text-foreground hover:bg-muted text-xs sm:text-sm"
-            >
-              Skip
-            </Button>
-          </div>
-          
           {/* Progress Bar */}
-          <div className="pb-4 sm:pb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs sm:text-sm text-muted-foreground">
-                Question {currentQuestionIndex + 1} of {config.questions.length}
-              </span>
-              <span className="text-xs sm:text-sm text-muted-foreground">
-                {Math.round(progress)}% complete
-              </span>
+          <div className="py-4 sm:py-6">
+            <div className="flex items-center gap-4 mb-2">
+              <Button variant="ghost" size="icon" onClick={handlePrevious} className="hover:bg-muted flex-shrink-0">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center justify-between flex-1">
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  Question {currentQuestionIndex + 1} of {config.questions.length}
+                </span>
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  {Math.round(progress)}% complete
+                </span>
+              </div>
             </div>
             <Progress value={progress} className="h-1 sm:h-2" />
           </div>

@@ -41,45 +41,6 @@ interface SurgeryReadinessUpsellPageProps {
 }
 export function SurgeryReadinessUpsellPage({ onAddToBasket, onOpenBasket }: SurgeryReadinessUpsellPageProps) {
   const [isHovered, setIsHovered] = useState(false);
-//   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-//   const [isBasketOpen, setIsBasketOpen] = useState(false);
-
-//   const addToBasket = (assessment: Assessment) => {
-//     setBasketItems(prev => {
-//       const existingItem = prev.find(item => item.assessment.id === assessment.id);
-//       if (existingItem) {
-//         return prev.map(item =>
-//           item.assessment.id === assessment.id
-//             ? { ...item, quantity: item.quantity + 1 }
-//             : item
-//         );
-//       }
-//       return [...prev, { assessment, quantity: 1 }];
-//     });
-//     setIsBasketOpen(true);
-//   };
-//
-//   const removeFromBasket = (assessmentId: string) => {
-//     setBasketItems(prev => prev.filter(item => item.assessment.id !== assessmentId));
-//   };
-//
-//   const updateQuantity = (assessmentId: string, quantity: number) => {
-//     if (quantity <= 0) {
-//       removeFromBasket(assessmentId);
-//       return;
-//     }
-//     setBasketItems(prev =>
-//       prev.map(item =>
-//         item.assessment.id === assessmentId
-//           ? { ...item, quantity }
-//           : item
-//       )
-//     );
-//   };
-//
-//   const getTotalPrice = () => {
-//     return basketItems.reduce((total, item) => total + (item.assessment.price * item.quantity), 0);
-//   };
 
   const handleStartAssessment = () => {
     onAddToBasket(surgeryReadinessAssessment);
@@ -236,6 +197,66 @@ export function SurgeryReadinessUpsellPage({ onAddToBasket, onOpenBasket }: Surg
     </CardContent>
   </Card>
 </div>
+           {/* Mobile Layout - Grid Below Image */}
+              <div className="md:hidden grid grid-cols-2 gap-4">
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Clarity at a Glance</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A single readiness score gives you an elegant, straightforward measure of where you stand.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Accelerated Recovery</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Optimised preparation ensures you return to the lifestyle you enjoy, faster.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Exclusive Insight</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Uncovers hidden risks so you can address them before they become obstacles.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Confidence Restored</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Peace of mind knowing you're entering surgery at your very best.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Premium Protection</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Reduced complications mean a smoother, safer surgical journey.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg">
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Bespoke Planning</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A personalised improvement plan crafted around your top priorities.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+
+
+
             </div>
           </div>
         </div>

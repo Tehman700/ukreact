@@ -374,15 +374,8 @@ const makePayment = async (funnelType = "complication-risk") => {
   <CreditCard className="w-4 h-4 mr-2" />
   Checkout - £{totalPrice.toFixed(2)}
 </Button>
-
-
-
-
-
-
-
                 <p className="text-xs text-muted-foreground text-center">
-                  Secure checkout powered by Luther Health
+                  Powered by Stripe
                 </p>
               </div>
             </>
