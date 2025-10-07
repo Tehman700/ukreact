@@ -19,7 +19,6 @@ export function ServicesPage({ onRequestQuote, onAddToCart }: ServicesPageProps)
     { id: 'diagnostics', label: 'Diagnostics' }
   ];
 
-
   return (
     <div className="space-y-16">
       {/* Hero Section */}
