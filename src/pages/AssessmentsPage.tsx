@@ -132,11 +132,11 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
       {/* Assessments Peek Carousel */}
       <section className="container mx-auto px-4 pb-16">
         <div className="relative">
-          <div 
+          <div
             ref={scrollContainerRef}
             className="overflow-x-auto overscroll-x-contain scrollbar-hide focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
-            style={{ 
-              scrollbarWidth: 'none', 
+            style={{
+              scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               scrollSnapType: 'x mandatory'
             }}
@@ -145,7 +145,7 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
             aria-label="Health assessments carousel. Use arrow keys to scroll."
             onKeyDown={handleKeyDown}
           >
-            <div 
+            <div
               className="flex gap-6 pb-4 pl-4 pr-16"
               role="list"
               aria-label="Health assessments carousel"
@@ -253,7 +253,7 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
                       </div>
 
                       <div className="mt-6 space-y-2">
-                        <Button 
+                        <Button
                           onClick={() => {
                             if (assessment.id === '1') {
                               trackAssessmentStart(assessment.id, assessment.name, assessment.price);
@@ -334,7 +334,7 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
                           <Play className="w-4 h-4 mr-2" />
                           Start Assessment
                         </Button>
-                        <Button 
+                        <Button
                           onClick={() => addToBasket(assessment)}
                           className="w-full"
                           variant="outline"

@@ -47,21 +47,20 @@ export function DailyEnergyUpsellPage({ onAddToBasket, onOpenBasket }: DailyEner
         <div className="grid lg:grid-cols-2 gap-12 items-center py-[0px] px-[14px] pt-[0px] pr-[14px] pb-[30px] pl-[14px]">
 {/* Image */}
 <div className="relative order-1 lg:order-2">
-  <div className="relative aspect-[3/4] max-w-2xl mx-auto lg:max-w-xl">
+  <div className="relative aspect-[3/4] max-w-md mx-auto lg:max-w-sm">
     <ImageWithFallback
       src={heroImage}
       alt="Daily Energy Audit Report"
       width={1600}
       height={2000}
-      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 900px"
-      quality={90}
+      sizes="(max-width: 640px) 70vw, (max-width: 1024px) 45vw, 500px"
+      quality={85}
       priority
-      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[900px]"
+      className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
     />
     <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
   </div>
 </div>
-
           {/* Text */}
           <div className="space-y-6 order-2 lg:order-1">
             <h2 className="text-xl font-medium tracking-tight text-muted-foreground">Daily Energy Assessment</h2>

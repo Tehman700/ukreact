@@ -54,8 +54,8 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = selectedCategory === 'All' 
-      ? MOCK_PRODUCTS 
+    let filtered = selectedCategory === 'All'
+      ? MOCK_PRODUCTS
       : MOCK_PRODUCTS.filter(product => product.category === selectedCategory);
 
     return filtered.sort((a, b) => {
@@ -76,10 +76,10 @@ export function ProductGrid({ onRequestQuote, onAddToCart }: ProductGridProps) {
   // Keyboard navigation for carousel
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!scrollContainerRef.current) return;
-    
+
     const container = scrollContainerRef.current;
     const cardWidth = container.scrollWidth / filteredAndSortedProducts.length;
-    
+
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       container.scrollBy({ left: -cardWidth, behavior: 'smooth' });

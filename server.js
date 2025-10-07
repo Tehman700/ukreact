@@ -769,8 +769,6 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = medicationBurdenPrompt(assessmentType);
     } else if (assessmentType === "Daily Energy") {
       systemPrompt = dailyEnergyPrompt(assessmentType);
-    } else if (assessmentType === "Daily Energy") {
-      systemPrompt = dailyEnergyPrompt(assessmentType);
     } else if (assessmentType === "Lifestyle Limiter") {
       systemPrompt = lifestyleLimiterPrompt(assessmentType);
     } else if (assessmentType === "Biological Age") {
