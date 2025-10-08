@@ -75,11 +75,12 @@ export function NutritionBodyCompositionUpsellPage({ onAddToBasket, onOpenBasket
               Get your complete nutrition and body composition score with evidence-based strategies to optimise metabolic health and achieve your ideal physique.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
-                Get my nutrition score
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
+                Get my nutrition now
               </Button>
             </div>
           </div>
@@ -157,45 +158,25 @@ export function NutritionBodyCompositionUpsellPage({ onAddToBasket, onOpenBasket
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground"> Your nutrition in one score. </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Precision</h3>
-                    <p className="text-sm text-muted-foreground"> Targeted macro & micronutrients. </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Performance</h3>
-                    <p className="text-sm text-muted-foreground"> Eat to train and recover. </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground"> A plan you can follow. </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Metabolism</h3>
-                    <p className="text-sm text-muted-foreground"> Improve insulin sensitivity. </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground"> Strategies tailored to you. </p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Clarity', 'See your nutrition in one simple score — making it easy to understand what fuels your health.'],
+    ['Precision', 'Get targeted macro and micronutrient insights designed to support your unique goals.'],
+    ['Performance', 'Fuel your training and recovery with the right nutrients at the right time for your body.'],
+    ['Confidence', 'Follow a clear, evidence-based plan built to help you stay consistent and feel your best.'],
+    ['Metabolism', 'Support better insulin sensitivity and energy balance with smart, tailored nutrition.'],
+    ['Personal', 'Receive strategies customized to your body, your goals, and your long-term health.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -269,11 +250,11 @@ export function NutritionBodyCompositionUpsellPage({ onAddToBasket, onOpenBasket
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
-                    Get my nutrition score
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
+                    Get my nutrition now
                   </Button>
                 </div>
               </CardContent>

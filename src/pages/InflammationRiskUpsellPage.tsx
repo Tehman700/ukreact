@@ -71,11 +71,11 @@ export function InflammationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Infl
               Identify your personal inflammation triggers and get targeted strategies for lasting relief.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" />
-                Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
                 Get my score now
               </Button>
             </div>
@@ -154,45 +154,25 @@ export function InflammationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Infl
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your risk in one score.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Relief</h3>
-                    <p className="text-sm text-muted-foreground">Act on triggers fast.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot patterns driving flare-ups.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Resilience</h3>
-                    <p className="text-sm text-muted-foreground">Build habits that protect.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Prevention</h3>
-                    <p className="text-sm text-muted-foreground">Lower long-term risk.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Clarity', 'Understand your risk instantly with one clear score.'],
+    ['Relief', 'Tackle triggers early to ease flare-ups fast.'],
+    ['Insight', 'Spot patterns that drive flare-ups before they build.'],
+    ['Resilience', 'Strengthen daily habits to protect your health.'],
+    ['Prevention', 'Take smart steps to lower your long-term risk.'],
+    ['Personal', 'Follow a tailored plan designed just for you.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -269,11 +249,10 @@ export function InflammationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Infl
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
+                                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
                     Get my inflammation analysis now
                   </Button>
                 </div>

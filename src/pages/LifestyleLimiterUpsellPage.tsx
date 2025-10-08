@@ -77,11 +77,10 @@ export function LifestyleLimiterUpsellPage({ onAddToBasket, onOpenBasket }: Life
               A clear, practical score that shows what’s holding you back at work, in relationships, and day‑to‑day—and how to start fixing it.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" />
-                Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
+              <Button
+                onClick={handleStartAssessment}
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
                 Get my score now
               </Button>
             </div>
@@ -169,24 +168,25 @@ export function LifestyleLimiterUpsellPage({ onAddToBasket, onOpenBasket }: Life
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                {[
-                  ['Work', 'Focus, stamina, productivity.'],
-                  ['Social', 'Connection without burnout.'],
-                  ['Independence', 'Daily tasks, safely paced.'],
-                  ['Energy', 'Plan days to avoid crashes.'],
-                  ['Confidence', 'Know your limits—and expand them.'],
-                  ['Direction', 'Clear next steps that fit.'],
-                ].map(([title, body]) => (
-                  <Card key={title as string} className="bg-white shadow-lg">
-                    <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                      <h3 className="font-medium mb-2">{title}</h3>
-                      <p className="text-sm text-muted-foreground">{body}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Work', 'Stay focused longer and get more done. Build stamina without pushing past your limits.'],
+    ['Social', 'Enjoy meaningful connections while protecting your energy. Stay engaged, not burnt out.'],
+    ['Independence', 'Handle daily tasks at your own pace. Stay safe, steady, and in control.'],
+    ['Energy', 'Plan your day around natural highs and lows. Prevent crashes before they happen.'],
+    ['Confidence', 'Know your limits clearly—and gradually push them further. Build strength with trust.'],
+    ['Direction', 'Get clear, personalized next steps. Make every day feel more structured and doable.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -263,11 +263,10 @@ export function LifestyleLimiterUpsellPage({ onAddToBasket, onOpenBasket }: Life
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
                     Get my score now
                   </Button>
                 </div>

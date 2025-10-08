@@ -73,10 +73,11 @@ export function ComplicationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Surg
               Identify your hidden risk factors and get specific strategies to minimise surgical complications.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
                 Get my risk analysis now
               </Button>
             </div>
@@ -159,42 +160,42 @@ export function ComplicationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Surg
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
+{/* Mobile Layout - Grid Below Image */}
               <div className="md:hidden grid grid-cols-2 gap-4">
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Clarity</h3>
                     <p className="text-sm text-muted-foreground"> Your risk profile in one glance, made simple.</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Speed</h3>
                     <p className="text-sm text-muted-foreground"> Act now, avoid setbacks, with confidence. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Insight</h3>
                     <p className="text-sm text-muted-foreground"> Spot complication before they grow, with clarity. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground"> Go into surgery prepared, for recovery. </p>
+                    <p className="text-sm text-muted-foreground"> Preparation before surgery sets the foundation for a stronger recovery. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Protection</h3>
                     <p className="text-sm text-muted-foreground"> Lower risk, smoother recovery, through insight. </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
+                  <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
                     <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground"> Strategies tailored to you, with precision. </p>
+                    <p className="text-sm text-muted-foreground"> Personalized strategies, crafted with precision to support your journey. </p>
                   </CardContent>
                 </Card>
               </div>
@@ -271,10 +272,10 @@ export function ComplicationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Surg
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" /> Start Assessment
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
                     Get my risk analysis now
                   </Button>
                 </div>

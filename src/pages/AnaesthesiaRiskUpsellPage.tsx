@@ -78,11 +78,11 @@ const handleTryDemo = () => {
               A quick, focused safety check that highlights what could complicate your anaesthetic—and how to fix it before surgery.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" />
-                Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
                 Get my screening now
               </Button>
             </div>
@@ -170,24 +170,25 @@ const handleTryDemo = () => {
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                {[
-                  ['Safety', 'Flag issues before induction.'],
-                  ['Precision', 'Guide drug and dosing choices.'],
-                  ['Airway', 'Sleep apnoea and reflux risks.'],
-                  ['Confidence', 'Arrive prepared with a plan.'],
-                  ['Recovery', 'Fewer surprises, smoother wake-up.'],
-                  ['Personal', 'Recommendations matched to you.'],
-                ].map(([title, body]) => (
-                  <Card key={title as string} className="bg-white shadow-lg">
-                    <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                      <h3 className="font-medium mb-2">{title}</h3>
-                      <p className="text-sm text-muted-foreground">{body}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Safety', 'Spot and address potential risks early to keep your procedure safe.'],
+    ['Precision', 'Ensure the right drug and dose decisions for your unique needs.'],
+    ['Airway', 'Identify sleep apnoea or reflux risks before they become problems.'],
+    ['Confidence', 'Walk in with clarity and a solid plan for what comes next.'],
+    ['Recovery', 'Wake up smoother with fewer surprises and faster stabilization.'],
+    ['Personal', 'Get recommendations designed around your health and history.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -264,11 +265,10 @@ const handleTryDemo = () => {
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
                     Get my screening now
                   </Button>
                 </div>

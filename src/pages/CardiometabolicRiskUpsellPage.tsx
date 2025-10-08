@@ -86,11 +86,12 @@ export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: C
               Get your cardiometabolic risk score and evidence-based strategies to prevent heart disease and diabetes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
-                Get my risk score
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
+                Get my risk score now
               </Button>
             </div>
           </div>
@@ -176,45 +177,25 @@ export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: C
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your risk in one score.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">Act early. Prevent more.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot drivers of risk.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Know what to change.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Lower lifetime risk.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Clarity', 'See your risk clearly in one simple score. Understand where you stand today.'],
+    ['Speed', 'Act early to prevent more later. Small changes now make a lasting difference.'],
+    ['Insight', 'Spot the key drivers behind your risk. Know what’s shaping your health.'],
+    ['Confidence', 'Get a clear picture of what to change. Take action with real direction.'],
+    ['Protection', 'Lower your lifetime risk step by step. Build habits that protect your future.'],
+    ['Personal', 'Follow a plan designed for your unique profile. Every step is made for you.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -303,11 +284,11 @@ export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: C
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
-                    Get my risk score
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
+                    Get my risk now
                   </Button>
                 </div>
               </CardContent>

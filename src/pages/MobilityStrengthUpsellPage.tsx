@@ -75,10 +75,11 @@ export function MobilityStrengthUpsellPage({ onAddToBasket, onOpenBasket }: Mobi
               Establish your physical baseline and optimise your recovery potential with targeted rehabilitation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
                 Get mobility score now
               </Button>
             </div>
@@ -161,45 +162,25 @@ export function MobilityStrengthUpsellPage({ onAddToBasket, onOpenBasket }: Mobi
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Baseline</h3>
-                    <p className="text-sm text-muted-foreground">Measured start point.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Progress</h3>
-                    <p className="text-sm text-muted-foreground">See gains clearly.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Function</h3>
-                    <p className="text-sm text-muted-foreground">Everyday ability.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Stay motivated.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Safety</h3>
-                    <p className="text-sm text-muted-foreground">Spot issues early.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Tailored plan.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Baseline', 'Start with a clear snapshot of your current strength and mobility.'],
+    ['Progress', 'Track improvements over time to see your gains clearly.'],
+    ['Function', 'Focus on real-life movements that matter every day.'],
+    ['Confidence', 'Stay motivated with visible milestones and steady growth.'],
+    ['Safety', 'Spot any concerns early and adjust your plan with ease.'],
+    ['Personal', 'Follow a tailored approach designed around your goals.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -286,12 +267,11 @@ export function MobilityStrengthUpsellPage({ onAddToBasket, onOpenBasket }: Mobi
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
-                    Get my baseline score now
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
+                    Get mobility score now
                   </Button>
                 </div>
               </CardContent>

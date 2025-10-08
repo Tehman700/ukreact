@@ -121,14 +121,10 @@ export function CompletedChronicSymptomsUpsellPage() {
               bundle.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
               <Button
                 onClick={handleStartAssessment}
-                variant="outline"
                 size="lg"
-                className="px-8"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
               >
                 Get complete assessment
               </Button>
@@ -240,55 +236,25 @@ export function CompletedChronicSymptomsUpsellPage() {
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Everything in one place.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Start improvements today.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Spot triggers early.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Take control of your day.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Reduce flare-ups.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Tailored plan.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Clarity', 'Track everything in one clear view to understand your health patterns.'],
+    ['Speed', 'Start meaningful improvements today with focused daily steps.'],
+    ['Insight', 'Spot triggers early and prevent flare-ups before they escalate.'],
+    ['Confidence', 'Take back control of your day with structured, simple actions.'],
+    ['Protection', 'Build stronger defenses to reduce flare-ups and setbacks.'],
+    ['Personal', 'Follow a tailored plan built around your unique needs and goals.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
             </div>
           </div>
         </div>
@@ -391,14 +357,9 @@ export function CompletedChronicSymptomsUpsellPage() {
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
                   <Button
                     onClick={handleStartAssessment}
-                    className="w-full"
-                    variant="outline"
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
                   >
                     Get complete assessment
                   </Button>

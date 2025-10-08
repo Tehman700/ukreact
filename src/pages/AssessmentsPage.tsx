@@ -332,14 +332,7 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
                           className="w-full"
                         >
                           <Play className="w-4 h-4 mr-2" />
-                          Start Assessment
-                        </Button>
-                        <Button
-                          onClick={() => addToBasket(assessment)}
-                          className="w-full"
-                          variant="outline"
-                        >
-                          Add to Basket
+                          Learn More
                         </Button>
                       </div>
                     </CardContent>

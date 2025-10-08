@@ -76,11 +76,12 @@ export function RecoverySpeedUpsellPage({ onAddToBasket, onOpenBasket }: Recover
               Get your personalised recovery timeline and targeted strategies to accelerate healing.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Try Demo Quiz
-              </Button>
-              <Button onClick={handleStartAssessment} variant="outline" size="lg" className="px-8">
-                Get prediction now
+              <Button
+                onClick={handleStartAssessment}
+                size="lg"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+              >
+                Get predictions now
               </Button>
             </div>
           </div>
@@ -189,45 +190,58 @@ export function RecoverySpeedUpsellPage({ onAddToBasket, onOpenBasket }: Recover
 
 
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Timeline</h3>
-                    <p className="text-sm text-muted-foreground">Your phased recovery.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Nutrition</h3>
-                    <p className="text-sm text-muted-foreground">Fuel healing daily.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Mindset</h3>
-                    <p className="text-sm text-muted-foreground">Resilience & focus.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Support</h3>
-                    <p className="text-sm text-muted-foreground">Help at home.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Expectations set.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Tailored to you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Timeline</h3>
+      <p className="text-sm text-muted-foreground">
+        Clear recovery milestones guide each phase. Know what to expect.
+      </p>
+    </CardContent>
+  </Card>
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Nutrition</h3>
+      <p className="text-sm text-muted-foreground">
+        Nourish your body with the right fuel. Every meal supports faster healing.
+      </p>
+    </CardContent>
+  </Card>
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Mindset</h3>
+      <p className="text-sm text-muted-foreground">
+        A strong mind accelerates recovery. Build focus, resilience, and calm.
+      </p>
+    </CardContent>
+  </Card>
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Support</h3>
+      <p className="text-sm text-muted-foreground">
+        Recovery is easier with help. Plan your home support early on.
+      </p>
+    </CardContent>
+  </Card>
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Confidence</h3>
+      <p className="text-sm text-muted-foreground">
+        Clarity builds trust in the process. Know your path and move forward with ease.
+      </p>
+    </CardContent>
+  </Card>
+  <Card className="bg-white shadow-lg">
+    <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+      <h3 className="font-medium mb-2">Personal</h3>
+      <p className="text-sm text-muted-foreground">
+        Every recovery is unique. Your plan is built to match your goals.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
             </div>
           </div>
         </div>
@@ -316,11 +330,11 @@ export function RecoverySpeedUpsellPage({ onAddToBasket, onOpenBasket }: Recover
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" /> Start Assessment
-                  </Button>
-                  <Button onClick={handleStartAssessment} className="w-full" variant="outline">
-                    Get prediction now
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
+                  >
+                    Get predictions now
                   </Button>
                 </div>
               </CardContent>

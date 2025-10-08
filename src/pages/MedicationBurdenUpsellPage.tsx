@@ -79,14 +79,10 @@ export function MedicationBurdenUpsellPage({ onAddToBasket, onOpenBasket }: Medi
               more effective treatment.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleTryDemo} size="lg" className="px-8">
-                <Play className="w-4 h-4 mr-2" /> Start Assessment
-              </Button>
               <Button
                 onClick={handleStartAssessment}
-                variant="outline"
                 size="lg"
-                className="px-8"
+                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
               >
                 Calculate Burden
               </Button>
@@ -191,45 +187,26 @@ export function MedicationBurdenUpsellPage({ onAddToBasket, onOpenBasket }: Medi
                 </Card>
               </div>
 
-              {/* Mobile Layout - Grid Below Image */}
-              <div className="md:hidden grid grid-cols-2 gap-4">
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Clear score.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Safety</h3>
-                    <p className="text-sm text-muted-foreground">Spot risks.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Know triggers.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Plan changes.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Fewer effects.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white shadow-lg">
-                  <CardContent className="pt-[6px] pr-[14px] pb-[13px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Your plan.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Mobile Layout - Grid Below Image */}
+<div className="md:hidden grid grid-cols-2 gap-4">
+  {[
+    ['Clarity', 'See your full medication impact in one simple score. Gain a clear picture of what truly matters.'],
+    ['Safety', 'Spot risks linked to multiple medications early. Take steps to prevent unwanted effects.'],
+    ['Insight', 'Understand what triggers side effects or flare-ups. Know the patterns before they grow.'],
+    ['Confidence', 'Plan changes with your clinician using clear insights. Feel in control of your treatment.'],
+    ['Protection', 'Lower the chance of flare-ups and complications. Build habits that keep you safer.'],
+    ['Personal', 'Follow a plan tailored to your needs. Every step focuses on your health and goals.'],
+  ].map(([title, body]) => (
+    <Card key={title as string} className="bg-white shadow-lg">
+      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
+        <h3 className="font-medium mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
+
             </div>
           </div>
         </div>
@@ -319,14 +296,9 @@ export function MedicationBurdenUpsellPage({ onAddToBasket, onOpenBasket }: Medi
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-2">
-                  <Button onClick={handleTryDemo} className="w-full" variant="default">
-                    <Play className="w-4 h-4 mr-2" />
-                    Try Demo Quiz
-                  </Button>
                   <Button
                     onClick={handleStartAssessment}
-                    className="w-full"
-                    variant="outline"
+                    className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
                   >
                     Get my score now
                   </Button>
