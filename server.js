@@ -6,6 +6,8 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
+import puppeteer from 'puppeteer';
+
 
 
 const { Pool } = pkg;
@@ -18,7 +20,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const puppeteer = require('puppeteer');
 
 
 // ----------------------------
