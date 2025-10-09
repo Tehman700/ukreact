@@ -1,13 +1,11 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
 
+// ----------------------
+// Quiz Config
+// ----------------------
 const healthConciergeQuiz: QuizConfig = {
   title: 'Health Concierge Assessment',
-  onComplete: (answers) => {
-    // Store answers for results page
-    localStorage.setItem('healthConciergeResponses', JSON.stringify(answers));
-    window.location.hash = 'database-processing';
-  },
   questions: [
     {
       id: 'primary-goal',
@@ -78,10 +76,52 @@ const healthConciergeQuiz: QuizConfig = {
       ],
     },
   ],
-  processingPage: 'database-processing',
-  resultsPage: 'health-concierge-results',
 };
 
+// ----------------------
+// Convert Answers to Labels
+// ----------------------
+const convertAnswersToLabels = (answers: Record<string, any>) => {
+  const converted: Array<{ question: string; answer: string }> = [];
+  healthConciergeQuiz.questions.forEach((q) => {
+    const answer = answers[q.id];
+    if (!answer) return;
+
+    let labels: string;
+    if (q.multiSelect && Array.isArray(answer)) {
+      labels = answer
+        .map((id) => q.options.find((o) => o.id === id)?.label || id)
+        .join(', ');
+    } else {
+      const selectedId = Array.isArray(answer) ? answer[0] : answer;
+      labels =
+        q.options.find((o) => o.id === selectedId)?.label || selectedId || '';
+    }
+
+    converted.push({ question: q.question, answer: labels });
+  });
+  return converted;
+};
+
+// ----------------------
+// Page Component
+// ----------------------
 export function HealthConciergeQuestionsPage() {
-  return <QuizTemplate config={healthConciergeQuiz} />;
+  const quizWithSubmit: QuizConfig = {
+    ...healthConciergeQuiz,
+    informationPageRoute: 'health-concierge-information',
+    onComplete: async (answers) => {
+      console.log('Health Concierge Assessment completed:', answers);
+      sessionStorage.setItem(
+        'pendingAnswers',
+        JSON.stringify(convertAnswersToLabels(answers))
+      );
+      window.location.hash = 'health-concierge-information-user';
+    },
+    onBack: () => {
+      window.location.hash = 'health-concierge-learn-more';
+    },
+  };
+
+  return <QuizTemplate config={quizWithSubmit} />
 }

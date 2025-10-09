@@ -20,7 +20,7 @@ export function Hero() {
               <Button 
                 size="lg" 
                 className="w-full sm:w-auto"
-                onClick={() => window.location.hash = 'health-concierge-questions'}
+                onClick={() => window.location.hash = 'health-concierge-information'}
               >
                 Discover
               </Button>

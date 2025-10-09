@@ -31,6 +31,7 @@ import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestions
 import { SurgeryReadinessInformationPage } from './pages/SurgeryReadinessInformationPage';
 import { SurgeryReadinessResultsPage } from './pages/SurgeryReadinessResultsPage';
 import { SurgeryReadinessReviewPage } from './pages/SurgeryReadinessReviewPage';
+import { HealthConciergeInformationUser } from './pages/HealthConciergeInformationUser';
 
 // Assessment Pages - Biological Age
 import { BiologicalAgeUpsellPage } from './pages/BiologicalAgeUpsellPage';
@@ -760,6 +761,9 @@ useEffect(() => {
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
+
+      case 'health-concierge-information-user':
+          return <HealthConciergeInformationUser />;
       case 'biological-age-calculator-questions':
         return <BiologicalAgeQuestionsPage />;
       case 'biological-age-calculator-information':
