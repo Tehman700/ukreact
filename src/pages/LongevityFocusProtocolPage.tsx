@@ -106,6 +106,15 @@ export function LongevityFocusProtocolPage({ onAddToCart, onOpenBasket }: Longev
                   <CheckCircle2 className="h-5 w-5 mr-2" />
                   Book Your Consultation Now
                 </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleBookLater}
+                >
+                  I'll Book Later
+                </Button>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">

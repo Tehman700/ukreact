@@ -33,8 +33,12 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
   useEffect(() => {
     const currentUrl = window.location.href;
 
+    console.log('🔍 ChronicSymptomProtocol - Checking current URL');
+    console.log('📍 Current URL:', currentUrl);
+
     // Check if the full URL matches the success redirect URL
     if (currentUrl === 'https://luther.health/Health-Audit.html#chronic-symptom-protocol-challenge') {
+      console.log('🎉 Payment success URL detected! Showing booking popup...');
 
       // Check if we've already shown the popup for this session
       const hasShownPopup = sessionStorage.getItem('chronicSymptomBookingShown');
@@ -106,6 +110,15 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
                 >
                   <CheckCircle2 className="h-5 w-5 mr-2" />
                   Book Your Consultation Now
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleBookLater}
+                >
+                  I'll Book Later
                 </Button>
               </div>
 
