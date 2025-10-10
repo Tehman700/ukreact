@@ -358,7 +358,8 @@ const makePayment = async (funnelType = "complication-risk") => {
       "20": "functional",             // Functional Fitness
       "21": "surgery",                // Surgery Bundle
       "22": "chronic",                // Chronic Symptoms Bundle
-      "23": "longevity"               // Longevity Bundle
+      "23": "longevity",              // Longevity Bundle
+      "15": "chronic-symptom-protocol" // 21 Day Chronic Symptom Management Challenge
     };
 
     const funnelType = funnelMap[firstItem?.id] || "complication-risk";
