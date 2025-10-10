@@ -27,22 +27,27 @@ const chronicSymptomProtocol = {
 };
 
 export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: ChronicSymptomProtocolPageProps) {
-  // Check if user just came from successful payment and redirect to calendar
+  const [showBookingPrompt, setShowBookingPrompt] = useState(false);
+
+  // Check if user came from payment success and show booking popup
   useEffect(() => {
-    // Check if URL has the hash indicating this is the success page
-    const hash = window.location.hash;
+    const currentUrl = window.location.href;
 
-    console.log('🔍 ChronicSymptomProtocol - Checking for payment redirect');
-    console.log('📍 Current hash:', hash);
+    console.log('🔍 ChronicSymptomProtocol - Checking current URL');
+    console.log('📍 Current URL:', currentUrl);
 
-    // If we're on the chronic-symptom-protocol-challenge page, redirect to calendar
-    if (hash.includes('chronic-symptom-protocol-challenge')) {
-      console.log('🎉 Payment success detected! Redirecting to Google Calendar...');
+    // Check if the full URL matches the success redirect URL
+    if (currentUrl === 'https://luther.health/Health-Audit.html#chronic-symptom-protocol-challenge') {
+      console.log('🎉 Payment success URL detected! Showing booking popup...');
 
-      // Add a small delay to show the page briefly, then redirect
-      setTimeout(() => {
-        window.location.href = 'https://calendar.app.google/yGirmgpsvgqgZJH26';
-      }, 1500); // 1.5 second delay for better UX
+      // Check if we've already shown the popup for this session
+      const hasShownPopup = sessionStorage.getItem('chronicSymptomBookingShown');
+
+      if (!hasShownPopup) {
+        setShowBookingPrompt(true);
+        // Mark that we've shown the popup
+        sessionStorage.setItem('chronicSymptomBookingShown', 'true');
+      }
     }
   }, []);
 
@@ -67,8 +72,64 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
     }
   };
 
+  const handleBookConsultation = () => {
+    // Open Google Calendar link in new tab
+    window.open('https://calendar.app.google/yGirmgpsvgqgZJH26', '_blank');
+
+    setShowBookingPrompt(false);
+  };
+
+  const handleBookLater = () => {
+    setShowBookingPrompt(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Booking Prompt Modal */}
+      {showBookingPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              </div>
+
+              <h3 className="text-xl font-semibold text-center">
+                Welcome to the Challenge!
+              </h3>
+
+              <p className="text-muted-foreground text-center">
+                Your purchase is complete. Now let's schedule your initial consultation to get you started on your journey.
+              </p>
+
+              <div className="space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={handleBookConsultation}
+                >
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                  Book Your Consultation Now
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleBookLater}
+                >
+                  I'll Book Later
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                You can always book your consultation from your account dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Hero + Product Section */}
       <div className="container max-w-7xl mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Hero / Context */}
