@@ -6,6 +6,7 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
+import htmlPdf from 'html-pdf-node';
 
 
 
@@ -4390,9 +4391,7 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
-// ----------------------------
-// Send Email Report
-// ----------------------------
+
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId } = req.body;
@@ -4404,34 +4403,320 @@ app.post("/api/send-email-report", async (req, res) => {
       });
     }
 
-    // Generate HTML content
+    console.log(`📄 Generating PDF report for ${userName}...`);
+    console.log(`📧 Email: ${userEmail}`);
+    console.log(`📊 Assessment Type: ${assessmentType}`);
+
+    // Generate HTML content for PDF
     const htmlContent = generateEmailContent(userName, assessmentType, report);
+    console.log(`✅ HTML content generated (${htmlContent.length} characters)`);
 
-    // Send email
-    const mailOptions = {
-      from: `"Luther Health" <${process.env.GMAIL_USER}>`,
-      to: userEmail,
-      subject: `Your ${assessmentType} Assessment Results - Luther Health`,
-      html: htmlContent,
-    };
-    await transporter.sendMail(mailOptions);
+    let pdfBuffer;
+    let pdfGenerationSuccessful = false;
 
-    console.log(`✅ Email sent successfully to ${userEmail}`);
-    res.json({ success: true, message: "Email sent successfully" });
+    try {
+      // Generate PDF using html-pdf-node
+      console.log('🚀 Starting PDF generation with html-pdf-node...');
+
+      const options = {
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20px',
+          right: '20px',
+          bottom: '20px',
+          left: '20px'
+        }
+      };
+
+      const file = { content: htmlContent };
+
+      pdfBuffer = await htmlPdf.generatePdf(file, options);
+
+      console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)`);
+      pdfGenerationSuccessful = true;
+
+    } catch (pdfError) {
+      console.error('❌ PDF generation error:', pdfError.message);
+      console.error('📍 Error stack:', pdfError.stack);
+      pdfGenerationSuccessful = false;
+    }
+
+    // Send email based on whether PDF generation was successful
+    if (pdfGenerationSuccessful && pdfBuffer) {
+      // Send email with PDF attachment
+      console.log('📧 Sending email with PDF attachment...');
+
+      const mailOptions = {
+        from: `"Luther Health" <${process.env.GMAIL_USER}>`,
+        to: userEmail,
+        subject: `Your ${assessmentType} Assessment Results - Luther Health`,
+        html: generateEmailBodyWithAttachment(userName, assessmentType),
+        attachments: [
+          {
+            filename: `Luther-Health-${assessmentType.replace(/\s+/g, '-')}-Report-${reportId || Date.now()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ]
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Email with PDF sent successfully to ${userEmail}`);
+
+      res.json({
+        success: true,
+        message: "Email with PDF report sent successfully",
+        pdfGenerated: true
+      });
+
+    } else {
+      // Fallback: Send HTML email without PDF
+      console.log('⚠️ Falling back to HTML email without PDF attachment');
+
+      const mailOptions = {
+        from: `"Luther Health" <${process.env.GMAIL_USER}>`,
+        to: userEmail,
+        subject: `Your ${assessmentType} Assessment Results - Luther Health`,
+        html: htmlContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Fallback: HTML email sent successfully to ${userEmail} (without PDF)`);
+
+      res.json({
+        success: true,
+        message: "Email sent successfully (PDF generation unavailable - full report included in email)",
+        pdfGenerated: false,
+        fallback: true
+      });
+    }
 
   } catch (error) {
-    console.error("❌ Email sending error:", error);
+    console.error("❌ Critical error in email/PDF generation:", error.message);
+    console.error("📍 Full error:", error);
+
     res.status(500).json({
       success: false,
       error: error.message,
-      details: "Failed to send email report"
+      details: "Failed to send email report",
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
+// ----------------------------
+// Email Body (Brief message with PDF attachment)
+// ----------------------------
+function generateEmailBodyWithAttachment(userName, assessmentType) {
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
 
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${assessmentType} Results - Luther Health</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1a1a1a;
+                background-color: #f9fafb;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0 0 10px 0;
+                font-size: 28px;
+                font-weight: 600;
+            }
+            .header h2 {
+                margin: 0 0 5px 0;
+                font-size: 18px;
+                font-weight: 400;
+                opacity: 0.9;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .greeting h3 {
+                color: #030213;
+                margin: 0 0 20px 0;
+                font-size: 20px;
+            }
+            .greeting p {
+                color: #4b5563;
+                font-size: 15px;
+                line-height: 1.7;
+                margin: 15px 0;
+            }
+            .attachment-notice {
+                background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
+                border: 2px solid #0284c7;
+                border-radius: 12px;
+                padding: 25px;
+                text-align: center;
+                margin: 30px 0;
+            }
+            .attachment-icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+            }
+            .attachment-notice h4 {
+                color: #0284c7;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+            .attachment-notice p {
+                color: #1e40af;
+                font-size: 14px;
+                margin: 0;
+            }
+            .important-notice {
+                background-color: #fffbeb;
+                border: 1px solid #fed7aa;
+                border-radius: 8px;
+                padding: 25px;
+                margin: 30px 0;
+                border-left: 5px solid #f59e0b;
+            }
+            .important-notice h4 {
+                color: #92400e;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+            .important-notice p {
+                color: #78350f;
+                font-size: 14px;
+                line-height: 1.6;
+                margin: 0;
+            }
+            .footer {
+                background-color: #1f2937;
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            .footer .logo {
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+            .footer .tagline {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 0 0 20px 0;
+            }
+            .footer .copyright {
+                font-size: 12px;
+                opacity: 0.7;
+                margin: 0;
+                line-height: 1.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <h1>Luther Health</h1>
+                <h2>Your ${assessmentType} Assessment Results</h2>
+            </div>
+
+            <div class="content">
+                <div class="greeting">
+                    <h3>Dear ${userName},</h3>
+                    <p>
+                        Thank you for completing your ${assessmentType} assessment with Luther Health.
+                        We've analyzed your responses using our advanced AI system to provide you with
+                        personalized insights and evidence-based recommendations.
+                    </p>
+                </div>
+
+                <div class="attachment-notice">
+                    <div class="attachment-icon">📄</div>
+                    <h4>Your Detailed Report is Attached</h4>
+                    <p>
+                        Please find your comprehensive ${assessmentType} assessment report
+                        attached to this email as a PDF document. The report contains your scores,
+                        detailed analysis, and personalized recommendations.
+                    </p>
+                </div>
+
+                <div class="greeting">
+                    <p>
+                        <strong>Your report includes:</strong>
+                    </p>
+                    <ul style="color: #4b5563; font-size: 15px; line-height: 1.7;">
+                        <li>Overall assessment score and rating</li>
+                        <li>Category-by-category breakdown</li>
+                        <li>Detailed clinical analysis</li>
+                        <li>Evidence-based recommendations</li>
+                        <li>Risk factors and strengths identification</li>
+                    </ul>
+                    <p>
+                        We recommend reviewing your report carefully and discussing the findings
+                        with your healthcare provider to develop an appropriate care plan.
+                    </p>
+                </div>
+
+                <div class="important-notice">
+                    <h4>⚠️ Important Medical Disclaimer</h4>
+                    <p>
+                        <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
+                        The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
+                        Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #4b5563; margin: 0 0 20px 0;">
+                        Questions about your results? Our support team is here to help.
+                    </p>
+                    <p style="color: #030213; margin: 0; font-size: 16px;">
+                        Best regards,<br>
+                        <strong>The Luther Health Team</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="logo">Luther Health</div>
+                <div class="tagline">AI-powered health assessments and clinical insights</div>
+                <div class="copyright">
+                    © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
+                    This email was sent because you completed an assessment on our platform.<br>
+                    Assessment completed on ${completionDate}
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+}
+
+// Keep the original generateEmailContent function for PDF generation
 function generateEmailContent(userName, assessmentType, reportData) {
-  console.log("Generating email for:", userName, assessmentType);
+  console.log("Generating PDF content for:", userName, assessmentType);
   console.log("Report data structure:", Object.keys(reportData || {}));
 
   // Handle the report data structure correctly
@@ -4474,20 +4759,17 @@ function generateEmailContent(userName, assessmentType, reportData) {
     }
   };
 
-
-  // Helper function to render detailed analysis based on assessment type
+  // Helper function to render detailed analysis
   const renderDetailedAnalysis = (result) => {
     if (!result.detailedAnalysis) return '';
 
     const analysis = result.detailedAnalysis;
-
-    // Check if this is Surgery Readiness (has evidenceBase) or Complication Risk (has strengths)
     const isSurgeryReadiness = analysis.evidenceBase !== undefined;
     const isComplicationRisk = analysis.strengths !== undefined;
 
     let detailedHtml = `
       <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 15px 0;">
-        <h4 style="color: var(--primary); font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
+        <h4 style="color: #030213; font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
           📋 Clinical Context
         </h4>
         <p style="margin: 0 0 15px 0; color: #374151; font-size: 14px; line-height: 1.6;">
@@ -4495,7 +4777,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
         </p>
     `;
 
-    // Render evidence base (Surgery Readiness) or strengths (Complication Risk)
     if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
       detailedHtml += `
         <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
@@ -4526,7 +4807,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
       `;
     }
 
-    // Render risk factors (both assessment types)
     if (analysis.riskFactors && analysis.riskFactors.length > 0) {
       detailedHtml += `
         <h5 style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
@@ -4543,7 +4823,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
       `;
     }
 
-    // Render timeline (both assessment types)
     if (analysis.timeline) {
       detailedHtml += `
         <div style="background-color: #dbeafe; padding: 12px; border-radius: 6px; margin: 15px 0 0 0; border-left: 3px solid #0284c7;">
@@ -4566,7 +4845,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${assessmentType} Results - Luther Health</title>
         <style>
-            /* CSS Variables matching your design system */
             :root {
                 --font-size: 14px;
                 --background: #ffffff;
@@ -4581,23 +4859,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 --muted-foreground: #717182;
                 --border: rgba(0, 0, 0, 0.1);
                 --radius: 0.625rem;
-
-                /* Badge colors */
-                --badge-low-bg: #fef2f2;
-                --badge-low-text: #dc2626;
-                --badge-low-border: #fecaca;
-
-                --badge-moderate-bg: #fffbeb;
-                --badge-moderate-text: #d97706;
-                --badge-moderate-border: #fed7aa;
-
-                --badge-high-bg: #f0f9ff;
-                --badge-high-text: #0284c7;
-                --badge-high-border: #bae6fd;
-
-                --badge-optimal-bg: #f0fdf4;
-                --badge-optimal-text: #16a34a;
-                --badge-optimal-border: #bbf7d0;
             }
 
             body {
@@ -4613,7 +4874,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 max-width: 600px;
                 margin: 0 auto;
                 background-color: var(--background);
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
 
             .header {
@@ -4657,7 +4917,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 font-size: 18px;
             }
 
-            /* Overall Score Section */
             .score-section {
                 background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
                 border: 2px solid #0284c7;
@@ -4692,7 +4951,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 margin: 10px 0 0 0;
             }
 
-            /* Category Cards */
             .categories-section {
                 margin: 35px 0;
             }
@@ -4713,6 +4971,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 padding: 25px;
                 margin: 20px 0;
                 border-left: 5px solid #0284c7;
+                page-break-inside: avoid;
             }
 
             .category-header {
@@ -4758,7 +5017,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 height: 100%;
                 background: linear-gradient(90deg, var(--primary) 0%, #4f46e5 100%);
                 border-radius: 4px;
-                transition: width 0.5s ease;
             }
 
             .category-description {
@@ -4805,7 +5063,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 left: -10px;
             }
 
-            /* Summary Section */
             .summary-section {
                 background-color: #f8fafc;
                 border: 1px solid var(--border);
@@ -4813,6 +5070,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 padding: 25px;
                 margin: 30px 0;
                 border-left: 5px solid #16a34a;
+                page-break-inside: avoid;
             }
 
             .summary-title {
@@ -4830,7 +5088,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 line-height: 1.7;
             }
 
-            /* Important Notice */
             .important-notice {
                 background-color: #fffbeb;
                 border: 1px solid #fed7aa;
@@ -4838,6 +5095,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 padding: 25px;
                 margin: 30px 0;
                 border-left: 5px solid #f59e0b;
+                page-break-inside: avoid;
             }
 
             .important-notice h4 {
@@ -4854,12 +5112,12 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 margin: 0;
             }
 
-            /* Footer */
             .footer {
                 background-color: #1f2937;
                 color: white;
                 padding: 30px;
                 text-align: center;
+                margin-top: 40px;
             }
 
             .footer .logo {
@@ -4879,23 +5137,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 opacity: 0.7;
                 margin: 0;
                 line-height: 1.5;
-            }
-
-            /* Responsive */
-            @media (max-width: 600px) {
-                .content {
-                    padding: 20px;
-                }
-
-                .score-number {
-                    font-size: 44px;
-                }
-
-                .category-header {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 10px;
-                }
             }
         </style>
     </head>
@@ -4963,7 +5204,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
                             📊 Detailed Clinical Analysis
                         </h3>
                         <div class="summary-content">
-                            ${report.summary.replace(/\n/g, '<br>').substring(0, 1500)}${report.summary.length > 1500 ? '...' : ''}
+                            ${report.summary.replace(/\n/g, '<br>')}
                         </div>
                     </div>
                 ` : ''}
@@ -5001,6 +5242,8 @@ function generateEmailContent(userName, assessmentType, reportData) {
     </html>
   `;
 }
+
+
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
