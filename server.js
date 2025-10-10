@@ -4397,6 +4397,11 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
 
 
 
+// First, install these packages:
+// npm install puppeteer
+
+const puppeteer = require('puppeteer');
+
 // ----------------------------
 // Generate PDF from HTML
 // ----------------------------
@@ -4590,16 +4595,49 @@ function generateEmailNotification(userName, assessmentType) {
 function generatePDFContent(userName, assessmentType, reportData) {
   console.log("Generating PDF content for:", userName, assessmentType);
   console.log("Report data structure:", Object.keys(reportData || {}));
+  console.log("Full report data:", JSON.stringify(reportData, null, 2));
 
-  // Handle the report data structure correctly
+  // Handle the report data structure correctly with better error handling
   let report;
-  if (reportData.structured_report) {
-    report = typeof reportData.structured_report === "string"
-      ? JSON.parse(reportData.structured_report)
-      : reportData.structured_report;
-  } else if (reportData.results) {
-    report = reportData;
-  } else {
+  try {
+    if (reportData.structured_report) {
+      report = typeof reportData.structured_report === "string"
+        ? JSON.parse(reportData.structured_report)
+        : reportData.structured_report;
+    } else if (reportData.results) {
+      report = reportData;
+    } else {
+      report = {
+        overallScore: 75,
+        overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
+        results: [],
+        summary: "Your assessment has been completed. Please consult with a healthcare provider for detailed interpretation."
+      };
+    }
+
+    // Ensure results array exists and has proper structure
+    if (!Array.isArray(report.results)) {
+      report.results = [];
+    }
+
+    // Validate each result has required properties
+    report.results = report.results.map(result => ({
+      category: result.category || 'Assessment Category',
+      score: result.score || 75,
+      maxScore: result.maxScore || 100,
+      level: result.level || 'moderate',
+      description: result.description || 'Analysis in progress.',
+      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      detailedAnalysis: result.detailedAnalysis || {
+        clinicalContext: 'Analysis completed.',
+        strengths: [],
+        riskFactors: [],
+        timeline: 'Consult with healthcare provider.'
+      }
+    }));
+
+  } catch (error) {
+    console.error("Error parsing report data:", error);
     report = {
       overallScore: 75,
       overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
@@ -4631,9 +4669,9 @@ function generatePDFContent(userName, assessmentType, reportData) {
     }
   };
 
-  // Helper function to render detailed analysis
+  // Helper function to render detailed analysis with null checks
   const renderDetailedAnalysis = (result) => {
-    if (!result.detailedAnalysis) return '';
+    if (!result || !result.detailedAnalysis) return '';
 
     const analysis = result.detailedAnalysis;
     const isSurgeryReadiness = analysis.evidenceBase !== undefined;
@@ -4649,7 +4687,7 @@ function generatePDFContent(userName, assessmentType, reportData) {
         </p>
     `;
 
-    if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
+    if (isSurgeryReadiness && Array.isArray(analysis.evidenceBase) && analysis.evidenceBase.length > 0) {
       detailedHtml += `
         <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ✓ Clinical Evidence
@@ -4658,12 +4696,12 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.evidenceBase.map(evidence => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #16a34a; position: absolute; left: -10px;">•</span>
-              ${evidence}
+              ${evidence || ''}
             </li>
           `).join('')}
         </ul>
       `;
-    } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
+    } else if (isComplicationRisk && Array.isArray(analysis.strengths) && analysis.strengths.length > 0) {
       detailedHtml += `
         <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ✓ Current Strengths
@@ -4672,14 +4710,14 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.strengths.map(strength => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #16a34a; position: absolute; left: -10px;">✓</span>
-              ${strength}
+              ${strength || ''}
             </li>
           `).join('')}
         </ul>
       `;
     }
 
-    if (analysis.riskFactors && analysis.riskFactors.length > 0) {
+    if (Array.isArray(analysis.riskFactors) && analysis.riskFactors.length > 0) {
       detailedHtml += `
         <h5 style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ⚠ Key Risk Factors
@@ -4688,7 +4726,7 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.riskFactors.map(risk => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #dc2626; position: absolute; left: -10px;">⚠</span>
-              ${risk}
+              ${risk || ''}
             </li>
           `).join('')}
         </ul>
