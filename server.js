@@ -6,7 +6,7 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
-import puppeteer from 'puppeteer';
+//import puppeteer from 'puppeteer';
 
 
 
@@ -4393,45 +4393,8 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 
 }
-
 // ----------------------------
-// Generate PDF from HTML
-// ----------------------------
-async function generatePDF(htmlContent) {
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-
-    return pdfBuffer;
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw error;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
-}
-
-// ----------------------------
-// Send Email Report with PDF
+// Send Email Report
 // ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
@@ -4444,40 +4407,21 @@ app.post("/api/send-email-report", async (req, res) => {
       });
     }
 
-    // Generate HTML content for PDF
-    const pdfHtmlContent = generatePDFContent(userName, assessmentType, report);
+    // Generate HTML content
+    const htmlContent = generateEmailContent(userName, assessmentType, report);
 
-    // Generate PDF buffer
-    console.log('Generating PDF...');
-    const pdfBuffer = await generatePDF(pdfHtmlContent);
-    console.log('PDF generated successfully');
-
-    // Generate simple email HTML (not the full report, just a notification)
-    const emailHtmlContent = generateEmailNotification(userName, assessmentType);
-
-    // Create filename with sanitized assessment type
-    const sanitizedAssessmentType = assessmentType.replace(/\s+/g, '_');
-    const filename = `Luther_Health_${sanitizedAssessmentType}_Report_${reportId || Date.now()}.pdf`;
-
-    // Send email with PDF attachment
+    // Send email
     const mailOptions = {
       from: `"Luther Health" <${process.env.GMAIL_USER}>`,
       to: userEmail,
       subject: `Your ${assessmentType} Assessment Results - Luther Health`,
-      html: emailHtmlContent,
-      attachments: [
-        {
-          filename: filename,
-          content: pdfBuffer,
-          contentType: 'application/pdf'
-        }
-      ]
+      html: htmlContent,
     };
 
     await transporter.sendMail(mailOptions);
 
-    console.log(`✅ Email with PDF sent successfully to ${userEmail}`);
-    res.json({ success: true, message: "Email with PDF report sent successfully" });
+    console.log(`✅ Email sent successfully to ${userEmail}`);
+    res.json({ success: true, message: "Email sent successfully" });
 
   } catch (error) {
     console.error("❌ Email sending error:", error);
@@ -4489,147 +4433,20 @@ app.post("/api/send-email-report", async (req, res) => {
   }
 });
 
-// ----------------------------
-// Generate Email Notification (Simple HTML)
-// ----------------------------
-function generateEmailNotification(userName, assessmentType) {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${assessmentType} Results - Luther Health</title>
-    </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; background-color: #f9fafb; margin: 0; padding: 0;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center;">
-                <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 600;">Luther Health</h1>
-                <h2 style="margin: 0 0 5px 0; font-size: 18px; font-weight: 400; opacity: 0.9;">Your ${assessmentType} Assessment Results</h2>
-            </div>
 
-            <!-- Content -->
-            <div style="padding: 40px 30px;">
-                <h3 style="color: #030213; margin: 0 0 10px 0; font-size: 18px;">Dear ${userName},</h3>
-
-                <p style="font-size: 15px; line-height: 1.7; color: #374151; margin: 15px 0;">
-                    Thank you for completing your ${assessmentType} assessment with Luther Health. Your comprehensive results are now ready.
-                </p>
-
-                <div style="background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%); border: 2px solid #0284c7; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
-                    <div style="font-size: 48px; margin-bottom: 15px;">📄</div>
-                    <h3 style="color: #0284c7; margin: 0 0 10px 0; font-size: 20px;">Your Report is Attached</h3>
-                    <p style="font-size: 14px; color: #4b5563; margin: 0;">
-                        Please find your detailed assessment report attached to this email as a PDF document.
-                    </p>
-                </div>
-
-                <div style="background-color: #f8fafc; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 10px; padding: 25px; margin: 30px 0;">
-                    <h4 style="color: #030213; font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">What's included in your report:</h4>
-                    <ul style="margin: 0; padding-left: 20px; list-style: none;">
-                        <li style="margin: 10px 0; padding-left: 10px; position: relative; color: #374151; font-size: 14px;">
-                            <span style="color: #0284c7; position: absolute; left: -10px;">✓</span>
-                            Your overall assessment score and rating
-                        </li>
-                        <li style="margin: 10px 0; padding-left: 10px; position: relative; color: #374151; font-size: 14px;">
-                            <span style="color: #0284c7; position: absolute; left: -10px;">✓</span>
-                            Detailed category breakdown and analysis
-                        </li>
-                        <li style="margin: 10px 0; padding-left: 10px; position: relative; color: #374151; font-size: 14px;">
-                            <span style="color: #0284c7; position: absolute; left: -10px;">✓</span>
-                            Personalized recommendations
-                        </li>
-                        <li style="margin: 10px 0; padding-left: 10px; position: relative; color: #374151; font-size: 14px;">
-                            <span style="color: #0284c7; position: absolute; left: -10px;">✓</span>
-                            Evidence-based clinical insights
-                        </li>
-                    </ul>
-                </div>
-
-                <div style="background-color: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; padding: 25px; margin: 30px 0; border-left: 5px solid #f59e0b;">
-                    <h4 style="color: #92400e; font-size: 16px; font-weight: 600; margin: 0 0 10px 0;">⚠️ Important Medical Disclaimer</h4>
-                    <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
-                        <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
-                        Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
-                    </p>
-                </div>
-
-                <div style="text-align: center; margin: 30px 0;">
-                    <p style="color: #4b5563; margin: 0 0 20px 0;">
-                        Questions about your results? Our support team is here to help.
-                    </p>
-                    <p style="color: #030213; margin: 0; font-size: 16px;">
-                        Best regards,<br>
-                        <strong>The Luther Health Team</strong>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div style="background-color: #1f2937; color: white; padding: 30px; text-align: center;">
-                <div style="font-size: 20px; font-weight: 600; margin: 0 0 10px 0;">Luther Health</div>
-                <div style="font-size: 14px; opacity: 0.9; margin: 0 0 20px 0;">AI-powered health assessments and clinical insights</div>
-                <div style="font-size: 12px; opacity: 0.7; margin: 0; line-height: 1.5;">
-                    © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
-                    This email was sent because you completed an assessment on our platform.
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-  `;
-}
-
-// ----------------------------
-// Generate PDF Content (Full Report HTML)
-// ----------------------------
-function generatePDFContent(userName, assessmentType, reportData) {
-  console.log("Generating PDF content for:", userName, assessmentType);
+function generateEmailContent(userName, assessmentType, reportData) {
+  console.log("Generating email for:", userName, assessmentType);
   console.log("Report data structure:", Object.keys(reportData || {}));
-  console.log("Full report data:", JSON.stringify(reportData, null, 2));
 
-  // Handle the report data structure correctly with better error handling
+  // Handle the report data structure correctly
   let report;
-  try {
-    if (reportData.structured_report) {
-      report = typeof reportData.structured_report === "string"
-        ? JSON.parse(reportData.structured_report)
-        : reportData.structured_report;
-    } else if (reportData.results) {
-      report = reportData;
-    } else {
-      report = {
-        overallScore: 75,
-        overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
-        results: [],
-        summary: "Your assessment has been completed. Please consult with a healthcare provider for detailed interpretation."
-      };
-    }
-
-    // Ensure results array exists and has proper structure
-    if (!Array.isArray(report.results)) {
-      report.results = [];
-    }
-
-    // Validate each result has required properties
-    report.results = report.results.map(result => ({
-      category: result.category || 'Assessment Category',
-      score: result.score || 75,
-      maxScore: result.maxScore || 100,
-      level: result.level || 'moderate',
-      description: result.description || 'Analysis in progress.',
-      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
-      detailedAnalysis: result.detailedAnalysis || {
-        clinicalContext: 'Analysis completed.',
-        strengths: [],
-        riskFactors: [],
-        timeline: 'Consult with healthcare provider.'
-      }
-    }));
-
-  } catch (error) {
-    console.error("Error parsing report data:", error);
+  if (reportData.structured_report) {
+    report = typeof reportData.structured_report === "string"
+      ? JSON.parse(reportData.structured_report)
+      : reportData.structured_report;
+  } else if (reportData.results) {
+    report = reportData;
+  } else {
     report = {
       overallScore: 75,
       overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
@@ -4661,17 +4478,20 @@ function generatePDFContent(userName, assessmentType, reportData) {
     }
   };
 
-  // Helper function to render detailed analysis with null checks
+
+  // Helper function to render detailed analysis based on assessment type
   const renderDetailedAnalysis = (result) => {
-    if (!result || !result.detailedAnalysis) return '';
+    if (!result.detailedAnalysis) return '';
 
     const analysis = result.detailedAnalysis;
+
+    // Check if this is Surgery Readiness (has evidenceBase) or Complication Risk (has strengths)
     const isSurgeryReadiness = analysis.evidenceBase !== undefined;
     const isComplicationRisk = analysis.strengths !== undefined;
 
     let detailedHtml = `
       <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 15px 0;">
-        <h4 style="color: #030213; font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
+        <h4 style="color: var(--primary); font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
           📋 Clinical Context
         </h4>
         <p style="margin: 0 0 15px 0; color: #374151; font-size: 14px; line-height: 1.6;">
@@ -4679,7 +4499,8 @@ function generatePDFContent(userName, assessmentType, reportData) {
         </p>
     `;
 
-    if (isSurgeryReadiness && Array.isArray(analysis.evidenceBase) && analysis.evidenceBase.length > 0) {
+    // Render evidence base (Surgery Readiness) or strengths (Complication Risk)
+    if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
       detailedHtml += `
         <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ✓ Clinical Evidence
@@ -4688,12 +4509,12 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.evidenceBase.map(evidence => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #16a34a; position: absolute; left: -10px;">•</span>
-              ${evidence || ''}
+              ${evidence}
             </li>
           `).join('')}
         </ul>
       `;
-    } else if (isComplicationRisk && Array.isArray(analysis.strengths) && analysis.strengths.length > 0) {
+    } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
       detailedHtml += `
         <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ✓ Current Strengths
@@ -4702,14 +4523,15 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.strengths.map(strength => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #16a34a; position: absolute; left: -10px;">✓</span>
-              ${strength || ''}
+              ${strength}
             </li>
           `).join('')}
         </ul>
       `;
     }
 
-    if (Array.isArray(analysis.riskFactors) && analysis.riskFactors.length > 0) {
+    // Render risk factors (both assessment types)
+    if (analysis.riskFactors && analysis.riskFactors.length > 0) {
       detailedHtml += `
         <h5 style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
           ⚠ Key Risk Factors
@@ -4718,13 +4540,14 @@ function generatePDFContent(userName, assessmentType, reportData) {
           ${analysis.riskFactors.map(risk => `
             <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
               <span style="color: #dc2626; position: absolute; left: -10px;">⚠</span>
-              ${risk || ''}
+              ${risk}
             </li>
           `).join('')}
         </ul>
       `;
     }
 
+    // Render timeline (both assessment types)
     if (analysis.timeline) {
       detailedHtml += `
         <div style="background-color: #dbeafe; padding: 12px; border-radius: 6px; margin: 15px 0 0 0; border-left: 3px solid #0284c7;">
@@ -4747,18 +4570,54 @@ function generatePDFContent(userName, assessmentType, reportData) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${assessmentType} Results - Luther Health</title>
         <style>
+            /* CSS Variables matching your design system */
+            :root {
+                --font-size: 14px;
+                --background: #ffffff;
+                --foreground: #1a1a1a;
+                --card: #ffffff;
+                --card-foreground: #1a1a1a;
+                --primary: #030213;
+                --primary-foreground: #ffffff;
+                --secondary: #f5f5f5;
+                --secondary-foreground: #030213;
+                --muted: #ececf0;
+                --muted-foreground: #717182;
+                --border: rgba(0, 0, 0, 0.1);
+                --radius: 0.625rem;
+
+                /* Badge colors */
+                --badge-low-bg: #fef2f2;
+                --badge-low-text: #dc2626;
+                --badge-low-border: #fecaca;
+
+                --badge-moderate-bg: #fffbeb;
+                --badge-moderate-text: #d97706;
+                --badge-moderate-border: #fed7aa;
+
+                --badge-high-bg: #f0f9ff;
+                --badge-high-text: #0284c7;
+                --badge-high-border: #bae6fd;
+
+                --badge-optimal-bg: #f0fdf4;
+                --badge-optimal-text: #16a34a;
+                --badge-optimal-border: #bbf7d0;
+            }
+
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                 line-height: 1.6;
-                color: #1a1a1a;
-                background-color: #ffffff;
+                color: var(--foreground);
+                background-color: #f9fafb;
                 margin: 0;
-                padding: 20px;
+                padding: 0;
             }
 
-            .pdf-container {
-                max-width: 800px;
+            .email-container {
+                max-width: 600px;
                 margin: 0 auto;
+                background-color: var(--background);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
 
             .header {
@@ -4766,27 +4625,29 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 color: white;
                 padding: 40px 30px;
                 text-align: center;
-                border-radius: 10px;
-                margin-bottom: 30px;
             }
 
             .header h1 {
                 margin: 0 0 10px 0;
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 600;
             }
 
             .header h2 {
                 margin: 0 0 5px 0;
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: 400;
                 opacity: 0.9;
             }
 
             .header .date {
-                margin: 10px 0 0 0;
+                margin: 0;
                 font-size: 14px;
                 opacity: 0.8;
+            }
+
+            .content {
+                padding: 30px;
             }
 
             .greeting {
@@ -4795,11 +4656,12 @@ function generatePDFContent(userName, assessmentType, reportData) {
             }
 
             .greeting h3 {
-                color: #030213;
+                color: var(--primary);
                 margin: 0 0 10px 0;
                 font-size: 18px;
             }
 
+            /* Overall Score Section */
             .score-section {
                 background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
                 border: 2px solid #0284c7;
@@ -4807,7 +4669,6 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 padding: 30px;
                 text-align: center;
                 margin: 30px 0;
-                page-break-inside: avoid;
             }
 
             .score-number {
@@ -4835,27 +4696,27 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 margin: 10px 0 0 0;
             }
 
+            /* Category Cards */
             .categories-section {
                 margin: 35px 0;
             }
 
             .categories-title {
-                color: #030213;
-                font-size: 22px;
+                color: var(--primary);
+                font-size: 20px;
                 font-weight: 600;
                 margin: 0 0 25px 0;
-                border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+                border-bottom: 2px solid var(--border);
                 padding-bottom: 10px;
             }
 
             .category-card {
-                background-color: #ffffff;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
+                background-color: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
                 padding: 25px;
                 margin: 20px 0;
                 border-left: 5px solid #0284c7;
-                page-break-inside: avoid;
             }
 
             .category-header {
@@ -4866,14 +4727,21 @@ function generatePDFContent(userName, assessmentType, reportData) {
             }
 
             .category-title {
-                color: #030213;
+                color: var(--primary);
                 font-size: 18px;
                 font-weight: 600;
                 margin: 0;
+                display: flex;
+                align-items: center;
+            }
+
+            .category-icon {
+                margin-right: 10px;
+                font-size: 18px;
             }
 
             .category-score {
-                background-color: #030213;
+                background-color: var(--primary);
                 color: white;
                 padding: 6px 15px;
                 border-radius: 20px;
@@ -4892,7 +4760,9 @@ function generatePDFContent(userName, assessmentType, reportData) {
 
             .progress-fill {
                 height: 100%;
+                background: linear-gradient(90deg, var(--primary) 0%, #4f46e5 100%);
                 border-radius: 4px;
+                transition: width 0.5s ease;
             }
 
             .category-description {
@@ -4910,7 +4780,7 @@ function generatePDFContent(userName, assessmentType, reportData) {
             }
 
             .recommendations h4 {
-                color: #030213;
+                color: var(--primary);
                 font-size: 16px;
                 font-weight: 600;
                 margin: 0 0 15px 0;
@@ -4928,6 +4798,7 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 position: relative;
                 color: #374151;
                 font-size: 14px;
+                line-height: 1.5;
             }
 
             .recommendations li::before {
@@ -4938,14 +4809,14 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 left: -10px;
             }
 
+            /* Summary Section */
             .summary-section {
                 background-color: #f8fafc;
-                border: 1px solid rgba(0, 0, 0, 0.1);
+                border: 1px solid var(--border);
                 border-radius: 10px;
                 padding: 25px;
                 margin: 30px 0;
                 border-left: 5px solid #16a34a;
-                page-break-inside: avoid;
             }
 
             .summary-title {
@@ -4953,6 +4824,8 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 font-size: 20px;
                 font-weight: 600;
                 margin: 0 0 20px 0;
+                display: flex;
+                align-items: center;
             }
 
             .summary-content {
@@ -4961,6 +4834,7 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 line-height: 1.7;
             }
 
+            /* Important Notice */
             .important-notice {
                 background-color: #fffbeb;
                 border: 1px solid #fed7aa;
@@ -4968,7 +4842,6 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 padding: 25px;
                 margin: 30px 0;
                 border-left: 5px solid #f59e0b;
-                page-break-inside: avoid;
             }
 
             .important-notice h4 {
@@ -4985,103 +4858,147 @@ function generatePDFContent(userName, assessmentType, reportData) {
                 margin: 0;
             }
 
+            /* Footer */
             .footer {
-                margin-top: 50px;
-                padding-top: 30px;
-                border-top: 2px solid rgba(0, 0, 0, 0.1);
+                background-color: #1f2937;
+                color: white;
+                padding: 30px;
                 text-align: center;
-                color: #6b7280;
-                font-size: 12px;
             }
 
-            @media print {
-                body {
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
+            .footer .logo {
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 10px 0;
+            }
+
+            .footer .tagline {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 0 0 20px 0;
+            }
+
+            .footer .copyright {
+                font-size: 12px;
+                opacity: 0.7;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            /* Responsive */
+            @media (max-width: 600px) {
+                .content {
+                    padding: 20px;
+                }
+
+                .score-number {
+                    font-size: 44px;
+                }
+
+                .category-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
                 }
             }
         </style>
     </head>
     <body>
-        <div class="pdf-container">
+        <div class="email-container">
             <div class="header">
                 <h1>Luther Health</h1>
                 <h2>Your ${assessmentType} Assessment Results</h2>
                 <p class="date">Completed on ${completionDate}</p>
             </div>
 
-            <div class="greeting">
-                <h3>Dear ${userName},</h3>
-                <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and evidence-based recommendations.</p>
-            </div>
-
-            <div class="score-section">
-                <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 22px;">Overall Assessment Score</h3>
-                <div class="score-number">${report.overallScore || 'N/A'}%</div>
-                <div class="score-rating">${report.overallRating || 'Assessment Complete'}</div>
-                <p class="score-description">
-                    This score reflects your overall ${assessmentType === "Surgery Readiness" ? "surgical readiness" : "risk profile"} based on your assessment responses and clinical evidence.
-                </p>
-            </div>
-
-            <div class="categories-section">
-                <h3 class="categories-title">Category Breakdown & Analysis</h3>
-
-                ${(report.results || []).map(result => `
-                    <div class="category-card">
-                        <div class="category-header">
-                            <h4 class="category-title">
-                                <span style="margin-right: 10px;">${getIcon(result.level)}</span>
-                                ${result.category || 'Assessment Category'}
-                            </h4>
-                            <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
-                        </div>
-
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%; background: ${getScoreColor(result.score || 0)};"></div>
-                        </div>
-
-                        <p class="category-description">
-                            ${result.description || 'Analysis not available for this category.'}
-                        </p>
-
-                        ${result.recommendations && result.recommendations.length > 0 ? `
-                            <div class="recommendations">
-                                <h4>Key Recommendations</h4>
-                                <ul>
-                                    ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-
-                        ${renderDetailedAnalysis(result)}
-                    </div>
-                `).join('')}
-            </div>
-
-            ${report.summary ? `
-                <div class="summary-section">
-                    <h3 class="summary-title">
-                        📊 Detailed Clinical Analysis
-                    </h3>
-                    <div class="summary-content">
-                        ${report.summary.replace(/\n/g, '<br>')}
-                    </div>
+            <div class="content">
+                <div class="greeting">
+                    <h3>Dear ${userName},</h3>
+                    <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and evidence-based recommendations.</p>
                 </div>
-            ` : ''}
 
-            <div class="important-notice">
-                <h4>⚠️ Important Medical Disclaimer</h4>
-                <p>
-                    <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
-                    The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
-                    Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
-                </p>
+                <div class="score-section">
+                    <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 22px;">Overall Assessment Score</h3>
+                    <div class="score-number">${report.overallScore || 'N/A'}%</div>
+                    <div class="score-rating">${report.overallRating || 'Assessment Complete'}</div>
+                    <p class="score-description">
+                        This score reflects your overall ${assessmentType === "Surgery Readiness" ? "surgical readiness" : "risk profile"} based on your assessment responses and clinical evidence.
+                    </p>
+                </div>
+
+                <div class="categories-section">
+                    <h3 class="categories-title">Category Breakdown & Analysis</h3>
+
+                    ${(report.results || []).map(result => `
+                        <div class="category-card">
+                            <div class="category-header">
+                                <h4 class="category-title">
+                                    <span class="category-icon">${getIcon(result.level)}</span>
+                                    ${result.category || 'Assessment Category'}
+                                </h4>
+                                <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
+                            </div>
+
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%; background: ${getScoreColor(result.score || 0)};"></div>
+                            </div>
+
+                            <p class="category-description">
+                                ${result.description || 'Analysis not available for this category.'}
+                            </p>
+
+                            ${result.recommendations && result.recommendations.length > 0 ? `
+                                <div class="recommendations">
+                                    <h4>Key Recommendations</h4>
+                                    <ul>
+                                        ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+
+                            ${renderDetailedAnalysis(result)}
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${report.summary ? `
+                    <div class="summary-section">
+                        <h3 class="summary-title">
+                            📊 Detailed Clinical Analysis
+                        </h3>
+                        <div class="summary-content">
+                            ${report.summary.replace(/\n/g, '<br>').substring(0, 1500)}${report.summary.length > 1500 ? '...' : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="important-notice">
+                    <h4>⚠️ Important Medical Disclaimer</h4>
+                    <p>
+                        <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
+                        The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
+                        Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #4b5563; margin: 0 0 20px 0;">
+                        Questions about your results? Our support team is here to help.
+                    </p>
+                    <p style="color: var(--primary); margin: 0; font-size: 16px;">
+                        Best regards,<br>
+                        <strong>The Luther Health Team</strong>
+                    </p>
+                </div>
             </div>
 
             <div class="footer">
-                <p>© ${new Date().getFullYear()} Luther Health. All rights reserved.</p>
-                <p>AI-powered health assessments and clinical insights</p>
+                <div class="logo">Luther Health</div>
+                <div class="tagline">AI-powered health assessments and clinical insights</div>
+                <div class="copyright">
+                    © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
+                    This email was sent because you completed an assessment on our platform.
+                </div>
             </div>
         </div>
     </body>
