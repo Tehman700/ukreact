@@ -4414,7 +4414,6 @@ app.post("/api/send-email-report", async (req, res) => {
       subject: `Your ${assessmentType} Assessment Results - Luther Health`,
       html: htmlContent,
     };
-
     await transporter.sendMail(mailOptions);
 
     console.log(`✅ Email sent successfully to ${userEmail}`);
