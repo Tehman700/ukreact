@@ -146,12 +146,13 @@ app.post("/api/assessments", async (req, res) => {
   }
 });
 
+
 // ----------------------------
 // 3. Stripe Checkout
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
+    const { products, funnel_type = "complication-risk" } = req.body;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
@@ -186,7 +187,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       "surgery": "completed-surgery-preparation-bundle-questions",
       "chronic": "completed-chronic-symptoms-bundle-questions",
       "longevity": "longevity-wellness-bundle-questions",
-      "chronic-symptom-protocol": "chronic-symptom-protocol-challenge"
+      "chronic-symptom-protocol": "chronic-symptom-protocol-challenge" // ✅ This is correct
     };
 
     const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
@@ -199,11 +200,10 @@ app.post("/api/create-checkout-session", async (req, res) => {
       metadata: {
         funnel_type: funnel_type
       },
-      // Redirect directly to the questions page for this funnel
-      success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
+      // ⚠️ CRITICAL FIX: Add ?session_id={CHECKOUT_SESSION_ID} to the URL
+      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
-//      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
 
     // Return sessionId so frontend can save & use it
     res.json({ sessionId: session.id });
@@ -212,6 +212,74 @@ app.post("/api/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+//// ----------------------------
+//// 3. Stripe Checkout
+//// ----------------------------
+//app.post("/api/create-checkout-session", async (req, res) => {
+//  try {
+//    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
+//
+//    if (!products || !Array.isArray(products) || products.length === 0) {
+//      return res.status(400).json({ error: "No products provided" });
+//    }
+//
+//    const line_items = products.map((item) => ({
+//      price_data: {
+//        currency: "gbp",
+//        product_data: { name: item.item_name },
+//        unit_amount: Math.round(item.price * 100),
+//      },
+//      quantity: item.quantity || 1,
+//    }));
+//
+//    // Map funnel types to their question page routes
+//    const funnelRouteMap = {
+//      "complication-risk": "complication-risk-checker-questions",
+//      "recovery-speed": "recovery-speed-predictor-questions",
+//      "surgery-readiness": "surgery-readiness-assessment-questions",
+//      "anesthesia": "anaesthesia-risk-screener-questions",
+//      "mobility": "mobility-strength-score-questions",
+//      "symptom": "symptom-severity-index-questions",
+//      "inflammation": "inflammation-risk-score-questions",
+//      "medication": "medication-burden-calculator-questions",
+//      "energy": "daily-energy-audit-questions",
+//      "lifestyle": "lifestyle-limiter-score-questions",
+//      "bio": "biological-age-calculator-questions",
+//      "card": "cardiometabolic-risk-score-questions",
+//      "res": "resilience-index-questions",
+//      "nutrition": "nutrition-body-composition-score-questions",
+//      "functional": "functional-fitness-age-test-questions",
+//      "surgery": "completed-surgery-preparation-bundle-questions",
+//      "chronic": "completed-chronic-symptoms-bundle-questions",
+//      "longevity": "longevity-wellness-bundle-questions",
+//      "chronic-symptom-protocol": "chronic-symptom-protocol-challenge"
+//    };
+//
+//    const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
+//
+//    const session = await stripe.checkout.sessions.create({
+//      payment_method_types: ["card"],
+//      line_items,
+//      mode: "payment",
+//      // Store funnel type in metadata
+//      metadata: {
+//        funnel_type: funnel_type
+//      },
+//      // Redirect directly to the questions page for this funnel
+//      success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
+//      cancel_url: "https://luther.health/Health-Audit.html#cancel",
+//    });
+////      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
+//
+//    // Return sessionId so frontend can save & use it
+//    res.json({ sessionId: session.id });
+//  } catch (err) {
+//    console.error("Stripe session creation failed:", err);
+//    res.status(500).json({ error: err.message });
+//  }
+//});
 
 // Update your existing webhook to store funnel_type
 app.post("/api/webhook", async (req, res) => {

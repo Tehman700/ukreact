@@ -89,9 +89,8 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
 
   const handleBookConsultation = () => {
     // Get session_id from URL
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.split('?')[1]);
-    const sessionId = params.get('session_id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
 
     // Open Google Calendar link in new tab
     window.open('https://calendar.app.google/yGirmgpsvgqgZJH26', '_blank');
@@ -106,9 +105,8 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
 
   const handleBookLater = () => {
     // Get session_id from URL
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.split('?')[1]);
-    const sessionId = params.get('session_id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
 
     // Mark that user dismissed but don't mark as booked
     if (sessionId) {
