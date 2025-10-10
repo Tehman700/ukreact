@@ -4491,7 +4491,7 @@ app.post("/api/send-email-report", async (req, res) => {
 });
 
 // ----------------------------
-// Generate PDF Report using PDFKit
+// Generate PDF Report using PDFKit - ENHANCED VERSION
 // ----------------------------
 function generatePDFReport(userName, assessmentType, reportData) {
   return new Promise((resolve, reject) => {
@@ -4559,7 +4559,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
       doc.fontSize(11)
          .font('Helvetica')
          .fillColor('#4b5563')
-         .text('Thank you for completing your assessment with Luther Health. We\'ve analyzed your responses using our advanced AI system.', {
+         .text('Thank you for completing your assessment with Luther Health. We\'ve analyzed your responses using our advanced AI system to provide personalized insights and evidence-based recommendations.', {
            width: 500,
            align: 'left'
          });
@@ -4588,77 +4588,254 @@ function generatePDFReport(userName, assessmentType, reportData) {
          .text(report.overallRating || 'Assessment Complete', 220, scoreBoxY + 98, { width: 160, align: 'center' });
 
       doc.y = scoreBoxY + 140;
-      doc.moveDown();
+      doc.moveDown(2);
 
       // Categories Section
       doc.fillColor('#1a1a1a')
-         .fontSize(16)
+         .fontSize(18)
          .font('Helvetica-Bold')
          .text('Category Breakdown & Analysis', 50, doc.y);
 
       doc.moveDown();
 
-      // Category Cards
+      // Category Cards with FULL DETAILS
       (report.results || []).forEach((result, index) => {
-        // Check if we need a new page
-        if (doc.y > 650) {
-          doc.addPage();
-        }
-
-        const cardY = doc.y;
-
-        // Category card border
-        doc.rect(50, cardY, 500, 10)
-           .fill('#0284c7');
-
-        doc.rect(50, cardY + 10, 500, 100)
-           .fillAndStroke('#ffffff', '#e5e7eb');
-
-        // Category name and score
-        doc.fillColor('#1a1a1a')
-           .fontSize(14)
-           .font('Helvetica-Bold')
-           .text(result.category || 'Category', 60, cardY + 20, { width: 350 });
-
-        doc.fontSize(12)
-           .fillColor('#ffffff')
-           .rect(420, cardY + 18, 120, 22)
-           .fill('#030213');
-
-        doc.fillColor('#ffffff')
-           .text(`${result.score || 'N/A'}/${result.maxScore || 100}`, 420, cardY + 22, { width: 120, align: 'center' });
-
-        // Description
-        doc.fillColor('#4b5563')
-           .fontSize(10)
-           .font('Helvetica')
-           .text(result.description || 'Analysis not available.', 60, cardY + 50, {
-             width: 480,
-             height: 50
-           });
-
-        doc.y = cardY + 120;
-        doc.moveDown();
-      });
-
-      // Summary Section if available
-      if (report.summary) {
         // Check if we need a new page
         if (doc.y > 600) {
           doc.addPage();
         }
 
-        doc.fillColor('#16a34a')
+        const cardY = doc.y;
+
+        // Category card header bar
+        doc.rect(50, cardY, 500, 8)
+           .fill('#0284c7');
+
+        // Category card background
+        doc.rect(50, cardY + 8, 500, 10)
+           .stroke('#e5e7eb');
+
+        // Category name and score
+        doc.fillColor('#1a1a1a')
            .fontSize(14)
            .font('Helvetica-Bold')
-           .text('Detailed Clinical Analysis', 50, doc.y);
+           .text(result.category || 'Category', 60, cardY + 18, { width: 350 });
+
+        doc.fontSize(11)
+           .fillColor('#ffffff')
+           .rect(420, cardY + 15, 120, 20)
+           .fill('#030213');
+
+        doc.fillColor('#ffffff')
+           .text(`${result.score || 'N/A'}/${result.maxScore || 100}`, 420, cardY + 18, { width: 120, align: 'center' });
+
+        let currentY = cardY + 45;
+
+        // Description
+        doc.fillColor('#4b5563')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(result.description || 'Analysis not available.', 60, currentY, {
+             width: 480
+           });
+
+        currentY = doc.y + 10;
+
+        // Recommendations section
+        if (result.recommendations && result.recommendations.length > 0) {
+          // Check if we need a new page
+          if (currentY > 650) {
+            doc.addPage();
+            currentY = 50;
+          }
+
+          doc.fillColor('#030213')
+             .fontSize(11)
+             .font('Helvetica-Bold')
+             .text('Key Recommendations:', 60, currentY);
+
+          currentY += 15;
+
+          result.recommendations.forEach((rec, i) => {
+            if (currentY > 700) {
+              doc.addPage();
+              currentY = 50;
+            }
+
+            doc.fillColor('#4b5563')
+               .fontSize(9)
+               .font('Helvetica')
+               .text(`• ${rec}`, 70, currentY, { width: 470 });
+
+            currentY = doc.y + 5;
+          });
+        }
+
+        // Detailed Analysis section
+        if (result.detailedAnalysis) {
+          const analysis = result.detailedAnalysis;
+
+          // Check if we need a new page
+          if (currentY > 600) {
+            doc.addPage();
+            currentY = 50;
+          }
+
+          // Clinical Context
+          doc.rect(60, currentY, 480, 5)
+             .fill('#f8fafc');
+
+          currentY += 10;
+
+          doc.fillColor('#030213')
+             .fontSize(10)
+             .font('Helvetica-Bold')
+             .text('📋 Clinical Context', 65, currentY);
+
+          currentY += 15;
+
+          doc.fillColor('#374151')
+             .fontSize(9)
+             .font('Helvetica')
+             .text(analysis.clinicalContext || 'Analysis details available upon request.', 65, currentY, {
+               width: 470
+             });
+
+          currentY = doc.y + 10;
+
+          // Evidence Base or Strengths
+          const isSurgeryReadiness = analysis.evidenceBase !== undefined;
+          const isComplicationRisk = analysis.strengths !== undefined;
+
+          if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
+            if (currentY > 650) {
+              doc.addPage();
+              currentY = 50;
+            }
+
+            doc.fillColor('#16a34a')
+               .fontSize(10)
+               .font('Helvetica-Bold')
+               .text('✓ Clinical Evidence', 65, currentY);
+
+            currentY += 15;
+
+            analysis.evidenceBase.slice(0, 3).forEach(evidence => {
+              if (currentY > 700) {
+                doc.addPage();
+                currentY = 50;
+              }
+
+              doc.fillColor('#374151')
+                 .fontSize(8)
+                 .font('Helvetica')
+                 .text(`• ${evidence}`, 75, currentY, { width: 460 });
+
+              currentY = doc.y + 4;
+            });
+
+            currentY += 8;
+          } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
+            if (currentY > 650) {
+              doc.addPage();
+              currentY = 50;
+            }
+
+            doc.fillColor('#16a34a')
+               .fontSize(10)
+               .font('Helvetica-Bold')
+               .text('✓ Current Strengths', 65, currentY);
+
+            currentY += 15;
+
+            analysis.strengths.forEach(strength => {
+              if (currentY > 700) {
+                doc.addPage();
+                currentY = 50;
+              }
+
+              doc.fillColor('#374151')
+                 .fontSize(8)
+                 .font('Helvetica')
+                 .text(`✓ ${strength}`, 75, currentY, { width: 460 });
+
+              currentY = doc.y + 4;
+            });
+
+            currentY += 8;
+          }
+
+          // Risk Factors
+          if (analysis.riskFactors && analysis.riskFactors.length > 0) {
+            if (currentY > 650) {
+              doc.addPage();
+              currentY = 50;
+            }
+
+            doc.fillColor('#dc2626')
+               .fontSize(10)
+               .font('Helvetica-Bold')
+               .text('⚠ Key Risk Factors', 65, currentY);
+
+            currentY += 15;
+
+            analysis.riskFactors.forEach(risk => {
+              if (currentY > 700) {
+                doc.addPage();
+                currentY = 50;
+              }
+
+              doc.fillColor('#374151')
+                 .fontSize(8)
+                 .font('Helvetica')
+                 .text(`⚠ ${risk}`, 75, currentY, { width: 460 });
+
+              currentY = doc.y + 4;
+            });
+
+            currentY += 8;
+          }
+
+          // Timeline
+          if (analysis.timeline) {
+            if (currentY > 680) {
+              doc.addPage();
+              currentY = 50;
+            }
+
+            doc.rect(65, currentY, 470, 30)
+               .fillAndStroke('#dbeafe', '#0284c7');
+
+            doc.fillColor('#1e40af')
+               .fontSize(9)
+               .font('Helvetica-Bold')
+               .text(`⏱ Timeline: ${analysis.timeline}`, 70, currentY + 8, { width: 460 });
+
+            currentY += 40;
+          }
+        }
+
+        doc.y = currentY + 15;
+      });
+
+      // Summary Section if available
+      if (report.summary) {
+        // Check if we need a new page
+        if (doc.y > 550) {
+          doc.addPage();
+        }
+
+        doc.fillColor('#16a34a')
+           .fontSize(16)
+           .font('Helvetica-Bold')
+           .text('📊 Detailed Clinical Analysis', 50, doc.y);
 
         doc.moveDown();
 
         doc.fillColor('#374151')
-           .fontSize(10)
+           .fontSize(9)
            .font('Helvetica')
-           .text(report.summary.substring(0, 1000), 50, doc.y, {
+           .text(report.summary, 50, doc.y, {
              width: 500,
              align: 'left'
            });
@@ -4672,7 +4849,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
       }
 
       const disclaimerY = doc.y;
-      doc.rect(50, disclaimerY, 500, 100)
+      doc.rect(50, disclaimerY, 500, 110)
          .fillAndStroke('#fffbeb', '#fed7aa');
 
       doc.fillColor('#92400e')
@@ -4681,9 +4858,9 @@ function generatePDFReport(userName, assessmentType, reportData) {
          .text('⚠️ Important Medical Disclaimer', 60, disclaimerY + 10);
 
       doc.fillColor('#78350f')
-         .fontSize(9)
+         .fontSize(8)
          .font('Helvetica')
-         .text('This assessment is for informational purposes only and does not constitute medical advice. Always consult with qualified healthcare providers.',
+         .text('This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment. The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment. Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.',
            60, disclaimerY + 30, { width: 480 });
 
       // Footer
