@@ -33,17 +33,16 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
   // Check for successful payment on component mount
   useEffect(() => {
     const checkPaymentStatus = async () => {
-      // Get session_id from URL hash parameters
-      const hash = window.location.hash;
-      const params = new URLSearchParams(hash.split('?')[1]);
-      const sessionId = params.get('session_id');
+      // Get session_id from URL query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
 
       if (sessionId && !localStorage.getItem(`consultation_booked_${sessionId}`)) {
         setIsCheckingPayment(true);
         try {
           // Verify payment with your backend
           const response = await fetch(
-            `https://luther.health/api/check-payment?session_id=${sessionId}&funnel_type=chronic`,
+            `https://luther.health/api/check-payment?session_id=${sessionId}&funnel_type=chronic-symptom-protocol`,
             {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' }
