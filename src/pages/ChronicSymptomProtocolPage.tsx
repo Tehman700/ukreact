@@ -27,59 +27,23 @@ const chronicSymptomProtocol = {
 };
 
 export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: ChronicSymptomProtocolPageProps) {
-  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-
-  // Check for successful payment on component mount and redirect directly to Calendar
+  // Check if user just came from successful payment and redirect to calendar
   useEffect(() => {
-    const checkPaymentStatus = async () => {
-      // Get session_id from URL query parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionId = urlParams.get('session_id');
+    // Check if URL has the hash indicating this is the success page
+    const hash = window.location.hash;
 
-      console.log('🔍 ChronicSymptomProtocol - Checking payment status');
-      console.log('📍 Current URL:', window.location.href);
-      console.log('🔑 Session ID found:', sessionId);
-      console.log('💾 Already redirected?', localStorage.getItem(`consultation_redirected_${sessionId}`));
+    console.log('🔍 ChronicSymptomProtocol - Checking for payment redirect');
+    console.log('📍 Current hash:', hash);
 
-      if (sessionId && !localStorage.getItem(`consultation_redirected_${sessionId}`)) {
-        setIsCheckingPayment(true);
-        try {
-          const apiUrl = `https://luther.health/api/check-payment?session_id=${sessionId}&funnel_type=chronic-symptom-protocol`;
-          console.log('📡 Calling API:', apiUrl);
+    // If we're on the chronic-symptom-protocol-challenge page, redirect to calendar
+    if (hash.includes('chronic-symptom-protocol-challenge')) {
+      console.log('🎉 Payment success detected! Redirecting to Google Calendar...');
 
-          // Verify payment with your backend
-          const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          const data = await response.json();
-          console.log('✅ Payment check response:', data);
-
-          if (data.success && data.paid) {
-            // Payment verified - redirect directly to Google Calendar
-            console.log('🎉 Payment verified! Redirecting to Google Calendar...');
-
-            // Mark as redirected to prevent repeated redirects
-            localStorage.setItem(`consultation_redirected_${sessionId}`, 'true');
-
-            // Redirect to Google Calendar booking link
-            window.location.href = 'https://calendar.app.google/yGirmgpsvgqgZJH26';
-          } else {
-            console.log('❌ Payment not verified or not paid:', data);
-          }
-        } catch (error) {
-          console.error('💥 Error checking payment status:', error);
-        } finally {
-          setIsCheckingPayment(false);
-        }
-      } else {
-        console.log('⚠️ No session_id or already redirected - skipping payment check');
-        setIsCheckingPayment(false);
-      }
-    };
-
-    checkPaymentStatus();
+      // Add a small delay to show the page briefly, then redirect
+      setTimeout(() => {
+        window.location.href = 'https://calendar.app.google/yGirmgpsvgqgZJH26';
+      }, 1500); // 1.5 second delay for better UX
+    }
   }, []);
 
   const handleRequestQuote = (product: any) => {
@@ -105,19 +69,6 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Loading overlay while checking payment and redirecting */}
-      {isCheckingPayment && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-40">
-          <Card className="p-6">
-            <div className="flex flex-col items-center space-y-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-              <p className="text-muted-foreground">Verifying your payment...</p>
-              <p className="text-sm text-muted-foreground">Redirecting to booking...</p>
-            </div>
-          </Card>
-        </div>
-      )}
-
       {/* Hero + Product Section */}
       <div className="container max-w-7xl mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Hero / Context */}
