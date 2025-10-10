@@ -2,6 +2,7 @@
       "name": "LH main",
       "version": "0.1.0",
       "private": true,
+      "type": "module",
       "dependencies": {
             "@radix-ui/react-accordion": "^1.2.3",
             "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -69,6 +70,7 @@
       },
       "scripts": {
             "dev": "vite",
-            "build": "vite build"
+            "build": "vite build",
+            "server": "node server.js"
       }
 }
