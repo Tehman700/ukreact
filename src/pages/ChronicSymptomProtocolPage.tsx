@@ -48,9 +48,9 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
               headers: { 'Content-Type': 'application/json' }
             }
           );
-
+          
           const data = await response.json();
-
+          
           if (data.success && data.paid) {
             // Payment verified - show booking prompt
             setShowBookingPrompt(true);
@@ -80,7 +80,7 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
 
   const handleAddToCart = (product: Product) => {
     onAddToCart(product);
-
+    
     // Open basket after adding to cart
     if (onOpenBasket) {
       setTimeout(() => onOpenBasket(), 100);
@@ -91,15 +91,15 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
     // Get session_id from URL
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
-
+    
     // Open Google Calendar link in new tab
     window.open('https://calendar.app.google/yGirmgpsvgqgZJH26', '_blank');
-
+    
     // Mark as booked for this specific session
     if (sessionId) {
       localStorage.setItem(`consultation_booked_${sessionId}`, 'true');
     }
-
+    
     setShowBookingPrompt(false);
   };
 
@@ -107,12 +107,12 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
     // Get session_id from URL
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
-
+    
     // Mark that user dismissed but don't mark as booked
     if (sessionId) {
       localStorage.setItem(`consultation_dismissed_${sessionId}`, 'true');
     }
-
+    
     setShowBookingPrompt(false);
   };
 
@@ -138,15 +138,15 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
               <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
               </div>
-
+              
               <h3 className="text-xl font-semibold text-center">
                 Welcome to the Challenge!
               </h3>
-
+              
               <p className="text-muted-foreground text-center">
                 Your purchase is complete. Now let's schedule your initial consultation to get you started on your journey.
               </p>
-
+              
               <div className="space-y-3">
                 <Button
                   size="lg"
@@ -156,7 +156,7 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
                   <Calendar className="h-5 w-5 mr-2" />
                   Book Your Consultation Now
                 </Button>
-
+                
                 <Button
                   size="lg"
                   variant="outline"
@@ -166,7 +166,7 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
                   I'll Book Later
                 </Button>
               </div>
-
+              
               <p className="text-xs text-muted-foreground text-center">
                 You can always book your consultation from your account dashboard.
               </p>
