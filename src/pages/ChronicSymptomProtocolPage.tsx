@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
-import { BookOpen, CheckCircle2, ShoppingCart } from 'lucide-react';
+import { BookOpen, CheckCircle2, ShoppingCart, Calendar } from 'lucide-react';
 import { Product } from '../App';
 
 interface ChronicSymptomProtocolPageProps {
   onAddToCart: (product: Product) => void;
-  onOpenBasket?: () => void; // Add this prop to open basket
+  onOpenBasket?: () => void;
 }
 
 // Base product definition
@@ -27,6 +27,46 @@ const chronicSymptomProtocol = {
 };
 
 export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: ChronicSymptomProtocolPageProps) {
+  const [showBookingPrompt, setShowBookingPrompt] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+
+  // Check for successful payment on component mount
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      // Get session_id from URL hash parameters
+      const hash = window.location.hash;
+      const params = new URLSearchParams(hash.split('?')[1]);
+      const sessionId = params.get('session_id');
+
+      if (sessionId && !localStorage.getItem(`consultation_booked_${sessionId}`)) {
+        setIsCheckingPayment(true);
+        try {
+          // Verify payment with your backend
+          const response = await fetch(
+            `https://luther.health/api/check-payment?session_id=${sessionId}&funnel_type=chronic`,
+            {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success && data.paid) {
+            // Payment verified - show booking prompt
+            setShowBookingPrompt(true);
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+        } finally {
+          setIsCheckingPayment(false);
+        }
+      }
+    };
+
+    checkPaymentStatus();
+  }, []);
+
   const handleRequestQuote = (product: any) => {
     sessionStorage.setItem(
       'requestedService',
@@ -41,14 +81,103 @@ export function ChronicSymptomProtocolPage({ onAddToCart, onOpenBasket }: Chroni
 
   const handleAddToCart = (product: Product) => {
     onAddToCart(product);
+
     // Open basket after adding to cart
     if (onOpenBasket) {
       setTimeout(() => onOpenBasket(), 100);
     }
   };
 
+  const handleBookConsultation = () => {
+    // Get session_id from URL
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.split('?')[1]);
+    const sessionId = params.get('session_id');
+
+    // Open Google Calendar link in new tab
+    window.open('https://calendar.app.google/yGirmgpsvgqgZJH26', '_blank');
+
+    // Mark as booked for this specific session
+    if (sessionId) {
+      localStorage.setItem(`consultation_booked_${sessionId}`, 'true');
+    }
+
+    setShowBookingPrompt(false);
+  };
+
+  const handleBookLater = () => {
+    // Get session_id from URL
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.split('?')[1]);
+    const sessionId = params.get('session_id');
+
+    // Mark that user dismissed but don't mark as booked
+    if (sessionId) {
+      localStorage.setItem(`consultation_dismissed_${sessionId}`, 'true');
+    }
+
+    setShowBookingPrompt(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Loading overlay while checking payment */}
+      {isCheckingPayment && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-40">
+          <Card className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <p className="text-muted-foreground">Verifying your payment...</p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Booking Prompt Modal */}
+      {showBookingPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              </div>
+
+              <h3 className="text-xl font-semibold text-center">
+                Welcome to the Challenge!
+              </h3>
+
+              <p className="text-muted-foreground text-center">
+                Your purchase is complete. Now let's schedule your initial consultation to get you started on your journey.
+              </p>
+
+              <div className="space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={handleBookConsultation}
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Book Your Consultation Now
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleBookLater}
+                >
+                  I'll Book Later
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                You can always book your consultation from your account dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Hero + Product Section */}
       <div className="container max-w-7xl mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Hero / Context */}
