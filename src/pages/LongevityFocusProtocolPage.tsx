@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -9,9 +9,34 @@ import { Product } from '../App';
 
 interface LongevityChallengePageProps {
   onAddToCart: (product: Product) => void;
+  onOpenBasket?: () => void;
 }
 
-export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePageProps) {
+export function LongevityFocusProtocolPage({ onAddToCart, onOpenBasket }: LongevityChallengePageProps) {
+  const [showBookingPrompt, setShowBookingPrompt] = useState(false);
+
+  // Check if user came from payment success and show booking popup
+  useEffect(() => {
+    const currentUrl = window.location.href;
+
+    console.log('🔍 LongevityProtocol - Checking current URL');
+    console.log('📍 Current URL:', currentUrl);
+
+    // Check if the full URL matches the success redirect URL
+    if (currentUrl === 'https://luther.health/Health-Audit.html#longevity-focus-protocol-challenge') {
+      console.log('🎉 Payment success URL detected! Showing booking popup...');
+
+      // Check if we've already shown the popup for this session
+      const hasShownPopup = sessionStorage.getItem('longevityBookingShown');
+
+      if (!hasShownPopup) {
+        setShowBookingPrompt(true);
+        // Mark that we've shown the popup
+        sessionStorage.setItem('longevityBookingShown', 'true');
+      }
+    }
+  }, []);
+
   const handleRequestQuote = (product: any) => {
     sessionStorage.setItem('requestedService', JSON.stringify({
       name: product.name,
@@ -21,8 +46,28 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
     window.location.hash = 'contact';
   };
 
+  const handleAddToCart = (product: Product) => {
+    onAddToCart(product);
+
+    // Open basket after adding to cart
+    if (onOpenBasket) {
+      setTimeout(() => onOpenBasket(), 100);
+    }
+  };
+
+  const handleBookConsultation = () => {
+    // Open Google Calendar link in new tab
+    window.open('https://calendar.app.google/yGirmgpsvgqgZJH26', '_blank');
+
+    setShowBookingPrompt(false);
+  };
+
+  const handleBookLater = () => {
+    setShowBookingPrompt(false);
+  };
+
   const longevityChallenge = {
-    id: '21',
+    id: '24',
     name: '21-Day Longevity Challenge',
     price: 300.00,
     image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
@@ -35,6 +80,42 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Booking Prompt Modal */}
+      {showBookingPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              </div>
+
+              <h3 className="text-xl font-semibold text-center">
+                Welcome to the Longevity Challenge!
+              </h3>
+
+              <p className="text-muted-foreground text-center">
+                Your purchase is complete. Now let's schedule your initial consultation to get you started on your longevity journey.
+              </p>
+
+              <div className="space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={handleBookConsultation}
+                >
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                  Book Your Consultation Now
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                You can always book your consultation from your account dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Hero + Product Section */}
       <div className="container max-w-7xl mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Hero / Context */}
@@ -47,7 +128,7 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
 
           <div>
             <p className="text-sm lg:text-base text-muted-foreground leading-relaxed pb-5">
-              Your assessment has highlighted opportunities to strengthen your foundation for healthy aging. That’s exactly why we created the:
+              Your assessment has highlighted opportunities to strengthen your foundation for healthy aging. That's exactly why we created the:
             </p>
 
             <h4 className="font-medium mb-2 flex items-center space-x-2">
@@ -76,7 +157,7 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
             </ul>
 
             <p className="text-sm lg:text-base text-muted-foreground leading-relaxed py-5">
-              It’s structured, practical, and proven to make a measurable difference.
+              It's structured, practical, and proven to make a measurable difference.
             </p>
 
             <p className="text-sm lg:text-base text-muted-foreground">
@@ -90,7 +171,7 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
           <ProductCard
             product={longevityChallenge}
             onRequestQuote={handleRequestQuote}
-            onAddToCart={onAddToCart}
+            onAddToCart={handleAddToCart}
           />
         </div>
       </div>
@@ -170,7 +251,7 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
               <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
                 <span className="text-green-500 mt-1">✓</span>
                 <span>
-                  If you follow the plan for 21 days and don’t notice improvements in energy, strength, or wellbeing — we’ll work with you 1-on-1 until you do. If still unsatisfied, we’ll credit your full investment toward other services.
+                  If you follow the plan for 21 days and don't notice improvements in energy, strength, or wellbeing — we'll work with you 1-on-1 until you do. If still unsatisfied, we'll credit your full investment toward other services.
                 </span>
               </li>
             </ul>
@@ -213,7 +294,7 @@ export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePa
                         <a href="https://www.nia.nih.gov/health/lifestyle-and-healthy-aging" className="text-blue-600 hover:underline">↗</a>
                       </li>
                       <li>
-                        • UK Chief Medical Officers’ Physical Activity Guidelines{" "}
+                        • UK Chief Medical Officers' Physical Activity Guidelines{" "}
                         <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/832868/uk-chief-medical-officers-physical-activity-guidelines.pdf" className="text-blue-600 hover:underline">↗</a>
                       </li>
                       <li>

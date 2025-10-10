@@ -186,7 +186,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
       "surgery": "completed-surgery-preparation-bundle-questions",
       "chronic": "completed-chronic-symptoms-bundle-questions",
       "longevity": "longevity-wellness-bundle-questions",
-      "chronic-symptom-protocol": "chronic-symptom-protocol-challenge"
+      "chronic-symptom-protocol": "chronic-symptom-protocol-challenge",
+      "longevity-focus-protocol": "longevity-focus-protocol-challenge"
     };
 
     const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
