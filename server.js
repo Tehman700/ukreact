@@ -4692,7 +4692,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
           doc.fillColor('#030213')
              .fontSize(10)
              .font('Helvetica-Bold')
-             .text('📋 Clinical Context', 65, currentY);
+             .text('[Clinical Context]', 65, currentY);
 
           currentY += 15;
 
@@ -4718,7 +4718,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
             doc.fillColor('#16a34a')
                .fontSize(10)
                .font('Helvetica-Bold')
-               .text('✓ Clinical Evidence', 65, currentY);
+               .text('[Clinical Evidence]', 65, currentY);
 
             currentY += 15;
 
@@ -4731,7 +4731,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
               doc.fillColor('#374151')
                  .fontSize(8)
                  .font('Helvetica')
-                 .text(`• ${evidence}`, 75, currentY, { width: 460 });
+                 .text(`> ${evidence}`, 75, currentY, { width: 460 });
 
               currentY = doc.y + 4;
             });
@@ -4746,7 +4746,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
             doc.fillColor('#16a34a')
                .fontSize(10)
                .font('Helvetica-Bold')
-               .text('✓ Current Strengths', 65, currentY);
+               .text('[Current Strengths]', 65, currentY);
 
             currentY += 15;
 
@@ -4759,7 +4759,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
               doc.fillColor('#374151')
                  .fontSize(8)
                  .font('Helvetica')
-                 .text(`✓ ${strength}`, 75, currentY, { width: 460 });
+                 .text(`+ ${strength}`, 75, currentY, { width: 460 });
 
               currentY = doc.y + 4;
             });
@@ -4777,7 +4777,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
             doc.fillColor('#dc2626')
                .fontSize(10)
                .font('Helvetica-Bold')
-               .text('⚠ Key Risk Factors', 65, currentY);
+               .text('[Key Risk Factors]', 65, currentY);
 
             currentY += 15;
 
@@ -4790,7 +4790,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
               doc.fillColor('#374151')
                  .fontSize(8)
                  .font('Helvetica')
-                 .text(`⚠ ${risk}`, 75, currentY, { width: 460 });
+                 .text(`! ${risk}`, 75, currentY, { width: 460 });
 
               currentY = doc.y + 4;
             });
@@ -4811,7 +4811,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
             doc.fillColor('#1e40af')
                .fontSize(9)
                .font('Helvetica-Bold')
-               .text(`⏱ Timeline: ${analysis.timeline}`, 70, currentY + 8, { width: 460 });
+               .text(`[Timeline] ${analysis.timeline}`, 70, currentY + 8, { width: 460 });
 
             currentY += 40;
           }
@@ -4830,7 +4830,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
         doc.fillColor('#16a34a')
            .fontSize(16)
            .font('Helvetica-Bold')
-           .text('📊 Detailed Clinical Analysis', 50, doc.y);
+           .text('[Detailed Clinical Analysis]', 50, doc.y);
 
         doc.moveDown();
 
@@ -4857,7 +4857,7 @@ function generatePDFReport(userName, assessmentType, reportData) {
       doc.fillColor('#92400e')
          .fontSize(12)
          .font('Helvetica-Bold')
-         .text('⚠️ Important Medical Disclaimer', 60, disclaimerY + 10);
+         .text('[Important Medical Disclaimer]', 60, disclaimerY + 10);
 
       doc.fillColor('#78350f')
          .fontSize(8)
