@@ -1,98 +1,251 @@
 import React from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Button } from '../components/ui/button';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { Card, CardContent } from '../components/ui/card';
+import { Separator } from '../components/ui/separator';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
+import { BookOpen, CheckCircle2 } from 'lucide-react';
 import { Product } from '../App';
 
-interface LongevityFocusProtocolPageProps {
+interface LongevityChallengePageProps {
   onAddToCart: (product: Product) => void;
 }
 
-export function LongevityFocusProtocolPage({ onAddToCart }: LongevityFocusProtocolPageProps) {
+export function LongevityFocusProtocolPage({ onAddToCart }: LongevityChallengePageProps) {
   const handleRequestQuote = (product: any) => {
-    // Store the product context for the contact form
     sessionStorage.setItem('requestedService', JSON.stringify({
       name: product.name,
       category: product.category,
       price: product.price
     }));
-    
-    // Navigate to contact page
     window.location.hash = 'contact';
   };
 
-  const longevityFocusProtocol = {
-    id: '16',
-    name: 'Longevity Focus Protocol',
-    price: 399.99,
-    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZ2luZyUyMGZhc3RlciUyMHNpZ25zJTIwbG9uZ2V2aXR5fGVufDF8fHx8MTc1NzM0NjY0M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+  const longevityChallenge = {
+    id: '21',
+    name: '21-Day Longevity Challenge',
+    price: 300.00,
+    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     category: 'Longevity Optimization',
-    sizes: ['4 Weeks', '8 Weeks', '12 Weeks'],
+    sizes: ['21 Days'],
     colors: ['Standard', 'Enhanced', 'Premium'],
-    description: 'Comprehensive longevity optimization program designed by longevity experts to slow aging, extend healthspan, and optimize biological function for optimal aging.',
-    isTrialOffer: true // Flag to indicate this is the trial version
+    description: '',
+    isTrialOffer: true
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="container px-4 md:py-24 py-[0px] mx-[0px] m-[0px] pt-[30px] pr-[14px] pb-[0px] pl-[14px]">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-xl font-medium tracking-tight text-muted-foreground">
-                Thanks for Your Feedback.
-              </h2>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight text-[24px]">
-                Want to Trial Our Best Program,
-                <span className="block text-primary">On Us?</span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-md">
-                Your feedback helps us improve our service — so we want to return the favor.
-              </p>
+      {/* Hero + Product Section */}
+      <div className="container max-w-7xl mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Hero / Context */}
+        <CardContent className="space-y-8">
+          <p className="text-sm lg:text-base text-muted-foreground bg-blue-50 p-3 rounded-lg">
+            Thanks for investing in your future health — small changes today compound into big benefits tomorrow.
+          </p>
 
-            </div>
-            
-            <div className="relative">
-              <div className="aspect-square relative overflow-hidden rounded-2xl">
-                <ImageWithFallback
-                  src={longevityFocusProtocol.image}
-                  alt="Person living with optimal longevity and vitality"
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
-            </div>
+          <Separator />
+
+          <div>
+            <p className="text-sm lg:text-base text-muted-foreground leading-relaxed pb-5">
+              Your assessment has highlighted opportunities to strengthen your foundation for healthy aging. That’s exactly why we created the:
+            </p>
+
+            <h4 className="font-medium mb-2 flex items-center space-x-2">
+              <span className="pb-3 text-lg lg:text-xl">
+                21-Day Longevity Challenge.
+              </span>
+            </h4>
+
+            <p className="text-sm lg:text-base text-muted-foreground pb-3">
+              This doctor-led program is designed to help you:
+            </p>
+
+            <ul className="space-y-2">
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-green-500 mt-1">✓</span>
+                <span>Boost daily energy and mental clarity</span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-green-500 mt-1">✓</span>
+                <span>Improve strength, mobility, and resilience against aging</span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-green-500 mt-1">✓</span>
+                <span>Lay the foundations for a longer, healthier lifespan</span>
+              </li>
+            </ul>
+
+            <p className="text-sm lg:text-base text-muted-foreground leading-relaxed py-5">
+              It’s structured, practical, and proven to make a measurable difference.
+            </p>
+
+            <p className="text-sm lg:text-base text-muted-foreground">
+              <span className="text-[rgba(54,54,54,1)] font-bold">All for only £300.</span>
+            </p>
           </div>
-        </div>
-      </section>
+        </CardContent>
 
-      {/* Additional Context Section */}
-      <section className="py-16 bg-background px-[0px] pt-[40px] pr-[0px] pb-[20px] pl-[0px]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="space-y-4">
-              <p className="text-lg text-[rgba(76,76,76,1)] leading-relaxed text-left">
-                Your assessment revealed insights about your biological aging patterns. If any of those findings are concerning or you want to optimize your longevity, we'd love to help.
-              </p>
-              <p className="text-lg text-[rgba(76,76,76,1)] leading-relaxed text-left px-[0px] py-[10px]">
-                That's why we're offering you a free 30-day trial of our Longevity Focus Protocol — designed to help men like you slow aging, extend healthspan, and optimize biological function for peak longevity.
-              </p>
-              <p className="text-lg text-[rgba(76,76,76,1)] leading-relaxed text-left">
-                This is our way of saying thank you for helping us improve — and giving you something of value in return.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="container mx-auto px-4 py-24 px-[14px] py-[50px]">
-        <div className="max-w-md mx-auto">
+        {/* Product Card */}
+        <div className="max-w-md mx-auto lg:mx-0 w-full">
           <ProductCard
-            product={longevityFocusProtocol}
+            product={longevityChallenge}
             onRequestQuote={handleRequestQuote}
             onAddToCart={onAddToCart}
           />
         </div>
+      </div>
+
+      {/* Clinical Info */}
+      <div className="container max-w-5xl mx-auto px-4 space-y-12">
+        <CardContent className="space-y-12">
+          {/* Challenges */}
+          <div>
+            <h4 className="font-medium mb-4 text-orange-600 text-lg">
+              Most people wait until problems appear — and pay the price:
+            </h4>
+            <ul className="space-y-2">
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-orange-500 mt-1">⚠</span>
+                <span>Declining energy and slower recovery</span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-orange-500 mt-1">⚠</span>
+                <span>Loss of muscle, strength, and confidence with age</span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-orange-500 mt-1">⚠</span>
+                <span>Increased risk of chronic disease and reduced healthspan</span>
+              </li>
+            </ul>
+            <p className="text-sm lg:text-base text-muted-foreground mt-6">
+              <strong>The habits you build in 21 days can add years of vitality to your life.</strong>
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Evidence */}
+          <div>
+            <h4 className="font-medium mb-4 text-lg">What does the evidence say?</h4>
+            <ul className="space-y-2">
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-primary mt-1">•</span>
+                <span>
+                  Following 5 simple lifestyle habits — healthy diet, regular exercise, not smoking, moderate alcohol, and healthy weight — adds up to <strong>10–14 extra years of life expectancy</strong> (Harvard T.H. Chan School of Public Health).
+                </span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-primary mt-1">•</span>
+                <span>
+                  Regular physical activity reduces risk of premature death by up to <strong>30%</strong> and lowers risk of heart disease, type 2 diabetes, and dementia (UK CMO Guidelines).
+                </span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-primary mt-1">•</span>
+                <span>
+                  Adults who stay active are <strong>40% less likely to develop chronic conditions</strong> compared to inactive adults (NHS Healthy Ageing).
+                </span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-primary mt-1">•</span>
+                <span>
+                  Global Burden of Disease data shows that lifestyle factors account for the majority of preventable years lost to disease worldwide (The Lancet, GBD Study).
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <Separator />
+
+          {/* Guarantee */}
+          <div>
+            <h4 className="font-medium mb-4 flex items-center space-x-2 text-green-600 text-lg">
+              <CheckCircle2 className="h-5 w-5" />
+              <span>21-Day Vitality Guarantee</span>
+            </h4>
+            <p className="text-sm lg:text-base text-[rgba(113,113,130,1)] my-4">
+              We stand behind this program — because it creates change you can feel.
+            </p>
+            <ul className="space-y-2">
+              <li className="flex items-start space-x-2 text-sm lg:text-base text-muted-foreground">
+                <span className="text-green-500 mt-1">✓</span>
+                <span>
+                  If you follow the plan for 21 days and don’t notice improvements in energy, strength, or wellbeing — we’ll work with you 1-on-1 until you do. If still unsatisfied, we’ll credit your full investment toward other services.
+                </span>
+              </li>
+            </ul>
+            <p className="text-sm lg:text-base text-[rgba(113,113,130,1)] mt-6">No catch. No fine print.</p>
+          </div>
+
+          <Button
+            size="lg"
+            className="w-full lg:w-auto px-8 py-3"
+            onClick={() => (window.location.hash = 'assessments')}
+          >
+            Start your longevity journey today
+          </Button>
+        </CardContent>
+
+        {/* Sources & References */}
+        <Card className="mt-6 bg-background border-muted">
+          <CardContent className="py-5 px-5">
+            <div className="space-y-4">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="sources-references">
+                  <AccordionTrigger className="font-medium hover:no-underline">
+                    <div className="flex items-center space-x-2">
+                      <BookOpen className="h-4 w-4" />
+                      <span>Sources & References</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="text-sm text-muted-foreground leading-relaxed list-none pl-0 space-y-2">
+                      <li>
+                        • World Health Organization – Healthy Ageing and Functional Ability{" "}
+                        <a href="https://www.who.int/health-topics/ageing#tab=tab_1" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • NHS – How to Stay Healthy as You Age{" "}
+                        <a href="https://www.nhs.uk/live-well/healthy-ageing/" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • National Institute on Aging (NIH) – Lifestyle and Healthy Ageing{" "}
+                        <a href="https://www.nia.nih.gov/health/lifestyle-and-healthy-aging" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • UK Chief Medical Officers’ Physical Activity Guidelines{" "}
+                        <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/832868/uk-chief-medical-officers-physical-activity-guidelines.pdf" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • Harvard T.H. Chan School of Public Health – Healthy Lifestyle and Life Expectancy{" "}
+                        <a href="https://www.hsph.harvard.edu/news/press-releases/healthy-lifestyle-linked-to-longer-life/" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • British Journal of Sports Medicine – Exercise and Healthy Ageing{" "}
+                        <a href="https://bjsm.bmj.com/content/52/13/858" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li>
+                        • Global Burden of Disease Study – Impact of Lifestyle Factors on Longevity{" "}
+                        <a href="https://www.thelancet.com/gbd" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                      <li className="mt-[0px] mr-[0px] mb-[10px] ml-[0px]">
+                        • NICE – Maintaining a Healthy Lifestyle into Older Age{" "}
+                        <a href="https://www.nice.org.uk/guidance/lifestyle-and-wellbeing" className="text-blue-600 hover:underline">↗</a>
+                      </li>
+                    </ul>
+
+                    <div className="pt-4 border-t border-muted">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Disclaimer:</strong> All information provided is based on current UK and international medical guidelines on ageing and longevity. Individual outcomes may vary, and professional medical advice should always be sought for specific health concerns.
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </CardContent>
+        </Card>
+        <Separator />
       </div>
     </div>
   );

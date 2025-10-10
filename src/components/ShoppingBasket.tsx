@@ -278,11 +278,11 @@ const makePayment = async (funnelType = "complication-risk") => {
                             {bundleSuggestion.bundle.name}
                           </h4>
                         </div>
-                        
+
                         <p className="text-xs text-muted-foreground">
                           {bundleSuggestion.bundle.description}
                         </p>
-                        
+
                         <div className="space-y-2">
                           <p className="text-xs font-medium">Includes:</p>
                           <div className="space-y-1">
@@ -296,13 +296,13 @@ const makePayment = async (funnelType = "complication-risk") => {
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-foreground font-medium">
                             Save £{calculateSavings().toFixed(2)} vs buying separately
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between pt-2">
                           <Button
                             onClick={handleUpgrade}

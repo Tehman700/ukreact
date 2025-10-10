@@ -1071,7 +1071,10 @@ useEffect(() => {
       case 'lifestyle-limiter-score-feedback':
         return <LifestyleLimiterReviewPage />;
       case 'chronic-symptom-protocol-challenge':
-        return <ChronicSymptomProtocolPage onAddToCart={handleAddToCart} />;
+  return <ChronicSymptomProtocolPage
+    onAddToCart={handleAddToCart}
+    onOpenBasket={() => setIsBasketOpen(true)}
+  />;
       case 'health-concierge-information':
         return <HealthConciergeInformationPage />;
       case 'health-concierge-questions':
