@@ -4389,7 +4389,6 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
       assessmentType
     };
   }
-
 }
 
 app.post("/api/send-email-report", async (req, res) => {
@@ -5202,8 +5201,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
     </html>
   `;
 }
-
-
 
 
 
