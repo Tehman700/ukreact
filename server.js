@@ -6,7 +6,8 @@ import pkg from "pg";
 import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
-import htmlPdf from 'html-pdf-node';
+import PDFDocument from 'pdfkit';
+import { Buffer } from 'buffer';
 
 
 
@@ -4391,7 +4392,6 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
-
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId } = req.body;
@@ -4407,31 +4407,14 @@ app.post("/api/send-email-report", async (req, res) => {
     console.log(`📧 Email: ${userEmail}`);
     console.log(`📊 Assessment Type: ${assessmentType}`);
 
-    // Generate HTML content for PDF
-    const htmlContent = generateEmailContent(userName, assessmentType, report);
-    console.log(`✅ HTML content generated (${htmlContent.length} characters)`);
-
     let pdfBuffer;
     let pdfGenerationSuccessful = false;
 
     try {
-      // Generate PDF using html-pdf-node
-      console.log('🚀 Starting PDF generation with html-pdf-node...');
+      // Generate PDF using PDFKit
+      console.log('🚀 Starting PDF generation with PDFKit...');
 
-      const options = {
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20px',
-          right: '20px',
-          bottom: '20px',
-          left: '20px'
-        }
-      };
-
-      const file = { content: htmlContent };
-
-      pdfBuffer = await htmlPdf.generatePdf(file, options);
+      pdfBuffer = await generatePDFReport(userName, assessmentType, report);
 
       console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)`);
       pdfGenerationSuccessful = true;
@@ -4474,6 +4457,8 @@ app.post("/api/send-email-report", async (req, res) => {
       // Fallback: Send HTML email without PDF
       console.log('⚠️ Falling back to HTML email without PDF attachment');
 
+      const htmlContent = generateEmailContent(userName, assessmentType, report);
+
       const mailOptions = {
         from: `"Luther Health" <${process.env.GMAIL_USER}>`,
         to: userEmail,
@@ -4504,6 +4489,226 @@ app.post("/api/send-email-report", async (req, res) => {
     });
   }
 });
+
+// ----------------------------
+// Generate PDF Report using PDFKit
+// ----------------------------
+function generatePDFReport(userName, assessmentType, reportData) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Handle the report data structure
+      let report;
+      if (reportData.structured_report) {
+        report = typeof reportData.structured_report === "string"
+          ? JSON.parse(reportData.structured_report)
+          : reportData.structured_report;
+      } else if (reportData.results) {
+        report = reportData;
+      } else {
+        report = {
+          overallScore: 75,
+          overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
+          results: [],
+          summary: "Your assessment has been completed."
+        };
+      }
+
+      const doc = new PDFDocument({
+        size: 'A4',
+        margins: { top: 50, bottom: 50, left: 50, right: 50 }
+      });
+
+      const chunks = [];
+
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      const completionDate = new Date().toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      // Header with gradient effect (simulated with colored rectangle)
+      doc.rect(0, 0, 612, 150).fill('#667eea');
+
+      // Title
+      doc.fillColor('#ffffff')
+         .fontSize(28)
+         .font('Helvetica-Bold')
+         .text('Luther Health', 50, 50, { align: 'center' });
+
+      doc.fontSize(18)
+         .font('Helvetica')
+         .text(`${assessmentType} Assessment Results`, 50, 85, { align: 'center' });
+
+      doc.fontSize(12)
+         .text(`Completed on ${completionDate}`, 50, 115, { align: 'center' });
+
+      // Reset position after header
+      doc.y = 180;
+
+      // Greeting
+      doc.fillColor('#1a1a1a')
+         .fontSize(16)
+         .font('Helvetica-Bold')
+         .text(`Dear ${userName},`, 50, doc.y);
+
+      doc.moveDown();
+      doc.fontSize(11)
+         .font('Helvetica')
+         .fillColor('#4b5563')
+         .text('Thank you for completing your assessment with Luther Health. We\'ve analyzed your responses using our advanced AI system.', {
+           width: 500,
+           align: 'left'
+         });
+
+      doc.moveDown(2);
+
+      // Overall Score Section
+      const scoreBoxY = doc.y;
+      doc.rect(50, scoreBoxY, 500, 120)
+         .fillAndStroke('#e8f4fd', '#0284c7');
+
+      doc.fillColor('#0284c7')
+         .fontSize(14)
+         .font('Helvetica-Bold')
+         .text('Overall Assessment Score', 50, scoreBoxY + 20, { width: 500, align: 'center' });
+
+      doc.fontSize(48)
+         .text(`${report.overallScore || 'N/A'}%`, 50, scoreBoxY + 45, { width: 500, align: 'center' });
+
+      doc.fontSize(12)
+         .fillColor('#ffffff')
+         .rect(220, scoreBoxY + 95, 160, 20)
+         .fill('#0284c7');
+
+      doc.fillColor('#ffffff')
+         .text(report.overallRating || 'Assessment Complete', 220, scoreBoxY + 98, { width: 160, align: 'center' });
+
+      doc.y = scoreBoxY + 140;
+      doc.moveDown();
+
+      // Categories Section
+      doc.fillColor('#1a1a1a')
+         .fontSize(16)
+         .font('Helvetica-Bold')
+         .text('Category Breakdown & Analysis', 50, doc.y);
+
+      doc.moveDown();
+
+      // Category Cards
+      (report.results || []).forEach((result, index) => {
+        // Check if we need a new page
+        if (doc.y > 650) {
+          doc.addPage();
+        }
+
+        const cardY = doc.y;
+
+        // Category card border
+        doc.rect(50, cardY, 500, 10)
+           .fill('#0284c7');
+
+        doc.rect(50, cardY + 10, 500, 100)
+           .fillAndStroke('#ffffff', '#e5e7eb');
+
+        // Category name and score
+        doc.fillColor('#1a1a1a')
+           .fontSize(14)
+           .font('Helvetica-Bold')
+           .text(result.category || 'Category', 60, cardY + 20, { width: 350 });
+
+        doc.fontSize(12)
+           .fillColor('#ffffff')
+           .rect(420, cardY + 18, 120, 22)
+           .fill('#030213');
+
+        doc.fillColor('#ffffff')
+           .text(`${result.score || 'N/A'}/${result.maxScore || 100}`, 420, cardY + 22, { width: 120, align: 'center' });
+
+        // Description
+        doc.fillColor('#4b5563')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(result.description || 'Analysis not available.', 60, cardY + 50, {
+             width: 480,
+             height: 50
+           });
+
+        doc.y = cardY + 120;
+        doc.moveDown();
+      });
+
+      // Summary Section if available
+      if (report.summary) {
+        // Check if we need a new page
+        if (doc.y > 600) {
+          doc.addPage();
+        }
+
+        doc.fillColor('#16a34a')
+           .fontSize(14)
+           .font('Helvetica-Bold')
+           .text('Detailed Clinical Analysis', 50, doc.y);
+
+        doc.moveDown();
+
+        doc.fillColor('#374151')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(report.summary.substring(0, 1000), 50, doc.y, {
+             width: 500,
+             align: 'left'
+           });
+
+        doc.moveDown(2);
+      }
+
+      // Medical Disclaimer
+      if (doc.y > 650) {
+        doc.addPage();
+      }
+
+      const disclaimerY = doc.y;
+      doc.rect(50, disclaimerY, 500, 100)
+         .fillAndStroke('#fffbeb', '#fed7aa');
+
+      doc.fillColor('#92400e')
+         .fontSize(12)
+         .font('Helvetica-Bold')
+         .text('⚠️ Important Medical Disclaimer', 60, disclaimerY + 10);
+
+      doc.fillColor('#78350f')
+         .fontSize(9)
+         .font('Helvetica')
+         .text('This assessment is for informational purposes only and does not constitute medical advice. Always consult with qualified healthcare providers.',
+           60, disclaimerY + 30, { width: 480 });
+
+      // Footer
+      doc.moveDown(3);
+      doc.fillColor('#4b5563')
+         .fontSize(10)
+         .font('Helvetica')
+         .text('Questions about your results? Our support team is here to help.', 50, doc.y, { align: 'center' });
+
+      doc.moveDown();
+      doc.fillColor('#1a1a1a')
+         .fontSize(11)
+         .font('Helvetica-Bold')
+         .text('Best regards,', 50, doc.y, { align: 'center' });
+
+      doc.text('The Luther Health Team', 50, doc.y + 15, { align: 'center' });
+
+      // End the document
+      doc.end();
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 // ----------------------------
 // Email Body (Brief message with PDF attachment)
@@ -4714,9 +4919,9 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
   `;
 }
 
-// Keep the original generateEmailContent function for PDF generation
+// Keep your existing generateEmailContent function for the fallback HTML email
 function generateEmailContent(userName, assessmentType, reportData) {
-  console.log("Generating PDF content for:", userName, assessmentType);
+  console.log("Generating email content for:", userName, assessmentType);
   console.log("Report data structure:", Object.keys(reportData || {}));
 
   // Handle the report data structure correctly
@@ -4845,78 +5050,39 @@ function generateEmailContent(userName, assessmentType, reportData) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${assessmentType} Results - Luther Health</title>
         <style>
-            :root {
-                --font-size: 14px;
-                --background: #ffffff;
-                --foreground: #1a1a1a;
-                --card: #ffffff;
-                --card-foreground: #1a1a1a;
-                --primary: #030213;
-                --primary-foreground: #ffffff;
-                --secondary: #f5f5f5;
-                --secondary-foreground: #030213;
-                --muted: #ececf0;
-                --muted-foreground: #717182;
-                --border: rgba(0, 0, 0, 0.1);
-                --radius: 0.625rem;
-            }
-
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                 line-height: 1.6;
-                color: var(--foreground);
+                color: #1a1a1a;
                 background-color: #f9fafb;
                 margin: 0;
                 padding: 0;
             }
-
             .email-container {
                 max-width: 600px;
                 margin: 0 auto;
-                background-color: var(--background);
+                background-color: #ffffff;
             }
-
             .header {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 padding: 40px 30px;
                 text-align: center;
             }
-
             .header h1 {
                 margin: 0 0 10px 0;
                 font-size: 28px;
                 font-weight: 600;
             }
-
             .header h2 {
                 margin: 0 0 5px 0;
                 font-size: 18px;
                 font-weight: 400;
                 opacity: 0.9;
             }
-
-            .header .date {
-                margin: 0;
-                font-size: 14px;
-                opacity: 0.8;
-            }
-
             .content {
                 padding: 30px;
             }
-
-            .greeting {
-                font-size: 16px;
-                margin-bottom: 25px;
-            }
-
-            .greeting h3 {
-                color: var(--primary);
-                margin: 0 0 10px 0;
-                font-size: 18px;
-            }
-
             .score-section {
                 background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
                 border: 2px solid #0284c7;
@@ -4925,7 +5091,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 text-align: center;
                 margin: 30px 0;
             }
-
             .score-number {
                 font-size: 56px;
                 font-weight: bold;
@@ -4933,210 +5098,12 @@ function generateEmailContent(userName, assessmentType, reportData) {
                 margin: 15px 0;
                 line-height: 1;
             }
-
-            .score-rating {
-                display: inline-block;
-                background-color: #0284c7;
-                color: white;
-                padding: 8px 20px;
-                border-radius: 25px;
-                font-weight: 600;
-                font-size: 16px;
-                margin: 15px 0;
-            }
-
-            .score-description {
-                font-size: 14px;
-                color: #4b5563;
-                margin: 10px 0 0 0;
-            }
-
-            .categories-section {
-                margin: 35px 0;
-            }
-
-            .categories-title {
-                color: var(--primary);
-                font-size: 20px;
-                font-weight: 600;
-                margin: 0 0 25px 0;
-                border-bottom: 2px solid var(--border);
-                padding-bottom: 10px;
-            }
-
             .category-card {
-                background-color: var(--card);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
                 padding: 25px;
                 margin: 20px 0;
                 border-left: 5px solid #0284c7;
-                page-break-inside: avoid;
-            }
-
-            .category-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-
-            .category-title {
-                color: var(--primary);
-                font-size: 18px;
-                font-weight: 600;
-                margin: 0;
-                display: flex;
-                align-items: center;
-            }
-
-            .category-icon {
-                margin-right: 10px;
-                font-size: 18px;
-            }
-
-            .category-score {
-                background-color: var(--primary);
-                color: white;
-                padding: 6px 15px;
-                border-radius: 20px;
-                font-weight: 600;
-                font-size: 14px;
-            }
-
-            .progress-bar {
-                width: 100%;
-                height: 8px;
-                background-color: #e5e7eb;
-                border-radius: 4px;
-                margin: 15px 0;
-                overflow: hidden;
-            }
-
-            .progress-fill {
-                height: 100%;
-                background: linear-gradient(90deg, var(--primary) 0%, #4f46e5 100%);
-                border-radius: 4px;
-            }
-
-            .category-description {
-                color: #4b5563;
-                font-size: 15px;
-                line-height: 1.6;
-                margin: 15px 0;
-            }
-
-            .recommendations {
-                background-color: #f8fafc;
-                padding: 20px;
-                border-radius: 8px;
-                margin: 15px 0;
-            }
-
-            .recommendations h4 {
-                color: var(--primary);
-                font-size: 16px;
-                font-weight: 600;
-                margin: 0 0 15px 0;
-            }
-
-            .recommendations ul {
-                margin: 0;
-                padding-left: 20px;
-                list-style: none;
-            }
-
-            .recommendations li {
-                margin: 10px 0;
-                padding-left: 10px;
-                position: relative;
-                color: #374151;
-                font-size: 14px;
-                line-height: 1.5;
-            }
-
-            .recommendations li::before {
-                content: '•';
-                color: #0284c7;
-                font-weight: bold;
-                position: absolute;
-                left: -10px;
-            }
-
-            .summary-section {
-                background-color: #f8fafc;
-                border: 1px solid var(--border);
-                border-radius: 10px;
-                padding: 25px;
-                margin: 30px 0;
-                border-left: 5px solid #16a34a;
-                page-break-inside: avoid;
-            }
-
-            .summary-title {
-                color: #16a34a;
-                font-size: 20px;
-                font-weight: 600;
-                margin: 0 0 20px 0;
-                display: flex;
-                align-items: center;
-            }
-
-            .summary-content {
-                color: #374151;
-                font-size: 15px;
-                line-height: 1.7;
-            }
-
-            .important-notice {
-                background-color: #fffbeb;
-                border: 1px solid #fed7aa;
-                border-radius: 8px;
-                padding: 25px;
-                margin: 30px 0;
-                border-left: 5px solid #f59e0b;
-                page-break-inside: avoid;
-            }
-
-            .important-notice h4 {
-                color: #92400e;
-                font-size: 16px;
-                font-weight: 600;
-                margin: 0 0 10px 0;
-            }
-
-            .important-notice p {
-                color: #78350f;
-                font-size: 14px;
-                line-height: 1.6;
-                margin: 0;
-            }
-
-            .footer {
-                background-color: #1f2937;
-                color: white;
-                padding: 30px;
-                text-align: center;
-                margin-top: 40px;
-            }
-
-            .footer .logo {
-                font-size: 20px;
-                font-weight: 600;
-                margin: 0 0 10px 0;
-            }
-
-            .footer .tagline {
-                font-size: 14px;
-                opacity: 0.9;
-                margin: 0 0 20px 0;
-            }
-
-            .footer .copyright {
-                font-size: 12px;
-                opacity: 0.7;
-                margin: 0;
-                line-height: 1.5;
             }
         </style>
     </head>
@@ -5145,105 +5112,45 @@ function generateEmailContent(userName, assessmentType, reportData) {
             <div class="header">
                 <h1>Luther Health</h1>
                 <h2>Your ${assessmentType} Assessment Results</h2>
-                <p class="date">Completed on ${completionDate}</p>
+                <p>Completed on ${completionDate}</p>
             </div>
 
             <div class="content">
-                <div class="greeting">
-                    <h3>Dear ${userName},</h3>
-                    <p>Thank you for completing your ${assessmentType} assessment with Luther Health. We've analyzed your responses using our advanced AI system to provide you with personalized insights and evidence-based recommendations.</p>
-                </div>
+                <h3>Dear ${userName},</h3>
+                <p>Thank you for completing your assessment with Luther Health.</p>
 
                 <div class="score-section">
-                    <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 22px;">Overall Assessment Score</h3>
+                    <h3>Overall Assessment Score</h3>
                     <div class="score-number">${report.overallScore || 'N/A'}%</div>
-                    <div class="score-rating">${report.overallRating || 'Assessment Complete'}</div>
-                    <p class="score-description">
-                        This score reflects your overall ${assessmentType === "Surgery Readiness" ? "surgical readiness" : "risk profile"} based on your assessment responses and clinical evidence.
-                    </p>
+                    <p>${report.overallRating || 'Assessment Complete'}</p>
                 </div>
 
-                <div class="categories-section">
-                    <h3 class="categories-title">Category Breakdown & Analysis</h3>
-
-                    ${(report.results || []).map(result => `
-                        <div class="category-card">
-                            <div class="category-header">
-                                <h4 class="category-title">
-                                    <span class="category-icon">${getIcon(result.level)}</span>
-                                    ${result.category || 'Assessment Category'}
-                                </h4>
-                                <div class="category-score">${result.score || 'N/A'}/${result.maxScore || 100}</div>
-                            </div>
-
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${((result.score || 0) / (result.maxScore || 100)) * 100}%; background: ${getScoreColor(result.score || 0)};"></div>
-                            </div>
-
-                            <p class="category-description">
-                                ${result.description || 'Analysis not available for this category.'}
-                            </p>
-
-                            ${result.recommendations && result.recommendations.length > 0 ? `
-                                <div class="recommendations">
-                                    <h4>Key Recommendations</h4>
-                                    <ul>
-                                        ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                                    </ul>
-                                </div>
-                            ` : ''}
-
-                            ${renderDetailedAnalysis(result)}
-                        </div>
-                    `).join('')}
-                </div>
+                <h3>Category Breakdown</h3>
+                ${(report.results || []).map(result => `
+                    <div class="category-card">
+                        <h4>${result.category || 'Category'}</h4>
+                        <p><strong>Score:</strong> ${result.score || 'N/A'}/${result.maxScore || 100}</p>
+                        <p>${result.description || 'Analysis not available.'}</p>
+                        ${renderDetailedAnalysis(result)}
+                    </div>
+                `).join('')}
 
                 ${report.summary ? `
-                    <div class="summary-section">
-                        <h3 class="summary-title">
-                            📊 Detailed Clinical Analysis
-                        </h3>
-                        <div class="summary-content">
-                            ${report.summary.replace(/\n/g, '<br>')}
-                        </div>
+                    <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
+                        <h3>Detailed Clinical Analysis</h3>
+                        <p>${report.summary}</p>
                     </div>
                 ` : ''}
 
-                <div class="important-notice">
-                    <h4>⚠️ Important Medical Disclaimer</h4>
-                    <p>
-                        <strong>This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment.</strong>
-                        The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment.
-                        Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.
-                    </p>
-                </div>
-
-                <div style="text-align: center; margin: 30px 0;">
-                    <p style="color: #4b5563; margin: 0 0 20px 0;">
-                        Questions about your results? Our support team is here to help.
-                    </p>
-                    <p style="color: var(--primary); margin: 0; font-size: 16px;">
-                        Best regards,<br>
-                        <strong>The Luther Health Team</strong>
-                    </p>
-                </div>
-            </div>
-
-            <div class="footer">
-                <div class="logo">Luther Health</div>
-                <div class="tagline">AI-powered health assessments and clinical insights</div>
-                <div class="copyright">
-                    © ${new Date().getFullYear()} Luther Health. All rights reserved.<br>
-                    This email was sent because you completed an assessment on our platform.
-                </div>
+                <p style="text-align: center; margin: 30px 0;">
+                    <strong>Best regards,<br>The Luther Health Team</strong>
+                </p>
             </div>
         </div>
     </body>
     </html>
   `;
 }
-
-
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
