@@ -4394,14 +4394,6 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
 
 }
 
-
-
-
-// First, install these packages:
-// npm install puppeteer
-
-const puppeteer = require('puppeteer');
-
 // ----------------------------
 // Generate PDF from HTML
 // ----------------------------
