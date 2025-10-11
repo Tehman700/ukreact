@@ -4395,35 +4395,26 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
+
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId, pageUrl } = req.body;
 
     if (!userEmail || !userName || !assessmentType || !report || !pageUrl) {
-      return res.status(400).json({ success: false, error: "Missing required fields for email" });
+      return res.status(400).json({ success: false, error: "Missing required fields" });
     }
 
-    console.log(`📸 Capturing multi-tab screenshot for ${userName}...`);
-    console.log(`📍 Page URL: ${pageUrl}`);
-
+    // Launch Puppeteer
     const browser = await puppeteer.launch({
       headless: true,
       executablePath: '/home/ubuntu/.cache/puppeteer/chrome/linux-141.0.7390.76/chrome-linux64/chrome',
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--disable-gpu"
-      ],
+      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 800 });
+    await page.setViewport({ width: 1280, height: 800 });
 
-    // Store the report data in page context BEFORE navigation
+    // Inject sessionStorage data before navigation
     await page.evaluateOnNewDocument((reportData, userInfoData) => {
       sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
       sessionStorage.setItem('assessmentType', 'Anaesthesia Risk');
@@ -4435,98 +4426,44 @@ app.post("/api/send-email-report", async (req, res) => {
       last_name: userName.split(' ').slice(1).join(' ')
     });
 
-    console.log('Navigating to page...');
-    await page.goto(pageUrl, { waitUntil: "networkidle0", timeout: 60000 });
+    // Navigate to page
+    await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 0 });
 
-    console.log('Waiting for page to load...');
-    await page.waitForTimeout(3000); // Give page time to render
+    // Wait 3 seconds
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
-    const screenshotBuffers = [];
-    const tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
+    // Take screenshot
+    const screenshotBuffer = await page.screenshot({ fullPage: true });
 
-    // Capture each tab
-    for (let i = 0; i < tabs.length; i++) {
-      const tabName = tabs[i];
-      console.log(`📸 Attempting to capture tab: ${tabName}`);
-
-      try {
-        // Find and click the tab button by exact text match
-        const clicked = await page.evaluate((targetTab) => {
-          const buttons = Array.from(document.querySelectorAll('button'));
-          const tabButton = buttons.find(btn => {
-            const text = btn.textContent.trim();
-            return text === targetTab;
-          });
-
-          if (tabButton) {
-            console.log(`Found button for: ${targetTab}`);
-            tabButton.click();
-            return true;
-          }
-          console.log(`Button not found for: ${targetTab}`);
-          return false;
-        }, tabName);
-
-        if (!clicked) {
-          console.log(`⚠️ Could not find button for ${tabName}, trying alternative method...`);
-
-          // Alternative: click by index
-          await page.evaluate((index) => {
-            const buttons = document.querySelectorAll('button');
-            const tabButtons = Array.from(buttons).filter(btn =>
-              btn.textContent.includes('Overview') ||
-              btn.textContent.includes('Detailed') ||
-              btn.textContent.includes('Safety')
-            );
-            if (tabButtons[index]) {
-              tabButtons[index].click();
-              return true;
-            }
-            return false;
-          }, i);
-        }
-
-        // Wait for content to update
-        console.log(`Waiting for ${tabName} content to render...`);
-        await page.waitForTimeout(2000);
-
-        // Scroll to top
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await page.waitForTimeout(500);
-
-        // Take screenshot
-        console.log(`Taking screenshot of ${tabName}...`);
-        const screenshot = await page.screenshot({
-          fullPage: true,
-          type: 'png'
-        });
-
-        screenshotBuffers.push({
-          name: tabName,
-          buffer: screenshot
-        });
-
-        console.log(`✅ ${tabName} tab captured (${screenshot.length} bytes)`);
-      } catch (error) {
-        console.error(`❌ Error capturing ${tabName} tab:`, error.message);
-        // Continue with other tabs even if one fails
-      }
-    }
-
+    await page.close();
     await browser.close();
+    console.log('✅ Screenshot captured');
 
-    if (screenshotBuffers.length === 0) {
-      throw new Error('Failed to capture any screenshots. Please check server logs for details.');
-    }
+    // Convert Screenshot to PDF
+    const doc = new PDFDocument({ autoFirstPage: false });
+    const chunks = [];
 
-    console.log(`✅ Captured ${screenshotBuffers.length}/${tabs.length} tabs successfully`);
+    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("error", (err) => {
+      console.error('PDF Error:', err);
+      throw err;
+    });
 
-    // 📝 Convert screenshots into single PDF
-    const pdfBuffer = await convertScreenshotsToPDF(screenshotBuffers, userName, assessmentType, report);
+    // Add a page with the same dimensions as the screenshot
+    const img = doc.openImage(screenshotBuffer);
+    doc.addPage({ size: [img.width, img.height] });
+    doc.image(img, 0, 0);
+    doc.end();
 
-    console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)`);
+    // Wait until PDF is complete
+    const pdfBuffer = await new Promise((resolve, reject) => {
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+    });
 
-    // 📧 Send email with PDF attachment
+    console.log('✅ PDF created');
+
+    // Send Email with PDF
     const mailOptions = {
       from: `"Luther Health" <${process.env.GMAIL_USER}>`,
       to: userEmail,
@@ -4534,123 +4471,25 @@ app.post("/api/send-email-report", async (req, res) => {
       html: generateEmailBodyWithAttachment(userName, assessmentType),
       attachments: [
         {
-          filename: `Luther-Health-${assessmentType.replace(/\s+/g, "-")}-Report-${reportId || Date.now()}.pdf`,
+          filename: `Luther-Health-${assessmentType.replace(/\s+/g, "-")}-Report.pdf`,
           content: pdfBuffer,
-          contentType: "application/pdf",
-        },
-      ],
+          contentType: 'application/pdf'
+        }
+      ]
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`📩 Email sent successfully to ${userEmail}`);
+    console.log('📧 Email sent:', userEmail);
 
-    res.json({
-      success: true,
-      message: "Email sent successfully",
-      tabsCaptured: screenshotBuffers.length
-    });
+    res.json({ success: true, message: "Email sent successfully" });
 
   } catch (error) {
-    console.error("❌ Error in send-email-report:", error);
+    console.error('❌ Error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// 🧾 Convert multiple screenshots to a single comprehensive PDF
-function convertScreenshotsToPDF(screenshotBuffers, userName, assessmentType, report) {
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument({ autoFirstPage: false, size: 'A4' });
-      const chunks = [];
-
-      doc.on("data", chunk => chunks.push(chunk));
-      doc.on("end", () => resolve(Buffer.concat(chunks)));
-      doc.on("error", reject);
-
-      // Add title page
-      doc.addPage({ margins: { top: 50, left: 50, right: 50, bottom: 50 } });
-      doc.font("Helvetica-Bold").fontSize(28).text("Luther Health", { align: "center" });
-      doc.moveDown();
-      doc.font("Helvetica").fontSize(18).text(`${assessmentType} Assessment`, { align: "center" });
-      doc.moveDown();
-      doc.fontSize(14).text(`Patient: ${userName}`, { align: "center" });
-      doc.moveDown(0.5);
-      doc.fontSize(12).text(`Date: ${new Date().toLocaleDateString('en-GB')}`, { align: "center" });
-      doc.moveDown(2);
-
-      // Add summary box
-      doc.fontSize(10).fillColor('#666666');
-      doc.rect(50, doc.y, doc.page.width - 100, 80).stroke();
-      doc.moveDown(0.5);
-      doc.text('Assessment Summary', { align: 'center' });
-      doc.moveDown(0.5);
-      doc.text(`Overall Score: ${report.overallScore}%`, { align: 'center' });
-      doc.text(`Rating: ${report.overallRating}`, { align: 'center' });
-      doc.text(`Categories Assessed: ${report.results.length}`, { align: 'center' });
-
-      // Add each screenshot as a new page with header
-      screenshotBuffers.forEach((screenshot, index) => {
-        doc.addPage({ size: 'A4' });
-
-        // Add section header
-        doc.fillColor('#000000').font("Helvetica-Bold").fontSize(16)
-           .text(`${screenshot.name} Analysis`, 50, 30);
-
-        doc.moveDown(1);
-
-        // Add the screenshot
-        const img = doc.openImage(screenshot.buffer);
-        const pageWidth = doc.page.width - 100; // 50px margins on each side
-        const scale = pageWidth / img.width;
-        const imgHeight = img.height * scale;
-
-        // Check if image fits on page, if not scale it down
-        const maxHeight = doc.page.height - 150; // Leave room for header and footer
-        let finalScale = scale;
-        let finalHeight = imgHeight;
-
-        if (imgHeight > maxHeight) {
-          finalScale = maxHeight / img.height;
-          finalHeight = maxHeight;
-        }
-
-        const finalWidth = img.width * finalScale;
-
-        doc.image(img, (doc.page.width - finalWidth) / 2, 80, {
-          width: finalWidth,
-          height: finalHeight
-        });
-
-        // Add page number at bottom
-        doc.fontSize(8).fillColor('#999999')
-           .text(`Page ${index + 2} of ${screenshotBuffers.length + 2}`,
-                 50, doc.page.height - 30,
-                 { align: 'center' });
-      });
-
-      // Add disclaimer page
-      doc.addPage({ margins: { top: 50, left: 50, right: 50, bottom: 50 } });
-      doc.fillColor('#000000').font("Helvetica-Bold").fontSize(16).text("Important Information", { align: "center" });
-      doc.moveDown(2);
-
-      doc.font("Helvetica").fontSize(10).fillColor('#333333');
-      doc.text("This assessment is for informational purposes only and does not constitute medical advice. " +
-               "Please discuss these results with your healthcare provider before making any medical decisions.",
-               { align: 'left', lineGap: 5 });
-
-      doc.moveDown();
-      doc.text("All recommendations are based on evidence-based UK medical guidelines including NICE, " +
-               "Royal College of Anaesthetists, and other reputable medical organizations.",
-               { align: 'left', lineGap: 5 });
-
-      doc.end();
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
-
-// ✉️ Email template (keep existing function or use this updated version)
+// Email template
 function generateEmailBodyWithAttachment(userName, assessmentType) {
   const date = new Date().toLocaleDateString("en-GB");
   return `
@@ -4669,18 +4508,12 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
 
         <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
           <p style="margin: 0; font-size: 14px; color: #333;">
-            📄 Your comprehensive assessment report is attached as a PDF document, including:
+            📄 Your comprehensive assessment report is attached as a PDF document.
           </p>
-          <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 13px; color: #555;">
-            <li>Complete overview of all assessment categories</li>
-            <li>Detailed analysis with benchmarks</li>
-            <li>Personalized safety recommendations</li>
-            <li>Evidence-based action plan</li>
-          </ul>
         </div>
 
         <p style="font-size: 13px; line-height: 1.6; color: #666; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px;">
-          <strong>Important:</strong> This assessment is designed to help you prepare for medical discussions.
+          <strong>Important:</strong> This assessment is for informational purposes.
           Please share these results with your healthcare provider for personalized medical guidance.
         </p>
 
@@ -4698,7 +4531,6 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
     </div>
   `;
 }
-
 
 
 
