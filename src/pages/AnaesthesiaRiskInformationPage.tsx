@@ -155,22 +155,24 @@ export function AnaesthesiaRiskInformationPage() {
         }),
       });
 
-      const reportData = await reportResponse.json();
-      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-      sessionStorage.setItem("reportId", reportData.reportId.toString());
-      sessionStorage.setItem("assessmentType", "Anaesthesia Risk");
+const reportData = await reportResponse.json();
+sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+sessionStorage.setItem("reportId", reportData.reportId.toString());
+sessionStorage.setItem("assessmentType", "Anaesthesia Risk");
 
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Anaesthesia Risk",
-          report: reportData.report,
-          reportId: reportData.reportId,
-        }),
-      });
+await fetch("https://luther.health/api/send-email-report", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userEmail: savedUser.email,
+    userName: `${savedUser.first_name} ${savedUser.last_name}`,
+    assessmentType: "Anaesthesia Risk",
+    report: reportData.report,
+    reportId: reportData.reportId,
+    pageUrl: window.location.href // ✅ Add this line
+  }),
+});
+
 
       // Mark report as ready
       setReportReady(true);
