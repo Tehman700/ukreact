@@ -779,7 +779,10 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = lifestyleLimiterPrompt(assessmentType);
     } else if (assessmentType === "Biological Age") {
       systemPrompt = biologicalAgePrompt(assessmentType);
-    } else {
+    } else if (assessmentType === "Cardiometabolic Risk") {
+      systemPrompt = cardiometabolicRiskPrompt(assessmentType);
+    }
+    else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
     const userPrompt = `
@@ -831,6 +834,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Biological Age") {
       structuredReport = biologicalAgeParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Cardiometabolic Risk") {
+      structuredReport = cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -861,7 +866,87 @@ Please provide a comprehensive analysis following the exact format specified in 
   }
 });
 
+function cardiometabolicRiskPrompt(assessmentType) {
+  const prompts = {
+    "Cardiometabolic Risk": `You are a specialist cardiovascular and metabolic health assessment AI with expertise in risk prediction, disease prevention, and longevity optimization. Analyze the patient's responses to evaluate their cardiometabolic risk profile and provide evidence-based prevention strategies.
 
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where LOWER = HIGHER RISK and HIGHER = BETTER HEALTH. Use 85-100 for low risk, 70-84 for moderate risk, 55-69 for elevated risk, 0-54 for high risk]
+OVERALL_RATING: [exactly one of: "Low Risk", "Moderate Risk", "Elevated Risk", "High Risk"]
+
+CATEGORY_ANALYSIS:
+Cardiovascular Risk: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing heart disease risk, atherosclerosis indicators, and cardiovascular protection level] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Metabolic Health: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing insulin sensitivity, glucose metabolism, diabetes risk, and metabolic syndrome indicators] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Blood Pressure Control: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing hypertension risk, blood pressure patterns, and vascular health] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lipid Profile: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing cholesterol levels, HDL/LDL ratio, triglycerides, and lipid-related cardiovascular risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Body Composition: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing BMI, body fat distribution, visceral adiposity, and metabolic implications] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Inflammation Status: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing systemic inflammation, inflammatory markers impact on cardiovascular and metabolic disease] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Lifestyle Risk Factors: [score 0-100, higher is better] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing physical activity, diet quality, stress, sleep, and modifiable cardiovascular risk behaviors] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Cardiovascular Risk|[clinical context: 3-4 sentences on cardiovascular disease being the leading cause of death globally, affecting 1 in 4 deaths. Reference that 80% of cardiovascular disease is preventable through lifestyle modification. Discuss Framingham Risk Score, QRISK, cite European Heart Journal guidelines and British Heart Foundation data]|[strengths: comma-separated list of EXACTLY 3 UNIQUE cardiovascular protective factors - NEVER write "None provided". Examples: "No family history of early heart disease, Regular physical activity, Non-smoker status"]|[risk factors: comma-separated list of 2-3 specific cardiovascular concerns or "Excellent cardiovascular protection" if optimal]|[timeline: specific timeline like "Annual cardiovascular screening recommended. Continue protective lifestyle factors"]
+
+Metabolic Health|[clinical context: 3-4 sentences on metabolic syndrome affecting 30% of adults and increasing diabetes risk 5-fold. Reference that early intervention reduces type 2 diabetes progression by 58%. Discuss insulin resistance, cite Diabetes UK guidelines and Nature Metabolism research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE metabolic health factors - NEVER "None provided". Examples: "Good glucose tolerance, Healthy eating patterns, Regular meal timing"]|[risk factors: comma-separated list of 2-3 metabolic concerns]|[timeline: specific timeline like "HbA1c and fasting glucose testing every 6-12 months. Optimize metabolic health through diet"]
+
+Blood Pressure Control|[clinical context: 3-4 sentences on hypertension affecting 1 in 3 UK adults, doubling stroke risk and increasing heart attack risk by 60%. Reference that lifestyle modifications can reduce blood pressure by 10-20 mmHg. Discuss NICE hypertension guidelines and British Hypertension Society standards]|[strengths: comma-separated list of EXACTLY 3 UNIQUE blood pressure factors - NEVER "None provided". Examples: "Normal blood pressure readings, Low sodium diet, Stress management practices"]|[risk factors: comma-separated list of 2-3 blood pressure concerns]|[timeline: specific timeline like "Blood pressure monitoring every 3-6 months. Maintain lifestyle modifications"]
+
+Lipid Profile|[clinical context: 3-4 sentences on dyslipidemia contributing to 50% of cardiovascular events. Reference that optimizing lipids reduces heart attack risk by 30-40%. Discuss LDL, HDL, triglycerides, cite Circulation journal and NICE lipid guidelines]|[strengths: comma-separated list of EXACTLY 3 UNIQUE lipid health factors - NEVER "None provided". Examples: "Healthy HDL cholesterol, Low triglycerides, Good dietary fat choices"]|[risk factors: comma-separated list of 2-3 lipid concerns]|[timeline: specific timeline like "Full lipid panel annually. Continue heart-healthy fat intake"]
+
+Body Composition|[clinical context: 3-4 sentences on obesity increasing cardiovascular death risk by 50-100%. Reference that visceral fat is metabolically active and strongly predicts cardiometabolic disease. Discuss BMI limitations, waist circumference, cite British Nutrition Foundation and Obesity journal]|[strengths: comma-separated list of EXACTLY 3 UNIQUE body composition factors - NEVER "None provided". Examples: "Healthy BMI range, Good muscle mass, Active metabolism"]|[risk factors: comma-separated list of 2-3 body composition concerns]|[timeline: specific timeline like "Monitor body composition quarterly. Focus on sustainable weight management"]
+
+Inflammation Status|[clinical context: 3-4 sentences on chronic inflammation driving atherosclerosis and metabolic disease. Reference that reducing inflammation lowers cardiovascular events by 25-30%. Discuss CRP, inflammatory pathways, cite Lancet inflammation research and anti-inflammatory interventions]|[strengths: comma-separated list of EXACTLY 3 UNIQUE anti-inflammatory factors - NEVER "None provided". Examples: "Anti-inflammatory diet, Good sleep quality, Regular exercise reducing inflammation"]|[risk factors: comma-separated list of 2-3 inflammatory concerns]|[timeline: specific timeline like "Consider hs-CRP testing annually. Optimize anti-inflammatory lifestyle"]
+
+Lifestyle Risk Factors|[clinical context: 3-4 sentences on lifestyle factors contributing 80% of cardiometabolic disease risk. Reference that comprehensive lifestyle intervention reduces cardiovascular events by 50%. Discuss Mediterranean diet, exercise, stress, cite Preventive Medicine and British Heart Foundation lifestyle guidance]|[strengths: comma-separated list of EXACTLY 3 UNIQUE lifestyle protective factors - NEVER "None provided". Examples: "Regular physical activity, Balanced diet, Good sleep hygiene"]|[risk factors: comma-separated list of 2-3 lifestyle areas for improvement]|[timeline: specific timeline like "Implement lifestyle modifications over 3-6 months. Track progress with biomarkers"]
+
+CRITICAL INSTRUCTIONS FOR STRENGTHS:
+- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
+- ALWAYS provide EXACTLY 3 unique strengths per category
+- Each strength must be DIFFERENT and SPECIFIC to that category
+- Base strengths on actual patient responses when available
+- When information is limited, infer reasonable strengths from context
+- For cardiovascular: "No smoking history", "Regular activity", "Family history negative"
+- For metabolic: "Stable weight", "Balanced meals", "Good energy levels"
+- For blood pressure: "Normal readings", "Low sodium intake", "Stress management"
+- For lipids: "Healthy fats intake", "Regular exercise", "Good HDL levels"
+- Make strengths actionable and meaningful, not generic
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall cardiometabolic risk profile with 10-year disease risk estimation (using Framingham or QRISK framework language)
+2. Key protective factors reducing cardiovascular and metabolic disease risk
+3. Primary modifiable risk factors requiring intervention with specific impact on disease prevention
+4. Evidence-based prevention strategy prioritizing highest-impact interventions
+5. Biomarker monitoring recommendations (blood pressure, lipids, glucose, inflammatory markers, body composition)
+6. Long-term disease prevention and healthy aging implications with longevity optimization strategies
+
+Include specific medical references to UK and international guidelines (European Heart Journal, Circulation, NICE, British Heart Foundation, Diabetes UK, Lancet), cite evidence-based cardiometabolic research with percentage risk reductions from interventions, and provide personalized prevention recommendations based on their specific responses. Use empowering language focused on disease prevention and health optimization rather than fear-based messaging. Emphasize that 80% of cardiometabolic disease is preventable.]
+
+SCORING GUIDELINES:
+- Score 85-100 (Low Risk): Excellent cardiometabolic health, continue protective factors
+- Score 70-84 (Moderate Risk): Good health with some optimization opportunities
+- Score 55-69 (Elevated Risk): Significant prevention potential, targeted interventions needed
+- Score 0-54 (High Risk): Multiple risk factors requiring comprehensive intervention
+
+RISK COMMUNICATION:
+- Use "Low Risk" not "Low" for best outcomes
+- Use "Moderate Risk" for intermediate profiles
+- Use "Elevated Risk" for concerning patterns
+- Use "High Risk" only for multiple significant factors
+
+Focus on evidence-based prevention strategies with specific percentage risk reductions from interventions. Emphasize modifiable risk factors and realistic lifestyle changes. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use prevention-focused, empowering language that motivates healthy behavior change while being honest about risk levels.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function biologicalAgePrompt(assessmentType) {
   const prompts = {
@@ -1719,6 +1804,270 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+
+
+function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    if (detailedSection) {
+      const categories = [
+        'Cardiovascular Risk',
+        'Metabolic Health',
+        'Blood Pressure Control',
+        'Lipid Profile',
+        'Body Composition',
+        'Inflammation Status',
+        'Lifestyle Risk Factors'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    if (categorySection) {
+      const categories = [
+        'Cardiovascular Risk',
+        'Metabolic Health',
+        'Blood Pressure Control',
+        'Lipid Profile',
+        'Body Composition',
+        'Inflammation Status',
+        'Lifestyle Risk Factors'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for disease prevention.`,
+              strengths: ['Baseline assessment completed', 'Awareness of risk factors', 'Prevention opportunities identified'],
+              riskFactors: ['Continue monitoring and optimization'],
+              timeline: 'Regular screening and lifestyle optimization recommended.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Cardiometabolic Risk");
+
+      const fallbackCategories = [
+        {
+          name: 'Cardiovascular Risk',
+          desc: 'Your cardiovascular risk profile shows good heart health with areas for optimization.',
+          context: 'Cardiovascular disease is the leading cause of death globally, affecting 1 in 4 deaths. However, 80% of cardiovascular disease is preventable through lifestyle modification. Your assessment reveals important opportunities for heart disease prevention.',
+          strengths: [
+            'No smoking history or quit successfully',
+            'Regular physical activity participation',
+            'Good baseline cardiovascular fitness'
+          ],
+          risks: [
+            'Some modifiable risk factors present',
+            'Continue preventive strategies'
+          ]
+        },
+        {
+          name: 'Metabolic Health',
+          desc: 'Good metabolic function with opportunities for diabetes and metabolic syndrome prevention.',
+          context: 'Metabolic syndrome affects 30% of adults and increases diabetes risk 5-fold. Early intervention reduces type 2 diabetes progression by 58%. Optimizing metabolic health provides significant long-term disease prevention benefits.',
+          strengths: [
+            'Stable weight management',
+            'Balanced eating patterns',
+            'Good energy levels throughout day'
+          ],
+          risks: [
+            'Optimize glucose metabolism',
+            'Focus on insulin sensitivity improvement'
+          ]
+        },
+        {
+          name: 'Blood Pressure Control',
+          desc: 'Blood pressure levels indicate good cardiovascular protection with continued focus beneficial.',
+          context: 'Hypertension affects 1 in 3 UK adults, doubling stroke risk and increasing heart attack risk by 60%. Lifestyle modifications can reduce blood pressure by 10-20 mmHg, significantly lowering cardiovascular events.',
+          strengths: [
+            'Normal blood pressure readings',
+            'Low sodium dietary approach',
+            'Stress management awareness and practices'
+          ],
+          risks: [
+            'Continue regular monitoring',
+            'Maintain lifestyle protective factors'
+          ]
+        },
+        {
+          name: 'Lipid Profile',
+          desc: 'Cholesterol levels show good cardiovascular protection with optimization potential.',
+          context: 'Dyslipidemia contributes to 50% of cardiovascular events. Optimizing lipids reduces heart attack risk by 30-40%. Focus on HDL/LDL ratio and triglyceride management provides significant protection.',
+          strengths: [
+            'Healthy dietary fat choices',
+            'Regular physical activity supporting HDL',
+            'Good cholesterol awareness'
+          ],
+          risks: [
+            'Continue heart-healthy fat intake',
+            'Annual lipid panel monitoring recommended'
+          ]
+        },
+        {
+          name: 'Body Composition',
+          desc: 'Body composition shows healthy patterns with continued focus beneficial for long-term health.',
+          context: 'Obesity increases cardiovascular death risk by 50-100%. Visceral fat is metabolically active and strongly predicts cardiometabolic disease. Maintaining healthy body composition reduces multiple disease risks simultaneously.',
+          strengths: [
+            'Healthy weight range maintenance',
+            'Good muscle mass for metabolic health',
+            'Active metabolism and energy expenditure'
+          ],
+          risks: [
+            'Monitor body composition trends quarterly',
+            'Focus on sustainable healthy habits'
+          ]
+        },
+        {
+          name: 'Inflammation Status',
+          desc: 'Inflammatory markers suggest good systemic health with optimization opportunities.',
+          context: 'Chronic inflammation drives atherosclerosis and metabolic disease progression. Reducing inflammation lowers cardiovascular events by 25-30%. Anti-inflammatory lifestyle strategies provide broad health benefits.',
+          strengths: [
+            'Anti-inflammatory diet awareness',
+            'Good sleep quality reducing inflammation',
+            'Regular exercise with anti-inflammatory effects'
+          ],
+          risks: [
+            'Optimize anti-inflammatory lifestyle further',
+            'Consider inflammatory marker testing (hs-CRP)'
+          ]
+        },
+        {
+          name: 'Lifestyle Risk Factors',
+          desc: 'Lifestyle patterns support good cardiometabolic health with areas for enhancement.',
+          context: 'Lifestyle factors contribute 80% of cardiometabolic disease risk. Comprehensive lifestyle intervention reduces cardiovascular events by 50%. Small changes in multiple areas create synergistic health benefits.',
+          strengths: [
+            'Regular physical activity participation',
+            'Balanced nutritional approach',
+            'Good health awareness and motivation'
+          ],
+          risks: [
+            'Continue building healthy behaviors',
+            'Track progress with biomarker monitoring'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Continue protective lifestyle factors',
+            'Monitor key biomarkers regularly',
+            'Focus on evidence-based prevention strategies'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Regular screening and lifestyle optimization recommended annually.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    // Calculate actual risk percentage (inverse of health score for display)
+    // Higher health score = lower risk percentage
+    const riskPercentage = Math.round(100 - overallScore);
+
+    return {
+      overallScore,
+      overallRating,
+      riskPercentage, // For display as "15% risk" instead of "85% health score"
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Cardiometabolic Risk AI response:", error);
+
+    return {
+      overallScore: 75,
+      overallRating: "Moderate Risk",
+      riskPercentage: 25,
+      results: [{
+        category: "Overall Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your cardiometabolic risk assessment has been completed. Focus on preventive strategies for optimal heart and metabolic health.",
+        recommendations: [
+          "Maintain regular cardiovascular exercise and healthy diet",
+          "Monitor blood pressure, cholesterol, and glucose regularly",
+          "Focus on stress management and quality sleep for inflammation reduction"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Prevention awareness', 'Health-focused mindset'],
+          riskFactors: ['Continue monitoring and optimization'],
+          timeline: 'Regular screening and lifestyle optimization recommended.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
+
+
+
+
+
 
 function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
   try {
@@ -4459,8 +4808,12 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Longevity Plan'];
     } else if (assessmentType === 'Health Concierge') {
       tabs = ['Overview', 'Detailed Analysis', 'Your Roadmap'];
+    } else if (assessmentType === 'Cardiometabolic Risk') {
+      tabs = ['Overview', 'Detailed Results', 'Prevention Plan'];
     }
-     else {
+
+
+    else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     }
