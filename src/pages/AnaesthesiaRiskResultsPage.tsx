@@ -178,6 +178,7 @@ export function AnaesthesiaRiskResultsPage() {
 
   return (
                           <PaymentGate requiredFunnel="anesthesia">
+    <div className="container" data-assessment-results="true">
 
     <div className="min-h-screen bg-background">
       <div className="border-b bg-card">
@@ -694,7 +695,8 @@ export function AnaesthesiaRiskResultsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div>    </div>
+
                                     </PaymentGate>
 
   );

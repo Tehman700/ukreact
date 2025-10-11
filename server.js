@@ -4405,7 +4405,6 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
   try {
     console.log('🌐 Launching Puppeteer browser...');
 
-    // Launch browser
     browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -4429,36 +4428,68 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
 
     console.log('📍 Navigating to results page...');
 
-    // Navigate to your results page
-    // Adjust the URL based on your deployment
     const baseUrl = process.env.BASE_URL || 'https://luther.health';
+
+    // Navigate directly to the full URL with hash
     const resultsUrl = `${baseUrl}/Health-Audit.html#anaesthesia-risk-screener-results`;
 
-    // First, we need to inject the report data into sessionStorage
-    await page.goto(baseUrl, { waitUntil: 'networkidle0', timeout: 30000 });
+    console.log('🔗 Results URL:', resultsUrl);
+
+    // Go to the page first
+    await page.goto(resultsUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     console.log('💾 Injecting report data into session storage...');
 
-    // Inject data into sessionStorage
+    // Inject data into sessionStorage AFTER page loads
     await page.evaluate((reportDataStr, reportIdStr, assessmentTypeStr) => {
       sessionStorage.setItem('assessmentReport', reportDataStr);
       sessionStorage.setItem('reportId', reportIdStr);
       sessionStorage.setItem('assessmentType', assessmentTypeStr);
+
+      // Log to verify data is stored
+      console.log('Session data stored:', {
+        hasReport: !!sessionStorage.getItem('assessmentReport'),
+        hasId: !!sessionStorage.getItem('reportId'),
+        hasType: !!sessionStorage.getItem('assessmentType')
+      });
     }, JSON.stringify(reportData), reportId.toString(), assessmentType);
 
-    // Now navigate to the results page
-    await page.goto(resultsUrl, {
-      waitUntil: 'networkidle0',
-      timeout: 30000
-    });
+    console.log('🔄 Reloading page to apply session data...');
+
+    // Reload the page so React can pick up the sessionStorage data
+    await page.reload({ waitUntil: 'networkidle0', timeout: 30000 });
 
     console.log('⏳ Waiting for page to fully render...');
 
-    // Wait for the main content to be visible
-    await page.waitForSelector('.container', { timeout: 10000 });
+    // Wait for specific results content instead of just .container
+    // Adjust this selector based on your actual results page structure
+    try {
+      await page.waitForSelector('[data-assessment-results]', { timeout: 10000 });
+      console.log('✅ Results component found');
+    } catch (e) {
+      console.log('⚠️ Specific selector not found, trying generic container...');
+      await page.waitForSelector('.container', { timeout: 10000 });
+    }
 
     // Additional wait to ensure all animations and dynamic content are loaded
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
+
+    // Check if content actually loaded
+    const hasContent = await page.evaluate(() => {
+      const report = sessionStorage.getItem('assessmentReport');
+      const container = document.querySelector('.container');
+      return {
+        hasSessionData: !!report,
+        hasContainer: !!container,
+        containerHasContent: container ? container.textContent.length > 100 : false
+      };
+    });
+
+    console.log('📊 Content check:', hasContent);
+
+    if (!hasContent.hasSessionData || !hasContent.containerHasContent) {
+      throw new Error('Results page did not render properly - missing session data or content');
+    }
 
     console.log('📄 Generating PDF from rendered page...');
 
@@ -4482,6 +4513,7 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
 
   } catch (error) {
     console.error('❌ Puppeteer error:', error.message);
+    console.error('📍 Full stack:', error.stack);
     if (browser) {
       await browser.close();
     }
