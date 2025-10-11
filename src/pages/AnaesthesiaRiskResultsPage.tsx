@@ -418,7 +418,7 @@ export function AnaesthesiaRiskResultsPage() {
                 <div className="space-y-16">
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-6">{item.name}</h3>
+                      <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = Math.max(0, item.average - 20);

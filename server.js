@@ -4404,6 +4404,7 @@ app.post("/api/send-email-report", async (req, res) => {
     }
 
     console.log(`📸 Capturing screenshots for ${userName}...`);
+    console.log(`Assessment Type: ${assessmentType}`);
 
     // Launch Puppeteer
     const browser = await puppeteer.launch({
@@ -4415,26 +4416,38 @@ app.post("/api/send-email-report", async (req, res) => {
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
 
-    // Inject sessionStorage data before navigation
-    await page.evaluateOnNewDocument((reportData, userInfoData) => {
+    // ✅ FIX: Use the assessmentType from the request instead of hardcoding
+    await page.evaluateOnNewDocument((reportData, userInfoData, assessType) => {
       sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
-      sessionStorage.setItem('assessmentType', 'Anaesthesia Risk');
+      sessionStorage.setItem('assessmentType', assessType); // ✅ Dynamic now
       sessionStorage.setItem('userInfo', JSON.stringify(userInfoData));
       sessionStorage.setItem('currentUser', JSON.stringify(userInfoData));
     }, report, {
       email: userEmail,
       first_name: userName.split(' ')[0],
       last_name: userName.split(' ').slice(1).join(' ')
-    });
+    }, assessmentType); // ✅ Pass assessmentType as third parameter
 
     // Navigate to page
     await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 0 });
 
     // Wait for page to load
-    await new Promise(resolve => setTimeout(resolve, 20000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     const screenshots = [];
-    const tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
+
+    // ✅ Dynamic tab names based on assessment type
+    let tabs;
+    if (assessmentType === 'Surgery Readiness') {
+      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
+    } else if (assessmentType === 'Anaesthesia Risk') {
+      tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
+    } else {
+      // Default tabs for other assessments
+      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
+    }
+
+    console.log(`📋 Tab names for ${assessmentType}:`, tabs);
 
     // Capture each tab
     for (let i = 0; i < tabs.length; i++) {
@@ -4443,17 +4456,15 @@ app.post("/api/send-email-report", async (req, res) => {
 
       try {
         // Click the tab button
-        await page.evaluate((index) => {
+        await page.evaluate((index, tabList) => {
           const buttons = Array.from(document.querySelectorAll('button'));
           const tabButtons = buttons.filter(btn =>
-            btn.textContent.trim() === 'Overview' ||
-            btn.textContent.trim() === 'Detailed Results' ||
-            btn.textContent.trim() === 'Safety Measures'
+            tabList.some(tab => btn.textContent.trim() === tab)
           );
           if (tabButtons[index]) {
             tabButtons[index].click();
           }
-        }, i);
+        }, i, tabs);
 
         // Wait for tab content to load
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -4538,7 +4549,7 @@ app.post("/api/send-email-report", async (req, res) => {
   }
 });
 
-// Email template
+// Email template (keep as is)
 function generateEmailBodyWithAttachment(userName, assessmentType) {
   const date = new Date().toLocaleDateString("en-GB");
   return `
@@ -4586,8 +4597,6 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
     </div>
   `;
 }
-
-
 
 // ----------------------------
 app.listen(process.env.PORT, () =>

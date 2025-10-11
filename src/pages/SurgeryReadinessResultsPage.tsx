@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Shield, BarChart3, Clock, Target, BookOpen, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Shield, BarChart3, Clock, Target, BookOpen, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -36,6 +35,9 @@ export function SurgeryReadinessResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -48,7 +50,6 @@ export function SurgeryReadinessResultsPage() {
       try {
         setLoading(true);
 
-        // Read the report that was already generated on the Information page
         const storedReport = sessionStorage.getItem('assessmentReport');
         const storedAssessmentType = sessionStorage.getItem('assessmentType');
 
@@ -60,7 +61,6 @@ export function SurgeryReadinessResultsPage() {
 
         const report = JSON.parse(storedReport);
 
-        // Verify it's the correct assessment type
         if (storedAssessmentType !== 'Surgery Readiness') {
           console.warn('Assessment type mismatch:', storedAssessmentType);
         }
@@ -82,6 +82,54 @@ export function SurgeryReadinessResultsPage() {
 
     loadReport();
   }, []);
+
+  const handleEmailReport = async () => {
+    setEmailSending(true);
+
+    try {
+      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+      if (!userInfoStr) {
+        throw new Error('User information not found. Please complete the assessment again.');
+      }
+
+      const userInfo = JSON.parse(userInfoStr);
+      const currentPageUrl = window.location.href;
+
+      const response = await fetch('https://luther.health/api/send-email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: userInfo.email,
+          userName: `${userInfo.first_name} ${userInfo.last_name}`,
+          assessmentType: 'Surgery Readiness',
+          report: aiReport,
+          reportId: Date.now(),
+          pageUrl: currentPageUrl,
+          activeTab: activeTab
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      setEmailSent(true);
+
+      setTimeout(() => {
+        setShowEmailPopup(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert(error instanceof Error ? error.message : 'Failed to send email. Please try again.');
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -136,25 +184,18 @@ export function SurgeryReadinessResultsPage() {
   const allTabsViewed = viewedTabs.size === 3;
 
   if (loading) {
-
     return (
-                  <PaymentGate requiredFunnel="surgery-readiness">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Analyzing your surgical readiness...</p>
         </div>
       </div>
-                          </PaymentGate>
-
     );
   }
 
   if (error || !aiReport) {
     return (
-                  <PaymentGate requiredFunnel="surgery-readiness">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -171,8 +212,6 @@ export function SurgeryReadinessResultsPage() {
           </CardContent>
         </Card>
       </div>
-                                </PaymentGate>
-
     );
   }
 
@@ -180,9 +219,75 @@ export function SurgeryReadinessResultsPage() {
   const rating = getOverallRating(overallRating);
 
   return (
-                        <PaymentGate requiredFunnel="surgery-readiness">
-
     <div className="min-h-screen bg-background">
+      {/* Email Popup */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Email Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {emailSent ? (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground mb-4">
+                    A copy of your surgery readiness assessment has been sent to your email.
+                  </p>
+                  <Button onClick={() => setShowEmailPopup(false)} className="w-full">
+                    Close
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-muted-foreground mb-6">
+                    Would you like to receive a PDF copy of your complete assessment report via email?
+                  </p>
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      disabled={emailSending}
+                      className="flex-1"
+                    >
+                      {emailSending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Email
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowEmailPopup(false)}
+                      disabled={emailSending}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
@@ -219,6 +324,16 @@ export function SurgeryReadinessResultsPage() {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Your overall assessment score indicates your current health status and readiness level.
               </p>
+
+              {/* Email Report Button */}
+              <Button
+                onClick={() => setShowEmailPopup(true)}
+                variant="outline"
+                className="mt-4"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Report (Email PDF)
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -301,13 +416,11 @@ export function SurgeryReadinessResultsPage() {
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
                       <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
-
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = Math.max(0, item.average - 20);
                           const rangeEnd = 100;
                           const rangeSize = rangeEnd - rangeStart;
-
                           const yourScorePosition = ((item.yourScore - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((item.average - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((item.optimal - rangeStart) / rangeSize) * 100;
@@ -321,13 +434,11 @@ export function SurgeryReadinessResultsPage() {
                                 <div className="text-xs text-muted-foreground mb-1">Your score</div>
                                 <div className="text-sm font-medium">{item.yourScore}%</div>
                               </div>
-
                               <div className="relative h-2 bg-gray-300 rounded-full">
                                 <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
-
                                 <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
@@ -337,7 +448,6 @@ export function SurgeryReadinessResultsPage() {
                                   style={{ left: `${optimalPosition}%` }}
                                 />
                               </div>
-
                               <div className="relative mt-3 h-12">
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
                                   <div
@@ -346,6 +456,7 @@ export function SurgeryReadinessResultsPage() {
                                   >
                                     <div className="text-sm font-medium">{item.average}%</div>
                                     <div className="text-xs text-muted-foreground whitespace-nowrap">Average Patient</div>
+                                  </div>
                                   </div>
                                 )}
                                 {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
@@ -608,80 +719,38 @@ export function SurgeryReadinessResultsPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-
-              <Accordion type="multiple" className="w-full">
-                <AccordionItem value="physical-activity">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Physical Activity & Surgery
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• NHS Physical Activity Guidelines (2019). Available at: nhs.uk/live-well/exercise</li>
-                      <li>• NICE Guideline NG180: Perioperative care in adults (2020)</li>
-                      <li>• Enhanced Recovery After Surgery (ERAS) Society Guidelines</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="metabolic-health">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Metabolic Health & Surgical Outcomes
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• NICE Guideline CG15: Type 1 diabetes in adults (2022)</li>
-                      <li>• Diabetes UK: Surgery and diabetes guidance</li>
-                      <li>• Royal College of Surgeons: Perioperative management of diabetes</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="sleep-stress">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Sleep, Stress & Recovery
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Sleep Foundation: Sleep and Surgery Recovery Guidelines</li>
-                      <li>• British Association for Psychopharmacology: Perioperative anxiety management</li>
-                      <li>• NHS: Vitamin D recommendations and surgical outcomes</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="risk-modification">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Risk Factor Modification
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• NICE Guideline PH48: Smoking cessation in secondary care (2013)</li>
-                      <li>• Royal College of Surgeons: Smoking and surgery guidance</li>
-                      <li>• British Hypertension Society: Perioperative blood pressure management</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="preoperative-prep">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Preoperative Preparation
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• NICE Quality Standard QS174: Perioperative care (2018)</li>
-                      <li>• Royal College of Anaesthetists: Preoperative assessment guidelines</li>
-                      <li>• ERAS Society: Enhanced Recovery After Surgery protocols</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <div className="pt-4 border-t border-muted">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Disclaimer:</strong> All information provided is based on current UK medical guidelines and evidence-based medicine.
-                  Individual circumstances may vary, and professional medical advice should always be sought for specific health concerns.
-                </p>
-              </div>
+                    <Accordion type="multiple" className="w-full">
+                      <AccordionItem value="physical-activity">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Physical Activity & Surgery
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• NHS Physical Activity Guidelines (2019)</li>
+                            <li>• NICE Guideline NG180: Perioperative care in adults (2020)</li>
+                            <li>• Enhanced Recovery After Surgery (ERAS) Society Guidelines</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="metabolic-health">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Metabolic Health & Surgical Outcomes
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• NICE Guideline CG15: Type 1 diabetes in adults (2022)</li>
+                            <li>• Diabetes UK: Surgery and diabetes guidance</li>
+                            <li>• Royal College of Surgeons: Perioperative management</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                    <div className="pt-4 border-t border-muted">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Disclaimer:</strong> All information is based on current UK medical guidelines.
+                        Individual circumstances may vary, and professional medical advice should always be sought.
+                      </p>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -690,7 +759,5 @@ export function SurgeryReadinessResultsPage() {
         </Card>
       </div>
     </div>
-                                    </PaymentGate>
-
   );
 }
