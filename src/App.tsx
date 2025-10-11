@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
-import { ResultsNotification } from './components/ResultsNotification';
+// import { ResultsNotification } from './components/ResultsNotification';
 import { HealthConciergeOptIn } from './components/HealthConciergeOptIn';
 import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
@@ -1208,7 +1208,7 @@ useEffect(() => {
       </main>
       {!isQuizPage() && <Footer />}
       <CookieConsent />
-      {currentPage.endsWith('-results') && <ResultsNotification />}
+      {currentPage.endsWith('-results')}
       <HealthConciergeOptIn
         isOpen={showHealthConciergeOptIn}
         onClose={() => {
