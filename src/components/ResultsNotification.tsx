@@ -7,6 +7,17 @@ export function ResultsNotification() {
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
+    // ✅ Don't show notification during PDF capture (Puppeteer detection)
+    const isPuppeteer = navigator.webdriver ||
+                        /HeadlessChrome/.test(navigator.userAgent) ||
+                        window.navigator.webdriver === true;
+
+    if (isPuppeteer) {
+      setShowNotification(false);
+      console.log("🤖 Puppeteer detected - hiding results notification");
+      return;
+    }
+
     // Show notification after a brief delay for better UX
     const timer = setTimeout(() => setShowNotification(true), 800);
     return () => clearTimeout(timer);
@@ -33,7 +44,7 @@ export function ResultsNotification() {
                   </p>
                 </div>
               </div>
-              
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -47,7 +58,7 @@ export function ResultsNotification() {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Overlay to prevent interaction with page content */}
       <div className="fixed inset-0 bg-black/20 z-40" />
     </>
