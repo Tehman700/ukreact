@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 
 interface AssessmentResult {
@@ -37,6 +37,8 @@ export function BiologicalAgeResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -82,6 +84,56 @@ export function BiologicalAgeResultsPage() {
 
     loadReport();
   }, []);
+
+    const handleEmailReport = async () => {
+      try {
+        const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+        if (!userInfoStr) {
+          alert('User information not found. Please complete the assessment again.');
+          setShowEmailPopup(false);
+          return;
+        }
+
+        const userInfo = JSON.parse(userInfoStr);
+        const currentPageUrl = window.location.href;
+
+        // Show success immediately and close popup
+        setEmailSent(true);
+
+        setTimeout(() => {
+          setShowEmailPopup(false);
+          setEmailSent(false);
+        }, 2000);
+
+        // Send email in background (fire and forget)
+        fetch('https://luther.health/api/send-email-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userEmail: userInfo.email,
+            userName: `${userInfo.first_name} ${userInfo.last_name}`,
+            assessmentType: 'Biological Age',
+            report: aiReport,
+            reportId: Date.now(),
+            pageUrl: currentPageUrl,
+            activeTab: activeTab
+          })
+        }).then(response => response.json())
+          .then(data => {
+            console.log('Email sent successfully:', data);
+          })
+          .catch(error => {
+            console.error('Error sending email in background:', error);
+          });
+
+      } catch (error) {
+        console.error('Error preparing email:', error);
+        alert('Failed to send email. Please try again.');
+        setShowEmailPopup(false);
+      }
+    };
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -161,6 +213,62 @@ export function BiologicalAgeResultsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+          {/* Email Popup */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Email Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {emailSent ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground mb-4">
+                      Your report is being prepared and will be sent to your email shortly.
+                    </p>
+                    <Button onClick={() => setShowEmailPopup(false)} className="w-full">
+                      Close
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-muted-foreground mb-6">
+                      Would you like to receive a PDF copy of your complete assessment report via email?
+                    </p>
+                    <div className="flex space-x-3">
+                      <Button
+                        onClick={handleEmailReport}
+                        className="flex-1"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send Email
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowEmailPopup(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
@@ -204,9 +312,20 @@ export function BiologicalAgeResultsPage() {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Your biological age assessment reveals how well your body is aging compared to your chronological age.
               </p>
+
+              {/* Email Report Button */}
+              <Button
+                onClick={() => setShowEmailPopup(true)}
+                variant="outline"
+                className="mt-4"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Report (Email PDF)
+              </Button>
             </div>
           </CardContent>
         </Card>
+
 
         <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
           <Button

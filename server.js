@@ -782,7 +782,6 @@ app.post("/api/generate-assessment-report", async (req, res) => {
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
-
     const userPrompt = `
 User Information:
 Name: ${userInfo.first_name} ${userInfo.last_name}
@@ -4435,7 +4434,6 @@ app.post("/api/send-email-report", async (req, res) => {
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     const screenshots = [];
-
     let tabs;
     if (assessmentType === 'Surgery Readiness') {
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
@@ -4451,6 +4449,14 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Management Plan'];
     } else if (assessmentType === 'Inflammation Risk') {
       tabs = ['Overview', 'Detailed Results', 'Anti-Inflammation Plan'];
+    } else if (assessmentType === 'Medication Burden') {
+      tabs = ['Overview', 'Detailed Results', 'Optimization Plan'];
+    } else if (assessmentType === 'Daily Energy') {
+      tabs = ['Overview', 'Detailed Results', 'Energy Optimization'];
+    } else if (assessmentType === 'Lifestyle Limiter') {
+      tabs = ['Overview', 'Detailed Results', 'Adaptation Strategies'];
+    } else if (assessmentType === 'Biological Age') {
+      tabs = ['Overview', 'Detailed Results', 'Longevity Plan'];
     }
      else {
       // Default tabs for other assessments
