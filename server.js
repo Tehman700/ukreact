@@ -4432,7 +4432,7 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
     // Navigate to your results page
     // Adjust the URL based on your deployment
     const baseUrl = process.env.BASE_URL || 'https://luther.health';
-    const resultsUrl = `${baseUrl}/#anaesthesia-risk-screener-results`;
+    const resultsUrl = `${baseUrl}/Health-Audit.html#anaesthesia-risk-screener-results`;
 
     // First, we need to inject the report data into sessionStorage
     await page.goto(baseUrl, { waitUntil: 'networkidle0', timeout: 30000 });
