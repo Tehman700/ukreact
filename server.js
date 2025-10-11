@@ -4404,6 +4404,7 @@ app.post("/api/send-email-report", async (req, res) => {
     }
 
     console.log(`📸 Capturing multi-tab screenshot for ${userName}...`);
+    console.log(`📍 Page URL: ${pageUrl}`);
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -4422,59 +4423,92 @@ app.post("/api/send-email-report", async (req, res) => {
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 800 });
 
-    // Store the report data in page evaluation context
-    await page.evaluateOnNewDocument((reportData) => {
+    // Store the report data in page context BEFORE navigation
+    await page.evaluateOnNewDocument((reportData, userInfoData) => {
       sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
       sessionStorage.setItem('assessmentType', 'Anaesthesia Risk');
-    }, report);
+      sessionStorage.setItem('userInfo', JSON.stringify(userInfoData));
+      sessionStorage.setItem('currentUser', JSON.stringify(userInfoData));
+    }, report, {
+      email: userEmail,
+      first_name: userName.split(' ')[0],
+      last_name: userName.split(' ').slice(1).join(' ')
+    });
 
-    await page.goto(pageUrl, { waitUntil: "networkidle2", timeout: 60000 });
+    console.log('Navigating to page...');
+    await page.goto(pageUrl, { waitUntil: "networkidle0", timeout: 60000 });
 
-    // Wait for content to load
-    await page.waitForSelector('[data-testid="assessment-results"], .container', { timeout: 10000 });
+    console.log('Waiting for page to load...');
+    await page.waitForTimeout(3000); // Give page time to render
 
     const screenshotBuffers = [];
-    const tabs = ['overview', 'detailed', 'recommendations'];
+    const tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
 
     // Capture each tab
-    for (const tab of tabs) {
-      console.log(`📸 Capturing ${tab} tab...`);
-
-      // Click the appropriate tab button
-      const tabButtonSelector = `button:has-text("${tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}")`;
+    for (let i = 0; i < tabs.length; i++) {
+      const tabName = tabs[i];
+      console.log(`📸 Attempting to capture tab: ${tabName}`);
 
       try {
-        // Find and click the tab button
-        await page.evaluate((tabName) => {
+        // Find and click the tab button by exact text match
+        const clicked = await page.evaluate((targetTab) => {
           const buttons = Array.from(document.querySelectorAll('button'));
           const tabButton = buttons.find(btn => {
-            const text = btn.textContent.toLowerCase();
-            return text.includes(tabName.toLowerCase().replace('-', ' '));
+            const text = btn.textContent.trim();
+            return text === targetTab;
           });
-          if (tabButton) tabButton.click();
-        }, tab);
+
+          if (tabButton) {
+            console.log(`Found button for: ${targetTab}`);
+            tabButton.click();
+            return true;
+          }
+          console.log(`Button not found for: ${targetTab}`);
+          return false;
+        }, tabName);
+
+        if (!clicked) {
+          console.log(`⚠️ Could not find button for ${tabName}, trying alternative method...`);
+
+          // Alternative: click by index
+          await page.evaluate((index) => {
+            const buttons = document.querySelectorAll('button');
+            const tabButtons = Array.from(buttons).filter(btn =>
+              btn.textContent.includes('Overview') ||
+              btn.textContent.includes('Detailed') ||
+              btn.textContent.includes('Safety')
+            );
+            if (tabButtons[index]) {
+              tabButtons[index].click();
+              return true;
+            }
+            return false;
+          }, i);
+        }
 
         // Wait for content to update
-        await page.waitForTimeout(1500);
+        console.log(`Waiting for ${tabName} content to render...`);
+        await page.waitForTimeout(2000);
 
         // Scroll to top
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.waitForTimeout(500);
 
         // Take screenshot
+        console.log(`Taking screenshot of ${tabName}...`);
         const screenshot = await page.screenshot({
           fullPage: true,
           type: 'png'
         });
 
         screenshotBuffers.push({
-          name: tab.charAt(0).toUpperCase() + tab.slice(1),
+          name: tabName,
           buffer: screenshot
         });
 
-        console.log(`✅ ${tab} tab captured (${screenshot.length} bytes)`);
+        console.log(`✅ ${tabName} tab captured (${screenshot.length} bytes)`);
       } catch (error) {
-        console.error(`Error capturing ${tab} tab:`, error);
+        console.error(`❌ Error capturing ${tabName} tab:`, error.message);
         // Continue with other tabs even if one fails
       }
     }
@@ -4482,10 +4516,10 @@ app.post("/api/send-email-report", async (req, res) => {
     await browser.close();
 
     if (screenshotBuffers.length === 0) {
-      throw new Error('Failed to capture any screenshots');
+      throw new Error('Failed to capture any screenshots. Please check server logs for details.');
     }
 
-    console.log(`✅ All screenshots captured successfully`);
+    console.log(`✅ Captured ${screenshotBuffers.length}/${tabs.length} tabs successfully`);
 
     // 📝 Convert screenshots into single PDF
     const pdfBuffer = await convertScreenshotsToPDF(screenshotBuffers, userName, assessmentType, report);
@@ -4510,7 +4544,11 @@ app.post("/api/send-email-report", async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log(`📩 Email sent successfully to ${userEmail}`);
 
-    res.json({ success: true, message: "Email with complete assessment PDF sent successfully" });
+    res.json({
+      success: true,
+      message: "Email sent successfully",
+      tabsCaptured: screenshotBuffers.length
+    });
 
   } catch (error) {
     console.error("❌ Error in send-email-report:", error);
