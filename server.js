@@ -4395,7 +4395,6 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
-
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId, pageUrl } = req.body;
@@ -4403,6 +4402,8 @@ app.post("/api/send-email-report", async (req, res) => {
     if (!userEmail || !userName || !assessmentType || !report || !pageUrl) {
       return res.status(400).json({ success: false, error: "Missing required fields" });
     }
+
+    console.log(`📸 Capturing screenshots for ${userName}...`);
 
     // Launch Puppeteer
     const browser = await puppeteer.launch({
@@ -4429,17 +4430,58 @@ app.post("/api/send-email-report", async (req, res) => {
     // Navigate to page
     await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 0 });
 
-    // Wait 3 seconds
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    // Wait for page to load
+    await new Promise(resolve => setTimeout(resolve, 20000));
 
-    // Take screenshot
-    const screenshotBuffer = await page.screenshot({ fullPage: true });
+    const screenshots = [];
+    const tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
+
+    // Capture each tab
+    for (let i = 0; i < tabs.length; i++) {
+      const tabName = tabs[i];
+      console.log(`📸 Capturing ${tabName} tab...`);
+
+      try {
+        // Click the tab button
+        await page.evaluate((index) => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const tabButtons = buttons.filter(btn =>
+            btn.textContent.trim() === 'Overview' ||
+            btn.textContent.trim() === 'Detailed Results' ||
+            btn.textContent.trim() === 'Safety Measures'
+          );
+          if (tabButtons[index]) {
+            tabButtons[index].click();
+          }
+        }, i);
+
+        // Wait for tab content to load
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Scroll to top
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Take screenshot
+        const screenshot = await page.screenshot({ fullPage: true });
+        screenshots.push({ name: tabName, buffer: screenshot });
+
+        console.log(`✅ ${tabName} captured (${screenshot.length} bytes)`);
+      } catch (error) {
+        console.error(`❌ Error capturing ${tabName}:`, error.message);
+      }
+    }
 
     await page.close();
     await browser.close();
-    console.log('✅ Screenshot captured');
 
-    // Convert Screenshot to PDF
+    if (screenshots.length === 0) {
+      throw new Error('Failed to capture any screenshots');
+    }
+
+    console.log(`✅ All ${screenshots.length} tabs captured`);
+
+    // Convert screenshots to PDF
     const doc = new PDFDocument({ autoFirstPage: false });
     const chunks = [];
 
@@ -4449,10 +4491,13 @@ app.post("/api/send-email-report", async (req, res) => {
       throw err;
     });
 
-    // Add a page with the same dimensions as the screenshot
-    const img = doc.openImage(screenshotBuffer);
-    doc.addPage({ size: [img.width, img.height] });
-    doc.image(img, 0, 0);
+    // Add each screenshot as a separate page
+    screenshots.forEach((screenshot, index) => {
+      const img = doc.openImage(screenshot.buffer);
+      doc.addPage({ size: [img.width, img.height] });
+      doc.image(img, 0, 0);
+    });
+
     doc.end();
 
     // Wait until PDF is complete
@@ -4461,7 +4506,7 @@ app.post("/api/send-email-report", async (req, res) => {
       doc.on('error', reject);
     });
 
-    console.log('✅ PDF created');
+    console.log('✅ PDF created with all tabs');
 
     // Send Email with PDF
     const mailOptions = {
@@ -4481,7 +4526,11 @@ app.post("/api/send-email-report", async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log('📧 Email sent:', userEmail);
 
-    res.json({ success: true, message: "Email sent successfully" });
+    res.json({
+      success: true,
+      message: "Email sent successfully",
+      tabsCaptured: screenshots.length
+    });
 
   } catch (error) {
     console.error('❌ Error:', error);
@@ -4508,8 +4557,14 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
 
         <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
           <p style="margin: 0; font-size: 14px; color: #333;">
-            📄 Your comprehensive assessment report is attached as a PDF document.
+            📄 Your comprehensive assessment report is attached as a PDF document, including:
           </p>
+          <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 13px; color: #555;">
+            <li>Complete overview of all assessment categories</li>
+            <li>Detailed analysis with benchmarks</li>
+            <li>Personalized safety recommendations</li>
+            <li>Evidence-based action plan</li>
+          </ul>
         </div>
 
         <p style="font-size: 13px; line-height: 1.6; color: #666; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px;">
@@ -4531,7 +4586,6 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
     </div>
   `;
 }
-
 
 
 
