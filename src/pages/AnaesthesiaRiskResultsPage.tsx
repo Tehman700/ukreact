@@ -36,7 +36,6 @@ export function AnaesthesiaRiskResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
-  const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
@@ -83,56 +82,55 @@ export function AnaesthesiaRiskResultsPage() {
     loadReport();
   }, []);
 
-  const handleEmailReport = async () => {
-    setEmailSending(true);
+    const handleEmailReport = async () => {
+      try {
+        const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+        if (!userInfoStr) {
+          alert('User information not found. Please complete the assessment again.');
+          setShowEmailPopup(false);
+          return;
+        }
 
-    try {
-      // Get user info from sessionStorage (check both possible keys)
-      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
-      if (!userInfoStr) {
-        throw new Error('User information not found. Please complete the assessment again.');
-      }
+        const userInfo = JSON.parse(userInfoStr);
+        const currentPageUrl = window.location.href;
 
-      const userInfo = JSON.parse(userInfoStr);
-      const currentPageUrl = window.location.href;
+        // Show success immediately and close popup
+        setEmailSent(true);
 
-      // Send request to backend
-      const response = await fetch('https://luther.health/api/send-email-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userEmail: userInfo.email,
-          userName: `${userInfo.first_name} ${userInfo.last_name}`,
-          assessmentType: 'Anaesthesia Risk',
-          report: aiReport,
-          reportId: Date.now(),
-          pageUrl: currentPageUrl,
-          activeTab: activeTab // Send current tab info
-        })
-      });
+        setTimeout(() => {
+          setShowEmailPopup(false);
+          setEmailSent(false);
+        }, 2000);
 
-      const data = await response.json();
+        // Send email in background (fire and forget)
+        fetch('https://luther.health/api/send-email-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userEmail: userInfo.email,
+            userName: `${userInfo.first_name} ${userInfo.last_name}`,
+            assessmentType: 'Anaesthesia Risk',
+            report: aiReport,
+            reportId: Date.now(),
+            pageUrl: currentPageUrl,
+            activeTab: activeTab
+          })
+        }).then(response => response.json())
+          .then(data => {
+            console.log('Email sent successfully:', data);
+          })
+          .catch(error => {
+            console.error('Error sending email in background:', error);
+          });
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to send email');
-      }
-
-      setEmailSent(true);
-
-      // Auto-close popup after 3 seconds
-      setTimeout(() => {
+      } catch (error) {
+        console.error('Error preparing email:', error);
+        alert('Failed to send email. Please try again.');
         setShowEmailPopup(false);
-      }, 3000);
-
-    } catch (error) {
-      console.error('Error sending email:', error);
-      alert(error instanceof Error ? error.message : 'Failed to send email. Please try again.');
-    } finally {
-      setEmailSending(false);
-    }
-  };
+      }
+    };
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -244,48 +242,37 @@ export function AnaesthesiaRiskResultsPage() {
             </CardHeader>
             <CardContent>
               {emailSent ? (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground mb-4">
-                    A copy of your anaesthesia risk assessment has been sent to your email.
-                  </p>
-                  <Button onClick={() => setShowEmailPopup(false)} className="w-full">
-                    Close
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-muted-foreground mb-6">
-                    Would you like to receive a PDF copy of your complete assessment report via email?
-                  </p>
-                  <div className="flex space-x-3">
-                    <Button
-                      onClick={handleEmailReport}
-                      disabled={emailSending}
-                      className="flex-1"
-                    >
-                      {emailSending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send Email
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowEmailPopup(false)}
-                      disabled={emailSending}
-                      className="flex-1"
-                    >
-                      Cancel
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground mb-4">
+                      Your report is being prepared and will be sent to your email shortly.
+                    </p>
+                    <Button onClick={() => setShowEmailPopup(false)} className="w-full">
+                      Close
                     </Button>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div>
+                    <p className="text-muted-foreground mb-6">
+                      Would you like to receive a PDF copy of your complete assessment report via email?
+                    </p>
+                    <div className="flex space-x-3">
+                      <Button
+                        onClick={handleEmailReport}
+                        className="flex-1"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send Email
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowEmailPopup(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
             </CardContent>
           </Card>
         </div>
