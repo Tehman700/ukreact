@@ -4447,6 +4447,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Speed Boosters'];
     } else if (assessmentType === 'Mobility Strength') {
       tabs = ['Overview', 'Detailed Results', 'Training Plan'];
+    } else if (assessmentType === 'Symptom Severity') {
+      tabs = ['Overview', 'Detailed Results', 'Training Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];

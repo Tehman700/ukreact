@@ -802,6 +802,7 @@ useEffect(() => {
           } else if (currentAssessment === 'anaesthesia-risk') {
             setCurrentPage('anaesthesia-risk-screener-results');
           } else if (currentAssessment === 'mobility-strength') {
+          } else if (currentAssessment === 'mobility-strength') {
             setCurrentPage('mobility-strength-score-results');
           } else if (currentAssessment === 'symptom-severity') {
             setCurrentPage('symptom-severity-index-results');
