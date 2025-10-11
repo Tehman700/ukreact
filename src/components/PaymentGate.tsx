@@ -16,38 +16,27 @@ export function PaymentGate({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    // Check for screenshot bypass token
+    // First, check if session_id is in URL (from Stripe redirect)
     const urlParams = new URLSearchParams(window.location.search);
-    let hashParams = new URLSearchParams();
-    if (window.location.hash.includes('?')) {
-      hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
-    }
-
-    const screenshotToken = urlParams.get('screenshot_token') || hashParams.get('screenshot_token');
-
-    // Use a secure token - change this to something secret
-    if (screenshotToken === 'YOUR_SECRET_TOKEN_HERE_12345') {
-      setAllowed(true);
-      setLoading(false);
-      console.log('✅ Screenshot bypass token validated');
-      return;
-    }
-
-    // Rest of your existing code...
     let urlSessionId = urlParams.get('session_id');
 
+    // Also check in hash parameters (for SPA routing)
     if (!urlSessionId && window.location.hash.includes('?')) {
+      const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
       urlSessionId = hashParams.get('session_id');
     }
 
+    // If we have a session_id in URL, store it in sessionStorage
     if (urlSessionId) {
       sessionStorage.setItem("stripe_session_id", urlSessionId);
       console.log(`✅ Stored session ID from URL: ${urlSessionId}`);
 
+      // Clean up URL by removing session_id parameter
       const hashBase = window.location.hash.split('?')[0];
       window.history.replaceState({}, document.title, window.location.pathname + hashBase);
     }
 
+    // Now get session ID from sessionStorage
     const sessionId = sessionStorage.getItem("stripe_session_id");
 
     if (!sessionId) {
@@ -57,6 +46,7 @@ export function PaymentGate({
       return;
     }
 
+    // Check if user paid for this specific funnel
     fetch(`https://luther.health/api/check-payment?session_id=${sessionId}&funnel_type=${requiredFunnel}`)
       .then((res) => res.json())
       .then((data) => {
@@ -76,7 +66,6 @@ export function PaymentGate({
       .finally(() => setLoading(false));
   }, [requiredFunnel, redirectUrl]);
 
-  // Rest of component remains the same...
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
