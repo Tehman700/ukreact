@@ -4397,7 +4397,7 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
 }
 
 // ----------------------------
-// Generate PDF by capturing the actual results page
+// Generate PDF from Screenshots of Results Page
 // ----------------------------
 async function generatePDFWithPuppeteer(userName, assessmentType, reportData, reportId) {
   let browser;
@@ -4419,7 +4419,7 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
 
     const page = await browser.newPage();
 
-    // Set viewport for better rendering
+    // Set viewport for consistent rendering
     await page.setViewport({
       width: 1920,
       height: 1080,
@@ -4429,84 +4429,56 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
     console.log('📍 Navigating to results page...');
 
     const baseUrl = process.env.BASE_URL || 'https://luther.health';
-
-    // Navigate directly to the full URL with hash
     const resultsUrl = `${baseUrl}/Health-Audit.html#anaesthesia-risk-screener-results`;
 
     console.log('🔗 Results URL:', resultsUrl);
 
-    // Go to the page first
+    // Navigate to page
     await page.goto(resultsUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     console.log('💾 Injecting report data into session storage...');
 
-    // Inject data into sessionStorage AFTER page loads
+    // Inject session data
     await page.evaluate((reportDataStr, reportIdStr, assessmentTypeStr) => {
       sessionStorage.setItem('assessmentReport', reportDataStr);
       sessionStorage.setItem('reportId', reportIdStr);
       sessionStorage.setItem('assessmentType', assessmentTypeStr);
-
-      // Log to verify data is stored
-      console.log('Session data stored:', {
-        hasReport: !!sessionStorage.getItem('assessmentReport'),
-        hasId: !!sessionStorage.getItem('reportId'),
-        hasType: !!sessionStorage.getItem('assessmentType')
-      });
     }, JSON.stringify(reportData), reportId.toString(), assessmentType);
 
-    console.log('🔄 Reloading page to apply session data...');
+    console.log('🔄 Reloading page to render with session data...');
 
-    // Reload the page so React can pick up the sessionStorage data
+    // Reload to apply session data
     await page.reload({ waitUntil: 'networkidle0', timeout: 30000 });
 
-    console.log('⏳ Waiting for page to fully render...');
+    console.log('⏳ Waiting for complete page render...');
 
-    // Wait for specific results content instead of just .container
-    // Adjust this selector based on your actual results page structure
-    try {
-      await page.waitForSelector('[data-assessment-results]', { timeout: 10000 });
-      console.log('✅ Results component found');
-    } catch (e) {
-      console.log('⚠️ Specific selector not found, trying generic container...');
-      await page.waitForSelector('.container', { timeout: 10000 });
-    }
+    // Wait for main container
+    await page.waitForSelector('.container', { timeout: 10000 });
 
-    // Additional wait to ensure all animations and dynamic content are loaded
+    // Additional wait for all content to load
     await page.waitForTimeout(3000);
 
-    // Check if content actually loaded
-    const hasContent = await page.evaluate(() => {
-      const report = sessionStorage.getItem('assessmentReport');
-      const container = document.querySelector('.container');
-      return {
-        hasSessionData: !!report,
-        hasContainer: !!container,
-        containerHasContent: container ? container.textContent.length > 100 : false
-      };
+    console.log('📸 Capturing full page screenshots...');
+
+    // Get full page height
+    const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+    console.log(`📏 Page height: ${bodyHeight}px`);
+
+    // Take full page screenshot
+    const screenshot = await page.screenshot({
+      fullPage: true,
+      type: 'png'
     });
 
-    console.log('📊 Content check:', hasContent);
-
-    if (!hasContent.hasSessionData || !hasContent.containerHasContent) {
-      throw new Error('Results page did not render properly - missing session data or content');
-    }
-
-    console.log('📄 Generating PDF from rendered page...');
-
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '10mm',
-        right: '10mm',
-        bottom: '10mm',
-        left: '10mm'
-      },
-      preferCSSPageSize: false
-    });
+    console.log(`✅ Screenshot captured (${screenshot.length} bytes)`);
 
     await browser.close();
+
+    console.log('📄 Converting screenshot to PDF...');
+
+    // Convert screenshot to PDF
+    const pdfBuffer = await convertScreenshotToPDF(screenshot, userName, assessmentType);
+
     console.log('✅ PDF generation complete');
 
     return pdfBuffer;
@@ -4522,7 +4494,53 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
 }
 
 // ----------------------------
-// Main Email Endpoint with Puppeteer ONLY
+// Convert Screenshot to PDF with PDFKit
+// ----------------------------
+function convertScreenshotToPDF(screenshotBuffer, userName, assessmentType) {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({
+        size: 'A4',
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        autoFirstPage: false
+      });
+
+      const chunks = [];
+
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      // A4 dimensions in points (72 points = 1 inch)
+      const pageWidth = 595.28;  // A4 width in points
+      const pageHeight = 841.89; // A4 height in points
+
+      // Get image dimensions using a simple approach
+      // We'll fit the image to page width and let it flow across multiple pages
+
+      // Add first page
+      doc.addPage({
+        size: 'A4',
+        margins: { top: 0, bottom: 0, left: 0, right: 0 }
+      });
+
+      // Fit image to page width, height will scale proportionally
+      doc.image(screenshotBuffer, 0, 0, {
+        fit: [pageWidth, pageHeight * 100], // Allow for very tall images
+        align: 'center',
+        valign: 'top'
+      });
+
+      doc.end();
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// ----------------------------
+// Main Email Endpoint with Screenshot-to-PDF
 // ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
@@ -4543,8 +4561,7 @@ app.post("/api/send-email-report", async (req, res) => {
     let pdfGenerationSuccessful = false;
 
     try {
-      // Use Puppeteer to capture the actual results page
-      console.log('🚀 Starting PDF generation with Puppeteer (capturing results page)...');
+      console.log('🚀 Starting PDF generation with Puppeteer (screenshot method)...');
       pdfBuffer = await generatePDFWithPuppeteer(userName, assessmentType, report, reportId || Date.now());
       console.log(`✅ PDF generated successfully with Puppeteer (${pdfBuffer.length} bytes)`);
       pdfGenerationSuccessful = true;
@@ -4557,7 +4574,6 @@ app.post("/api/send-email-report", async (req, res) => {
 
     // Send email based on whether PDF generation was successful
     if (pdfGenerationSuccessful && pdfBuffer) {
-      // Send email with PDF attachment
       console.log('📧 Sending email with PDF attachment...');
 
       const mailOptions = {
@@ -4584,7 +4600,6 @@ app.post("/api/send-email-report", async (req, res) => {
       });
 
     } else {
-      // Fallback: Send HTML email without PDF
       console.log('⚠️ Falling back to HTML email without PDF attachment');
 
       const htmlContent = generateEmailContent(userName, assessmentType, report);
@@ -4620,9 +4635,7 @@ app.post("/api/send-email-report", async (req, res) => {
   }
 });
 
-// ----------------------------
-// Email Body (Brief message with PDF attachment)
-// ----------------------------
+// Keep your existing email body functions
 function generateEmailBodyWithAttachment(userName, assessmentType) {
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -4822,222 +4835,6 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
                     This email was sent because you completed an assessment on our platform.<br>
                     Assessment completed on ${completionDate}
                 </div>
-            </div>
-        </div>
-    </body>
-    </html>
-  `;
-}
-
-// Fallback HTML email function (when PDF generation fails)
-function generateEmailContent(userName, assessmentType, reportData) {
-  console.log("Generating fallback email content for:", userName, assessmentType);
-  console.log("Report data structure:", Object.keys(reportData || {}));
-
-  // Handle the report data structure correctly
-  let report;
-  if (reportData.structured_report) {
-    report = typeof reportData.structured_report === "string"
-      ? JSON.parse(reportData.structured_report)
-      : reportData.structured_report;
-  } else if (reportData.results) {
-    report = reportData;
-  } else {
-    report = {
-      overallScore: 75,
-      overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
-      results: [],
-      summary: "Your assessment has been completed. Please consult with a healthcare provider for detailed interpretation."
-    };
-  }
-
-  const completionDate = new Date().toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-
-  // Helper function to render detailed analysis
-  const renderDetailedAnalysis = (result) => {
-    if (!result.detailedAnalysis) return '';
-
-    const analysis = result.detailedAnalysis;
-    const isSurgeryReadiness = analysis.evidenceBase !== undefined;
-    const isComplicationRisk = analysis.strengths !== undefined;
-
-    let detailedHtml = `
-      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 15px 0;">
-        <h4 style="color: #030213; font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
-          📋 Clinical Context
-        </h4>
-        <p style="margin: 0 0 15px 0; color: #374151; font-size: 14px; line-height: 1.6;">
-          ${analysis.clinicalContext || 'Analysis details not available.'}
-        </p>
-    `;
-
-    if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
-      detailedHtml += `
-        <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
-          ✓ Clinical Evidence
-        </h5>
-        <ul style="margin: 0; padding-left: 20px; list-style: none;">
-          ${analysis.evidenceBase.map(evidence => `
-            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
-              <span style="color: #16a34a; position: absolute; left: -10px;">•</span>
-              ${evidence}
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
-      detailedHtml += `
-        <h5 style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
-          ✓ Current Strengths
-        </h5>
-        <ul style="margin: 0; padding-left: 20px; list-style: none;">
-          ${analysis.strengths.map(strength => `
-            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
-              <span style="color: #16a34a; position: absolute; left: -10px;">✓</span>
-              ${strength}
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    }
-
-    if (analysis.riskFactors && analysis.riskFactors.length > 0) {
-      detailedHtml += `
-        <h5 style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0;">
-          ⚠ Key Risk Factors
-        </h5>
-        <ul style="margin: 0; padding-left: 20px; list-style: none;">
-          ${analysis.riskFactors.map(risk => `
-            <li style="margin: 8px 0; padding-left: 10px; position: relative; color: #374151; font-size: 13px;">
-              <span style="color: #dc2626; position: absolute; left: -10px;">⚠</span>
-              ${risk}
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    }
-
-    if (analysis.timeline) {
-      detailedHtml += `
-        <div style="background-color: #dbeafe; padding: 12px; border-radius: 6px; margin: 15px 0 0 0; border-left: 3px solid #0284c7;">
-          <p style="margin: 0; color: #1e40af; font-size: 13px; font-weight: 500;">
-            ⏱ Timeline: ${analysis.timeline}
-          </p>
-        </div>
-      `;
-    }
-
-    detailedHtml += `</div>`;
-    return detailedHtml;
-  };
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${assessmentType} Results - Luther Health</title>
-        <style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                line-height: 1.6;
-                color: #1a1a1a;
-                background-color: #f9fafb;
-                margin: 0;
-                padding: 0;
-            }
-            .email-container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #ffffff;
-            }
-            .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 40px 30px;
-                text-align: center;
-            }
-            .header h1 {
-                margin: 0 0 10px 0;
-                font-size: 28px;
-                font-weight: 600;
-            }
-            .header h2 {
-                margin: 0 0 5px 0;
-                font-size: 18px;
-                font-weight: 400;
-                opacity: 0.9;
-            }
-            .content {
-                padding: 30px;
-            }
-            .score-section {
-                background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
-                border: 2px solid #0284c7;
-                border-radius: 12px;
-                padding: 30px;
-                text-align: center;
-                margin: 30px 0;
-            }
-            .score-number {
-                font-size: 56px;
-                font-weight: bold;
-                color: #0284c7;
-                margin: 15px 0;
-                line-height: 1;
-            }
-            .category-card {
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                padding: 25px;
-                margin: 20px 0;
-                border-left: 5px solid #0284c7;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="email-container">
-            <div class="header">
-                <h1>Luther Health</h1>
-                <h2>Your ${assessmentType} Assessment Results</h2>
-                <p>Completed on ${completionDate}</p>
-            </div>
-
-            <div class="content">
-                <h3>Dear ${userName},</h3>
-                <p>Thank you for completing your assessment with Luther Health.</p>
-
-                <div class="score-section">
-                    <h3>Overall Assessment Score</h3>
-                    <div class="score-number">${report.overallScore || 'N/A'}%</div>
-                    <p>${report.overallRating || 'Assessment Complete'}</p>
-                </div>
-
-                <h3>Category Breakdown</h3>
-                ${(report.results || []).map(result => `
-                    <div class="category-card">
-                        <h4>${result.category || 'Category'}</h4>
-                        <p><strong>Score:</strong> ${result.score || 'N/A'}/${result.maxScore || 100}</p>
-                        <p>${result.description || 'Analysis not available.'}</p>
-                        ${renderDetailedAnalysis(result)}
-                    </div>
-                `).join('')}
-
-                ${report.summary ? `
-                    <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
-                        <h3>Detailed Clinical Analysis</h3>
-                        <p>${report.summary}</p>
-                    </div>
-                ` : ''}
-
-                <p style="text-align: center; margin: 30px 0;">
-                    <strong>Best regards,<br>The Luther Health Team</strong>
-                </p>
             </div>
         </div>
     </body>
