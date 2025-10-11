@@ -6,7 +6,6 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -189,23 +188,17 @@ export function AnaesthesiaRiskResultsPage() {
 
   if (loading) {
     return (
-              <PaymentGate requiredFunnel="anesthesia">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your anaesthesia safety assessment...</p>
         </div>
       </div>
-            </PaymentGate>
-
     );
   }
 
   if (error || !aiReport) {
     return (
-                      <PaymentGate requiredFunnel="anesthesia">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -222,8 +215,6 @@ export function AnaesthesiaRiskResultsPage() {
           </CardContent>
         </Card>
       </div>
-                  </PaymentGate>
-
     );
   }
 
@@ -231,8 +222,6 @@ export function AnaesthesiaRiskResultsPage() {
   const safetyRating = getSafetyRating(overallRating);
 
   return (
-                            <PaymentGate requiredFunnel="anesthesia">
-
     <div className="min-h-screen bg-background">
       {/* Email Popup */}
       {showEmailPopup && (
@@ -821,7 +810,5 @@ export function AnaesthesiaRiskResultsPage() {
         </Card>
       </div>
     </div>
-                      </PaymentGate>
-
   );
 }
