@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import heroImage from 'figma:asset/d7e3cd445a3d74be683dd8f119c8e15300b19f39.png';
+import heroImage from '../assets/heero.png';
 
 export function Hero() {
   return (
