@@ -4442,6 +4442,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     } else if (assessmentType === 'Anaesthesia Risk') {
       tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
+    } else if (assessmentType === 'Complication Risk') {
+      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
