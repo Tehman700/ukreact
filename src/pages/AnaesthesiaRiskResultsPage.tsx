@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-// import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -36,6 +35,9 @@ export function AnaesthesiaRiskResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -80,6 +82,57 @@ export function AnaesthesiaRiskResultsPage() {
 
     loadReport();
   }, []);
+
+  const handleEmailReport = async () => {
+    setEmailSending(true);
+
+    try {
+      // Get user info from sessionStorage
+      const userInfoStr = sessionStorage.getItem('userInfo');
+      if (!userInfoStr) {
+        throw new Error('User information not found. Please complete the assessment again.');
+      }
+
+      const userInfo = JSON.parse(userInfoStr);
+      const currentPageUrl = window.location.href;
+
+      // Send request to backend
+      const response = await fetch('https://luther.health/api/send-email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: userInfo.email,
+          userName: `${userInfo.first_name} ${userInfo.last_name}`,
+          assessmentType: 'Anaesthesia Risk',
+          report: aiReport,
+          reportId: Date.now(),
+          pageUrl: currentPageUrl,
+          activeTab: activeTab // Send current tab info
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      setEmailSent(true);
+
+      // Auto-close popup after 3 seconds
+      setTimeout(() => {
+        setShowEmailPopup(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert(error instanceof Error ? error.message : 'Failed to send email. Please try again.');
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -135,23 +188,17 @@ export function AnaesthesiaRiskResultsPage() {
 
   if (loading) {
     return (
-//             <PaymentGate requiredFunnel="anesthesia">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your anaesthesia safety assessment...</p>
         </div>
       </div>
-//                           </PaymentGate>
-
     );
   }
 
   if (error || !aiReport) {
     return (
-//                     <PaymentGate requiredFunnel="anesthesia">
-
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -168,8 +215,6 @@ export function AnaesthesiaRiskResultsPage() {
           </CardContent>
         </Card>
       </div>
-//                                 </PaymentGate>
-
     );
   }
 
@@ -177,9 +222,75 @@ export function AnaesthesiaRiskResultsPage() {
   const safetyRating = getSafetyRating(overallRating);
 
   return (
-//                           <PaymentGate requiredFunnel="anesthesia">
-
     <div className="min-h-screen bg-background">
+      {/* Email Popup */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Email Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {emailSent ? (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground mb-4">
+                    A copy of your anaesthesia risk assessment has been sent to your email.
+                  </p>
+                  <Button onClick={() => setShowEmailPopup(false)} className="w-full">
+                    Close
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-muted-foreground mb-6">
+                    Would you like to receive a PDF copy of your complete assessment report via email?
+                  </p>
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      disabled={emailSending}
+                      className="flex-1"
+                    >
+                      {emailSending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Email
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowEmailPopup(false)}
+                      disabled={emailSending}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
@@ -216,6 +327,16 @@ export function AnaesthesiaRiskResultsPage() {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Your anaesthesia safety assessment identifies key factors for your anaesthesia team to consider.
               </p>
+
+              {/* Email Report Button */}
+              <Button
+                onClick={() => setShowEmailPopup(true)}
+                variant="outline"
+                className="mt-4"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Report (Email PDF)
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -297,14 +418,12 @@ export function AnaesthesiaRiskResultsPage() {
                 <div className="space-y-16">
                   {comparisonData.map((item, index) => (
                     <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{item.name}</h3>
-
+                      <h3 className="text-left font-medium mb-6">{item.name}</h3>
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = Math.max(0, item.average - 20);
                           const rangeEnd = 100;
                           const rangeSize = rangeEnd - rangeStart;
-
                           const yourScorePosition = ((item.yourScore - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((item.average - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((item.optimal - rangeStart) / rangeSize) * 100;
@@ -318,13 +437,11 @@ export function AnaesthesiaRiskResultsPage() {
                                 <div className="text-xs text-muted-foreground mb-1">Your score</div>
                                 <div className="text-sm font-medium">{item.yourScore}%</div>
                               </div>
-
                               <div className="relative h-2 bg-gray-300 rounded-full">
                                 <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
-
                                 <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
@@ -334,7 +451,6 @@ export function AnaesthesiaRiskResultsPage() {
                                   style={{ left: `${optimalPosition}%` }}
                                 />
                               </div>
-
                               <div className="relative mt-3 h-12">
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
                                   <div
@@ -608,85 +724,84 @@ export function AnaesthesiaRiskResultsPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
+                    <Accordion type="multiple" className="w-full">
+                      <AccordionItem value="anaesthesia-safety">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Anaesthesia Safety & Risk Assessment
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• Royal College of Anaesthetists: Safety guidelines (2022)</li>
+                            <li>• NICE Guideline NG180: Perioperative care in adults (2020)</li>
+                            <li>• Association of Anaesthetists: Risk assessment protocols</li>
+                            <li>• WHO Surgical Safety Checklist: Anaesthesia considerations</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
 
-              <Accordion type="multiple" className="w-full">
-                <AccordionItem value="anaesthesia-safety">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Anaesthesia Safety & Risk Assessment
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Royal College of Anaesthetists: Safety guidelines (2022)</li>
-                      <li>• NICE Guideline NG180: Perioperative care in adults (2020)</li>
-                      <li>• Association of Anaesthetists: Risk assessment protocols</li>
-                      <li>• WHO Surgical Safety Checklist: Anaesthesia considerations</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                      <AccordionItem value="sleep-apnoea">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Sleep Apnoea & Anaesthesia Risks
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• British Thoracic Society: Sleep apnoea and surgery guidelines</li>
+                            <li>• NICE Guideline NG202: Obstructive sleep apnoea (2021)</li>
+                            <li>• Association of Anaesthetists: OSA management recommendations</li>
+                            <li>• European Respiratory Society: Perioperative sleep apnoea</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
 
-                <AccordionItem value="sleep-apnoea">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Sleep Apnoea & Anaesthesia Risks
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• British Thoracic Society: Sleep apnoea and surgery guidelines</li>
-                      <li>• NICE Guideline NG202: Obstructive sleep apnoea (2021)</li>
-                      <li>• Association of Anaesthetists: OSA management recommendations</li>
-                      <li>• European Respiratory Society: Perioperative sleep apnoea</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                      <AccordionItem value="drug-interactions">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Drug Interactions & Medication Safety
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• British National Formulary: Anaesthetic drug interactions</li>
+                            <li>• Medicines and Healthcare products Regulatory Agency (MHRA)</li>
+                            <li>• Royal Pharmaceutical Society: Perioperative prescribing</li>
+                            <li>• NICE Guideline CG92: Venous thromboembolism prevention</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
 
-                <AccordionItem value="drug-interactions">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Drug Interactions & Medication Safety
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• British National Formulary: Anaesthetic drug interactions</li>
-                      <li>• Medicines and Healthcare products Regulatory Agency (MHRA)</li>
-                      <li>• Royal Pharmaceutical Society: Perioperative prescribing</li>
-                      <li>• NICE Guideline CG92: Venous thromboembolism prevention</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                      <AccordionItem value="alcohol-substances">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Alcohol & Substance Use Impact
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• Royal College of Surgeons: Alcohol and surgery guidance</li>
+                            <li>• NICE Guideline CG100: Alcohol-use disorders (2010)</li>
+                            <li>• Association of Anaesthetists: Substance use screening</li>
+                            <li>• British Liver Trust: Liver function and anaesthesia</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
 
-                <AccordionItem value="alcohol-substances">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Alcohol & Substance Use Impact
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Royal College of Surgeons: Alcohol and surgery guidance</li>
-                      <li>• NICE Guideline CG100: Alcohol-use disorders (2010)</li>
-                      <li>• Association of Anaesthetists: Substance use screening</li>
-                      <li>• British Liver Trust: Liver function and anaesthesia</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                      <AccordionItem value="cardiac-respiratory">
+                        <AccordionTrigger className="text-sm font-medium">
+                          Cardiac & Respiratory Considerations
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>• British Cardiovascular Society: Perioperative care guidelines</li>
+                            <li>• NICE Guideline CG180: Atrial fibrillation management</li>
+                            <li>• British Thoracic Society: COPD and anaesthesia</li>
+                            <li>• European Society of Cardiology: Preoperative evaluation</li>
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
 
-                <AccordionItem value="cardiac-respiratory">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Cardiac & Respiratory Considerations
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• British Cardiovascular Society: Perioperative care guidelines</li>
-                      <li>• NICE Guideline CG180: Atrial fibrillation management</li>
-                      <li>• British Thoracic Society: COPD and anaesthesia</li>
-                      <li>• European Society of Cardiology: Preoperative evaluation</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <div className="pt-4 border-t border-muted">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Disclaimer:</strong> All information provided is based on current UK medical guidelines and evidence-based medicine.
-                  Individual circumstances may vary, and professional medical advice should always be sought for specific health concerns.
-                </p>
-              </div>
+                    <div className="pt-4 border-t border-muted">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Disclaimer:</strong> All information provided is based on current UK medical guidelines and evidence-based medicine.
+                        Individual circumstances may vary, and professional medical advice should always be sought for specific health concerns.
+                      </p>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -695,7 +810,5 @@ export function AnaesthesiaRiskResultsPage() {
         </Card>
       </div>
     </div>
-//                                     </PaymentGate>
-
   );
 }

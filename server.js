@@ -4403,26 +4403,84 @@ app.post("/api/send-email-report", async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing required fields for email" });
     }
 
-    console.log(`📸 Capturing screenshot for ${userName}...`);
+    console.log(`📸 Capturing multi-tab screenshot for ${userName}...`);
 
-    // 📸 Launch Puppeteer to capture screenshot
+    // 📸 Launch Puppeteer to capture ALL tabs
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
-    const page = await browser.newPage();
-    await page.goto(pageUrl, { waitUntil: "networkidle2" });
 
-    // Adjust viewport size for full page screenshot
+    const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 800 });
 
-    const screenshotBuffer = await page.screenshot({ fullPage: true });
+    // Store the report data in page evaluation context
+    await page.evaluateOnNewDocument((reportData) => {
+      sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
+      sessionStorage.setItem('assessmentType', 'Anaesthesia Risk');
+    }, report);
+
+    await page.goto(pageUrl, { waitUntil: "networkidle2", timeout: 60000 });
+
+    // Wait for content to load
+    await page.waitForSelector('[data-testid="assessment-results"], .container', { timeout: 10000 });
+
+    const screenshotBuffers = [];
+    const tabs = ['overview', 'detailed', 'recommendations'];
+
+    // Capture each tab
+    for (const tab of tabs) {
+      console.log(`📸 Capturing ${tab} tab...`);
+
+      // Click the appropriate tab button
+      const tabButtonSelector = `button:has-text("${tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}")`;
+
+      try {
+        // Find and click the tab button
+        await page.evaluate((tabName) => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const tabButton = buttons.find(btn => {
+            const text = btn.textContent.toLowerCase();
+            return text.includes(tabName.toLowerCase().replace('-', ' '));
+          });
+          if (tabButton) tabButton.click();
+        }, tab);
+
+        // Wait for content to update
+        await page.waitForTimeout(1500);
+
+        // Scroll to top
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(500);
+
+        // Take screenshot
+        const screenshot = await page.screenshot({
+          fullPage: true,
+          type: 'png'
+        });
+
+        screenshotBuffers.push({
+          name: tab.charAt(0).toUpperCase() + tab.slice(1),
+          buffer: screenshot
+        });
+
+        console.log(`✅ ${tab} tab captured (${screenshot.length} bytes)`);
+      } catch (error) {
+        console.error(`Error capturing ${tab} tab:`, error);
+        // Continue with other tabs even if one fails
+      }
+    }
+
     await browser.close();
 
-    console.log(`✅ Screenshot captured successfully (${screenshotBuffer.length} bytes)`);
+    if (screenshotBuffers.length === 0) {
+      throw new Error('Failed to capture any screenshots');
+    }
 
-    // 📝 Convert screenshot into PDF
-    const pdfBuffer = await convertScreenshotToPDF(screenshotBuffer, userName, assessmentType);
+    console.log(`✅ All screenshots captured successfully`);
+
+    // 📝 Convert screenshots into single PDF
+    const pdfBuffer = await convertScreenshotsToPDF(screenshotBuffers, userName, assessmentType, report);
 
     console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)`);
 
@@ -4444,7 +4502,7 @@ app.post("/api/send-email-report", async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log(`📩 Email sent successfully to ${userEmail}`);
 
-    res.json({ success: true, message: "Email with screenshot PDF sent successfully" });
+    res.json({ success: true, message: "Email with complete assessment PDF sent successfully" });
 
   } catch (error) {
     console.error("❌ Error in send-email-report:", error);
@@ -4452,11 +4510,11 @@ app.post("/api/send-email-report", async (req, res) => {
   }
 });
 
-// 🧾 Convert image buffer (screenshot) to PDF using PDFKit
-function convertScreenshotToPDF(imageBuffer, userName, assessmentType) {
+// 🧾 Convert multiple screenshots to a single comprehensive PDF
+function convertScreenshotsToPDF(screenshotBuffers, userName, assessmentType, report) {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ autoFirstPage: false });
+      const doc = new PDFDocument({ autoFirstPage: false, size: 'A4' });
       const chunks = [];
 
       doc.on("data", chunk => chunks.push(chunk));
@@ -4464,21 +4522,80 @@ function convertScreenshotToPDF(imageBuffer, userName, assessmentType) {
       doc.on("error", reject);
 
       // Add title page
-      doc.addPage({ size: "A4", margins: { top: 50, left: 50, right: 50, bottom: 50 } });
-      doc.font("Helvetica-Bold").fontSize(24).text("Luther Health", { align: "center" });
+      doc.addPage({ margins: { top: 50, left: 50, right: 50, bottom: 50 } });
+      doc.font("Helvetica-Bold").fontSize(28).text("Luther Health", { align: "center" });
       doc.moveDown();
-      doc.font("Helvetica").fontSize(16).text(`${assessmentType} Assessment Results`, { align: "center" });
+      doc.font("Helvetica").fontSize(18).text(`${assessmentType} Assessment`, { align: "center" });
       doc.moveDown();
-      doc.fontSize(12).text(`Generated for: ${userName}`, { align: "center" });
+      doc.fontSize(14).text(`Patient: ${userName}`, { align: "center" });
+      doc.moveDown(0.5);
+      doc.fontSize(12).text(`Date: ${new Date().toLocaleDateString('en-GB')}`, { align: "center" });
       doc.moveDown(2);
 
-      // Add screenshot page
-      const img = doc.openImage(imageBuffer);
-      const maxWidth = 500;
-      const scale = maxWidth / img.width;
-      const imgHeight = img.height * scale;
+      // Add summary box
+      doc.fontSize(10).fillColor('#666666');
+      doc.rect(50, doc.y, doc.page.width - 100, 80).stroke();
+      doc.moveDown(0.5);
+      doc.text('Assessment Summary', { align: 'center' });
+      doc.moveDown(0.5);
+      doc.text(`Overall Score: ${report.overallScore}%`, { align: 'center' });
+      doc.text(`Rating: ${report.overallRating}`, { align: 'center' });
+      doc.text(`Categories Assessed: ${report.results.length}`, { align: 'center' });
 
-      doc.image(img, 50, doc.y, { width: maxWidth, height: imgHeight });
+      // Add each screenshot as a new page with header
+      screenshotBuffers.forEach((screenshot, index) => {
+        doc.addPage({ size: 'A4' });
+
+        // Add section header
+        doc.fillColor('#000000').font("Helvetica-Bold").fontSize(16)
+           .text(`${screenshot.name} Analysis`, 50, 30);
+
+        doc.moveDown(1);
+
+        // Add the screenshot
+        const img = doc.openImage(screenshot.buffer);
+        const pageWidth = doc.page.width - 100; // 50px margins on each side
+        const scale = pageWidth / img.width;
+        const imgHeight = img.height * scale;
+
+        // Check if image fits on page, if not scale it down
+        const maxHeight = doc.page.height - 150; // Leave room for header and footer
+        let finalScale = scale;
+        let finalHeight = imgHeight;
+
+        if (imgHeight > maxHeight) {
+          finalScale = maxHeight / img.height;
+          finalHeight = maxHeight;
+        }
+
+        const finalWidth = img.width * finalScale;
+
+        doc.image(img, (doc.page.width - finalWidth) / 2, 80, {
+          width: finalWidth,
+          height: finalHeight
+        });
+
+        // Add page number at bottom
+        doc.fontSize(8).fillColor('#999999')
+           .text(`Page ${index + 2} of ${screenshotBuffers.length + 2}`,
+                 50, doc.page.height - 30,
+                 { align: 'center' });
+      });
+
+      // Add disclaimer page
+      doc.addPage({ margins: { top: 50, left: 50, right: 50, bottom: 50 } });
+      doc.fillColor('#000000').font("Helvetica-Bold").fontSize(16).text("Important Information", { align: "center" });
+      doc.moveDown(2);
+
+      doc.font("Helvetica").fontSize(10).fillColor('#333333');
+      doc.text("This assessment is for informational purposes only and does not constitute medical advice. " +
+               "Please discuss these results with your healthcare provider before making any medical decisions.",
+               { align: 'left', lineGap: 5 });
+
+      doc.moveDown();
+      doc.text("All recommendations are based on evidence-based UK medical guidelines including NICE, " +
+               "Royal College of Anaesthetists, and other reputable medical organizations.",
+               { align: 'left', lineGap: 5 });
 
       doc.end();
     } catch (err) {
@@ -4487,21 +4604,58 @@ function convertScreenshotToPDF(imageBuffer, userName, assessmentType) {
   });
 }
 
-// ✉️ Email template
+// ✉️ Email template (keep existing function or use this updated version)
 function generateEmailBodyWithAttachment(userName, assessmentType) {
   const date = new Date().toLocaleDateString("en-GB");
   return `
-    <div style="font-family: Arial, sans-serif; color:#333;">
-      <h2>Luther Health</h2>
-      <p>Dear ${userName},</p>
-      <p>Thank you for completing your <strong>${assessmentType}</strong> assessment.</p>
-      <p>Your detailed report (with screenshot) is attached as a PDF file.</p>
-      <p><em>Date: ${date}</em></p>
-      <br>
-      <p>Best regards,<br><strong>The Luther Health Team</strong></p>
+    <div style="font-family: Arial, sans-serif; color:#333; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">Luther Health</h1>
+        <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Your Health Assessment Results</p>
+      </div>
+
+      <div style="padding: 30px; background: white;">
+        <p style="font-size: 16px; line-height: 1.6;">Dear <strong>${userName}</strong>,</p>
+
+        <p style="font-size: 14px; line-height: 1.6; color: #555;">
+          Thank you for completing your <strong>${assessmentType}</strong> assessment with Luther Health.
+        </p>
+
+        <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px; color: #333;">
+            📄 Your comprehensive assessment report is attached as a PDF document, including:
+          </p>
+          <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 13px; color: #555;">
+            <li>Complete overview of all assessment categories</li>
+            <li>Detailed analysis with benchmarks</li>
+            <li>Personalized safety recommendations</li>
+            <li>Evidence-based action plan</li>
+          </ul>
+        </div>
+
+        <p style="font-size: 13px; line-height: 1.6; color: #666; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px;">
+          <strong>Important:</strong> This assessment is designed to help you prepare for medical discussions.
+          Please share these results with your healthcare provider for personalized medical guidance.
+        </p>
+
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">
+          <em>Assessment Date: ${date}</em>
+        </p>
+      </div>
+
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+        <p style="margin: 0; font-size: 12px; color: #666;">
+          Best regards,<br>
+          <strong style="color: #667eea;">The Luther Health Team</strong>
+        </p>
+      </div>
     </div>
   `;
 }
+
+
+
+
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
