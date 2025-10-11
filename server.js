@@ -4396,7 +4396,9 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
-
+// ----------------------------
+// Generate PDF by capturing the actual results page
+// ----------------------------
 async function generatePDFWithPuppeteer(userName, assessmentType, reportData, reportId) {
   let browser;
 
@@ -4488,7 +4490,7 @@ async function generatePDFWithPuppeteer(userName, assessmentType, reportData, re
 }
 
 // ----------------------------
-// Main Email Endpoint with Puppeteer
+// Main Email Endpoint with Puppeteer ONLY
 // ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
@@ -4509,7 +4511,7 @@ app.post("/api/send-email-report", async (req, res) => {
     let pdfGenerationSuccessful = false;
 
     try {
-      // Try Puppeteer to capture the actual results page
+      // Use Puppeteer to capture the actual results page
       console.log('🚀 Starting PDF generation with Puppeteer (capturing results page)...');
       pdfBuffer = await generatePDFWithPuppeteer(userName, assessmentType, report, reportId || Date.now());
       console.log(`✅ PDF generated successfully with Puppeteer (${pdfBuffer.length} bytes)`);
@@ -4518,17 +4520,7 @@ app.post("/api/send-email-report", async (req, res) => {
     } catch (puppeteerError) {
       console.error('❌ Puppeteer PDF generation error:', puppeteerError.message);
       console.error('📍 Error stack:', puppeteerError.stack);
-
-      // Fallback to PDFKit if Puppeteer fails
-      try {
-        console.log('🔄 Falling back to PDFKit...');
-        pdfBuffer = await generatePDFReport(userName, assessmentType, report);
-        console.log(`✅ PDF generated successfully with PDFKit (${pdfBuffer.length} bytes)`);
-        pdfGenerationSuccessful = true;
-      } catch (pdfkitError) {
-        console.error('❌ PDFKit generation error:', pdfkitError.message);
-        pdfGenerationSuccessful = false;
-      }
+      pdfGenerationSuccessful = false;
     }
 
     // Send email based on whether PDF generation was successful
@@ -4595,406 +4587,6 @@ app.post("/api/send-email-report", async (req, res) => {
     });
   }
 });
-
-
-
-
-// ----------------------------
-// Generate PDF Report using PDFKit - ENHANCED VERSION
-// ----------------------------
-function generatePDFReport(userName, assessmentType, reportData) {
-  return new Promise((resolve, reject) => {
-    try {
-      // Handle the report data structure
-      let report;
-      if (reportData.structured_report) {
-        report = typeof reportData.structured_report === "string"
-          ? JSON.parse(reportData.structured_report)
-          : reportData.structured_report;
-      } else if (reportData.results) {
-        report = reportData;
-      } else {
-        report = {
-          overallScore: 75,
-          overallRating: assessmentType === "Surgery Readiness" ? "Good" : "Moderate Risk",
-          results: [],
-          summary: "Your assessment has been completed."
-        };
-      }
-
-      const doc = new PDFDocument({
-        size: 'A4',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 }
-      });
-
-      const chunks = [];
-
-      doc.on('data', chunk => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      const completionDate = new Date().toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-
-      // Header with gradient effect (simulated with colored rectangle)
-      doc.rect(0, 0, 612, 150).fill('#667eea');
-
-      // Title
-      doc.fillColor('#ffffff')
-         .fontSize(28)
-         .font('Helvetica-Bold')
-         .text('Luther Health', 50, 50, { align: 'center' });
-
-      doc.fontSize(18)
-         .font('Helvetica')
-         .text(`${assessmentType} Assessment Results`, 50, 85, { align: 'center' });
-
-      doc.fontSize(12)
-         .text(`Completed on ${completionDate}`, 50, 115, { align: 'center' });
-
-      // Reset position after header
-      doc.y = 180;
-
-      // Greeting
-      doc.fillColor('#1a1a1a')
-         .fontSize(16)
-         .font('Helvetica-Bold')
-         .text(`Dear ${userName},`, 50, doc.y);
-
-      doc.moveDown();
-      doc.fontSize(11)
-         .font('Helvetica')
-         .fillColor('#4b5563')
-         .text('Thank you for completing your assessment with Luther Health. We\'ve analyzed your responses using our advanced AI system to provide personalized insights and evidence-based recommendations.', {
-           width: 500,
-           align: 'left'
-         });
-
-      doc.moveDown(2);
-
-      // Overall Score Section
-      const scoreBoxY = doc.y;
-      doc.rect(50, scoreBoxY, 500, 120)
-         .fillAndStroke('#e8f4fd', '#0284c7');
-
-      doc.fillColor('#0284c7')
-         .fontSize(14)
-         .font('Helvetica-Bold')
-         .text('Overall Assessment Score', 50, scoreBoxY + 20, { width: 500, align: 'center' });
-
-      doc.fontSize(48)
-         .text(`${report.overallScore || 'N/A'}%`, 50, scoreBoxY + 45, { width: 500, align: 'center' });
-
-      doc.fontSize(12)
-         .fillColor('#ffffff')
-         .rect(220, scoreBoxY + 95, 160, 20)
-         .fill('#0284c7');
-
-      doc.fillColor('#ffffff')
-         .text(report.overallRating || 'Assessment Complete', 220, scoreBoxY + 98, { width: 160, align: 'center' });
-
-      doc.y = scoreBoxY + 140;
-      doc.moveDown(2);
-
-      // Categories Section
-      doc.fillColor('#1a1a1a')
-         .fontSize(18)
-         .font('Helvetica-Bold')
-         .text('Category Breakdown & Analysis', 50, doc.y);
-
-      doc.moveDown();
-
-      // Category Cards with FULL DETAILS
-      (report.results || []).forEach((result, index) => {
-        // Check if we need a new page
-        if (doc.y > 600) {
-          doc.addPage();
-        }
-
-        const cardY = doc.y;
-
-        // Category card header bar
-        doc.rect(50, cardY, 500, 8)
-           .fill('#0284c7');
-
-        // Category card background
-        doc.rect(50, cardY + 8, 500, 10)
-           .stroke('#e5e7eb');
-
-        // Category name and score
-        doc.fillColor('#1a1a1a')
-           .fontSize(14)
-           .font('Helvetica-Bold')
-           .text(result.category || 'Category', 60, cardY + 18, { width: 350 });
-
-        doc.fontSize(11)
-           .fillColor('#ffffff')
-           .rect(420, cardY + 15, 120, 20)
-           .fill('#030213');
-
-        doc.fillColor('#ffffff')
-           .text(`${result.score || 'N/A'}/${result.maxScore || 100}`, 420, cardY + 18, { width: 120, align: 'center' });
-
-        let currentY = cardY + 45;
-
-        // Description
-        doc.fillColor('#4b5563')
-           .fontSize(10)
-           .font('Helvetica')
-           .text(result.description || 'Analysis not available.', 60, currentY, {
-             width: 480
-           });
-
-        currentY = doc.y + 10;
-
-        // Recommendations section
-        if (result.recommendations && result.recommendations.length > 0) {
-          // Check if we need a new page
-          if (currentY > 650) {
-            doc.addPage();
-            currentY = 50;
-          }
-
-          doc.fillColor('#030213')
-             .fontSize(11)
-             .font('Helvetica-Bold')
-             .text('Key Recommendations:', 60, currentY);
-
-          currentY += 15;
-
-          result.recommendations.forEach((rec, i) => {
-            if (currentY > 700) {
-              doc.addPage();
-              currentY = 50;
-            }
-
-            doc.fillColor('#4b5563')
-               .fontSize(9)
-               .font('Helvetica')
-               .text(`• ${rec}`, 70, currentY, { width: 470 });
-
-            currentY = doc.y + 5;
-          });
-        }
-
-        // Detailed Analysis section
-        if (result.detailedAnalysis) {
-          const analysis = result.detailedAnalysis;
-
-          // Check if we need a new page
-          if (currentY > 600) {
-            doc.addPage();
-            currentY = 50;
-          }
-
-          // Clinical Context
-          doc.rect(60, currentY, 480, 5)
-             .fill('#f8fafc');
-
-          currentY += 10;
-
-          doc.fillColor('#030213')
-             .fontSize(10)
-             .font('Helvetica-Bold')
-             .text('[Clinical Context]', 65, currentY);
-
-          currentY += 15;
-
-          doc.fillColor('#374151')
-             .fontSize(9)
-             .font('Helvetica')
-             .text(analysis.clinicalContext || 'Analysis details available upon request.', 65, currentY, {
-               width: 470
-             });
-
-          currentY = doc.y + 10;
-
-          // Evidence Base or Strengths
-          const isSurgeryReadiness = analysis.evidenceBase !== undefined;
-          const isComplicationRisk = analysis.strengths !== undefined;
-
-          if (isSurgeryReadiness && analysis.evidenceBase && analysis.evidenceBase.length > 0) {
-            if (currentY > 650) {
-              doc.addPage();
-              currentY = 50;
-            }
-
-            doc.fillColor('#16a34a')
-               .fontSize(10)
-               .font('Helvetica-Bold')
-               .text('[Clinical Evidence]', 65, currentY);
-
-            currentY += 15;
-
-            analysis.evidenceBase.slice(0, 3).forEach(evidence => {
-              if (currentY > 700) {
-                doc.addPage();
-                currentY = 50;
-              }
-
-              doc.fillColor('#374151')
-                 .fontSize(8)
-                 .font('Helvetica')
-                 .text(`> ${evidence}`, 75, currentY, { width: 460 });
-
-              currentY = doc.y + 4;
-            });
-
-            currentY += 8;
-          } else if (isComplicationRisk && analysis.strengths && analysis.strengths.length > 0) {
-            if (currentY > 650) {
-              doc.addPage();
-              currentY = 50;
-            }
-
-            doc.fillColor('#16a34a')
-               .fontSize(10)
-               .font('Helvetica-Bold')
-               .text('[Current Strengths]', 65, currentY);
-
-            currentY += 15;
-
-            analysis.strengths.forEach(strength => {
-              if (currentY > 700) {
-                doc.addPage();
-                currentY = 50;
-              }
-
-              doc.fillColor('#374151')
-                 .fontSize(8)
-                 .font('Helvetica')
-                 .text(`+ ${strength}`, 75, currentY, { width: 460 });
-
-              currentY = doc.y + 4;
-            });
-
-            currentY += 8;
-          }
-
-          // Risk Factors
-          if (analysis.riskFactors && analysis.riskFactors.length > 0) {
-            if (currentY > 650) {
-              doc.addPage();
-              currentY = 50;
-            }
-
-            doc.fillColor('#dc2626')
-               .fontSize(10)
-               .font('Helvetica-Bold')
-               .text('[Key Risk Factors]', 65, currentY);
-
-            currentY += 15;
-
-            analysis.riskFactors.forEach(risk => {
-              if (currentY > 700) {
-                doc.addPage();
-                currentY = 50;
-              }
-
-              doc.fillColor('#374151')
-                 .fontSize(8)
-                 .font('Helvetica')
-                 .text(`! ${risk}`, 75, currentY, { width: 460 });
-
-              currentY = doc.y + 4;
-            });
-
-            currentY += 8;
-          }
-
-          // Timeline
-          if (analysis.timeline) {
-            if (currentY > 680) {
-              doc.addPage();
-              currentY = 50;
-            }
-
-            doc.rect(65, currentY, 470, 30)
-               .fillAndStroke('#dbeafe', '#0284c7');
-
-            doc.fillColor('#1e40af')
-               .fontSize(9)
-               .font('Helvetica-Bold')
-               .text(`[Timeline] ${analysis.timeline}`, 70, currentY + 8, { width: 460 });
-
-            currentY += 40;
-          }
-        }
-
-        doc.y = currentY + 15;
-      });
-
-      // Summary Section if available
-      if (report.summary) {
-        // Check if we need a new page
-        if (doc.y > 550) {
-          doc.addPage();
-        }
-
-        doc.fillColor('#16a34a')
-           .fontSize(16)
-           .font('Helvetica-Bold')
-           .text('[Detailed Clinical Analysis]', 50, doc.y);
-
-        doc.moveDown();
-
-        doc.fillColor('#374151')
-           .fontSize(9)
-           .font('Helvetica')
-           .text(report.summary, 50, doc.y, {
-             width: 500,
-             align: 'left'
-           });
-
-        doc.moveDown(2);
-      }
-
-      // Medical Disclaimer
-      if (doc.y > 650) {
-        doc.addPage();
-      }
-
-      const disclaimerY = doc.y;
-      doc.rect(50, disclaimerY, 500, 110)
-         .fillAndStroke('#fffbeb', '#fed7aa');
-
-      doc.fillColor('#92400e')
-         .fontSize(12)
-         .font('Helvetica-Bold')
-         .text('[Important Medical Disclaimer]', 60, disclaimerY + 10);
-
-      doc.fillColor('#78350f')
-         .fontSize(8)
-         .font('Helvetica')
-         .text('This assessment is for informational and educational purposes only and does not constitute medical advice, diagnosis, or treatment. The results should not be used as a substitute for professional medical consultation, examination, diagnosis, or treatment. Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition or surgical procedure.',
-           60, disclaimerY + 30, { width: 480 });
-
-      // Footer
-      doc.moveDown(3);
-      doc.fillColor('#4b5563')
-         .fontSize(10)
-         .font('Helvetica')
-         .text('Questions about your results? Our support team is here to help.', 50, doc.y, { align: 'center' });
-
-      doc.moveDown();
-      doc.fillColor('#1a1a1a')
-         .fontSize(11)
-         .font('Helvetica-Bold')
-         .text('Best regards,', 50, doc.y, { align: 'center' });
-
-      doc.text('The Luther Health Team', 50, doc.y + 15, { align: 'center' });
-
-      // End the document
-      doc.end();
-
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
 
 // ----------------------------
 // Email Body (Brief message with PDF attachment)
@@ -5205,9 +4797,9 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
   `;
 }
 
-// Keep your existing generateEmailContent function for the fallback HTML email
+// Fallback HTML email function (when PDF generation fails)
 function generateEmailContent(userName, assessmentType, reportData) {
-  console.log("Generating email content for:", userName, assessmentType);
+  console.log("Generating fallback email content for:", userName, assessmentType);
   console.log("Report data structure:", Object.keys(reportData || {}));
 
   // Handle the report data structure correctly
@@ -5232,23 +4824,6 @@ function generateEmailContent(userName, assessmentType, reportData) {
     month: 'long',
     year: 'numeric'
   });
-
-  const getScoreColor = (score) => {
-    if (score >= 80) return '#28a745';
-    if (score >= 60) return '#ffc107';
-    if (score >= 40) return '#fd7e14';
-    return '#dc3545';
-  };
-
-  const getIcon = (level) => {
-    switch(level?.toLowerCase()) {
-      case 'optimal': return '✓';
-      case 'high': return '↗';
-      case 'moderate': return '⚠';
-      case 'low': return '⚠';
-      default: return '•';
-    }
-  };
 
   // Helper function to render detailed analysis
   const renderDetailedAnalysis = (result) => {
@@ -5437,6 +5012,7 @@ function generateEmailContent(userName, assessmentType, reportData) {
     </html>
   `;
 }
+
 
 // ----------------------------
 app.listen(process.env.PORT, () =>
