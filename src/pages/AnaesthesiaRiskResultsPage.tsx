@@ -87,8 +87,8 @@ export function AnaesthesiaRiskResultsPage() {
     setEmailSending(true);
 
     try {
-      // Get user info from sessionStorage
-      const userInfoStr = sessionStorage.getItem('userInfo');
+      // Get user info from sessionStorage (check both possible keys)
+      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
       if (!userInfoStr) {
         throw new Error('User information not found. Please complete the assessment again.');
       }
