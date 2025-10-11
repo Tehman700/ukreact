@@ -4457,6 +4457,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Adaptation Strategies'];
     } else if (assessmentType === 'Biological Age') {
       tabs = ['Overview', 'Detailed Results', 'Longevity Plan'];
+    } else if (assessmentType === 'Health Concierge') {
+      tabs = ['Overview', 'Detailed Analysis', 'Your Roadmap'];
     }
      else {
       // Default tabs for other assessments
