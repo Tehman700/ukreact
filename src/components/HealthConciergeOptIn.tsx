@@ -18,6 +18,17 @@ export function HealthConciergeOptIn({ isOpen, onClose, onAccept }: HealthConcie
       return;
     }
 
+    // ✅ Don't show popup during PDF capture (Puppeteer detection)
+    const isPuppeteer = navigator.webdriver ||
+                        /HeadlessChrome/.test(navigator.userAgent) ||
+                        window.navigator.webdriver === true;
+
+    if (isPuppeteer) {
+      setShouldShow(false);
+      console.log("🤖 Puppeteer detected - hiding Health Concierge popup");
+      return;
+    }
+
     // Check if user has paid for any funnel
     const sessionId = sessionStorage.getItem("stripe_session_id");
 
