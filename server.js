@@ -4436,7 +4436,6 @@ app.post("/api/send-email-report", async (req, res) => {
 
     const screenshots = [];
 
-    // ✅ Dynamic tab names based on assessment type
     let tabs;
     if (assessmentType === 'Surgery Readiness') {
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
@@ -4445,7 +4444,9 @@ app.post("/api/send-email-report", async (req, res) => {
     } else if (assessmentType === 'Complication Risk') {
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     } else if (assessmentType === 'Recovery Speed') {
-      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
+      tabs = ['Overview', 'Detailed Results', 'Speed Boosters'];
+    } else if (assessmentType === 'Mobility Strength') {
+      tabs = ['Overview', 'Detailed Results', 'Training Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
