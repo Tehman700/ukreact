@@ -4405,10 +4405,18 @@ app.post("/api/send-email-report", async (req, res) => {
 
     console.log(`📸 Capturing multi-tab screenshot for ${userName}...`);
 
-    // 📸 Launch Puppeteer to capture ALL tabs
     const browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: '/home/ubuntu/.cache/puppeteer/chrome/linux-141.0.7390.76/chrome-linux64/chrome',
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--disable-gpu"
+      ],
     });
 
     const page = await browser.newPage();
