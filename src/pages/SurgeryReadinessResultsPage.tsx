@@ -36,7 +36,6 @@ export function SurgeryReadinessResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
-  const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
@@ -84,18 +83,27 @@ export function SurgeryReadinessResultsPage() {
   }, []);
 
   const handleEmailReport = async () => {
-    setEmailSending(true);
-
     try {
       const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
       if (!userInfoStr) {
-        throw new Error('User information not found. Please complete the assessment again.');
+        alert('User information not found. Please complete the assessment again.');
+        setShowEmailPopup(false);
+        return;
       }
 
       const userInfo = JSON.parse(userInfoStr);
       const currentPageUrl = window.location.href;
 
-      const response = await fetch('https://luther.health/api/send-email-report', {
+      // Show success immediately and close popup
+      setEmailSent(true);
+
+      setTimeout(() => {
+        setShowEmailPopup(false);
+        setEmailSent(false);
+      }, 2000);
+
+      // Send email in background (fire and forget)
+      fetch('https://luther.health/api/send-email-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,25 +117,18 @@ export function SurgeryReadinessResultsPage() {
           pageUrl: currentPageUrl,
           activeTab: activeTab
         })
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to send email');
-      }
-
-      setEmailSent(true);
-
-      setTimeout(() => {
-        setShowEmailPopup(false);
-      }, 3000);
+      }).then(response => response.json())
+        .then(data => {
+          console.log('Email sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error sending email in background:', error);
+        });
 
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert(error instanceof Error ? error.message : 'Failed to send email. Please try again.');
-    } finally {
-      setEmailSending(false);
+      console.error('Error preparing email:', error);
+      alert('Failed to send email. Please try again.');
+      setShowEmailPopup(false);
     }
   };
 
@@ -243,7 +244,7 @@ export function SurgeryReadinessResultsPage() {
               {emailSent ? (
                 <div className="text-center py-4">
                   <p className="text-muted-foreground mb-4">
-                    A copy of your surgery readiness assessment has been sent to your email.
+                    Your report is being prepared and will be sent to your email shortly.
                   </p>
                   <Button onClick={() => setShowEmailPopup(false)} className="w-full">
                     Close
@@ -257,25 +258,14 @@ export function SurgeryReadinessResultsPage() {
                   <div className="flex space-x-3">
                     <Button
                       onClick={handleEmailReport}
-                      disabled={emailSending}
                       className="flex-1"
                     >
-                      {emailSending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send Email
-                        </>
-                      )}
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Email
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => setShowEmailPopup(false)}
-                      disabled={emailSending}
                       className="flex-1"
                     >
                       Cancel
