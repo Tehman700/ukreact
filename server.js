@@ -4448,8 +4448,11 @@ app.post("/api/send-email-report", async (req, res) => {
     } else if (assessmentType === 'Mobility Strength') {
       tabs = ['Overview', 'Detailed Results', 'Training Plan'];
     } else if (assessmentType === 'Symptom Severity') {
-      tabs = ['Overview', 'Detailed Results', 'Training Plan'];
-    } else {
+      tabs = ['Overview', 'Detailed Results', 'Management Plan'];
+    } else if (assessmentType === 'Inflammation Risk') {
+      tabs = ['Overview', 'Detailed Results', 'Anti-Inflammation Plan'];
+    }
+     else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     }

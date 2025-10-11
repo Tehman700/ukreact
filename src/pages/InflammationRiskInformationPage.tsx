@@ -117,74 +117,64 @@ export function InflammationRiskInformationPage() {
     }
   }, [reportReady, progress]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormValid()) return;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!isFormValid()) return;
 
-    setIsSubmitting(true);
-    setReportReady(false);
+  setIsSubmitting(true);
+  setReportReady(false);
 
-    try {
-      // Save user
-      const response = await fetch("https://luther.health/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: userInfo.firstName,
-          last_name: userInfo.lastName,
-          email: userInfo.email,
-          phone: userInfo.phone,
-          age_range: userInfo.age,
-        }),
-      });
+  try {
+    // Save user
+    const response = await fetch("https://luther.health/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        age_range: userInfo.age,
+      }),
+    });
 
-      const savedUser = await response.json();
-      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+    const savedUser = await response.json();
 
-      // Get stored answers
-      const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
+    // ✅ Store in BOTH keys for compatibility
+    sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+    sessionStorage.setItem("userInfo", JSON.stringify(savedUser)); // Added this line
 
-      // Generate AI report
-      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          assessmentType: "Inflammation Risk",
-          answers: pendingAnswers,
-          userInfo: savedUser,
-        }),
-      });
+    // Get stored answers
+    const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
 
-      const reportData = await reportResponse.json();
-      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-      sessionStorage.setItem("reportId", reportData.reportId.toString());
-      sessionStorage.setItem("assessmentType", "Inflammation Risk");
+    // Generate AI report
+    const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assessmentType: "Inflammation Risk",
+        answers: pendingAnswers,
+        userInfo: savedUser,
+      }),
+    });
 
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Inflammation Risk",
-          report: reportData.report,
-          reportId: reportData.reportId,
-        }),
-      });
+    const reportData = await reportResponse.json();
+    sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+    sessionStorage.setItem("reportId", reportData.reportId.toString());
+    sessionStorage.setItem("assessmentType", "Inflammation Risk");
+    // Mark report as ready
+    setReportReady(true);
 
-      // Mark report as ready
-      setReportReady(true);
+    // Wait for progress animation to complete, then redirect
+    setTimeout(() => {
+      window.location.hash = "inflammation-risk-score-results";
+    }, 1500);
 
-      // Wait for progress animation to complete, then redirect
-      setTimeout(() => {
-        window.location.hash = "inflammation-risk-score-results";
-      }, 1500);
-
-    } catch (err) {
-      console.error("Error saving user info and generating report:", err);
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error saving user info and generating report:", err);
+    setIsSubmitting(false);
+  }
+};
 
   // Calculate the stroke dash array for the progress circle
   const radius = 60;
