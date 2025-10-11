@@ -457,7 +457,6 @@ export function SurgeryReadinessResultsPage() {
                                     <div className="text-sm font-medium">{item.average}%</div>
                                     <div className="text-xs text-muted-foreground whitespace-nowrap">Average Patient</div>
                                   </div>
-                                  </div>
                                 )}
                                 {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
                                   <div
