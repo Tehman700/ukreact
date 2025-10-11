@@ -8,6 +8,8 @@ import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
 import PDFDocument from 'pdfkit';
 import { Buffer } from 'buffer';
+import puppeteer from 'puppeteer';
+
 
 
 
@@ -4394,6 +4396,100 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
+
+async function generatePDFWithPuppeteer(userName, assessmentType, reportData, reportId) {
+  let browser;
+
+  try {
+    console.log('🌐 Launching Puppeteer browser...');
+
+    // Launch browser
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process'
+      ]
+    });
+
+    const page = await browser.newPage();
+
+    // Set viewport for better rendering
+    await page.setViewport({
+      width: 1920,
+      height: 1080,
+      deviceScaleFactor: 2
+    });
+
+    console.log('📍 Navigating to results page...');
+
+    // Navigate to your results page
+    // Adjust the URL based on your deployment
+    const baseUrl = process.env.BASE_URL || 'https://luther.health';
+    const resultsUrl = `${baseUrl}/#anaesthesia-risk-screener-results`;
+
+    // First, we need to inject the report data into sessionStorage
+    await page.goto(baseUrl, { waitUntil: 'networkidle0', timeout: 30000 });
+
+    console.log('💾 Injecting report data into session storage...');
+
+    // Inject data into sessionStorage
+    await page.evaluate((reportDataStr, reportIdStr, assessmentTypeStr) => {
+      sessionStorage.setItem('assessmentReport', reportDataStr);
+      sessionStorage.setItem('reportId', reportIdStr);
+      sessionStorage.setItem('assessmentType', assessmentTypeStr);
+    }, JSON.stringify(reportData), reportId.toString(), assessmentType);
+
+    // Now navigate to the results page
+    await page.goto(resultsUrl, {
+      waitUntil: 'networkidle0',
+      timeout: 30000
+    });
+
+    console.log('⏳ Waiting for page to fully render...');
+
+    // Wait for the main content to be visible
+    await page.waitForSelector('.container', { timeout: 10000 });
+
+    // Additional wait to ensure all animations and dynamic content are loaded
+    await page.waitForTimeout(2000);
+
+    console.log('📄 Generating PDF from rendered page...');
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '10mm',
+        right: '10mm',
+        bottom: '10mm',
+        left: '10mm'
+      },
+      preferCSSPageSize: false
+    });
+
+    await browser.close();
+    console.log('✅ PDF generation complete');
+
+    return pdfBuffer;
+
+  } catch (error) {
+    console.error('❌ Puppeteer error:', error.message);
+    if (browser) {
+      await browser.close();
+    }
+    throw error;
+  }
+}
+
+// ----------------------------
+// Main Email Endpoint with Puppeteer
+// ----------------------------
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId } = req.body;
@@ -4413,18 +4509,26 @@ app.post("/api/send-email-report", async (req, res) => {
     let pdfGenerationSuccessful = false;
 
     try {
-      // Generate PDF using PDFKit
-      console.log('🚀 Starting PDF generation with PDFKit...');
-
-      pdfBuffer = await generatePDFReport(userName, assessmentType, report);
-
-      console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)`);
+      // Try Puppeteer to capture the actual results page
+      console.log('🚀 Starting PDF generation with Puppeteer (capturing results page)...');
+      pdfBuffer = await generatePDFWithPuppeteer(userName, assessmentType, report, reportId || Date.now());
+      console.log(`✅ PDF generated successfully with Puppeteer (${pdfBuffer.length} bytes)`);
       pdfGenerationSuccessful = true;
 
-    } catch (pdfError) {
-      console.error('❌ PDF generation error:', pdfError.message);
-      console.error('📍 Error stack:', pdfError.stack);
-      pdfGenerationSuccessful = false;
+    } catch (puppeteerError) {
+      console.error('❌ Puppeteer PDF generation error:', puppeteerError.message);
+      console.error('📍 Error stack:', puppeteerError.stack);
+
+      // Fallback to PDFKit if Puppeteer fails
+      try {
+        console.log('🔄 Falling back to PDFKit...');
+        pdfBuffer = await generatePDFReport(userName, assessmentType, report);
+        console.log(`✅ PDF generated successfully with PDFKit (${pdfBuffer.length} bytes)`);
+        pdfGenerationSuccessful = true;
+      } catch (pdfkitError) {
+        console.error('❌ PDFKit generation error:', pdfkitError.message);
+        pdfGenerationSuccessful = false;
+      }
     }
 
     // Send email based on whether PDF generation was successful
@@ -4491,6 +4595,9 @@ app.post("/api/send-email-report", async (req, res) => {
     });
   }
 });
+
+
+
 
 // ----------------------------
 // Generate PDF Report using PDFKit - ENHANCED VERSION
