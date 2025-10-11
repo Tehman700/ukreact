@@ -4413,7 +4413,7 @@ app.post("/api/send-email-report", async (req, res) => {
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1920, height: 1200 });
+    await page.setViewport({ width: 1280, height: 800 });
 
     // Inject sessionStorage data before navigation
     await page.evaluateOnNewDocument((reportData, userInfoData) => {
