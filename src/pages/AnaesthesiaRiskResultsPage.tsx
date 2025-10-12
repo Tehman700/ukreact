@@ -102,11 +102,9 @@ const handleEmailReport = async () => {
     setTimeout(() => {
       setShowEmailPopup(false);
       setEmailSent(false);
-      // ✅ Show the results notification after popup closes
-      setShowResultsNotification(true);
     }, 2000);
 
-    // Send email in background
+    // ✅ Send email and wait for response
     fetch('https://luther.health/api/send-email-report', {
       method: 'POST',
       headers: {
@@ -121,9 +119,14 @@ const handleEmailReport = async () => {
         pageUrl: currentPageUrl,
         activeTab: activeTab
       })
-    }).then(response => response.json())
+    })
+      .then(response => response.json())
       .then(data => {
         console.log('Email sent successfully:', data);
+        // ✅ Show results notification ONLY when server confirms success
+        if (data.success) {
+          setShowResultsNotification(true);
+        }
       })
       .catch(error => {
         console.error('Error sending email in background:', error);
@@ -282,7 +285,7 @@ const handleEmailReport = async () => {
         </div>
       )}
 
-{/* Results Notification - Shows after email is sent */}
+{/* Results Notification - Shows when server confirms email sent */}
 {showResultsNotification && (
   <>
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
@@ -312,7 +315,6 @@ const handleEmailReport = async () => {
         </CardContent>
       </Card>
     </div>
-
     {/* Overlay to prevent interaction with page content */}
     <div
       className="fixed inset-0 bg-black/20 z-40"
