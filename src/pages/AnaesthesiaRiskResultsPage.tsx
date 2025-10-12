@@ -6,7 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { X, Mail } from 'lucide-react';
+import { X} from 'lucide-react';
 
 interface AssessmentResult {
   category: string;
