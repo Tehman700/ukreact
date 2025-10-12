@@ -23,10 +23,10 @@ export function ResilienceIndexResultsPage() {
 
   const assessmentTitle = "Resilience Index";
   const assessmentType = "Comprehensive Mental & Physical Resilience Assessment";
-  const completionDate = new Date().toLocaleDateString('en-GB', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
   });
   const overallResilienceScore = 82;
   const resilienceLevel = "High";
@@ -261,20 +261,20 @@ export function ResilienceIndexResultsPage() {
                   {results.map((result, index) => (
                     <div key={index} className="space-y-4">
                       <h3 className="text-left font-medium mb-[50px] mt-[0px] mr-[0px] ml-[0px]">{result.category}</h3>
-                      
+
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = 40;
                           const rangeEnd = 100;
                           const rangeSize = rangeEnd - rangeStart;
-                          
+
                           const yourScorePosition = ((result.score - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((65 - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((90 - rangeStart) / rangeSize) * 100;
-                          
+
                           return (
                             <>
-                              <div 
+                              <div
                                 className="absolute -top-14 transform -translate-x-1/2 text-center"
                                 style={{ left: `${yourScorePosition}%` }}
                               >
@@ -283,16 +283,16 @@ export function ResilienceIndexResultsPage() {
                               </div>
 
                               <div className="relative h-2 bg-gray-300 rounded-full">
-                                <div 
+                                <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
-                                
-                                <div 
+
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
                                 />
-                                <div 
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${optimalPosition}%` }}
                                 />
@@ -300,7 +300,7 @@ export function ResilienceIndexResultsPage() {
 
                               <div className="relative mt-3 h-12">
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${averagePosition}%` }}
                                   >
@@ -309,7 +309,7 @@ export function ResilienceIndexResultsPage() {
                                   </div>
                                 )}
                                 {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${optimalPosition}%` }}
                                   >
@@ -348,7 +348,7 @@ export function ResilienceIndexResultsPage() {
                 <CardContent>
                   <div className="space-y-6">
                     <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
-                    
+
                     <div>
                       <h4 className="font-medium mb-2 flex items-center space-x-2">
                         <Target className="h-4 w-4" />
@@ -499,7 +499,7 @@ export function ResilienceIndexResultsPage() {
               <div className="space-y-1">
                 <p className="font-medium">Important Note</p>
                 <p className="text-sm text-muted-foreground">
-                  This resilience assessment provides insights into mental and emotional resilience patterns but does not diagnose psychological conditions. 
+                  This resilience assessment provides insights into mental and emotional resilience patterns but does not diagnose psychological conditions.
                   Consult mental health professionals for comprehensive psychological evaluation and personalized support.
                 </p>
               </div>
@@ -520,7 +520,7 @@ export function ResilienceIndexResultsPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-              
+
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="stress-response">
                   <AccordionTrigger className="text-sm font-medium">
@@ -578,7 +578,7 @@ export function ResilienceIndexResultsPage() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              
+
               <div className="pt-4 border-t border-muted">
                 <p className="text-xs text-muted-foreground">
                   <strong>Disclaimer:</strong> This resilience assessment is based on validated psychological research and resilience measurement tools. Results are for informational purposes and should not replace professional psychological consultation. Individual resilience capacity may vary based on personal history, current circumstances, and environmental factors not captured in this assessment.

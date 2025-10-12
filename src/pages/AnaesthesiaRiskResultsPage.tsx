@@ -6,6 +6,7 @@ import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { X, Mail } from 'lucide-react';
 
 interface AssessmentResult {
   category: string;
@@ -37,6 +38,7 @@ export function AnaesthesiaRiskResultsPage() {
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [showResultsNotification, setShowResultsNotification] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -82,55 +84,57 @@ export function AnaesthesiaRiskResultsPage() {
     loadReport();
   }, []);
 
-    const handleEmailReport = async () => {
-      try {
-        const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
-        if (!userInfoStr) {
-          alert('User information not found. Please complete the assessment again.');
-          setShowEmailPopup(false);
-          return;
-        }
+const handleEmailReport = async () => {
+  try {
+    const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+    if (!userInfoStr) {
+      alert('User information not found. Please complete the assessment again.');
+      setShowEmailPopup(false);
+      return;
+    }
 
-        const userInfo = JSON.parse(userInfoStr);
-        const currentPageUrl = window.location.href;
+    const userInfo = JSON.parse(userInfoStr);
+    const currentPageUrl = window.location.href;
 
-        // Show success immediately and close popup
-        setEmailSent(true);
+    // Show success in popup
+    setEmailSent(true);
 
-        setTimeout(() => {
-          setShowEmailPopup(false);
-          setEmailSent(false);
-        }, 2000);
+    setTimeout(() => {
+      setShowEmailPopup(false);
+      setEmailSent(false);
+      // ✅ Show the results notification after popup closes
+      setShowResultsNotification(true);
+    }, 2000);
 
-        // Send email in background (fire and forget)
-        fetch('https://luther.health/api/send-email-report', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userEmail: userInfo.email,
-            userName: `${userInfo.first_name} ${userInfo.last_name}`,
-            assessmentType: 'Anaesthesia Risk',
-            report: aiReport,
-            reportId: Date.now(),
-            pageUrl: currentPageUrl,
-            activeTab: activeTab
-          })
-        }).then(response => response.json())
-          .then(data => {
-            console.log('Email sent successfully:', data);
-          })
-          .catch(error => {
-            console.error('Error sending email in background:', error);
-          });
+    // Send email in background
+    fetch('https://luther.health/api/send-email-report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userEmail: userInfo.email,
+        userName: `${userInfo.first_name} ${userInfo.last_name}`,
+        assessmentType: 'Anaesthesia Risk',
+        report: aiReport,
+        reportId: Date.now(),
+        pageUrl: currentPageUrl,
+        activeTab: activeTab
+      })
+    }).then(response => response.json())
+      .then(data => {
+        console.log('Email sent successfully:', data);
+      })
+      .catch(error => {
+        console.error('Error sending email in background:', error);
+      });
 
-      } catch (error) {
-        console.error('Error preparing email:', error);
-        alert('Failed to send email. Please try again.');
-        setShowEmailPopup(false);
-      }
-    };
+  } catch (error) {
+    console.error('Error preparing email:', error);
+    alert('Failed to send email. Please try again.');
+    setShowEmailPopup(false);
+  }
+};
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -277,6 +281,47 @@ export function AnaesthesiaRiskResultsPage() {
           </Card>
         </div>
       )}
+
+{/* Results Notification - Shows after email is sent */}
+{showResultsNotification && (
+  <>
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
+      <Card className="mx-auto max-w-2xl shadow-lg border-2 animate-in slide-in-from-bottom duration-300">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <Mail className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+            <div className="flex-1">
+              <div>
+                <h3 className="mb-2 font-semibold">Your results are ready!</h3>
+                <p className="text-sm text-muted-foreground">
+                  A copy has also been sent to your email so you can review them anytime.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowResultsNotification(false)}
+              className="flex-shrink-0"
+              aria-label="Close notification"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    {/* Overlay to prevent interaction with page content */}
+    <div
+      className="fixed inset-0 bg-black/20 z-40"
+      onClick={() => setShowResultsNotification(false)}
+    />
+  </>
+)}
+
+
 
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
