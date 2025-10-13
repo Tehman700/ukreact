@@ -781,10 +781,7 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = biologicalAgePrompt(assessmentType);
     } else if (assessmentType === "Cardiometabolic Risk") {
       systemPrompt = cardiometabolicRiskPrompt(assessmentType);
-    } else if (assessmentType === "Resilience Index") {
-      systemPrompt = resilienceIndexPrompt(assessmentType);
-    }
-    else {
+    } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
     const userPrompt = `
@@ -838,11 +835,7 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = biologicalAgeParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Cardiometabolic Risk") {
       structuredReport = cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType);
-    } else if (assessmentType === "Resilience Index") {
-      structuredReport = resilienceIndexParseAIResponse(aiAnalysis, assessmentType);
-    }
-
-    else {
+    } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
     console.log("Structured report created:", JSON.stringify(structuredReport, null, 2));
@@ -870,94 +863,6 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
-
-
-
-
-function resilienceIndexPrompt(assessmentType) {
-  const prompts = {
-    "Resilience Index": `You are a specialist psychological resilience assessment AI with expertise in mental toughness, stress adaptation, and performance psychology. Analyze the patient's responses to evaluate their resilience capacity and provide evidence-based strategies for building adaptive capacity.
-
-IMPORTANT: Structure your response EXACTLY as follows:
-
-OVERALL_SCORE: [number between 0-100, where higher = stronger resilience]
-OVERALL_RATING: [exactly one of: "Exceptional Resilience", "High Resilience", "Moderate Resilience", "Developing Resilience"]
-
-CATEGORY_ANALYSIS:
-Stress Response: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing ability to maintain composure under pressure, stress adaptation mechanisms, and performance under stress] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Recovery Capacity: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing bounce-back ability from setbacks, emotional recovery patterns, and learning from adversity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Adaptability: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing flexibility in face of change, cognitive flexibility, and ability to find opportunities in challenges] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Social Support: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing support network quality, relationship depth, and ability to leverage support during challenges] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Mental Toughness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing mental fortitude, confidence in handling challenges, and sustained performance capacity] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Emotional Regulation: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing ability to manage emotions, emotional awareness, and emotional stability under pressure] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-Growth Mindset: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing belief in development potential, learning orientation, and perspective on challenges as opportunities] | [recommendation 1] | [recommendation 2] | [recommendation 3]
-
-DETAILED_ANALYSIS:
-Stress Response|[clinical context: 3-4 sentences on stress adaptation being trainable and predictive of performance. Reference that stress inoculation training improves performance by 30-40%. Discuss allostatic load, HPA axis regulation, cite Journal of Applied Psychology and Nature Neuroscience research on neuroplasticity]|[strengths: comma-separated list of EXACTLY 3 UNIQUE stress management strengths - NEVER write "None provided". Examples: "Maintains composure under pressure, Uses effective breathing techniques, Good stress awareness"]|[development areas: comma-separated list of 2-3 stress response optimization areas]|[timeline: specific timeline like "Practice stress exposure training daily for 4-6 weeks to build stress inoculation"]
-
-Recovery Capacity|[clinical context: 3-4 sentences on recovery being essential for sustained high performance. Reference that resilient individuals recover 50% faster from setbacks. Discuss post-traumatic growth, psychological recovery, cite Psychological Science and Journal of Personality research on bounce-back mechanisms]|[strengths: comma-separated list of EXACTLY 3 UNIQUE recovery factors - NEVER "None provided". Examples: "Good self-reflection skills, Learns from failures, Maintains perspective during setbacks"]|[development areas: comma-separated list of 2-3 recovery optimization strategies]|[timeline: specific timeline like "Implement structured recovery protocols after high-stress events over 6-8 weeks"]
-
-Adaptability|[clinical context: 3-4 sentences on adaptability being crucial in rapidly changing environments. Reference that high adaptability correlates with 60% better outcomes in uncertain situations. Discuss cognitive flexibility, growth mindset, cite Journal of Organizational Behavior and Cognitive Science research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE adaptability factors - NEVER "None provided". Examples: "Embraces change positively, Quick problem-solver, Flexible thinking patterns"]|[development areas: comma-separated list of 2-3 adaptability training needs]|[timeline: specific timeline like "Practice deliberate discomfort exposure weekly for 8-12 weeks"]
-
-Social Support|[clinical context: 3-4 sentences on social support being one of strongest resilience predictors. Reference that strong support networks reduce stress impact by 70% and improve recovery outcomes. Discuss attachment theory, social capital, cite Applied Psychology Health and British Journal of Psychology research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE social factors - NEVER "None provided". Examples: "Has trusted confidants, Good communication skills, Willing to seek help"]|[development areas: comma-separated list of 2-3 social support building strategies]|[timeline: specific timeline like "Invest in 2-3 key relationships with weekly meaningful connections over 12 weeks"]
-
-Mental Toughness|[clinical context: 3-4 sentences on mental toughness being trainable through progressive challenge. Reference that mental toughness training improves performance by 20-35% under pressure. Discuss grit, self-efficacy, cite Clinical Psychology Review and Journal of Positive Psychology research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE mental toughness factors - NEVER "None provided". Examples: "Strong self-belief, Perseveres through difficulty, Maintains focus under pressure"]|[development areas: comma-separated list of 2-3 mental toughness training areas]|[timeline: specific timeline like "Progressive challenge training with increasing difficulty over 8-12 weeks"]
-
-Emotional Regulation|[clinical context: 3-4 sentences on emotional regulation being foundational to resilience. Reference that strong emotion regulation reduces anxiety by 40-50% and improves decision-making. Discuss emotional intelligence, affect regulation, cite Clinical Psychology Science and British Medical Journal research]|[strengths: comma-separated list of EXACTLY 3 UNIQUE emotional regulation factors - NEVER "None provided". Examples: "Good emotional awareness, Can calm self when stressed, Maintains emotional balance"]|[development areas: comma-separated list of 2-3 emotional regulation strategies]|[timeline: specific timeline like "Daily emotion regulation practice for 6-8 weeks to build capacity"]
-
-Growth Mindset|[clinical context: 3-4 sentences on growth mindset predicting resilience and achievement. Reference that growth mindset correlates with 40% better outcomes when facing challenges. Discuss neuroplasticity beliefs, learning orientation, cite Psychological Science and Harvard research on mindset]|[strengths: comma-separated list of EXACTLY 3 UNIQUE growth mindset factors - NEVER "None provided". Examples: "Believes in ability to develop skills, Views challenges as opportunities, Embraces learning from mistakes"]|[development areas: comma-separated list of 2-3 mindset development strategies]|[timeline: specific timeline like "Reframe challenges as growth opportunities daily for 4-6 weeks"]
-
-CRITICAL INSTRUCTIONS FOR STRENGTHS:
-- NEVER use "None provided", "Not specified", "Limited information", or similar phrases
-- ALWAYS provide EXACTLY 3 unique strengths per category
-- Each strength must be DIFFERENT and SPECIFIC to that category
-- Base strengths on actual patient responses when available
-- When information is limited, infer reasonable strengths from context
-- For stress response: "Stays calm under pressure", "Uses coping strategies", "Good stress awareness"
-- For recovery: "Learns from setbacks", "Maintains perspective", "Self-reflective approach"
-- For adaptability: "Flexible thinking", "Embraces change", "Creative problem-solving"
-- For support: "Has trusted connections", "Communicates needs", "Values relationships"
-- Make strengths actionable and meaningful, not generic
-
-DETAILED_SUMMARY:
-[Provide a comprehensive 5-6 paragraph analysis covering:
-1. Overall resilience profile with specific resilience index score interpretation
-2. Key protective factors and resilience strengths that support thriving under pressure
-3. Primary development areas where resilience training would provide greatest benefit
-4. Evidence-based resilience building strategies with specific training protocols
-5. Performance implications - how current resilience affects stress management, recovery, and peak performance
-6. Long-term resilience development pathway with progressive challenge recommendations
-
-Include specific references to psychological research (Journal of Applied Psychology, Nature Neuroscience, Psychological Science, Clinical Psychology Review, British Journal of Psychology), cite evidence-based resilience training methods with percentage improvements, and provide personalized development recommendations. Use empowering, growth-oriented language that emphasizes resilience as trainable capacity rather than fixed trait. Focus on building antifragility - becoming stronger through stress exposure.]
-
-SCORING GUIDELINES:
-- Score 85-100 (Exceptional): Extraordinary resilience with strong adaptive capacity across all domains
-- Score 70-84 (High): Strong resilience with excellent stress management and recovery
-- Score 55-69 (Moderate): Good baseline resilience with clear development opportunities
-- Score 0-54 (Developing): Building resilience foundation, significant growth potential
-
-RESILIENCE LEVEL COMMUNICATION:
-- Use "Exceptional Resilience" for scores 85-100
-- Use "High Resilience" for scores 70-84
-- Use "Moderate Resilience" for scores 55-69
-- Use "Developing Resilience" for scores 0-54
-
-Focus on evidence-based resilience training with specific protocols and timelines. Emphasize that resilience is highly trainable through progressive stress exposure, recovery optimization, and mindset development. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use growth-oriented language that motivates resilience building while being realistic about current capacity and development needs.`,
-
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
-  };
-
-  return prompts[assessmentType] || prompts["default"];
-}
-
-
-
 
 function cardiometabolicRiskPrompt(assessmentType) {
   const prompts = {
@@ -1898,259 +1803,6 @@ Focus on actionable, evidence-based recommendations that are personalized to the
   return prompts[assessmentType] || prompts["default"];
 }
 
-
-function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
-  try {
-    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
-    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
-
-    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "High Resilience";
-
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
-    const results = [];
-
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
-    const detailedAnalysisMap = new Map();
-
-    if (detailedSection) {
-      const categories = [
-        'Stress Response',
-        'Recovery Capacity',
-        'Adaptability',
-        'Social Support',
-        'Mental Toughness',
-        'Emotional Regulation',
-        'Growth Mindset'
-      ];
-
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
-        const match = detailedSection[1].match(regex);
-
-        if (match) {
-          detailedAnalysisMap.set(category, {
-            clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
-          });
-        }
-      });
-    }
-
-    if (categorySection) {
-      const categories = [
-        'Stress Response',
-        'Recovery Capacity',
-        'Adaptability',
-        'Social Support',
-        'Mental Toughness',
-        'Emotional Regulation',
-        'Growth Mindset'
-      ];
-
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
-        const categoryMatch = categorySection[1].match(categoryRegex);
-
-        if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
-
-          if (parts.length >= 4) {
-            const score = parseInt(parts[0]) || 75;
-            const level = parts[1].toLowerCase();
-            const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
-
-            const detailedAnalysis = detailedAnalysisMap.get(category) || {
-              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for resilience development.`,
-              strengths: ['Baseline capacity present', 'Awareness of importance', 'Motivation to improve'],
-              riskFactors: ['Continue resilience training'],
-              timeline: 'Practice resilience strategies consistently over 6-8 weeks.'
-            };
-
-            results.push({
-              category,
-              score,
-              maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
-              description,
-              recommendations,
-              detailedAnalysis
-            });
-          }
-        }
-      });
-    }
-
-    if (results.length === 0) {
-      console.log("Creating fallback structure for Resilience Index");
-
-      const fallbackCategories = [
-        {
-          name: 'Stress Response',
-          desc: 'Good ability to maintain composure under pressure with developing stress adaptation mechanisms.',
-          context: 'Stress adaptation is highly trainable and predictive of performance. Research shows stress inoculation training improves performance by 30-40% under pressure. Your stress response capacity can be systematically developed through progressive stress exposure and recovery protocols.',
-          strengths: [
-            'Maintains composure in many situations',
-            'Uses some effective coping strategies',
-            'Good awareness of stress triggers and patterns'
-          ],
-          risks: [
-            'Practice advanced stress inoculation techniques',
-            'Develop scenario-based stress training protocols'
-          ]
-        },
-        {
-          name: 'Recovery Capacity',
-          desc: 'Strong bounce-back ability from setbacks with good emotional and mental recovery patterns.',
-          context: 'Recovery is essential for sustained high performance. Resilient individuals recover 50% faster from setbacks through effective processing. Post-traumatic growth research shows adversity can strengthen resilience when approached with proper recovery strategies.',
-          strengths: [
-            'Good self-reflection after setbacks',
-            'Learns from failures effectively',
-            'Maintains perspective during challenges'
-          ],
-          risks: [
-            'Implement structured recovery protocols after stress',
-            'Deepen lesson-extraction and meaning-making practices'
-          ]
-        },
-        {
-          name: 'Adaptability',
-          desc: 'Good flexibility in adapting to change with strong ability to find opportunities in challenges.',
-          context: 'Adaptability is crucial in rapidly changing environments. Research shows high adaptability correlates with 60% better outcomes in uncertain situations. Cognitive flexibility training enhances problem-solving capacity and change tolerance significantly.',
-          strengths: [
-            'Embraces change with positive mindset',
-            'Quick and creative problem-solver',
-            'Flexible thinking patterns and approaches'
-          ],
-          risks: [
-            'Practice deliberate discomfort exposure weekly',
-            'Develop scenario planning and mental simulation skills'
-          ]
-        },
-        {
-          name: 'Social Support',
-          desc: 'Adequate support network with room for strengthening key relationships and expanding trusted connections.',
-          context: 'Social support is one of the strongest resilience predictors. Strong support networks reduce stress impact by 70% and dramatically improve recovery outcomes. Quality relationships provide both emotional buffer and practical resources during challenges.',
-          strengths: [
-            'Has some trusted confidants available',
-            'Good communication and connection skills',
-            'Willing to seek help when needed'
-          ],
-          risks: [
-            'Invest in deepening 2-3 key relationships',
-            'Expand support network through communities and groups'
-          ]
-        },
-        {
-          name: 'Mental Toughness',
-          desc: 'Strong mental fortitude with good confidence in ability to handle challenges and maintain performance.',
-          context: 'Mental toughness is trainable through progressive challenge. Research shows mental toughness training improves performance by 20-35% under pressure. Grit and self-efficacy develop through consistent practice facing progressively difficult situations.',
-          strengths: [
-            'Strong self-belief and confidence',
-            'Perseveres through difficulties consistently',
-            'Maintains focus under pressure'
-          ],
-          risks: [
-            'Continue challenging yourself with progressive goals',
-            'Develop advanced mental toughness training protocols'
-          ]
-        },
-        {
-          name: 'Emotional Regulation',
-          desc: 'Good ability to manage emotions with developing emotional awareness and stability under pressure.',
-          context: 'Emotional regulation is foundational to resilience. Strong emotion regulation reduces anxiety by 40-50% and improves decision-making quality. Emotional intelligence skills are highly trainable and provide broad benefits across life domains.',
-          strengths: [
-            'Good emotional self-awareness',
-            'Can calm self effectively when stressed',
-            'Maintains emotional balance in most situations'
-          ],
-          risks: [
-            'Practice advanced regulation techniques daily',
-            'Develop deeper emotional intelligence skills'
-          ]
-        },
-        {
-          name: 'Growth Mindset',
-          desc: 'Strong belief in development potential with good learning orientation and positive challenge perspective.',
-          context: 'Growth mindset predicts resilience and achievement outcomes. Research shows growth mindset correlates with 40% better outcomes when facing challenges. Neuroplasticity research confirms abilities can be developed significantly through deliberate effort and practice.',
-          strengths: [
-            'Believes strongly in ability to develop skills',
-            'Views challenges as growth opportunities',
-            'Embraces learning from mistakes and setbacks'
-          ],
-          risks: [
-            'Deepen growth mindset through consistent practice',
-            'Reframe all challenges as development opportunities'
-          ]
-        }
-      ];
-
-      fallbackCategories.forEach(cat => {
-        results.push({
-          category: cat.name,
-          score: Math.floor(Math.random() * 20) + 70,
-          maxScore: 100,
-          level: 'high',
-          description: cat.desc,
-          recommendations: [
-            'Continue developing this resilience capacity systematically',
-            'Practice evidence-based resilience strategies consistently',
-            'Track progress and celebrate improvements over time'
-          ],
-          detailedAnalysis: {
-            clinicalContext: cat.context,
-            strengths: cat.strengths,
-            riskFactors: cat.risks,
-            timeline: 'Consistent practice over 6-8 weeks will show measurable improvement in this area.'
-          }
-        });
-      });
-    }
-
-    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
-    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
-
-    return {
-      overallScore,
-      overallRating,
-      results,
-      summary,
-      assessmentType
-    };
-
-  } catch (error) {
-    console.error("Error parsing Resilience Index AI response:", error);
-
-    return {
-      overallScore: 75,
-      overallRating: "High Resilience",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "high",
-        description: "Your resilience assessment has been completed. You demonstrate good adaptive capacity with clear pathways for further development through evidence-based training.",
-        recommendations: [
-          "Practice stress inoculation through progressive challenge exposure",
-          "Build deeper social support connections with trusted individuals",
-          "Develop advanced emotional regulation and mental toughness skills"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Resilience awareness', 'Motivation to develop'],
-          riskFactors: ['Continue systematic resilience training'],
-          timeline: 'Consistent resilience practice over 6-8 weeks will show significant measurable improvement.'
-        }
-      }],
-      summary: aiAnalysis,
-      assessmentType
-    };
-  }
-}
-
 function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
   try {
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
@@ -2408,11 +2060,6 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
     };
   }
 }
-
-
-
-
-
 
 function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
   try {
@@ -5155,10 +4802,7 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Analysis', 'Your Roadmap'];
     } else if (assessmentType === 'Cardiometabolic Risk') {
       tabs = ['Overview', 'Detailed Results', 'Prevention Plan'];
-    }
-
-
-    else {
+    } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
     }
