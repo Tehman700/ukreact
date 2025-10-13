@@ -15,7 +15,7 @@ const complicationRiskAssessment: Assessment = {
   name: 'Complication Risk Checker',
   description:
     'Comprehensive lifestyle and comorbidity analysis to predict and prevent surgical complications before they occur.',
-  price: 39.99,
+  price: 40,
   image:
     'https://images.unsplash.com/photo-1682365114794-14b870355d21?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwY29tcGxpY2F0aW9uJTIwcmlzayUyMGFzc2VzbWVudHxlbnwxfHx8fDE3NTczMTU2NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
   icon: <AlertTriangle className="w-6 h-6" />,
