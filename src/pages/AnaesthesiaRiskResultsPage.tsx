@@ -38,6 +38,7 @@ export function AnaesthesiaRiskResultsPage() {
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [showResultsNotification, setShowResultsNotification] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
