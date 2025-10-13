@@ -6,7 +6,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Assessment } from '../App';
 import { Heart, Play } from 'lucide-react';
 import heroImage from '/assests/anaesthesia-hero.webp';
-import sec from '/assests/sec.webp';
+import benefitsImage from '/assests/sec.webp';
 
 // --- Utilities
 const formatPrice = (value: number, currency: string = 'GBP') =>
@@ -110,62 +110,76 @@ const handleTryDemo = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="relative">
-              {/* Background placeholder (re-using hero for now) */}
+              {/* Background Image */}
               <div className="relative w-full max-w-2xl mx-auto mb-8 md:mb-0">
                 <ImageWithFallback
-                  src={sec}
-                  alt="Anaesthesia safety benefits"
-                  className="w-full h-auto object-cover rounded-lg"
+                  src={benefitsImage}
+                  alt="Luther Health Surgery Benefits"
+                  className="w-200 h-auto object-cover rounded-lg"
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Safety */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Safety</h3>
-                    <p className="text-sm text-muted-foreground">Flag issues before induction.</p>
+              {/* Desktop Overlapping Cards */}
+              <div className="hidden md:block absolute inset-0 pointer-events-none">
+                <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Clarity at a Glance</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      A single readiness score gives you an elegant <br /> straightforward measure of
+                      <br /> where you stand.
+                    </p>
                   </CardContent>
                 </Card>
 
-                {/* Top Right - Precision */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Precision</h3>
-                    <p className="text-sm text-muted-foreground">Guide drug and dosing choices.</p>
+                <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Exclusive Insight</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      Uncovers hidden risks so you can address
+                      <br /> them before they become <br />
+                      obstacles.
+                    </p>
                   </CardContent>
                 </Card>
 
-                {/* Middle Left - Airway */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Airway</h3>
-                    <p className="text-sm text-muted-foreground">Sleep apnoea and reflux risks.</p>
+                <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Premium Protection</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      Reduced complications mean a smoother
+                      <br /> safer surgical journey.
+                    </p>
                   </CardContent>
                 </Card>
 
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Arrive prepared with a plan.</p>
+                <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Accelerated Recovery</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      Optimised preparation ensures you return
+                      <br /> to the lifestyle you enjoy, faster.
+                    </p>
                   </CardContent>
                 </Card>
 
-                {/* Bottom Left - Recovery */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Recovery</h3>
-                    <p className="text-sm text-muted-foreground">Fewer surprises, smoother wake-up.</p>
+                <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Confidence Restored</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      Peace of mind knowing you're entering
+                      <br />
+                      surgery at your very best.
+                    </p>
                   </CardContent>
                 </Card>
 
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Recommendations matched to you.</p>
+                <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <h3 className="font-bold mb-3">Bespoke Planning</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+                      A personalised improvement plan crafted
+                      <br /> around your top priorities.
+                    </p>
                   </CardContent>
                 </Card>
               </div>

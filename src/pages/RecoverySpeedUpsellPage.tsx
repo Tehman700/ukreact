@@ -16,7 +16,7 @@ const recoverySpeedAssessment: Assessment = {
   name: 'Recovery Speed Predictor',
   description:
     'Personalised recovery timeline based on nutrition, mindset, and home support systems to optimise healing.',
-  price: 44.99,
+  price: 45,
   image:sec,
   icon: <Zap className="w-6 h-6" />,
   features: ['Nutrition impact analysis', 'Mental readiness assessment', 'Support system optimisation'],
