@@ -29,13 +29,14 @@ interface AIReport {
   summary: string;
 }
 
-export function SurgeryReadinessResultsPage() {
+export default function SurgeryReadinessResultsPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations'>('overview');
   const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['overview']));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -85,8 +86,14 @@ export function SurgeryReadinessResultsPage() {
   }, []);
 
   const handleEmailReport = async () => {
-    // Close popup immediately
-    setShowEmailPopup(false);
+    // Show sent state
+    setEmailSent(true);
+
+    // Close popup after 2 seconds
+    setTimeout(() => {
+      setShowEmailPopup(false);
+      setEmailSent(false);
+    }, 2000);
 
     try {
       const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
@@ -222,35 +229,49 @@ export function SurgeryReadinessResultsPage() {
     <div className="min-h-screen bg-background">
       {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <Card className="max-w-md w-full mx-4">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Mail className="h-5 w-5" />
-                <span>Email Your Report</span>
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div>
                 <p className="text-muted-foreground mb-6">
-                  Would you like a copy of your personalised report emailed to you?
+                  {emailSent
+                    ? 'Your report will be sent to your email shortly.'
+                    : 'Would you like a copy of your personalised report emailed to you?'
+                  }
                 </p>
-                <div className="flex space-x-3">
-                  <Button
-                    onClick={handleEmailReport}
-                    className="flex-1"
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Yes, Email Me
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleSkipEmail}
-                    className="flex-1"
-                  >
-                    No Thanks
-                  </Button>
-                </div>
+                {!emailSent && (
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      className="flex-1"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Yes, Email Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleSkipEmail}
+                      className="flex-1"
+                    >
+                      No Thanks
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
