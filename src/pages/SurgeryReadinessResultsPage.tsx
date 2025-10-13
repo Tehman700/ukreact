@@ -29,7 +29,7 @@ interface AIReport {
   summary: string;
 }
 
-export default function SurgeryReadinessResultsPage() {
+export function SurgeryReadinessResultsPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations'>('overview');
   const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['overview']));
   const [loading, setLoading] = useState(true);
