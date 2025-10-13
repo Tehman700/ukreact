@@ -36,7 +36,6 @@ export function SurgeryReadinessResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
-  const [emailSending, setEmailSending] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -86,22 +85,21 @@ export function SurgeryReadinessResultsPage() {
   }, []);
 
   const handleEmailReport = async () => {
-    try {
-      setEmailSending(true);
+    // Close popup immediately
+    setShowEmailPopup(false);
 
+    try {
       const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
       if (!userInfoStr) {
-        alert('User information not found. Please complete the assessment again.');
-        setShowEmailPopup(false);
-        setEmailSending(false);
+        console.error('User information not found');
         return;
       }
 
       const userInfo = JSON.parse(userInfoStr);
       const currentPageUrl = window.location.href;
 
-      // Send email
-      const response = await fetch('https://luther.health/api/send-email-report', {
+      // Send email in background
+      fetch('https://luther.health/api/send-email-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,23 +113,17 @@ export function SurgeryReadinessResultsPage() {
           pageUrl: currentPageUrl,
           activeTab: activeTab
         })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        console.log('Email sent successfully:', data);
-      }
-
-      // Close popup after sending
-      setShowEmailPopup(false);
-      setEmailSending(false);
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Email sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error sending email:', error);
+        });
 
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Failed to send email. Please try again.');
-      setShowEmailPopup(false);
-      setEmailSending(false);
+      console.error('Error preparing email:', error);
     }
   };
 
@@ -230,7 +222,7 @@ export function SurgeryReadinessResultsPage() {
     <div className="min-h-screen bg-background">
       {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
           <Card className="max-w-md w-full mx-4">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -247,25 +239,14 @@ export function SurgeryReadinessResultsPage() {
                   <Button
                     onClick={handleEmailReport}
                     className="flex-1"
-                    disabled={emailSending}
                   >
-                    {emailSending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Yes, Email Me
-                      </>
-                    )}
+                    <Mail className="h-4 w-4 mr-2" />
+                    Yes, Email Me
                   </Button>
                   <Button
                     variant="outline"
                     onClick={handleSkipEmail}
                     className="flex-1"
-                    disabled={emailSending}
                   >
                     No Thanks
                   </Button>
