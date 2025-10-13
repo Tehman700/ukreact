@@ -6,7 +6,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Assessment} from '../App';
 import { Thermometer, Play } from 'lucide-react';
 import heroImage from '/assests/symp-sever-hero.webp';
-import sec from '/assests/symp-sec.webp';
+import benefitsImage from '/assests/symp-sec.webp';
 
 // Symptom Severity Assessment definition
 const symptomSeverityAssessment: Assessment = {
@@ -14,8 +14,8 @@ const symptomSeverityAssessment: Assessment = {
   name: 'Symptom Severity Index',
   description:
     'Comprehensive assessment capturing frequency and intensity of pain, fatigue, digestive or joint issues.',
-  price: 42.99,
-  image:sec,
+  price: 43,
+  image:benefitsImage,
   icon: <Thermometer className="w-6 h-6" />,
   features: ['Pain intensity scoring', 'Fatigue impact analysis', 'Digestive symptom tracking'],
 };
@@ -101,7 +101,7 @@ export function SymptomSeverityUpsellPage({ onAddToBasket, onOpenBasket }: Sympt
         </div>
       </section>
 
-      {/* Benefits Section with Overlapping Cards (templated) */}
+      {/* Benefits Section with Overlapping Cards */}
       <section className="py-16 md:py-24 bg-muted/10">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -109,57 +109,81 @@ export function SymptomSeverityUpsellPage({ onAddToBasket, onOpenBasket }: Sympt
               {/* Background Image */}
               <div className="relative w-full max-w-2xl mx-auto mb-8 md:mb-0">
                 <ImageWithFallback
-                  src={symptomSeverityAssessment.image as any}
-                  alt="Symptom Tracking Benefits"
-                  className="w-full h-auto object-cover rounded-lg"
+                  src={benefitsImage}
+                  alt="Luther Health Surgery Benefits"
+                  className="w-200 h-auto object-cover rounded-lg"
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your symptoms in one score.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Speed */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">Quick to complete.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot flare patterns.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Talk to clinicians clearly.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Reduce avoidable flare-ups.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Understand your symptoms at a glance<br />
+        with one simple, clear score.<br />
+        Know exactly where you stand today.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Speed</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Complete your check-in in moments,<br />
+        from anywhere and at any time.<br />
+        Quick insights, without the wait.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot patterns in your symptoms early.<br />
+        Understand what triggers flare-ups.<br />
+        Turn data into real health awareness.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Share clear results with your clinician.<br />
+        Build stronger, informed conversations.<br />
+        Confidence begins with understanding.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Take action early to prevent flare-ups.<br />
+        Stay one step ahead of your symptoms.<br />
+        Protect your health proactively.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a plan built around your health.<br />
+        Address your unique needs with care.<br />
+        Your health, your personalized path.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">

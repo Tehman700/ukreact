@@ -24,7 +24,7 @@ const completedSurgeryPreparationAssessment: Assessment = {
   name: 'Completed Surgery Preparation Bundle',
   description:
     'Comprehensive surgical preparation assessment combining readiness, complication risk, recovery prediction, anaesthesia screening, and mobility evaluation in one complete bundle.',
-  price: 149.99,
+  price: 120,
   image: biologicalAgeImage,
   icon: <Shield className="w-6 h-6" />,
   category: 'Surgery',
@@ -308,8 +308,8 @@ export function CompletedSurgeryPreparationUpsellPage() {
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£149.99</p>
-                        <Badge variant="secondary" className="text-xs">Save £55 vs individual</Badge>
+                        <p className="font-medium">£120</p>
+                        <Badge variant="secondary" className="text-xs">Save £87 vs individual</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">Complete 5-assessment bundle</p>
                     </div>
