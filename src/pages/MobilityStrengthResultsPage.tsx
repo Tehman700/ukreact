@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Activity, Target, BookOpen, BarChart3, Clock, Loader2, Mail, Download } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BookOpen, BarChart3, Target, Clock, Loader2, Mail, Download } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { X } from 'lucide-react';
 
@@ -141,8 +141,7 @@ const handleEmailReport = async () => {
   }
 };
 
-
-
+  // Comparison data for charts - dynamically built from AI results
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
     yourScore: result.score,
@@ -234,6 +233,7 @@ const handleEmailReport = async () => {
 
   return (
       <div className="min-h-screen bg-background">
+      {/* Email Popup */}
       {showEmailPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <Card className="max-w-md w-full mx-4">
@@ -330,7 +330,7 @@ const handleEmailReport = async () => {
 )}
 
 
-        <div className="border-b bg-card">
+  <div className="border-b bg-card">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon" onClick={handleBackToAssessments}>
@@ -366,20 +366,10 @@ const handleEmailReport = async () => {
                 <Progress value={overallScore} className="w-full max-w-md mx-auto" />
                 <p className="text-muted-foreground max-w-md mx-auto">
                   Your mobility baseline provides a foundation for successful surgical recovery.
-              </p>
-
-              {/* Email Report Button */}
-              <Button
-                onClick={() => setShowEmailPopup(true)}
-                variant="outline"
-                className="mt-4"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download Report (Email PDF)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Navigation Tabs */}
           <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
