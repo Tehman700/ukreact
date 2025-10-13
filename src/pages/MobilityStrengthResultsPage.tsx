@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Activity, Target, BookOpen, BarChart3, Clock, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Activity, Shield, Target, BookOpen, BarChart3, Clock, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -36,6 +35,8 @@ export function MobilityStrengthResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -72,6 +73,19 @@ export function MobilityStrengthResultsPage() {
 
         setAiReport(report);
 
+        // Check if page is being accessed by Puppeteer (look for common indicators)
+        const isPuppeteer =
+          navigator.webdriver ||
+          window.navigator.userAgent.includes('HeadlessChrome') ||
+          window.navigator.userAgent.includes('Puppeteer') ||
+          // Check for URL parameter that Puppeteer can add
+          new URLSearchParams(window.location.search).get('puppeteer') === 'true';
+
+        // Only show email popup if NOT in Puppeteer
+        if (!isPuppeteer) {
+          setShowEmailPopup(true);
+        }
+
       } catch (err) {
         console.error('Error loading report:', err);
         setError(err instanceof Error ? err.message : 'Unable to load report');
@@ -82,6 +96,61 @@ export function MobilityStrengthResultsPage() {
 
     loadReport();
   }, []);
+
+
+  const handleEmailReport = async () => {
+    // Show sent state
+    setEmailSent(true);
+
+    // Close popup after 2 seconds
+    setTimeout(() => {
+      setShowEmailPopup(false);
+      setEmailSent(false);
+    }, 2000);
+
+    try {
+      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+      if (!userInfoStr) {
+        console.error('User information not found');
+        return;
+      }
+
+      const userInfo = JSON.parse(userInfoStr);
+      const currentPageUrl = window.location.href;
+
+      // Send email in background
+      fetch('https://luther.health/api/send-email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: userInfo.email,
+          userName: `${userInfo.first_name} ${userInfo.last_name}`,
+          assessmentType: 'Mobility Strength',
+          report: aiReport,
+          reportId: Date.now(),
+          pageUrl: currentPageUrl,
+          activeTab: activeTab
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Email sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error sending email:', error);
+        });
+
+    } catch (error) {
+      console.error('Error preparing email:', error);
+    }
+  };
+
+  const handleSkipEmail = () => {
+    setShowEmailPopup(false);
+  };
+
 
   // Comparison data for charts - dynamically built from AI results
   const comparisonData = aiReport?.results.map(result => ({
@@ -139,21 +208,18 @@ export function MobilityStrengthResultsPage() {
   // Loading state
   if (loading) {
     return (
-      <PaymentGate requiredFunnel="mobility">
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">Analyzing your mobility baseline...</p>
           </div>
         </div>
-      </PaymentGate>
     );
   }
 
   // Error state
   if (error || !aiReport) {
     return (
-      <PaymentGate requiredFunnel="mobility">
         <div className="min-h-screen bg-background flex items-center justify-center">
           <Card className="max-w-md">
             <CardHeader>
@@ -170,7 +236,6 @@ export function MobilityStrengthResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </PaymentGate>
     );
   }
 
@@ -178,9 +243,57 @@ export function MobilityStrengthResultsPage() {
   const rating = getOverallRating(overallRating);
 
   return (
-    <PaymentGate requiredFunnel="mobility">
       <div className="min-h-screen bg-background">
-        {/* Header */}
+      {/* Email Popup - Shows immediately on page load */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <p className="text-muted-foreground mb-6">
+                  {emailSent
+                    ? 'Your report will be sent to your email shortly.'
+                    : 'Would you like a copy of your personalised report emailed to you?'
+                  }
+                </p>
+                {!emailSent && (
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      className="flex-1"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Yes, Email Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleSkipEmail}
+                      className="flex-1"
+                    >
+                      No Thanks
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
         <div className="border-b bg-card">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center space-x-4">
@@ -719,6 +832,5 @@ export function MobilityStrengthResultsPage() {
           </Card>
         </div>
       </div>
-    </PaymentGate>
   );
 }

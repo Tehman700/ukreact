@@ -14,7 +14,7 @@ const mobilityStrengthAssessment: Assessment = {
   name: 'Mobility & Strength Score',
   description:
     'Baseline physical assessment to track post-operative recovery progress and optimize rehabilitation outcomes.',
-  price: 49.99,
+  price: 50,
   image:
     'https://images.unsplash.com/photo-1740572497450-4f4f2d3be984?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2JpbGl0eSUyMHN0cmVuZ3RoJTIwYXNzZXNzbWVudCUyMHBoeXNpY2FsJTIwdGhlcmFweXxlbnwxfHx8fDE3NTczMTU2NjF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
   icon: <Activity className="w-6 h-6" />,
@@ -102,7 +102,7 @@ export function MobilityStrengthUpsellPage({ onAddToBasket, onOpenBasket }: Mobi
         </div>
       </section>
 
-      {/* Benefits Section with Overlapping Cards (templated) */}
+      {/* Benefits Section with Overlapping Cards */}
       <section className="py-16 md:py-24 bg-muted/10">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -111,56 +111,79 @@ export function MobilityStrengthUpsellPage({ onAddToBasket, onOpenBasket }: Mobi
               <div className="relative w-full max-w-2xl mx-auto mb-8 md:mb-0">
                 <ImageWithFallback
                   src={benefitsImage}
-                  alt="Luther Health Mobility Benefits"
-                  className="w-full h-auto object-cover rounded-lg"
+                  alt="Luther Health Surgery Benefits"
+                  className="w-200 h-auto object-cover rounded-lg"
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Baseline */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Baseline</h3>
-                    <p className="text-sm text-muted-foreground">Your starting point, clearly measured.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Progress */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Progress</h3>
-                    <p className="text-sm text-muted-foreground">Track gains week by week.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Function */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Function</h3>
-                    <p className="text-sm text-muted-foreground">What you can do, quantified.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Motivating, visible improvement.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Safety */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Safety</h3>
-                    <p className="text-sm text-muted-foreground">Identify setbacks early.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan tailored to you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Baseline</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Start with a clear snapshot of your<br />
+        current strength and mobility levels.<br />
+        Ensure to build the base for smarter progress.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Progress</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Track improvements with clarity time.<br />
+        Celebrate small wins that leading to big results.<br />
+        See your hard work come to life.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Function</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Focus on real-life movements that really <br />
+        matter for everyday strength and ease.<br />
+        Move better, not just lift heavier.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Stay strong motivated with visible milestones.<br />
+        Gain trust in your body’s abilities.<br />
+        Confidence fuels consistent growth.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Safety</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot any concerns before they grow and worse.<br />
+        Adjust your plan with confidence, ease<br />
+        Protect your progress every step.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a tailored plan made for your timestamp.<br />
+        Focus on your unique goals and strengths.<br />
+        No one-size-fits-all — just your path.
+      </p>
+    </CardContent>
+  </Card>
+</div>
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
