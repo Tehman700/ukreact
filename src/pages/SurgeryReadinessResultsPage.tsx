@@ -71,8 +71,18 @@ export function SurgeryReadinessResultsPage() {
 
         setAiReport(report);
 
-        // Show email popup immediately after report loads
-        setShowEmailPopup(true);
+        // Check if page is being accessed by Puppeteer (look for common indicators)
+        const isPuppeteer =
+          navigator.webdriver ||
+          window.navigator.userAgent.includes('HeadlessChrome') ||
+          window.navigator.userAgent.includes('Puppeteer') ||
+          // Check for URL parameter that Puppeteer can add
+          new URLSearchParams(window.location.search).get('puppeteer') === 'true';
+
+        // Only show email popup if NOT in Puppeteer
+        if (!isPuppeteer) {
+          setShowEmailPopup(true);
+        }
 
       } catch (err) {
         console.error('Error loading report:', err);
