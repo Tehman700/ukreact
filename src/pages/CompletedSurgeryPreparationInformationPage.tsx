@@ -141,36 +141,54 @@ const handleSubmit = async (e: React.FormEvent) => {
     const savedUser = await response.json();
 
     sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
-    sessionStorage.setItem("userInfo", JSON.stringify(savedUser)); // Added this line
+    sessionStorage.setItem("userInfo", JSON.stringify(savedUser));
 
     // Get stored answers
     const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
 
-    // Generate AI report
-    const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        assessmentType: "Complete Surgery Bundle",
-        answers: pendingAnswers,
-        userInfo: savedUser,
-      }),
-    });
+    // Generate AI report with extended timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 240000); // 4 minutes timeout
 
-    const reportData = await reportResponse.json();
-    sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-    sessionStorage.setItem("reportId", reportData.reportId.toString());
-    sessionStorage.setItem("assessmentType", "Complete Surgery Bundle");
-    setReportReady(true);
+    try {
+      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentType: "Complete Surgery Bundle",
+          answers: pendingAnswers,
+          userInfo: savedUser,
+        }),
+        signal: controller.signal, // Add abort signal
+      });
 
-    // Wait for progress animation to complete, then redirect
-    setTimeout(() => {
-      window.location.hash = "anaesthesia-risk-screener-results";
-    }, 1500);
+      clearTimeout(timeoutId); // Clear timeout if request succeeds
+
+      if (!reportResponse.ok) {
+        throw new Error(`Server responded with ${reportResponse.status}`);
+      }
+
+      const reportData = await reportResponse.json();
+      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
+      sessionStorage.setItem("reportId", reportData.reportId.toString());
+      sessionStorage.setItem("assessmentType", "Complete Surgery Bundle");
+      setReportReady(true);
+
+      // Wait for progress animation to complete, then redirect
+      setTimeout(() => {
+        window.location.hash = "anaesthesia-risk-screener-results";
+      }, 1500);
+
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
 
   } catch (err) {
     console.error("Error saving user info and generating report:", err);
     setIsSubmitting(false);
+    // Optionally show an error message to the user
+    alert("There was an error generating your report. Please try again.");
   }
 };
 
