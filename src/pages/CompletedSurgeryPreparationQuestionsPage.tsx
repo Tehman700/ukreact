@@ -762,11 +762,11 @@ export function CompletedSurgeryPreparationQuestionsPage() {
         onComplete: async (answers) => {
           console.log("Surgery Bundle Assessment Complete:", answers);
           sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
-          window.location.hash = "surgery-bundle-information"; // go to info page
+          window.location.hash = "completed-surgery-preparation-bundle-information"; // go to info page
         },
 
     onBack: () => {
-      window.location.hash = "surgery-bundle-learn-more";
+      window.location.hash = "completed-surgery-preparation-bundle-learn-more";
     },
   };
 
