@@ -14,7 +14,7 @@ const dailyEnergyAssessment: Assessment = {
   name: 'Daily Energy Audit',
   description:
     'Detailed snapshot of fatigue patterns, sleep quality metrics, and stamina optimization potential.',
-  price: 41.99,
+  price: 42,
   image: sec,
   icon: <Battery className="w-6 h-6" />,
   category: 'Chronic Symptoms',
@@ -113,56 +113,75 @@ export function DailyEnergyUpsellPage({ onAddToBasket, onOpenBasket }: DailyEner
                 <ImageWithFallback src={sec} alt="Luther Health Energy Benefits" className="w-full h-auto object-cover rounded-lg" />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your energy, in one snapshot.</p>
-                  </CardContent>
-                </Card>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        See your daily energy patterns clearly<br />
+        at a glance and understand exactly when<br />
+        your focus and strength peak the most.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Top Right - Rhythm */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Rhythm</h3>
-                    <p className="text-sm text-muted-foreground">Work with your natural peaks.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Rhythm</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Work with your body’s natural energy peaks<br />
+        and align daily tasks to those powerful<br />
+        moments when you feel strongest.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot drains before they build.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot early signs of dips or fatigue before<br />
+        they build up. Act quickly to stay balanced<br />
+        and prevent unnecessary burnout.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Right - Focus */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Focus</h3>
-                    <p className="text-sm text-muted-foreground">Protect deep-work windows.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Focus</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Protect your deep-work hours by planning<br />
+        intentionally. Use your energy wisely and<br />
+        get more meaningful work done.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Left - Recovery */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Recovery</h3>
-                    <p className="text-sm text-muted-foreground">Sleep smarter, recharge faster.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Recovery</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Recharge intentionally between tasks to<br />
+        keep your energy flow steady and strong.<br />
+        Build simple habits that last.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built around you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow guidance crafted for your unique<br />
+        rhythm. Make each day feel smoother and<br />
+        far more productive overall.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
@@ -263,7 +282,7 @@ export function DailyEnergyUpsellPage({ onAddToBasket, onOpenBasket }: DailyEner
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£41.99</p>
+                        <p className="font-medium">£42.00</p>
                       </div>
                     </div>
                   </div>
