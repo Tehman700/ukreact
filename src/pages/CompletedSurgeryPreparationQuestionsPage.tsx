@@ -772,7 +772,7 @@ export function CompletedSurgeryPreparationQuestionsPage() {
 
   return (
     <PaymentGate requiredFunnel="surgery">
-      <QuizTemplate config={completedSurgeryPreparationQuizWithAnalytics} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }
