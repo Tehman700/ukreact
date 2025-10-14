@@ -256,7 +256,7 @@ const globalAssessments: Assessment[] = [
     id: '2',
     name: 'Practical Biological Age Proxy',
     description: 'Advanced biomarker analysis to determine your true biological age compared to chronological age.',
-    price: 49.99,
+    price: 46,
    image: biologicalAgeImage,
     icon: <Clock className="w-6 h-6" />,
     features: ['Comprehensive biomarker testing', 'Age acceleration analysis', 'Personalized longevity insights']

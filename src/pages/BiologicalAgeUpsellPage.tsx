@@ -17,7 +17,7 @@ const biologicalAgeAssessment: Assessment = {
   name: 'Practical Biological Age Proxy',
   description:
     'A pragmatic, evidence-informed proxy for biological age showing where you may be ageing faster—and what to change first.',
-  price: 299.99,
+  price: 46,
   image: biologicalAgeImage,
   icon: <Clock className="w-6 h-6" />,
   category: 'Longevity',
@@ -115,56 +115,76 @@ export function BiologicalAgeUpsellPage({ onAddToBasket, onOpenBasket }: Biologi
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">One score, clear direction.</p>
-                  </CardContent>
-                </Card>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Safety</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot and address potential risks early<br />
+        to keep your procedure safe and smooth.<br />
+        Build a foundation of trust and security.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Top Right - Trajectory */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Trajectory</h3>
-                    <p className="text-sm text-muted-foreground">See if ageing is accelerated.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Precision</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Ensure the right drug and dose decisions<br />
+        tailored to your unique health profile.<br />
+        Accuracy means fewer risks and better care.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Left - Metabolism */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Metabolism</h3>
-                    <p className="text-sm text-muted-foreground">Glucose, lipids, inflammation.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Airway</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Identify sleep apnoea or reflux risks early<br />
+        and create a safer, clearer breathing path.<br />
+        Prevent surprises during your procedure.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Right - Recovery */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Recovery</h3>
-                    <p className="text-sm text-muted-foreground">Sleep and stress load insights.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Walk in with clarity and a solid plan<br />
+        designed for your personal journey.<br />
+        Confidence leads to calmer secure recovery.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Left - Confidence */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Act on what matters most.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Recovery</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Wake up smoother with fewer surprises<br />
+        and faster stabilization after surgery.<br />
+        Healing begins the moment you’re ready.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">Recommendations matched to you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get recommendations designed around<br />
+        your health, history, and unique goals.<br />
+        Your plan should reflect only you.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
   {[
