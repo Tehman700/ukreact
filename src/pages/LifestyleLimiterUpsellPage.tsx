@@ -18,7 +18,7 @@ const lifestyleLimiterAssessment: Assessment = {
   name: 'Lifestyle Limiter Score',
   description:
     'Quantifies how symptoms are limiting work, social life, and daily independence—then points to the fastest wins.',
-  price: 44.99,
+  price: 45,
   image: heroImage,
   icon: <Users className="w-6 h-6" />,
   category: 'Chronic Symptoms',
@@ -117,56 +117,76 @@ export function LifestyleLimiterUpsellPage({ onAddToBasket, onOpenBasket }: Life
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Work */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Work</h3>
-                    <p className="text-sm text-muted-foreground">Focus, stamina, productivity.</p>
-                  </CardContent>
-                </Card>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Work</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Stay focused longer and get the most <br />
+        more done each day. Build the <br />
+        stamina without pushing limits.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Top Right - Social */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Social</h3>
-                    <p className="text-sm text-muted-foreground">Connection without burnout.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Social</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Enjoy meaningful connections also with<br />
+        while protecting your energy.<br />
+        Stay engaged, not burnt out.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Left - Independence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Independence</h3>
-                    <p className="text-sm text-muted-foreground">Daily tasks, safely paced.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Independence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Handle daily tasks at your pace. Enjoying<br />
+        Stay steady, safe, and fully<br />
+        in control of your routine.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Middle Right - Energy */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Energy</h3>
-                    <p className="text-sm text-muted-foreground">Plan days to avoid crashes.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Energy</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Plan your day around natural and fully<br />
+        highs and lows. Prevent energy<br />
+        crashes before they happen.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Left - Confidence */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Know your limits—and expand them.</p>
-                  </CardContent>
-                </Card>
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Know your limits clearly and check to<br />
+        push them further gradually.<br />
+        Build strength with trust.
+      </p>
+    </CardContent>
+  </Card>
 
-                {/* Bottom Right - Direction */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Direction</h3>
-                    <p className="text-sm text-muted-foreground">Clear next steps that fit.</p>
-                  </CardContent>
-                </Card>
-              </div>
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Direction</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get clear, personal next steps. for day<br />
+        Make each day feel structured<br />
+        and easier to manage.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
