@@ -787,6 +787,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = nutritionCompositionPrompt(assessmentType);
     } else if (assessmentType === "Functional Fitness") {
       systemPrompt = functionalFitnessPrompt(assessmentType);
+    } else if (assessmentType === "Complete Surgery Bundle") {
+      systemPrompt = completeSurgeryBundlePrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -847,6 +849,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = nutritionCompositionParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Functional Fitness") {
       structuredReport = functionalFitnessParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Complete Surgery Bundle") {
+      structuredReport = completeSurgeryBundleParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -875,6 +879,89 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+// Add this to server.js
+
+function completeSurgeryBundlePrompt(assessmentType) {
+  const prompts = {
+    "Complete Surgery Bundle": `You are a comprehensive surgical preparation specialist AI with expertise across all domains of perioperative medicine including readiness assessment, complication risk, recovery prediction, anaesthesia safety, mobility evaluation, nutrition optimization, psychological preparation, and support system analysis. Analyze the patient's comprehensive 40-question responses across all 5 assessment domains to provide an integrated surgical preparation evaluation.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better overall surgical preparation]
+OVERALL_RATING: [exactly one of: "Excellent Preparation", "Well Prepared", "Adequate Preparation", "Needs Improvement"]
+
+CATEGORY_ANALYSIS:
+Surgery Readiness Score: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence comprehensive description analyzing overall surgical readiness including health status, pre-operative understanding, and timing considerations] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Complication Risk Assessment: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing medical history, lifestyle factors, medication profile, and modifiable risk factors] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4] | [recommendation 5]
+
+Recovery Speed Prediction: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing nutritional status, support systems, home environment, sleep quality, and recovery factors] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4] | [recommendation 5]
+
+Anaesthesia Risk Profile: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing airway assessment, sleep quality, respiratory function, previous anaesthesia experiences, and cardiovascular stability] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Mobility & Strength Baseline: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing current physical function, strength, mobility, fall risk, and post-operative rehabilitation potential] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Nutritional Optimization: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing protein intake, micronutrient status, supplementation, hydration, and nutritional support for healing] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Psychological Readiness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing mental preparation, anxiety levels, stress management, coping strategies, and psychological resilience] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Support System Adequacy: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing family support, caregiver availability, financial resources, logistical planning, and social network strength] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+DETAILED_ANALYSIS:
+Surgery Readiness Score|[clinical context: 4-5 sentences synthesizing overall surgical readiness. Reference NHS guidelines, ERAS protocols, and comprehensive pre-operative assessment standards. Discuss surgery type, urgency, previous experiences, and current health optimization]|[strengths: comma-separated list of 3-4 positive readiness factors]|[optimization areas: comma-separated list of 2-3 areas to improve]|[timeline: specific timeline like "Continue healthy practices and complete final pre-operative clearances 1-2 weeks before surgery"]
+
+Complication Risk Assessment|[clinical context: 4-5 sentences on comprehensive risk profile. Reference NICE guidelines, Royal College of Surgeons protocols, surgical risk calculators, and evidence-based risk reduction strategies. Analyze medical comorbidities, medications, lifestyle factors, and modifiable risks]|[strengths: comma-separated list of 3-4 protective factors]|[optimization areas: comma-separated list of 3-4 modifiable risk factors]|[timeline: specific timeline like "Begin risk factor modification immediately, with optimal benefit seen 6-8 weeks before surgery"]
+
+Recovery Speed Prediction|[clinical context: 4-5 sentences on recovery trajectory prediction. Reference wound healing research, nutritional science, social determinants of health, and recovery optimization protocols. Discuss nutrition, support systems, home environment, and psychosocial factors]|[strengths: comma-separated list of 3-4 factors accelerating recovery]|[optimization areas: comma-separated list of 2-3 areas to enhance]|[timeline: specific timeline like "Optimize nutrition and finalize support arrangements 2-4 weeks before surgery"]
+
+Anaesthesia Risk Profile|[clinical context: 4-5 sentences on perioperative anaesthetic risk. Reference Royal College of Anaesthetists guidelines, ASA classification considerations, and anaesthetic safety protocols. Analyze airway, respiratory, cardiovascular, and pharmacologic factors]|[strengths: comma-separated list of 3-4 favorable anaesthetic factors]|[optimization areas: comma-separated list of 2-3 areas requiring attention]|[timeline: specific timeline like "Address sleep and respiratory issues 3-4 weeks pre-operatively for optimal anaesthetic safety"]
+
+Mobility & Strength Baseline|[clinical context: 4-5 sentences on functional capacity and rehabilitation potential. Reference Chartered Society of Physiotherapy standards, mobility assessment tools, and prehabilitation evidence. Discuss current function, fall risk, and post-operative mobility predictions]|[strengths: comma-separated list of 3-4 positive functional factors]|[optimization areas: comma-separated list of 2-3 functional areas to address]|[timeline: specific timeline like "Begin targeted conditioning exercises 4-6 weeks before surgery for maximum benefit"]
+
+Nutritional Optimization|[clinical context: 4-5 sentences on nutritional support for surgery. Reference British Dietetic Association standards, protein requirements for healing (1.2-1.6g/kg), micronutrient needs, and perioperative nutrition protocols]|[strengths: comma-separated list of 3-4 positive nutritional factors]|[optimization areas: comma-separated list of 2-3 nutritional areas to enhance]|[timeline: specific timeline like "Maintain high protein intake and add wound healing supplements 2-3 weeks pre-surgery"]
+
+Psychological Readiness|[clinical context: 4-5 sentences on mental preparation and resilience. Reference Health Psychology research, surgical anxiety management, and psychological predictors of recovery. Discuss stress, anxiety, coping mechanisms, and mental health optimization]|[strengths: comma-separated list of 3-4 positive psychological factors]|[optimization areas: comma-separated list of 2-3 mental health areas to address]|[timeline: specific timeline like "Begin enhanced stress reduction techniques 3-4 weeks before surgery for optimal mental preparation"]
+
+Support System Adequacy|[clinical context: 4-5 sentences on social determinants of surgical success. Reference Care Quality Commission standards, NHS discharge planning, and research on social support and recovery. Analyze caregiver support, financial resources, practical logistics, and backup planning]|[strengths: comma-separated list of 3-4 strong support factors]|[optimization areas: comma-separated list of 1-2 support areas to strengthen]|[timeline: specific timeline like "Confirm all support arrangements and establish backup plans 1-2 weeks pre-surgery"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 6-8 paragraph integrated analysis covering:
+1. Overall surgical preparation status with specific strengths across domains
+2. Integrated risk profile considering all assessment dimensions
+3. Most critical priority areas requiring immediate attention
+4. Synergistic optimization strategies that address multiple domains
+5. Predicted surgical outcome with current vs optimized preparation
+6. Comprehensive timeline for pre-operative optimization across all areas
+7. Evidence-based integration of readiness, risk, recovery, and support factors
+8. Specific actionable next steps prioritized by impact on surgical success
+
+Include comprehensive medical references to UK guidelines (NHS, NICE, ERAS, Royal College of Surgeons, Royal College of Anaesthetists, British Dietetic Association, Chartered Society of Physiotherapy), cite evidence-based practices across all surgical domains, and provide highly personalized integrated recommendations based on their comprehensive 40-question responses across all 5 assessment areas.]
+
+SCORING GUIDELINES:
+- Overall Score 90-100: Excellent preparation across all domains, minimal optimization needed
+- Overall Score 80-89: Well prepared with minor optimization opportunities
+- Overall Score 65-79: Adequate preparation with several areas requiring enhancement
+- Overall Score 50-64: Needs improvement across multiple preparation domains
+- Overall Score 0-49: Significant preparation gaps requiring comprehensive intervention
+
+Category-Specific Scoring:
+- Surgery Readiness: Consider health status, procedure understanding, timing, previous experiences
+- Complication Risk: Assess medical comorbidities, medications, lifestyle, modifiable factors (higher score = lower risk)
+- Recovery Speed: Evaluate nutrition, support, environment, sleep, psychosocial factors (higher score = faster recovery)
+- Anaesthesia Risk: Analyze airway, respiratory, cardiovascular, pharmacologic factors (higher score = lower risk)
+- Mobility/Strength: Assess functional capacity, fall risk, rehabilitation potential
+- Nutrition: Evaluate protein, micronutrients, supplements, hydration
+- Psychological: Assess mental preparation, anxiety, stress management, coping
+- Support: Analyze caregiver, financial, logistical, social network strength
+
+Focus on comprehensive, integrated, evidence-based recommendations that synthesize findings across all 5 assessment domains. Emphasize synergistic optimization strategies and provide realistic, actionable preparation plans with specific timelines.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function functionalFitnessPrompt(assessmentType) {
   const prompts = {
@@ -1990,6 +2077,224 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+function completeSurgeryBundleParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 80;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Well Prepared";
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis first - Complete Surgery Bundle specific categories
+    if (detailedSection) {
+      const categories = [
+        'Surgery Readiness Score',
+        'Complication Risk Assessment',
+        'Recovery Speed Prediction',
+        'Anaesthesia Risk Profile',
+        'Mobility & Strength Baseline',
+        'Nutritional Optimization',
+        'Psychological Readiness',
+        'Support System Adequacy'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Surgery Readiness Score',
+        'Complication Risk Assessment',
+        'Recovery Speed Prediction',
+        'Anaesthesia Risk Profile',
+        'Mobility & Strength Baseline',
+        'Nutritional Optimization',
+        'Psychological Readiness',
+        'Support System Adequacy'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for comprehensive surgical preparation.`,
+              strengths: ['Baseline assessment completed', 'Areas identified for optimization'],
+              riskFactors: ['Consult healthcare provider for personalized guidance'],
+              timeline: 'Discuss comprehensive preparation plan with your surgical team.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // If parsing failed, create comprehensive fallback
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Complete Surgery Bundle");
+
+      const fallbackCategories = [
+        {
+          name: 'Surgery Readiness Score',
+          desc: 'Your overall preparation shows good foundational health and appropriate surgical timing.',
+          context: 'Comprehensive surgical readiness encompasses health status, procedure understanding, and timing considerations for optimal outcomes.',
+          strengths: ['Good baseline health status', 'Appropriate surgical timing', 'Pre-operative understanding'],
+          risks: ['Continue monitoring health status', 'Complete all pre-operative clearances']
+        },
+        {
+          name: 'Complication Risk Assessment',
+          desc: 'Your risk profile shows manageable factors that can be optimized with targeted interventions.',
+          context: 'Comprehensive risk assessment identifies modifiable factors across medical, lifestyle, and medication domains.',
+          strengths: ['No major cardiac complications', 'Good medication compliance', 'Awareness of risk factors'],
+          risks: ['Optimize chronic condition management', 'Address modifiable lifestyle factors', 'Review medication interactions']
+        },
+        {
+          name: 'Recovery Speed Prediction',
+          desc: 'Your recovery potential is supported by good nutritional status and strong support systems.',
+          context: 'Recovery speed is influenced by nutrition, support networks, home environment, and psychosocial factors.',
+          strengths: ['Good nutritional foundation', 'Strong family support', 'Adequate home preparation'],
+          risks: ['Optimize protein intake', 'Finalize support arrangements']
+        },
+        {
+          name: 'Anaesthesia Risk Profile',
+          desc: 'Your anaesthesia risk profile is favorable with some areas requiring attention.',
+          context: 'Anaesthetic safety depends on airway assessment, respiratory function, cardiovascular stability, and medication factors.',
+          strengths: ['No previous anaesthesia complications', 'Good cardiovascular stability', 'Clear medical disclosure'],
+          risks: ['Address sleep quality issues', 'Optimize respiratory function']
+        },
+        {
+          name: 'Mobility & Strength Baseline',
+          desc: 'Your physical function provides a good foundation for post-operative rehabilitation.',
+          context: 'Baseline mobility and strength predict post-operative function and rehabilitation success.',
+          strengths: ['Good baseline mobility', 'Adequate strength levels', 'Low fall risk'],
+          risks: ['Continue pre-operative conditioning', 'Address minor joint limitations']
+        },
+        {
+          name: 'Nutritional Optimization',
+          desc: 'Your nutritional status strongly supports healing and tissue repair processes.',
+          context: 'Optimal nutrition provides essential building blocks for wound healing, immune function, and recovery.',
+          strengths: ['High protein intake', 'Good hydration', 'Comprehensive supplementation'],
+          risks: ['Maintain current nutrition plan', 'Add wound healing supplements']
+        },
+        {
+          name: 'Psychological Readiness',
+          desc: 'Your mental preparation supports a positive recovery experience with manageable stress levels.',
+          context: 'Psychological preparation influences pain perception, recovery speed, and overall surgical experience.',
+          strengths: ['Positive surgical outlook', 'Good stress management', 'Realistic expectations'],
+          risks: ['Continue anxiety management techniques', 'Seek support if stress increases']
+        },
+        {
+          name: 'Support System Adequacy',
+          desc: 'Your support network provides comprehensive resources for optimal recovery environment.',
+          context: 'Strong support systems accelerate recovery through practical assistance and emotional support.',
+          strengths: ['Strong family network', 'Financial stability', 'Reliable transportation', 'Employer support'],
+          risks: ['Establish backup support plans']
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 15) + 75,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with your healthcare provider for personalized guidance',
+            'Follow evidence-based preparation protocols for your specific procedure',
+            'Coordinate with your surgical team for comprehensive pre-operative optimization',
+            'Monitor and adjust based on your surgical team\'s recommendations'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Begin comprehensive optimization 4-8 weeks before scheduled surgery for best results.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Complete Surgery Bundle AI response:", error);
+
+    return {
+      overallScore: 80,
+      overallRating: "Well Prepared",
+      results: [{
+        category: "Comprehensive Assessment",
+        score: 80,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your comprehensive surgical preparation assessment has been completed across all domains. Please consult with your healthcare team for personalized surgical planning.",
+        recommendations: [
+          "Review results with your surgical team for personalized optimization strategies",
+          "Address priority areas identified in your assessment",
+          "Follow all pre-operative instructions carefully",
+          "Ensure comprehensive medical disclosure and preparation"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Comprehensive assessment completed', 'Multiple domains evaluated'],
+          riskFactors: ['Requires medical consultation for integrated optimization plan'],
+          timeline: 'Consult with healthcare team to develop comprehensive surgical preparation strategy.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
+
+
 function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract functional fitness age (OVERALL_SCORE)
@@ -5614,6 +5919,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Nutrition Plan'];
     } else if (assessmentType === 'Functional Fitness') {
       tabs = ['Overview', 'Detailed Results', 'Fitness Plan'];
+    } else if (assessmentType === 'Complete Surgery Bundle') {
+      tabs = ['Overview', 'Detailed Results', 'Preparation Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];

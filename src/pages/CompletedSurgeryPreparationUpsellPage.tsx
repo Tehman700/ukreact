@@ -157,51 +157,74 @@ export function CompletedSurgeryPreparationUpsellPage() {
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Comprehensive */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Comprehensive</h3>
-                    <p className="text-sm text-muted-foreground">Five critical areas, one bundle.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Speed */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">Prep now, recover faster.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot risks before they grow.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Enter surgery at your best.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Lower risk, smoother journey.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Comprehensive</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Prepare confidently across every vital<br />
+        aspect of your surgery with one simple,<br />
+        clear, and easy-to-follow bundle.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Speed</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Begin your preparation journey early to<br />
+        build strength, recover quickly, and step<br />
+        confidently into your healing process.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot early warning signs or potential<br />
+        risks ahead of time so your care team<br />
+        can act fast and protect your outcome.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Walk into surgery with clear guidance,<br />
+        trusted preparation, and calm support<br />
+        to help you feel fully in control.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a proven, lower-risk pathway<br />
+        that shields you from common issues<br />
+        and ensures safer, smoother recovery.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Receive tailored recommendation in<br />
+        for your health, personal journey, and<br />
+        unique goals every step of the way.
+      </p>
+    </CardContent>
+  </Card>
+</div>
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">

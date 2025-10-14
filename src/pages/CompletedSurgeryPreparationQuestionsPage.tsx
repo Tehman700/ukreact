@@ -733,32 +733,43 @@ const completedSurgeryPreparationQuiz: QuizConfig = {
 };
 
 export function CompletedSurgeryPreparationQuestionsPage() {
-  // Initialize analytics for this specific assessment
-  const { startAssessment, trackProgress, completeAssessment } = useAssessmentAnalytics(
-    '21',
-    'Completed Surgery Preparation Bundle',
-    120.00
-  );
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    completedSurgeryPreparationQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
 
-  // Enhanced quiz configuration with analytics tracking
-  const completedSurgeryPreparationQuizWithAnalytics: QuizConfig = {
-    ...completedSurgeryPreparationQuiz,
-    informationPageRoute: 'completed-surgery-preparation-bundle-information',
-    onComplete: (answers) => {
-      console.log('Completed Surgery Preparation Bundle Assessment completed with answers:', answers);
-      completeAssessment();
-      window.location.hash = 'completed-surgery-preparation-bundle-information';
-    },
-    onQuestionComplete: (questionIndex, totalQuestions) => {
-      const completionPercentage = Math.round(((questionIndex + 1) / totalQuestions) * 100);
-      trackProgress(`question_${questionIndex + 1}`, completionPercentage);
-    },
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
   };
 
-  // Start assessment tracking when component mounts
-  React.useEffect(() => {
-    startAssessment();
-  }, [startAssessment]);
+  const quizWithSubmit: QuizConfig = {
+    ...completedSurgeryPreparationQuiz,
+    informationPageRoute: "surgery-bundle-results",
+        onComplete: async (answers) => {
+          console.log("Surgery Bundle Assessment Complete:", answers);
+          sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+          window.location.hash = "surgery-bundle-information"; // go to info page
+        },
+
+    onBack: () => {
+      window.location.hash = "surgery-bundle-learn-more";
+    },
+  };
 
   return (
     <PaymentGate requiredFunnel="surgery">
