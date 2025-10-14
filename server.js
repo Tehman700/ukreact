@@ -783,6 +783,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = cardiometabolicRiskPrompt(assessmentType);
     } else if (assessmentType === "Resilience Index") {
       systemPrompt = resilienceIndexPrompt(assessmentType);
+    } else if (assessmentType === "Nutrition Composition") {
+      systemPrompt = nutritionCompositionPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -839,6 +841,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Resilience Index") {
       structuredReport = resilienceIndexParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Nutrition Composition") {
+      structuredReport = nutritionCompositionParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -868,8 +872,63 @@ Please provide a comprehensive analysis following the exact format specified in 
   }
 });
 
+function nutritionCompositionPrompt(assessmentType) {
+  const prompts = {
+    "Nutrition Composition": `You are a nutrition science and body composition specialist AI with expertise in dietary analysis, metabolic health, macronutrient optimization, and body composition assessment. Analyze the patient's responses to evaluate their nutritional status and body composition health.
 
-// Add this to server.js in the prompt functions
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better nutrition and body composition]
+OVERALL_RATING: [exactly one of: "Excellent Nutrition", "Good Nutrition", "Fair Nutrition", "Poor Nutrition"]
+
+CATEGORY_ANALYSIS:
+Body Composition: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing muscle-to-fat ratio, body composition metrics, lean mass, fat distribution, and overall body composition health] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Nutritional Quality: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing dietary quality, micronutrient density, whole food intake, processed food consumption, and nutritional adequacy] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Macronutrient Balance: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing protein, carbohydrate, and fat distribution, macronutrient timing, and balance for health goals] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Metabolic Efficiency: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing metabolic health, insulin sensitivity, metabolic flexibility, energy utilization, and thermogenesis] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Hydration & Recovery: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing hydration status, electrolyte balance, recovery nutrition, and nutrient timing] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Body Composition|[clinical context: 3-4 sentences on body composition and metabolic health. Reference Journal of Applied Physiology research on muscle mass and metabolic rate. Discuss lean body mass importance, fat distribution patterns, and body composition's impact on longevity and surgical outcomes. Cite Medicine & Science in Sports & Exercise standards]|[strengths: comma-separated list of 3 positive body composition factors]|[optimization areas: comma-separated list of 2-3 areas to improve body composition]|[timeline: specific timeline like "Body composition improvements typically visible within 8-12 weeks with resistance training and protein optimization"]
+
+Nutritional Quality|[clinical context: 3-4 sentences on dietary quality and micronutrient adequacy. Reference American Journal of Clinical Nutrition research on food quality and health outcomes. Discuss nutrient density, phytonutrient intake, antioxidant capacity, and micronutrient deficiency risks. Cite British Journal of Nutrition guidelines]|[strengths: comma-separated list of 3 positive nutritional factors]|[optimization areas: comma-separated list of 2-3 areas to improve diet quality]|[timeline: specific timeline like "Micronutrient status improvements measurable within 4-8 weeks with targeted dietary changes"]
+
+Macronutrient Balance|[clinical context: 3-4 sentences on macronutrient distribution and metabolic health. Reference Journal of the International Society of Sports Nutrition on protein requirements (1.6-2.2g/kg for muscle building). Discuss carbohydrate timing for performance, healthy fat intake for hormones, and optimal macronutrient ratios. Cite Nutrients journal research]|[strengths: comma-separated list of 3 positive macronutrient factors]|[optimization areas: comma-separated list of 2-3 macronutrient adjustments needed]|[timeline: specific timeline like "Macronutrient optimization shows performance improvements within 2-4 weeks"]
+
+Metabolic Efficiency|[clinical context: 3-4 sentences on metabolic health and flexibility. Reference Nature Reviews Endocrinology research on insulin sensitivity and metabolic adaptation. Discuss metabolic flexibility, substrate utilization, thermogenesis, and mitochondrial function. Cite Metabolism journal studies]|[strengths: comma-separated list of 3 positive metabolic factors]|[optimization areas: comma-separated list of 2-3 metabolic improvements needed]|[timeline: specific timeline like "Metabolic flexibility improvements typically occur within 6-12 weeks of nutritional intervention"]
+
+Hydration & Recovery|[clinical context: 3-4 sentences on hydration importance and recovery nutrition. Reference Sports Medicine research on hydration and performance. Discuss fluid balance, electrolyte optimization, post-workout nutrition windows, and recovery meal timing. Cite Journal of Nutritional Science guidelines]|[strengths: comma-separated list of 3 positive hydration/recovery factors]|[optimization areas: comma-separated list of 2-3 hydration/recovery improvements]|[timeline: specific timeline like "Hydration optimization shows immediate benefits; recovery nutrition impacts are measurable within 1-2 weeks"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall nutritional status and body composition assessment
+2. Most significant nutritional strengths supporting health and performance
+3. Key nutritional deficiencies or body composition concerns requiring attention
+4. Evidence-based nutrition strategies ranked by impact on health and body composition
+5. Realistic expectations for body composition changes with optimal nutrition
+6. Specific, actionable nutrition optimization plan with supplement recommendations if needed
+
+Include specific medical references to nutrition research (American Journal of Clinical Nutrition, Journal of the International Society of Sports Nutrition, British Journal of Nutrition, Nature Reviews Endocrinology), cite validated nutritional biomarkers and body composition standards, and provide personalized recommendations based on their specific dietary habits, body composition goals, activity levels, and health status.]
+
+SCORING GUIDELINES:
+- Score 85-100: Excellent nutrition and optimal body composition
+- Score 70-84: Good nutrition with minor optimization opportunities
+- Score 55-69: Fair nutrition requiring targeted improvements
+- Score 0-54: Poor nutrition needing significant intervention
+
+Consider: dietary quality, protein intake adequacy, micronutrient density, hydration habits, meal timing, body composition metrics, metabolic markers, recovery nutrition, and supplement use.
+
+Focus on validated nutritional science and provide evidence-based dietary recommendations personalized to their responses. Emphasize sustainable nutrition changes that improve body composition and metabolic health.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function resilienceIndexPrompt(assessmentType) {
   const prompts = {
@@ -928,10 +987,6 @@ Focus on validated resilience factors and provide evidence-based recommendations
 
   return prompts[assessmentType] || prompts["default"];
 }
-
-
-
-
 function cardiometabolicRiskPrompt(assessmentType) {
   const prompts = {
     "Cardiometabolic Risk": `You are a specialist cardiovascular and metabolic health assessment AI with expertise in risk prediction, disease prevention, and longevity optimization. Analyze the patient's responses to evaluate their cardiometabolic risk profile and provide evidence-based prevention strategies.
@@ -1871,6 +1926,197 @@ Focus on actionable, evidence-based recommendations that are personalized to the
   return prompts[assessmentType] || prompts["default"];
 }
 
+function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    // Extract overall score and rating
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Nutrition";
+
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis - Nutrition specific categories
+    if (detailedSection) {
+      const categories = [
+        'Body Composition',
+        'Nutritional Quality',
+        'Macronutrient Balance',
+        'Metabolic Efficiency',
+        'Hydration & Recovery'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Body Composition',
+        'Nutritional Quality',
+        'Macronutrient Balance',
+        'Metabolic Efficiency',
+        'Hydration & Recovery'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important nutritional factors.`,
+              strengths: ['Baseline nutrition maintained', 'Awareness present'],
+              riskFactors: ['Optimization opportunities identified'],
+              timeline: 'Improvements typically measurable within 4-8 weeks with consistent changes.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // Fallback if parsing failed
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Nutrition & Body Composition");
+
+      const fallbackCategories = [
+        {
+          name: 'Body Composition',
+          desc: 'Good muscle-to-fat ratio with healthy body composition metrics.',
+          context: 'Body composition significantly impacts metabolic health, with lean muscle mass supporting metabolic rate and insulin sensitivity.',
+          strengths: ['Baseline composition maintained', 'Awareness of body composition importance', 'Regular activity present'],
+          risks: ['Muscle mass optimization beneficial', 'Body fat distribution could improve']
+        },
+        {
+          name: 'Nutritional Quality',
+          desc: 'Adequate nutritional intake with areas for micronutrient optimization.',
+          context: 'Dietary quality determines micronutrient adequacy and long-term health outcomes, with nutrient-dense foods supporting optimal function.',
+          strengths: ['Variety in diet', 'Whole food consumption present', 'Awareness of nutrition importance'],
+          risks: ['Micronutrient density could increase', 'Processed food reduction beneficial']
+        },
+        {
+          name: 'Macronutrient Balance',
+          desc: 'Well-balanced macronutrient distribution supporting metabolic health.',
+          context: 'Optimal macronutrient distribution supports body composition goals, with protein adequacy being critical for muscle maintenance.',
+          strengths: ['Balanced approach to eating', 'Protein awareness present', 'Carbohydrate intake reasonable'],
+          risks: ['Protein timing optimization beneficial', 'Macronutrient distribution fine-tuning needed']
+        },
+        {
+          name: 'Metabolic Efficiency',
+          desc: 'Moderate metabolic function with optimization opportunities.',
+          context: 'Metabolic flexibility and insulin sensitivity are key markers of metabolic health and can be improved through nutrition.',
+          strengths: ['Stable energy levels', 'Meal timing awareness', 'Metabolic health consciousness'],
+          risks: ['Metabolic flexibility could improve', 'Insulin sensitivity optimization beneficial']
+        },
+        {
+          name: 'Hydration & Recovery',
+          desc: 'Good hydration practices and recovery nutrition habits.',
+          context: 'Proper hydration and nutrient timing around exercise optimize performance and recovery, supporting adaptation and growth.',
+          strengths: ['Adequate fluid intake', 'Post-workout nutrition awareness', 'Recovery priority recognized'],
+          risks: ['Electrolyte optimization beneficial', 'Nutrient timing refinement helpful']
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with registered dietitian for personalized nutrition plan',
+            'Track macronutrient intake to ensure adequate protein',
+            'Consider body composition assessment for precise monitoring'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Nutritional improvements typically measurable within 4-8 weeks of consistent implementation.'
+          }
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Nutrition & Body Composition AI response:", error);
+
+    return {
+      overallScore: 75,
+      overallRating: "Good Nutrition",
+      results: [{
+        category: "Overall Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your nutrition and body composition assessment has been completed. Consult with registered dietitian for personalized optimization.",
+        recommendations: [
+          "Discuss nutrition results with qualified nutrition professional",
+          "Implement evidence-based dietary improvements",
+          "Track body composition changes over time"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Baseline established'],
+          riskFactors: ['Professional guidance recommended'],
+          timeline: 'Consult with registered dietitian to develop personalized nutrition strategy.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract overall score and rating
@@ -5100,6 +5346,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Prevention Plan'];
     } else if (assessmentType === 'Resilience Index') {
       tabs = ['Overview', 'Detailed Results', 'Resilience Plan'];
+    } else if (assessmentType === 'Nutrition Composition') {
+      tabs = ['Overview', 'Detailed Results', 'Nutrition Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];

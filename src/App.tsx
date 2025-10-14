@@ -414,7 +414,7 @@ const globalAssessments: Assessment[] = [
     id: '19',
     name: 'Nutrition & Body Composition Score',
     description: 'Comprehensive nutritional and body composition assessment to optimize metabolic health, body composition, and nutritional status.',
-    price: 49.99,
+    price: 47.00,
    image: nut,
     icon: <Apple className="w-6 h-6" />,
     features: ['Body composition analysis', 'Nutritional deficiency assessment', 'Personalized nutrition optimization strategies']
@@ -423,7 +423,7 @@ const globalAssessments: Assessment[] = [
     id: '20',
     name: 'Functional Fitness Age Test',
     description: 'Comprehensive physical capability assessment to determine your functional fitness age and identify movement quality decline patterns.',
-    price: 44.99,
+    price: 44.00,
    image: func,
     icon: <Activity className="w-6 h-6" />,
     features: ['Movement quality analysis', 'Physical capability assessment', 'Personalized fitness optimization strategies']

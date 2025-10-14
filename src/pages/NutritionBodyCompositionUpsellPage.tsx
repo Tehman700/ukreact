@@ -16,7 +16,7 @@ const nutritionBodyCompositionAssessment: Assessment = {
   name: 'Nutrition & Body Composition Score',
   description:
     'Comprehensive nutritional and body composition assessment to optimise metabolic health, body composition, and nutritional status.',
-  price: 179.99,
+  price: 47.00,
   image: biologicalAgeImage,
   icon: <Apple className="w-6 h-6" />,
   category: 'Nutrition',
@@ -112,51 +112,76 @@ export function NutritionBodyCompositionUpsellPage({ onAddToBasket, onOpenBasket
                 <ImageWithFallback src={biologicalAgeImage} alt="Luther Health Nutrition Benefits" className="w-full h-auto object-cover rounded-lg" />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground"> Your nutrition in one score. </p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Precision */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Precision</h3>
-                    <p className="text-sm text-muted-foreground"> Targeted macro & micronutrients. </p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Performance */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Performance</h3>
-                    <p className="text-sm text-muted-foreground"> Eat to train and recover. </p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground"> A plan you can follow. </p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Metabolism */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Metabolism</h3>
-                    <p className="text-sm text-muted-foreground"> Improve insulin sensitivity. </p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground"> Strategies tailored to you. </p>
-                  </CardContent>
-                </Card>
-              </div>
+
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        See your nutrition clearly in one score<br />
+        to understand how your daily choices<br />
+        shape energy, strength, and health.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Precision</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get targeted nutrient insights crafted<br />
+        to fit your body, goals, and metabolism,<br />
+        making your plan smarter and stronger.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Performance</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Fuel your training and recovery better<br />
+        with the right nutrients at the right time<br />
+        for energy, endurance, and power.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a clear and structured plan and<br />
+        backed by evidence and real science<br />
+        so you stay consistent every day.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Metabolism</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Support better insulin sensitivity and<br />
+        balanced energy with a nutrition plan<br />
+        designed to work with your body.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Receive a fully personalized strategy<br />
+        shaped by your goals, lifestyle, and needs<br />
+        to build lasting health and strength.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
