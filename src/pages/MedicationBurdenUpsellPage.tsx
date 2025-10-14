@@ -16,7 +16,7 @@ const medicationBurdenAssessment: Assessment = {
   name: 'Medication Burden Calculator',
   description:
     'Comprehensive analysis weighing prescription load and potential drug interaction risks.',
-  price: 46.99,
+  price: 47,
   image: sec,
   icon: <Pill className="w-6 h-6" />,
   category: 'Chronic Symptoms',
@@ -129,63 +129,76 @@ export function MedicationBurdenUpsellPage({ onAddToBasket, onOpenBasket }: Medi
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">
-                      One clear burden score.
-                    </p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Safety */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Safety</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Surface risky combinations.
-                    </p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">
-                      See side‑effect drivers.
-                    </p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Discuss changes with ease.
-                    </p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Lower adverse events.
-                    </p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Tailored optimisation plan.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        See your full medication impact clearly ahead<br />
+        in one simple, easy-to-read score.<br />
+        Gain a clear picture of what matters.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Safety</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot risks linked to multiple medications<br />
+        early and take simple, smart steps to<br />
+        prevent unwanted effects before they grow.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Understand what truly triggers side effects<br />
+        or flare-ups. Know the warning patterns<br />
+        before they have a chance to build.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Plan meaningful changes with your clinician<br />
+        using clear, trusted insights. Feel fully<br />
+        in control of your ongoing treatment.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Lower the chance of flare-ups and other<br />
+        complications by building strong daily<br />
+        habits that keep your body safer.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a tailored plan built around your<br />
+        unique needs and goals. Every single step<br />
+        focuses on supporting your best health.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
