@@ -13,7 +13,7 @@ const inflammationRiskAssessment: Assessment = {
   id: '11',
   name: 'Inflammation Risk Score',
   description: 'Evidence-based assessment rooted in diet, lifestyle, sleep patterns, and stress levels.',
-  price: 38.99,
+  price: 39,
   image:
     'https://images.unsplash.com/photo-1670698783848-5cf695a1b308?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmZsYW1tYXRpb24lMjBkaWV0JTIwbGlmZXN0eWxlJTIwaGVhbHRofGVufDF8fHx8MTc1NzM0NjYyN3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
   icon: <Heart className="w-6 h-6" />,
@@ -108,51 +108,76 @@ export function InflammationRiskUpsellPage({ onAddToBasket, onOpenBasket }: Infl
                 <ImageWithFallback src={benefitsImage} alt="Luther Health Inflammation Benefits" className="w-full h-auto object-cover rounded-lg" />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your risk in one score.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Relief */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Relief</h3>
-                    <p className="text-sm text-muted-foreground">Act on triggers fast.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot patterns driving flare-ups.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Resilience */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Resilience</h3>
-                    <p className="text-sm text-muted-foreground">Build habits that protect.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Prevention */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Prevention</h3>
-                    <p className="text-sm text-muted-foreground">Lower long-term risk.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Safety</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot and address potential risks early<br />
+        to keep your procedure safe and smooth.<br />
+        Build a foundation of trust and security.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Precision</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Ensure the right drug and dose decisions<br />
+        tailored to your unique health profile.<br />
+        Accuracy means fewer risks and better care.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Airway</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Identify sleep apnoea or reflux risks early<br />
+        and create a safer, clearer breathing path.<br />
+        Prevent surprises during your procedure.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Walk in with clarity and a solid plan<br />
+        designed for your personal journey.<br />
+        Confidence leads to calmer, secure recovery.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Recovery</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Wake up smoother with fewer surprises<br />
+        and faster stabilization after surgery.<br />
+        Healing begins the moment you’re ready.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[220px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get recommendations designed around<br />
+        your health, history, and unique goals.<br />
+        Your plan should reflect only you.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
