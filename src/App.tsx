@@ -405,7 +405,7 @@ const globalAssessments: Assessment[] = [
     id: '18',
     name: 'Resilience Index',
     description: 'Comprehensive mental and physical resilience assessment to measure your ability to adapt, recover, and thrive under stress.',
-    price: 49.99,
+    price: 42.00,
    image: resilienceIndexImage,
     icon: <Zap className="w-6 h-6" />,
     features: ['Stress resilience analysis', 'Recovery capacity assessment', 'Personalized resilience building strategies']

@@ -14,7 +14,7 @@ const resilienceIndexAssessment: Assessment = {
   name: 'Resilience Index',
   description:
     'Comprehensive mental and physical resilience assessment to measure your ability to adapt, recover, and thrive under stress.',
-  price: 149.99,
+  price: 42,
   image: biologicalAgeImage,
   icon: <Zap className="w-6 h-6" />,
   category: 'Mental Health',
@@ -119,51 +119,77 @@ export function ResilienceIndexUpsellPage({ onAddToBasket, onOpenBasket }: Resil
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your resilience in one score.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Recovery */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Recovery</h3>
-                    <p className="text-sm text-muted-foreground">Bounce back faster.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot burnout risks early.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Perform under pressure.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Buffer against stress.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        One clear resilience score that helps you<br />
+        understand exactly where you stand now<br />
+        and what truly matters most for growth.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Recovery</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Understand how quickly your body, mind<br />
+        bounce back from challenges — and how<br />
+        to build lasting strength over time.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot early signs of burnout or fatigue<br />
+        long before they escalate further, so<br />
+        you can stay ahead with confidence.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Gain a deeper understanding of your own<br />
+        ability to handle stress effectively and<br />
+        perform at your personal best.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Build a strong protective buffer against<br />
+        everyday pressures with practical and<br />
+        personalized, data-driven strategies.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Receive tailored insights and actions that<br />
+        adapt to your history, goals, and rhythm<br />
+        to guide your resilience journey.
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
+
+
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
@@ -262,7 +288,7 @@ export function ResilienceIndexUpsellPage({ onAddToBasket, onOpenBasket }: Resil
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£149.99</p>
+                        <p className="font-medium">£42.00</p>
                       </div>
                     </div>
                   </div>

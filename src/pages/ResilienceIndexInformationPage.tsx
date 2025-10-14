@@ -138,8 +138,11 @@ export function ResilienceIndexInformationPage() {
         }),
       });
 
-      const savedUser = await response.json();
-      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+        const savedUser = await response.json();
+
+        // ✅ Store in BOTH keys for compatibility
+        sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+        sessionStorage.setItem("userInfo", JSON.stringify(savedUser)); // Added this line
 
       // Get stored answers
       const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
@@ -160,19 +163,6 @@ export function ResilienceIndexInformationPage() {
       sessionStorage.setItem("reportId", reportData.reportId.toString());
       sessionStorage.setItem("assessmentType", "Resilience Index");
 
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Resilience Index",
-          report: reportData.report,
-          reportId: reportData.reportId,
-        }),
-      });
-
-      // Mark report as ready
       setReportReady(true);
 
       // Wait for progress animation to complete, then redirect
