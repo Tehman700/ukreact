@@ -36,7 +36,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
 
-  // Safety checks
   if (!config || !config.questions || config.questions.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -52,7 +51,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
   const isLastQuestion = currentQuestionIndex === config.questions.length - 1;
   const progress = ((currentQuestionIndex + 1) / config.questions.length) * 100;
 
-  // Additional safety check for currentQuestion
   if (!currentQuestion) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -76,29 +74,43 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
         : [...selectedOptions, optionId];
       setSelectedOptions(newSelected);
     } else {
-      setSelectedOptions([optionId]);
-      // Auto-advance for single select after a brief delay
+      // For single select, immediately save and advance with the selected option
+      const newAnswers = { ...answers, [currentQuestion.id]: optionId };
+      setAnswers(newAnswers);
+
+      // Trigger onQuestionComplete if defined
+      if (config.onQuestionComplete) {
+        config.onQuestionComplete(currentQuestionIndex + 1, config.questions.length);
+      }
+
+      // Auto-advance after a brief delay
       setTimeout(() => {
-        handleNext();
+        if (isLastQuestion) {
+          config.onComplete?.(newAnswers);
+        } else {
+          setCurrentQuestionIndex(prev => prev + 1);
+          setSelectedOptions([]);
+        }
       }, 300);
+
+      // Update UI immediately to show selection
+      setSelectedOptions([optionId]);
     }
   };
 
   const handleNext = () => {
-    // Save current answer
+    // This is now only used for multi-select questions
     const currentAnswer = currentQuestion.multiSelect ? selectedOptions : selectedOptions[0];
     const newAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
     setAnswers(newAnswers);
 
     if (isLastQuestion) {
-      // Navigate to information page after quiz completion
       config.onComplete?.(newAnswers);
     } else {
       setCurrentQuestionIndex(prev => prev + 1);
-      setSelectedOptions([]); // Reset selections for next question
+      setSelectedOptions([]);
     }
 
-    // Trigger onQuestionComplete if defined
     if (config.onQuestionComplete) {
       config.onQuestionComplete(currentQuestionIndex + 1, config.questions.length);
     }
@@ -107,7 +119,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
-      // Load previous answer
       const previousAnswer = answers[config.questions[currentQuestionIndex - 1].id];
       if (previousAnswer) {
         setSelectedOptions(Array.isArray(previousAnswer) ? previousAnswer : [previousAnswer]);
@@ -129,7 +140,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
   if (showResults) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <div className="border-b border-border">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="flex items-center justify-between py-6">
@@ -142,7 +152,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
           </div>
         </div>
 
-        {/* Results Content */}
         <div className="container mx-auto px-4 max-w-2xl py-16">
           <div className="text-center space-y-8">
             <div className="space-y-6">
@@ -152,7 +161,7 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
               <div className="space-y-4">
                 <h2>Assessment Complete!</h2>
                 <p className="text-muted-foreground max-w-lg mx-auto">
-                  Thank you for completing the {config.title}. Your responses have been recorded 
+                  Thank you for completing the {config.title}. Your responses have been recorded
                   and you'll receive personalized recommendations based on your specific situation.
                 </p>
               </div>
@@ -174,10 +183,8 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
 
   return (
     <div className="min-h-screen bg-background">
-{/* Header with navigation */}
       <div className="border-b border-border">
         <div className="container mx-auto px-4 max-w-4xl">
-          {/* Progress Bar */}
           <div className="py-4 sm:py-6">
             <div className="flex items-center gap-4 mb-2">
               <Button variant="ghost" size="icon" onClick={handlePrevious} className="hover:bg-muted flex-shrink-0">
@@ -197,17 +204,14 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 max-w-2xl py-6 sm:py-8 lg:py-16">
         <div className="space-y-6 sm:space-y-8 lg:space-y-12">
-          {/* Question Section */}
           <div className="text-center space-y-3 sm:space-y-4">
             <h2 className="mx-auto max-w-2xl text-xl sm:text-2xl lg:text-3xl leading-tight">
               {currentQuestion.question}
             </h2>
           </div>
 
-          {/* Answer Options */}
           <div className="space-y-2 sm:space-y-3 max-w-2xl mx-auto">
             {currentQuestion.options.map((option) => (
               <Button
@@ -217,7 +221,7 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
                   w-full min-h-[48px] sm:min-h-[56px] lg:min-h-[60px] h-auto p-3 sm:p-4 lg:p-6 rounded-lg text-left justify-start
                   border transition-all duration-200 ease-in-out
                   ${selectedOptions.includes(option.id)
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                     : 'bg-card hover:bg-muted border-border hover:border-muted-foreground/30'
                   }
                 `}
@@ -235,7 +239,6 @@ export function QuizTemplate({ config }: QuizTemplateProps) {
             ))}
           </div>
 
-          {/* Continue Button for Multi-Select */}
           {currentQuestion.multiSelect && selectedOptions.length > 0 && (
             <div className="flex justify-center pt-4 sm:pt-6">
               <Button onClick={handleNext} size="lg" className="px-6 sm:px-8">
