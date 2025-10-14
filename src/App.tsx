@@ -396,7 +396,7 @@ const globalAssessments: Assessment[] = [
     id: '17',
     name: 'Cardiometabolic Risk Score',
     description: 'Comprehensive heart and metabolic health assessment to identify cardiovascular disease and diabetes risk factors.',
-    price: 39.99,
+    price: 39.00,
    image: cardio,
     icon: <Heart className="w-6 h-6" />,
     features: ['Cardiovascular risk analysis', 'Metabolic health assessment', 'Personalized prevention strategies']
@@ -441,7 +441,7 @@ const globalAssessments: Assessment[] = [
     id: '22',
     name: 'Completed Chronic Symptoms Bundle',
     description: 'Comprehensive chronic symptom management assessment combining severity analysis, inflammation risk, medication burden, energy patterns, and lifestyle impact evaluation in one complete bundle.',
-    price: 125.40,
+    price: 138,
    image: chronic,
     icon: <Stethoscope className="w-6 h-6" />,
     features: ['Complete chronic symptom assessment', 'Comprehensive lifestyle impact analysis', 'Personalized management strategies']

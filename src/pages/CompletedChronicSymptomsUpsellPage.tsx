@@ -20,7 +20,7 @@ const completedChronicSymptomsAssessment: Assessment = {
   name: 'Completed Chronic Symptoms Bundle',
   description:
     'Comprehensive chronic symptom management assessment combining severity analysis, inflammation risk, medication burden, energy patterns, and lifestyle impact evaluation in one complete bundle.',
-  price: 179.99,
+  price: 138,
   image: biologicalAgeImage,
   icon: <Stethoscope className="w-6 h-6" />,
   category: 'Chronic Symptoms',
@@ -345,7 +345,7 @@ export function CompletedChronicSymptomsUpsellPage() {
                           £{completedChronicSymptomsAssessment.price.toFixed(2)}
                         </p>
                         <Badge variant="secondary" className="text-xs">
-                          Save £35 vs individual
+                          Save £78 vs individual
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">

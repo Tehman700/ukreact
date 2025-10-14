@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, BarChart3, Target, Clock, BookOpen, Loader2, Mail, Download } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Heart, Shield, BarChart3, Target, Clock, BookOpen, Loader2, Mail } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { X } from 'lucide-react';
 
 interface AssessmentResult {
   category: string;
@@ -72,6 +71,19 @@ export function CardiometabolicRiskResultsPage() {
 
         setAiReport(report);
 
+        // Check if page is being accessed by Puppeteer (look for common indicators)
+        const isPuppeteer =
+          navigator.webdriver ||
+          window.navigator.userAgent.includes('HeadlessChrome') ||
+          window.navigator.userAgent.includes('Puppeteer') ||
+          // Check for URL parameter that Puppeteer can add
+          new URLSearchParams(window.location.search).get('puppeteer') === 'true';
+
+        // Only show email popup if NOT in Puppeteer
+        if (!isPuppeteer) {
+          setShowEmailPopup(true);
+        }
+
       } catch (err) {
         console.error('Error loading report:', err);
         setError(err instanceof Error ? err.message : 'Unable to load report');
@@ -83,62 +95,58 @@ export function CardiometabolicRiskResultsPage() {
     loadReport();
   }, []);
 
-
-const handleEmailReport = async () => {
-  try {
-    const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
-    if (!userInfoStr) {
-      alert('User information not found. Please complete the assessment again.');
-      setShowEmailPopup(false);
-      return;
-    }
-
-    const userInfo = JSON.parse(userInfoStr);
-    const currentPageUrl = window.location.href;
-
-    // Show success in popup
+  const handleEmailReport = async () => {
+    // Show sent state
     setEmailSent(true);
 
+    // Close popup after 2 seconds
     setTimeout(() => {
       setShowEmailPopup(false);
       setEmailSent(false);
     }, 2000);
 
-    // ✅ Send email and wait for response
-    fetch('https://luther.health/api/send-email-report', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userEmail: userInfo.email,
-        userName: `${userInfo.first_name} ${userInfo.last_name}`,
-        assessmentType: 'Cardiometabolic Risk',
-        report: aiReport,
-        reportId: Date.now(),
-        pageUrl: currentPageUrl,
-        activeTab: activeTab
-      })
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Email sent successfully:', data);
-        // ✅ Show results notification ONLY when server confirms success
-        if (data.success) {
-          setShowResultsNotification(true);
-        }
-      })
-      .catch(error => {
-        console.error('Error sending email in background:', error);
-      });
+    try {
+      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+      if (!userInfoStr) {
+        console.error('User information not found');
+        return;
+      }
 
-  } catch (error) {
-    console.error('Error preparing email:', error);
-    alert('Failed to send email. Please try again.');
+      const userInfo = JSON.parse(userInfoStr);
+      const currentPageUrl = window.location.href;
+
+      // Send email in background
+      fetch('https://luther.health/api/send-email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: userInfo.email,
+          userName: `${userInfo.first_name} ${userInfo.last_name}`,
+          assessmentType: 'Cardiometabolic Risk',
+          report: aiReport,
+          reportId: Date.now(),
+          pageUrl: currentPageUrl,
+          activeTab: activeTab
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Email sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error sending email:', error);
+        });
+
+    } catch (error) {
+      console.error('Error preparing email:', error);
+    }
+  };
+
+  const handleSkipEmail = () => {
     setShowEmailPopup(false);
-  }
-};
-
+  };
 
   const comparisonData = aiReport?.results.map(result => ({
     name: result.category,
@@ -239,16 +247,16 @@ const handleEmailReport = async () => {
 
   return (
       <div className="min-h-screen bg-background">
-      {/* Email Popup */}
+      {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <Card className="max-w-md w-full mx-4">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 {emailSent ? (
                   <>
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span>Email Sent!</span>
+                    <span>Sent!</span>
                   </>
                 ) : (
                   <>
@@ -259,79 +267,36 @@ const handleEmailReport = async () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {emailSent ? (
-                  <div className="text-center py-4">
-                    <p className="text-muted-foreground mb-4">
-                      Your report is being prepared and will be sent to your email shortly.
-                    </p>
-                    <Button onClick={() => setShowEmailPopup(false)} className="w-full">
-                      Close
+              <div>
+                <p className="text-muted-foreground mb-6">
+                  {emailSent
+                    ? 'Your report will be sent to your email shortly.'
+                    : 'Would you like a copy of your personalised report emailed to you?'
+                  }
+                </p>
+                {!emailSent && (
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      className="flex-1"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Yes, Email Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleSkipEmail}
+                      className="flex-1"
+                    >
+                      No Thanks
                     </Button>
                   </div>
-                ) : (
-                  <div>
-                    <p className="text-muted-foreground mb-6">
-                      Would you like to receive a PDF copy of your complete assessment report via email?
-                    </p>
-                    <div className="flex space-x-3">
-                      <Button
-                        onClick={handleEmailReport}
-                        className="flex-1"
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Email
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowEmailPopup(false)}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
                 )}
+              </div>
             </CardContent>
           </Card>
         </div>
       )}
-{showResultsNotification && (
-  <>
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-      <Card className="mx-auto max-w-2xl shadow-lg border-2 animate-in slide-in-from-bottom duration-300">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <Mail className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-            <div className="flex-1">
-              <div>
-                <h3 className="mb-2 font-semibold">Your results are ready!</h3>
-                <p className="text-sm text-muted-foreground">
-                  A copy has also been sent to your email so you can review them anytime.
-                </p>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowResultsNotification(false)}
-              className="flex-shrink-0"
-              aria-label="Close notification"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    {/* Overlay to prevent interaction with page content */}
-    <div
-      className="fixed inset-0 bg-black/20 z-40"
-      onClick={() => setShowResultsNotification(false)}
-    />
-  </>
-)}
 
         <div className="border-b bg-card">
           <div className="container mx-auto px-4 py-4">
@@ -377,16 +342,6 @@ const handleEmailReport = async () => {
                 <p className="text-muted-foreground max-w-md mx-auto">
                   Your assessment reveals key insights into your cardiovascular and metabolic health status.
               </p>
-
-              {/* Email Report Button */}
-              <Button
-                onClick={() => setShowEmailPopup(true)}
-                variant="outline"
-                className="mt-4"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download Report (Email PDF)
-              </Button>
             </div>
           </CardContent>
         </Card>

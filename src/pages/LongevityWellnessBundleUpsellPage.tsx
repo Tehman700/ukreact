@@ -46,7 +46,7 @@ const longevityWellnessBundleAssessment: Assessment = {
   name: 'The Complete Longevity Bundle',
   description:
     'Comprehensive longevity optimization assessment combining Biological Age Calculator, Cardiometabolic Risk Score, Resilience Index, Nutrition & Body Composition Score, and Functional Fitness Age Test in one complete bundle.',
-  price: 299.99,
+  price: 138,
   image: biologicalAgeImage,
   icon: <Clock className="w-6 h-6" />,
   category: 'Longevity',
@@ -345,8 +345,8 @@ export function LongevityWellnessBundleUpsellPage() {
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£299.99</p>
-                        <Badge variant="secondary" className="text-xs">Save £159 vs individual</Badge>
+                        <p className="font-medium">£138</p>
+                        <Badge variant="secondary" className="text-xs">Save £80 vs individual</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">Complete 5-assessment bundle</p>
                     </div>

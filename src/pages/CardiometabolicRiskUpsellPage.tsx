@@ -28,7 +28,7 @@ const cardiometabolicRiskAssessment: Assessment = {
   name: 'Cardiometabolic Risk Score',
   description:
     'Comprehensive heart and metabolic health assessment to identify cardiovascular disease and diabetes risk factors.',
-  price: 199.99,
+  price: 39,
   image: biologicalAgeImage,
   icon: <Heart className="w-6 h-6" />,
   category: 'Longevity',
@@ -131,70 +131,75 @@ export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: C
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your risk in one score.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Speed */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">Act early. Prevent more.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot drivers of risk.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Know what to change.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Lower lifetime risk.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        See your risk clearly with one simple score.<br />
+        Understand exactly where your health stands.<br />
+        Take action with confidence and direction.
+      </p>
+    </CardContent>
+  </Card>
 
-{/* Mobile Layout - Grid Below Image */}
-<div className="md:hidden grid grid-cols-2 gap-4">
-  {[
-    ['Clarity', 'See your risk clearly in one simple score. Understand where you stand today.'],
-    ['Speed', 'Act early to prevent more later. Small changes now make a lasting difference.'],
-    ['Insight', 'Spot the key drivers behind your risk. Know what’s shaping your health.'],
-    ['Confidence', 'Get a clear picture of what to change. Take action with real direction.'],
-    ['Protection', 'Lower your lifetime risk step by step. Build habits that protect your future.'],
-    ['Personal', 'Follow a plan designed for your unique profile. Every step is made for you.'],
-  ].map(([title, body]) => (
-    <Card key={title as string} className="bg-white shadow-lg">
-      <CardContent className="pt-[20px] pr-[14px] pb-[14px] pl-[18px]">
-        <h3 className="font-medium mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground">{body}</p>
-      </CardContent>
-    </Card>
-  ))}
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Speed</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Act early to prevent bigger problems later.<br />
+        Small smart changes made now create impact.<br />
+        Protect your long-term health proactively.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Spot the key drivers behind your personal risk.<br />
+        Understand what’s shaping your overall health.<br />
+        See patterns clearly and plan smarter steps.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get a focused picture of what matters most.<br />
+        Move forward with steady meaningful steps.<br />
+        Take action backed by real trusted guidance.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Lower your lifetime risk one step at a time.<br />
+        Build small habits that protect your future.<br />
+        Strengthen health through daily actions.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a plan built for your unique needs.<br />
+        Every step focuses on your individual risk.<br />
+        Make progress at your own steady pace.
+      </p>
+    </CardContent>
+  </Card>
 </div>
+
 
             </div>
           </div>
@@ -276,7 +281,7 @@ export function CardiometabolicRiskUpsellPage({ onAddToBasket, onOpenBasket }: C
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£199.99</p>
+                        <p className="font-medium">£39.00</p>
                       </div>
                     </div>
                   </div>
