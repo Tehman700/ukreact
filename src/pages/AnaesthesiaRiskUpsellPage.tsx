@@ -37,10 +37,16 @@ export function AnaesthesiaRiskUpsellPage({ onAddToBasket, onOpenBasket }: Anaes
 
     const [isHovered, setIsHovered] = useState(false);
 
+  // Force scroll to top on component mount - iOS compatible
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   const handleStartAssessment = () => {
     onAddToBasket(anaesthesiaRiskAssessment);
     onOpenBasket();
-
   };
 const handleTryDemo = () => {
     window.location.hash = 'anaesthesia-risk-screener-questions';

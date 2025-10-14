@@ -585,8 +585,14 @@ useEffect(() => {
       // Track page navigation
       analytics.trackPage(newPage, 'Navigation');
 
-      // Scroll to top when page changes
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top - iOS compatible
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        // Try multiple methods for better iOS compatibility
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 0);
     }
   };
 
