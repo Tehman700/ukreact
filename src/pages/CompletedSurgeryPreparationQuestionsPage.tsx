@@ -1,6 +1,5 @@
 import React from 'react';
 import { QuizTemplate, QuizConfig } from '../components/QuizTemplate';
-import { useAssessmentAnalytics } from '../hooks/useAnalytics';
 import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 const completedSurgeryPreparationQuiz: QuizConfig = {
