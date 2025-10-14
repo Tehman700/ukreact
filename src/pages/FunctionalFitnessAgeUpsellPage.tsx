@@ -22,7 +22,7 @@ const functionalFitnessAgeAssessment: Assessment = {
   name: 'Functional Fitness Age Test',
   description:
     'Comprehensive physical capability assessment to determine your functional fitness age and identify movement quality decline patterns.',
-  price: 129.99,
+  price: 44,
   image: biologicalAgeImage,
   icon: <Activity className="w-6 h-6" />,
   category: 'Fitness',
@@ -124,51 +124,74 @@ export function FunctionalFitnessAgeUpsellPage({ onAddToBasket, onOpenBasket }: 
                 />
               </div>
 
-              {/* Overlapping Cards - Hidden on mobile */}
-              <div className="hidden md:block absolute inset-0">
-                {/* Top Left - Clarity */}
-                <Card className="absolute top-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="pt-[15px] pr-[14px] pb-[21px] pl-[14px]">
-                    <h3 className="font-medium mb-2">Clarity</h3>
-                    <p className="text-sm text-muted-foreground">Your fitness age in one score.</p>
-                  </CardContent>
-                </Card>
-                {/* Top Right - Speed */}
-                <Card className="absolute top-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Speed</h3>
-                    <p className="text-sm text-muted-foreground">Quick test, fast insights.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Left - Insight */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Insight</h3>
-                    <p className="text-sm text-muted-foreground">Spot weak links early.</p>
-                  </CardContent>
-                </Card>
-                {/* Middle Right - Confidence */}
-                <Card className="absolute top-1/2 -translate-y-1/2 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">Train smarter, safer.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Left - Protection */}
-                <Card className="absolute bottom-40 -left-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Protection</h3>
-                    <p className="text-sm text-muted-foreground">Lower injury risk.</p>
-                  </CardContent>
-                </Card>
-                {/* Bottom Right - Personal */}
-                <Card className="absolute bottom-40 -right-8 max-w-xs bg-white/95 backdrop-blur-sm shadow-lg border-0">
-                  <CardContent className="p-4">
-                    <h3 className="font-medium mb-2">Personal</h3>
-                    <p className="text-sm text-muted-foreground">A plan built for you.</p>
-                  </CardContent>
-                </Card>
-              </div>
+{/* Desktop Overlapping Cards */}
+<div className="hidden md:block absolute inset-0 pointer-events-none">
+  <Card className="absolute top-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Clarity</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Understand your fitness age clearly<br />
+        with one simple score that reflects<br />
+        your real capacity and daily strength.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Speed</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Get fast, accurate insights through<br />
+        a quick test designed to fit easily<br />
+        into your daily training schedule.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 left-0 lg:-left-16 xl:-left-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Insight</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Identify weak links and imbalances<br />
+        early on so you can train smarter<br />
+        and build a stronger foundation.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Confidence</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Know exactly where you stand today<br />
+        and how to improve performance<br />
+        without risking overtraining fatigue.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute top-1/2 -translate-y-1/2 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Protection</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Train with precision and intention<br />
+        to reduce injury risks and maintain<br />
+        strength and mobility long term.
+      </p>
+    </CardContent>
+  </Card>
+
+  <Card className="absolute bottom-4 right-0 lg:-right-16 xl:-right-24 w-[240px] h-[180px] bg-white shadow-lg border-0 pointer-events-auto">
+    <CardContent className="p-6 h-full flex flex-col">
+      <h3 className="font-bold mb-3">Personal</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed text-justify">
+        Follow a personalized training plan<br />
+        crafted around your strengths, goals<br />
+        and recovery needs for real results.
+      </p>
+    </CardContent>
+  </Card>
+</div>
 
 {/* Mobile Layout - Grid Below Image */}
 <div className="md:hidden grid grid-cols-2 gap-4">
@@ -267,7 +290,7 @@ export function FunctionalFitnessAgeUpsellPage({ onAddToBasket, onOpenBasket }: 
                   <div className="pt-4 mt-auto">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">£129.99</p>
+                        <p className="font-medium">£44.00</p>
                       </div>
                     </div>
                   </div>

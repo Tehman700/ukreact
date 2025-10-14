@@ -138,10 +138,12 @@ export function FunctionalFitnessAgeInformationPage() {
         }),
       });
 
-      const savedUser = await response.json();
-      sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+        const savedUser = await response.json();
 
-      // Get stored answers
+        // ✅ Store in BOTH keys for compatibility
+        sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
+        sessionStorage.setItem("userInfo", JSON.stringify(savedUser));
+
       const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
 
       // Generate AI report
@@ -149,7 +151,7 @@ export function FunctionalFitnessAgeInformationPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assessmentType: "Functional Fitness Age",
+          assessmentType: "Functional Fitness",
           answers: pendingAnswers,
           userInfo: savedUser,
         }),
@@ -158,21 +160,8 @@ export function FunctionalFitnessAgeInformationPage() {
       const reportData = await reportResponse.json();
       sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
       sessionStorage.setItem("reportId", reportData.reportId.toString());
-      sessionStorage.setItem("assessmentType", "Functional Fitness Age");
+      sessionStorage.setItem("assessmentType", "Functional Fitness");
 
-      await fetch("https://luther.health/api/send-email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: savedUser.email,
-          userName: `${savedUser.first_name} ${savedUser.last_name}`,
-          assessmentType: "Functional Fitness Age",
-          report: reportData.report,
-          reportId: reportData.reportId,
-        }),
-      });
-
-      // Mark report as ready
       setReportReady(true);
 
       // Wait for progress animation to complete, then redirect

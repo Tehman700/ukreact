@@ -785,6 +785,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = resilienceIndexPrompt(assessmentType);
     } else if (assessmentType === "Nutrition Composition") {
       systemPrompt = nutritionCompositionPrompt(assessmentType);
+    } else if (assessmentType === "Functional Fitness") {
+      systemPrompt = functionalFitnessPrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -843,6 +845,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = resilienceIndexParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Nutrition Composition") {
       structuredReport = nutritionCompositionParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Functional Fitness") {
+      structuredReport = functionalFitnessParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -871,6 +875,67 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+
+function functionalFitnessPrompt(assessmentType) {
+  const prompts = {
+    "Functional Fitness": `You are a functional movement and physical performance specialist AI with expertise in biomechanics, exercise physiology, and age-related physical decline. Analyze the patient's responses to calculate their functional fitness age and identify movement optimization opportunities.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [functional fitness age as a number, should be lower than chronological age if fitness is good, higher if poor]
+OVERALL_RATING: [a descriptive statement like "13 years younger than chronological age" or "5 years older than chronological age" or "Matches chronological age"]
+CHRONOLOGICAL_AGE: [extract from user's age_range and use the midpoint, e.g., for "46-55" use 50]
+
+CATEGORY_ANALYSIS:
+Movement Quality: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing movement patterns, functional range of motion, compensatory movements, and motor control quality] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Strength & Power: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing muscular strength, explosive power, force production, and neuromuscular efficiency] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Balance & Coordination: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing balance capacity, proprioception, coordination, neuromuscular control, and fall risk] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Cardiovascular Fitness: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing aerobic capacity, VO2 max estimation, endurance, cardiovascular efficiency, and recovery] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+Flexibility & Mobility: [score 0-100] | [level: optimal/high/moderate/low] | [2-3 sentence description analyzing joint mobility, muscle flexibility, range of motion, tissue quality, and movement restrictions] | [recommendation 1] | [recommendation 2] | [recommendation 3]
+
+DETAILED_ANALYSIS:
+Movement Quality|[clinical context: 3-4 sentences on movement patterns and functional capacity. Reference Journal of Biomechanics research on movement screening, Physical Therapy guidelines on movement quality assessment, and age-related movement pattern changes. Discuss compensatory patterns, motor control, and injury risk]|[strengths: comma-separated list of 3 positive movement factors]|[limitations: comma-separated list of 2-3 movement restrictions or compensations]|[timeline: specific timeline like "Movement quality improvements can reduce functional age by 5-8 years within 8-12 weeks of targeted training"]
+
+Strength & Power|[clinical context: 3-4 sentences on strength and power as key functional fitness markers. Reference Journal of Strength & Conditioning research on age-related strength decline, sarcopenia prevention, and power training benefits. Discuss muscle mass, force production, and explosive capacity]|[strengths: comma-separated list of 3 positive strength factors]|[limitations: comma-separated list of 2-3 areas needing strength development]|[timeline: specific timeline like "Strength and power gains can reverse functional age by 8-12 years within 12-16 weeks of progressive resistance training"]
+
+Balance & Coordination|[clinical context: 3-4 sentences on balance as predictor of functional independence. Reference Journal of Gerontology on balance and fall prevention, Gait & Posture research on postural control aging. Discuss proprioception, neuromuscular control, and fall risk reduction]|[strengths: comma-separated list of 3 positive balance factors]|[limitations: comma-separated list of 2-3 balance or coordination challenges]|[timeline: specific timeline like "Balance training can improve functional age markers by 6-10 years within 6-8 weeks of consistent practice"]
+
+Cardiovascular Fitness|[clinical context: 3-4 sentences on aerobic fitness as cornerstone of functional capacity. Reference Medicine & Science in Sports research on VO2 max and aging, cardiovascular fitness as longevity predictor. Discuss aerobic capacity, endurance, and cardiovascular efficiency]|[strengths: comma-separated list of 3 positive cardiovascular factors]|[limitations: comma-separated list of 2-3 areas for cardiovascular improvement]|[timeline: specific timeline like "Cardiovascular training can reduce functional age by 10-15 years within 12-16 weeks of consistent aerobic exercise"]
+
+Flexibility & Mobility|[clinical context: 3-4 sentences on mobility as essential functional fitness component. Reference Clinical Biomechanics research on age-related flexibility decline, mobility and injury prevention. Discuss joint health, tissue quality, and movement freedom]|[strengths: comma-separated list of 3 positive mobility factors]|[limitations: comma-separated list of 2-3 flexibility or mobility restrictions]|[timeline: specific timeline like "Mobility work can improve functional age by 5-7 years within 8-12 weeks of daily flexibility training"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 5-6 paragraph analysis covering:
+1. Overall functional fitness age calculation with explanation of physical capability vs chronological age
+2. Most significant factors accelerating or decelerating functional aging
+3. Key movement limitations or strengths identified across all domains
+4. Evidence-based exercise interventions ranked by impact on functional age reversal
+5. Realistic expectations for functional age improvement with optimal training
+6. Specific, actionable movement optimization plan with progressive timelines
+
+Include specific references to exercise science (Journal of Strength & Conditioning, Medicine & Science in Sports, Journal of Gerontology, Physical Therapy journals), cite validated fitness assessments and functional movement screening, and provide personalized exercise recommendations based on their specific movement capacity, strength levels, balance, cardiovascular fitness, and flexibility responses.]
+
+SCORING GUIDELINES FOR FUNCTIONAL FITNESS AGE CALCULATION:
+- Analyze responses holistically to estimate functional vs chronological age based on physical capability
+- Score 85-100 in categories = functional age 10-15 years younger
+- Score 70-84 in categories = functional age 5-10 years younger
+- Score 55-69 in categories = functional age matches chronological
+- Score 40-54 in categories = functional age 5-10 years older
+- Score below 40 = functional age 10+ years older
+
+Consider: movement quality, strength levels, power output, balance capacity, cardiovascular endurance, flexibility, mobility restrictions, injury history, activity levels, and functional limitations.
+
+Focus on validated functional fitness markers and provide evidence-based exercise recommendations personalized to their responses. Emphasize modifiable factors that can reverse functional aging and restore youthful movement capacity.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 
 function nutritionCompositionPrompt(assessmentType) {
   const prompts = {
@@ -1925,7 +1990,206 @@ Focus on actionable, evidence-based recommendations that are personalized to the
 
   return prompts[assessmentType] || prompts["default"];
 }
+function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    // Extract functional fitness age (OVERALL_SCORE)
+    const fitnessAgeMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const functionalFitnessAge = fitnessAgeMatch ? parseInt(fitnessAgeMatch[1]) : 45;
 
+    // Extract chronological age
+    const chronoAgeMatch = aiAnalysis.match(/CHRONOLOGICAL_AGE:\s*(\d+)/i);
+    const chronologicalAge = chronoAgeMatch ? parseInt(chronoAgeMatch[1]) : 45;
+
+    // Extract overall rating
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Matches chronological age";
+
+    // Calculate fitness advantage
+    const fitnessAdvantage = chronologicalAge - functionalFitnessAge;
+
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis - Functional Fitness categories
+    if (detailedSection) {
+      const categories = [
+        'Movement Quality',
+        'Strength & Power',
+        'Balance & Coordination',
+        'Cardiovascular Fitness',
+        'Flexibility & Mobility'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Movement Quality',
+        'Strength & Power',
+        'Balance & Coordination',
+        'Cardiovascular Fitness',
+        'Flexibility & Mobility'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important functional fitness patterns.`,
+              strengths: ['Baseline function maintained', 'Awareness of fitness factors'],
+              riskFactors: ['Optimization opportunities identified'],
+              timeline: 'Improvements measurable within 8-12 weeks with targeted training.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // Fallback if parsing failed
+    if (results.length === 0) {
+      console.log("Creating fallback for Functional Fitness");
+
+      const fallbackCategories = [
+        {
+          name: 'Movement Quality',
+          desc: 'Movement patterns show typical patterns for your age group with optimization opportunities.',
+          context: 'Movement quality assessment reveals functional capacity and compensatory patterns that affect daily activities.',
+          strengths: ['Functional movement maintained', 'Good body awareness', 'No major restrictions'],
+          risks: ['Some compensatory patterns present', 'Movement efficiency could improve']
+        },
+        {
+          name: 'Strength & Power',
+          desc: 'Muscular strength and power show age-appropriate levels with enhancement potential.',
+          context: 'Strength and power are key functional fitness markers that directly impact daily activities and independence.',
+          strengths: ['Adequate baseline strength', 'Good force production', 'Functional capacity maintained'],
+          risks: ['Power output declining with age', 'Muscle mass optimization needed']
+        },
+        {
+          name: 'Balance & Coordination',
+          desc: 'Balance and coordination show good maintenance with room for enhancement.',
+          context: 'Balance capacity is a critical predictor of functional independence and fall risk in aging populations.',
+          strengths: ['Stable balance baseline', 'Good proprioception', 'Coordination maintained'],
+          risks: ['Single-leg balance could improve', 'Dynamic stability needs work']
+        },
+        {
+          name: 'Cardiovascular Fitness',
+          desc: 'Aerobic capacity shows typical age-related patterns with optimization opportunities.',
+          context: 'Cardiovascular fitness is the cornerstone of functional capacity and a key longevity predictor.',
+          strengths: ['Aerobic base maintained', 'Reasonable endurance', 'Good recovery patterns'],
+          risks: ['VO2 max declining with age', 'Aerobic capacity could improve']
+        },
+        {
+          name: 'Flexibility & Mobility',
+          desc: 'Joint mobility and flexibility show typical patterns with room for improvement.',
+          context: 'Mobility and flexibility are essential for injury prevention and maintaining full functional range of motion.',
+          strengths: ['Basic mobility maintained', 'Reasonable flexibility', 'No major restrictions'],
+          risks: ['Some joint stiffness present', 'Range of motion limited in key areas']
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 20) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with fitness professional for personalized programming',
+            'Implement progressive exercise interventions',
+            'Track functional improvements over time'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Measurable improvements typically occur within 8-12 weeks of consistent training.'
+          }
+        });
+      });
+    }
+
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore: functionalFitnessAge,
+      chronologicalAge: chronologicalAge,
+      fitnessAdvantage: fitnessAdvantage,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Functional Fitness AI response:", error);
+
+    return {
+      overallScore: 45,
+      chronologicalAge: 45,
+      fitnessAdvantage: 0,
+      overallRating: "Matches chronological age",
+      results: [{
+        category: "Overall Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your functional fitness assessment has been completed. Consult with fitness professionals for comprehensive movement evaluation.",
+        recommendations: [
+          "Discuss results with qualified fitness professional",
+          "Implement evidence-based exercise programming",
+          "Track functional fitness improvements over time"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Assessment completed', 'Baseline established'],
+          riskFactors: ['Requires professional consultation'],
+          timeline: 'Consult with fitness specialist for personalized program.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
+}
 function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract overall score and rating
@@ -5348,6 +5612,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Resilience Plan'];
     } else if (assessmentType === 'Nutrition Composition') {
       tabs = ['Overview', 'Detailed Results', 'Nutrition Plan'];
+    } else if (assessmentType === 'Functional Fitness') {
+      tabs = ['Overview', 'Detailed Results', 'Fitness Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];
