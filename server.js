@@ -20,6 +20,7 @@ app.use(cors());
 // ----------------------------
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 180000, // 3 minutes
 });
 
 // ----------------------------
@@ -6078,6 +6079,11 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
 }
 
 // ----------------------------
-app.listen(process.env.PORT, () =>
+const server = app.listen(process.env.PORT, () =>
   console.log(`🚀 Server running on port ${process.env.PORT}`)
 );
+
+// Set timeouts to prevent 504 errors
+server.timeout = 300000; // 5 minutes
+server.keepAliveTimeout = 300000;
+server.headersTimeout = 300000;
