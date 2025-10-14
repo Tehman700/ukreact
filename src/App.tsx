@@ -1,3 +1,192 @@
+import React, { useState, useEffect, useCallback } from 'react';
+// Core Components
+
+
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { CookieConsent } from './components/CookieConsent';
+// import { ResultsNotification } from './components/ResultsNotification';
+import { HealthConciergeOptIn } from './components/HealthConciergeOptIn';
+import { DesignSystemApp } from './components/design-system/DesignSystemApp';
+import { ShoppingBasket } from './components/ShoppingBasket';
+
+// Main Pages
+import { HomePage } from './pages/HomePage';
+import { AboutPage } from './pages/AboutPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { ContactPage } from './pages/ContactPage';
+import { AssessmentsPage } from './pages/AssessmentsPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { CookiePage } from './pages/CookiePage';
+import { ComplaintsPage } from './pages/ComplaintsPage';
+import { QuizPage } from './pages/QuizPage';
+import { LoadingPage } from './pages/LoadingPage';
+import { QuizResultsPage } from './pages/QuizResultsPage';
+import { UpsellPage } from './pages/UpsellPage';
+
+// Assessment Pages - Surgery Readiness
+import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
+import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
+import { SurgeryReadinessInformationPage } from './pages/SurgeryReadinessInformationPage';
+import { SurgeryReadinessResultsPage } from './pages/SurgeryReadinessResultsPage';
+import { SurgeryReadinessReviewPage } from './pages/SurgeryReadinessReviewPage';
+import { HealthConciergeInformationUser } from './pages/HealthConciergeInformationUser';
+
+// Assessment Pages - Biological Age
+import { BiologicalAgeUpsellPage } from './pages/BiologicalAgeUpsellPage';
+import { BiologicalAgeQuestionsPage } from './pages/BiologicalAgeQuestionsPage';
+import { BiologicalAgeInformationPage } from './pages/BiologicalAgeInformationPage';
+import { BiologicalAgeResultsPage } from './pages/BiologicalAgeResultsPage';
+import { BiologicalAgeReviewPage } from './pages/BiologicalAgeReviewPage';
+
+// Assessment Pages - Cardiometabolic Risk
+import { CardiometabolicRiskUpsellPage } from './pages/CardiometabolicRiskUpsellPage';
+import { CardiometabolicRiskQuestionsPage } from './pages/CardiometabolicRiskQuestionsPage';
+import { CardiometabolicRiskInformationPage } from './pages/CardiometabolicRiskInformationPage';
+import { CardiometabolicRiskResultsPage } from './pages/CardiometabolicRiskResultsPage';
+import { CardiometabolicRiskReviewPage } from './pages/CardiometabolicRiskReviewPage';
+
+// Assessment Pages - Resilience Index
+import { ResilienceIndexUpsellPage } from './pages/ResilienceIndexUpsellPage';
+import { ResilienceIndexQuestionsPage } from './pages/ResilienceIndexQuestionsPage';
+import { ResilienceIndexInformationPage } from './pages/ResilienceIndexInformationPage';
+import { ResilienceIndexResultsPage } from './pages/ResilienceIndexResultsPage';
+import { ResilienceIndexReviewPage } from './pages/ResilienceIndexReviewPage';
+
+// Assessment Pages - Nutrition & Body Composition
+import { NutritionBodyCompositionUpsellPage } from './pages/NutritionBodyCompositionUpsellPage';
+import { NutritionBodyCompositionQuestionsPage } from './pages/NutritionBodyCompositionQuestionsPage';
+import { NutritionBodyCompositionInformationPage } from './pages/NutritionBodyCompositionInformationPage';
+import { NutritionBodyCompositionResultsPage } from './pages/NutritionBodyCompositionResultsPage';
+import { NutritionBodyCompositionReviewPage } from './pages/NutritionBodyCompositionReviewPage';
+
+// Assessment Pages - Functional Fitness Age
+import { FunctionalFitnessAgeUpsellPage } from './pages/FunctionalFitnessAgeUpsellPage';
+import { FunctionalFitnessAgeQuestionsPage } from './pages/FunctionalFitnessAgeQuestionsPage';
+import { FunctionalFitnessAgeInformationPage } from './pages/FunctionalFitnessAgeInformationPage';
+import { FunctionalFitnessAgeResultsPage } from './pages/FunctionalFitnessAgeResultsPage';
+import { FunctionalFitnessAgeReviewPage } from './pages/FunctionalFitnessAgeReviewPage';
+
+// Bundle Assessment Pages
+import { CompletedSurgeryPreparationUpsellPage } from './pages/CompletedSurgeryPreparationUpsellPage';
+import { CompletedSurgeryPreparationQuestionsPage } from './pages/CompletedSurgeryPreparationQuestionsPage';
+import { CompletedSurgeryPreparationInformationPage } from './pages/CompletedSurgeryPreparationInformationPage';
+import { CompletedSurgeryPreparationResultsPage } from './pages/CompletedSurgeryPreparationResultsPage';
+import { CompletedSurgeryPreparationReviewPage } from './pages/CompletedSurgeryPreparationReviewPage';
+
+import { CompletedChronicSymptomsUpsellPage } from './pages/CompletedChronicSymptomsUpsellPage';
+import { CompletedChronicSymptomsQuestionsPage } from './pages/CompletedChronicSymptomsQuestionsPage';
+import { CompletedChronicSymptomsInformationPage } from './pages/CompletedChronicSymptomsInformationPage';
+import { CompletedChronicSymptomsResultsPage } from './pages/CompletedChronicSymptomsResultsPage';
+import { CompletedChronicSymptomsReviewPage } from './pages/CompletedChronicSymptomsReviewPage';
+
+import { LongevityWellnessBundleUpsellPage } from './pages/LongevityWellnessBundleUpsellPage';
+import { LongevityWellnessBundleQuestionsPage } from './pages/LongevityWellnessBundleQuestionsPage';
+import { LongevityWellnessBundleInformationPage } from './pages/LongevityWellnessBundleInformationPage';
+import { LongevityWellnessBundleResultsPage } from './pages/LongevityWellnessBundleResultsPage';
+import { LongevityWellnessBundleReviewPage } from './pages/LongevityWellnessBundleReviewPage';
+
+// Additional Assessment Pages
+import { ComplicationRiskUpsellPage } from './pages/ComplicationRiskUpsellPage';
+import { ComplicationRiskQuestionsPage } from './pages/ComplicationRiskQuestionsPage';
+import { ComplicationRiskInformationPage } from './pages/ComplicationRiskInformationPage';
+import { ComplicationRiskResultsPage } from './pages/ComplicationRiskResultsPage';
+import { ComplicationRiskReviewPage } from './pages/ComplicationRiskReviewPage';
+
+import { RecoverySpeedUpsellPage } from './pages/RecoverySpeedUpsellPage';
+import { RecoverySpeedQuestionsPage } from './pages/RecoverySpeedQuestionsPage';
+import { RecoverySpeedInformationPage } from './pages/RecoverySpeedInformationPage';
+import { RecoverySpeedResultsPage } from './pages/RecoverySpeedResultsPage';
+import { RecoverySpeedReviewPage } from './pages/RecoverySpeedReviewPage';
+
+import { AnaesthesiaRiskUpsellPage } from './pages/AnaesthesiaRiskUpsellPage';
+import { AnaesthesiaRiskQuestionsPage } from './pages/AnaesthesiaRiskQuestionsPage';
+import { AnaesthesiaRiskInformationPage } from './pages/AnaesthesiaRiskInformationPage';
+import { AnaesthesiaRiskResultsPage } from './pages/AnaesthesiaRiskResultsPage';
+import { AnaesthesiaRiskReviewPage } from './pages/AnaesthesiaRiskReviewPage';
+
+import { MobilityStrengthUpsellPage } from './pages/MobilityStrengthUpsellPage';
+import { MobilityStrengthQuestionsPage } from './pages/MobilityStrengthQuestionsPage';
+import { MobilityStrengthInformationPage } from './pages/MobilityStrengthInformationPage';
+import { MobilityStrengthResultsPage } from './pages/MobilityStrengthResultsPage';
+import { MobilityStrengthReviewPage } from './pages/MobilityStrengthReviewPage';
+
+import { SymptomSeverityUpsellPage } from './pages/SymptomSeverityUpsellPage';
+import { SymptomSeverityQuestionsPage } from './pages/SymptomSeverityQuestionsPage';
+import { SymptomSeverityInformationPage } from './pages/SymptomSeverityInformationPage';
+import { SymptomSeverityResultsPage } from './pages/SymptomSeverityResultsPage';
+import { SymptomSeverityReviewPage } from './pages/SymptomSeverityReviewPage';
+
+import { InflammationRiskUpsellPage } from './pages/InflammationRiskUpsellPage';
+import { InflammationRiskQuestionsPage } from './pages/InflammationRiskQuestionsPage';
+import { InflammationRiskInformationPage } from './pages/InflammationRiskInformationPage';
+import { InflammationRiskResultsPage } from './pages/InflammationRiskResultsPage';
+import { InflammationRiskReviewPage } from './pages/InflammationRiskReviewPage';
+
+import { MedicationBurdenUpsellPage } from './pages/MedicationBurdenUpsellPage';
+import { MedicationBurdenQuestionsPage } from './pages/MedicationBurdenQuestionsPage';
+import { MedicationBurdenInformationPage } from './pages/MedicationBurdenInformationPage';
+import { MedicationBurdenResultsPage } from './pages/MedicationBurdenResultsPage';
+import { MedicationBurdenReviewPage } from './pages/MedicationBurdenReviewPage';
+
+import { DailyEnergyUpsellPage } from './pages/DailyEnergyUpsellPage';
+import { DailyEnergyQuestionsPage } from './pages/DailyEnergyQuestionsPage';
+import { DailyEnergyInformationPage } from './pages/DailyEnergyInformationPage';
+import { DailyEnergyResultsPage } from './pages/DailyEnergyResultsPage';
+import { DailyEnergyReviewPage } from './pages/DailyEnergyReviewPage';
+
+import { LifestyleLimiterUpsellPage } from './pages/LifestyleLimiterUpsellPage';
+import { LifestyleLimiterQuestionsPage } from './pages/LifestyleLimiterQuestionsPage';
+import { LifestyleLimiterInformationPage } from './pages/LifestyleLimiterInformationPage';
+import { LifestyleLimiterResultsPage } from './pages/LifestyleLimiterResultsPage';
+import { LifestyleLimiterReviewPage } from './pages/LifestyleLimiterReviewPage';
+
+// Protocol Pages
+import { ChronicSymptomProtocolPage } from './pages/ChronicSymptomProtocolPage';
+import { LongevityFocusProtocolPage } from './pages/LongevityFocusProtocolPage';
+
+// Health Concierge Pages
+import { HealthConciergePage } from './pages/HealthConciergePage';
+import { HealthConciergeQuestionsPage } from './pages/HealthConciergeQuestionsPage';
+import { HealthConciergeResultsPage } from './pages/HealthConciergeResultsPage';
+import { HealthConciergeInformationPage } from './pages/HealthConciergeInformationPage';
+
+
+// For Stripe Payment Pages
+import Success from './pages/Success';
+import Cancel from './pages/Cancel';
+
+
+// Blog Pages
+import { BlogPage } from './pages/BlogPage';
+import { SurgeryReadySignsPage } from './pages/blog/SurgeryReadySignsPage';
+import { RedFlagsSurgeryPage } from './pages/blog/RedFlagsSurgeryPage';
+import { HomeTweaksPage } from './pages/blog/HomeTweaksPage';
+import { MorningStiffnessPage } from './pages/blog/MorningStiffnessPage';
+import { ComplicationRiskFactorsPage } from './pages/blog/ComplicationRiskFactorsPage';
+import { RecoverySpeedSecretsPage } from './pages/blog/RecoverySpeedSecretsPage';
+import { AnaesthesiaRisksPage } from './pages/blog/AnaesthesiaRisksPage';
+import { MobilityBaselinePage } from './pages/blog/MobilityBaselinePage';
+import { SymptomSeverityGuidePage } from './pages/blog/SymptomSeverityGuidePage';
+import { InflammationTriggerGuidePage } from './pages/blog/InflammationTriggerGuidePage';
+import { MedicationSafetyGuidePage } from './pages/blog/MedicationSafetyGuidePage';
+import { EnergyOptimizationGuidePage } from './pages/blog/EnergyOptimizationGuidePage';
+import { LifestyleImpactGuidePage } from './pages/blog/LifestyleImpactGuidePage';
+import { AgingFasterSignsPage } from './pages/blog/AgingFasterSignsPage';
+import { CardiometabolicRiskSignsPage } from './pages/blog/CardiometabolicRiskSignsPage';
+import { ResilienceSignsPage } from './pages/blog/ResilienceSignsPage';
+import { NutritionBodyCompositionSignsPage } from './pages/blog/NutritionBodyCompositionSignsPage';
+import { FunctionalFitnessAgeSignsPage } from './pages/blog/FunctionalFitnessAgeSignsPage';
+
+
+
+
+// Admin Pages
+import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AnalyticsTestPage } from './pages/AnalyticsTestPage';
+
 // Icons and Assets
 import { Shield, Clock, TrendingUp, Star, AlertTriangle, Zap, Heart, Activity, Thermometer, Pill, Battery, Users, Apple, Stethoscope } from 'lucide-react';
 import surgeryReadinessImage from '/assests/surgery-hero.webp';
