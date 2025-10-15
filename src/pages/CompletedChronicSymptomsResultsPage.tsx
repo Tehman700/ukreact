@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Thermometer, Pill, Battery, Stethoscope, Calendar } from 'lucide-react';
+import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Thermometer, Pill, Battery, Stethoscope, Calendar, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import { PaymentGate } from '../components/PaymentGate'; // <-- import the gate
 
 interface AssessmentResult {
   category: string;
@@ -15,94 +14,139 @@ interface AssessmentResult {
   level: 'low' | 'moderate' | 'high' | 'optimal';
   description: string;
   recommendations: string[];
+  detailedAnalysis?: {
+    clinicalContext: string;
+    strengths: string[];
+    riskFactors: string[];
+    timeline: string;
+  };
+}
+
+interface AIReport {
+  overallScore: number;
+  overallRating: string;
+  results: AssessmentResult[];
+  summary: string;
 }
 
 export function CompletedChronicSymptomsResultsPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations'>('overview');
   const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['overview']));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiReport, setAiReport] = useState<AIReport | null>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
-  const assessmentTitle = "Completed Chronic Symptoms Bundle";
-  const assessmentType = "Comprehensive 5-Assessment Chronic Symptom Management Bundle";
-  const completionDate = new Date().toLocaleDateString('en-GB', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  const completionDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
   });
-  const overallSymptomScore = 69;
-  const symptomLevel = "Moderate Management";
 
-  const results: AssessmentResult[] = [
-    {
-      category: "Symptom Severity Index",
-      score: 68,
-      maxScore: 100,
-      level: "moderate",
-      description: "Moderate symptom burden with regular daily impact and manageable but persistent pain and fatigue patterns requiring ongoing attention and optimization strategies.",
-      recommendations: [
-        "Implement structured symptom tracking to identify patterns and triggers",
-        "Consider pain management techniques including heat therapy and gentle movement",
-        "Explore stress reduction strategies to minimize symptom flare-ups",
-        "Discuss current treatment effectiveness with your healthcare provider"
-      ]
-    },
-    {
-      category: "Inflammation Risk Assessment",
-      score: 74,
-      maxScore: 100,
-      level: "moderate",
-      description: "Moderate inflammation risk with several modifiable lifestyle factors. Diet and stress management improvements could significantly reduce inflammatory burden.",
-      recommendations: [
-        "Adopt anti-inflammatory dietary patterns with omega-3 rich foods",
-        "Reduce consumption of processed foods and added sugars",
-        "Implement stress management techniques such as meditation or yoga",
-        "Optimize sleep quality to reduce inflammatory markers",
-        "Consider elimination diet to identify food triggers"
-      ]
-    },
-    {
-      category: "Medication Burden Analysis",
-      score: 82,
-      maxScore: 100,
-      level: "high",
-      description: "Well-managed medication regimen with good adherence and minimal side effects. Current medication strategy appears optimal with room for minor refinements.",
-      recommendations: [
-        "Continue current medication adherence practices",
-        "Regular medication reviews with healthcare provider to optimize effectiveness",
-        "Monitor for any new side effects or interactions",
-        "Consider medication timing optimization for better symptom control",
-        "Explore opportunities to simplify regimen where medically appropriate"
-      ]
-    },
-    {
-      category: "Daily Energy Profile",
-      score: 58,
-      maxScore: 100,
-      level: "low",
-      description: "Significant energy challenges with pronounced fatigue patterns affecting daily function. Multiple factors contributing to energy depletion require comprehensive intervention.",
-      recommendations: [
-        "Establish consistent sleep schedule with 7-9 hours nightly",
-        "Implement energy pacing strategies throughout the day",
-        "Consider B-vitamin and iron level assessment",
-        "Reduce caffeine dependence gradually with alternative energy strategies",
-        "Plan high-energy activities during your optimal energy windows",
-        "Explore underlying causes of fatigue with healthcare provider"
-      ]
-    },
-    {
-      category: "Lifestyle Impact Assessment",
-      score: 63,
-      maxScore: 100,
-      level: "moderate",
-      description: "Moderate lifestyle limitations with notable impact on work, social, and physical activities. Adaptive strategies could significantly improve quality of life.",
-      recommendations: [
-        "Develop workplace accommodations to reduce symptom impact",
-        "Create modified exercise routine appropriate for current limitations",
-        "Build support network for challenging days and flare-ups",
-        "Plan social activities around energy levels and symptom patterns",
-        "Explore assistive devices or modifications to maintain independence"
-      ]
+  useEffect(() => {
+    const loadReport = () => {
+      try {
+        setLoading(true);
+
+        const storedReport = sessionStorage.getItem('assessmentReport');
+        const storedAssessmentType = sessionStorage.getItem('assessmentType');
+
+        console.log('Loading stored report:', storedReport ? 'Found' : 'Not found');
+
+        if (!storedReport) {
+          throw new Error('No assessment report found. Please complete the assessment first.');
+        }
+
+        const report = JSON.parse(storedReport);
+
+        if (storedAssessmentType !== 'Chronic Symptoms Bundle') {
+          console.warn('Assessment type mismatch:', storedAssessmentType);
+        }
+
+        console.log('Report loaded successfully:', {
+          overallScore: report.overallScore,
+          categoriesCount: report.results?.length || 0
+        });
+
+        setAiReport(report);
+
+        // Check if page is being accessed by Puppeteer (look for common indicators)
+        const isPuppeteer =
+          navigator.webdriver ||
+          window.navigator.userAgent.includes('HeadlessChrome') ||
+          window.navigator.userAgent.includes('Puppeteer') ||
+          // Check for URL parameter that Puppeteer can add
+          new URLSearchParams(window.location.search).get('puppeteer') === 'true';
+
+        // Only show email popup if NOT in Puppeteer
+        if (!isPuppeteer) {
+          setShowEmailPopup(true);
+        }
+
+      } catch (err) {
+        console.error('Error loading report:', err);
+        setError(err instanceof Error ? err.message : 'Unable to load report');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReport();
+  }, []);
+
+  const handleEmailReport = async () => {
+    // Show sent state
+    setEmailSent(true);
+
+    // Close popup after 2 seconds
+    setTimeout(() => {
+      setShowEmailPopup(false);
+      setEmailSent(false);
+    }, 2000);
+
+    try {
+      const userInfoStr = sessionStorage.getItem('currentUser') || sessionStorage.getItem('userInfo');
+      if (!userInfoStr) {
+        console.error('User information not found');
+        return;
+      }
+
+      const userInfo = JSON.parse(userInfoStr);
+      const currentPageUrl = window.location.href;
+
+      // Send email in background
+      fetch('https://luther.health/api/send-email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: userInfo.email,
+          userName: `${userInfo.first_name} ${userInfo.last_name}`,
+          assessmentType: 'Chronic Symptoms Bundle',
+          report: aiReport,
+          reportId: Date.now(),
+          pageUrl: currentPageUrl,
+          activeTab: activeTab
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Email sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error sending email:', error);
+        });
+
+    } catch (error) {
+      console.error('Error preparing email:', error);
     }
-  ];
+  };
+
+  const handleSkipEmail = () => {
+    setShowEmailPopup(false);
+  };
 
   const getScoreColor = (level: string) => {
     switch (level) {
@@ -150,11 +194,92 @@ export function CompletedChronicSymptomsResultsPage() {
 
   const allTabsViewed = viewedTabs.size === 3;
 
-  return (
-            <PaymentGate requiredFunnel="chronic">
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your comprehensive chronic symptoms assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
+  if (error || !aiReport) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              <span>Error Loading Report</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">{error || 'Unable to load your assessment report.'}</p>
+            <Button onClick={() => window.location.hash = 'assessments'}>
+              Return to Assessments
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { overallScore, overallRating, results } = aiReport;
+
+  return (
     <div className="min-h-screen bg-background">
-      {/* Simplified Header */}
+              {/* Email Popup - Shows immediately on page load */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {emailSent ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <span>Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    <span>Email Your Report</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <p className="text-muted-foreground mb-6">
+                  {emailSent
+                    ? 'Your report will be sent to your email shortly.'
+                    : 'Would you like a copy of your personalised report emailed to you?'
+                  }
+                </p>
+                {!emailSent && (
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleEmailReport}
+                      className="flex-1"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Yes, Email Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleSkipEmail}
+                      className="flex-1"
+                    >
+                      No Thanks
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
@@ -169,7 +294,6 @@ export function CompletedChronicSymptomsResultsPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Overall Score Section */}
         <Card className="mb-8">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-2">
@@ -183,24 +307,23 @@ export function CompletedChronicSymptomsResultsPage() {
           <CardContent className="text-center">
             <div className="space-y-4">
               <div>
-                <div className="text-4xl font-bold mb-2 text-orange-600">{overallSymptomScore}%</div>
+                <div className="text-4xl font-bold mb-2 text-orange-600">{overallScore}%</div>
                 <p className="text-muted-foreground mb-2">Overall Symptom Management Score</p>
                 <div className="flex items-center justify-center gap-4 text-sm">
                   <Badge variant="default" className="bg-orange-100 text-orange-800">
-                    {symptomLevel}
+                    {overallRating}
                   </Badge>
                   <span className="text-muted-foreground">Comprehensive chronic symptom evaluation</span>
                 </div>
               </div>
-              <Progress value={69} className="w-full max-w-md mx-auto" />
+              <Progress value={overallScore} className="w-full max-w-md mx-auto" />
               <p className="text-muted-foreground max-w-md mx-auto">
-                Your comprehensive chronic symptoms bundle reveals moderate management opportunities across all critical symptom domains, with clear paths for optimization.
+                Your comprehensive chronic symptoms bundle reveals management opportunities across all critical symptom domains, with clear paths for optimization.
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Navigation Tabs */}
         <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
           <Button
             variant={activeTab === 'overview' ? 'default' : 'ghost'}
@@ -234,7 +357,6 @@ export function CompletedChronicSymptomsResultsPage() {
           </Button>
         </div>
 
-        {/* Tab Content */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {results.map((result, index) => (
@@ -268,134 +390,41 @@ export function CompletedChronicSymptomsResultsPage() {
 
         {activeTab === 'detailed' && (
           <div className="space-y-8">
-            {/* Comprehensive Symptom Profile Analysis */}
             <Card>
               <CardHeader>
                 <CardTitle>Comprehensive Chronic Symptom Profile Analysis</CardTitle>
                 <CardDescription>
-                  Detailed analysis based on your 50-question comprehensive assessment
+                  Detailed analysis based on your comprehensive 50-question assessment
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium flex items-center space-x-2">
-                      <Thermometer className="h-4 w-4" />
-                      <span>Symptom Severity Factors</span>
-                    </h4>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span>Primary Symptoms:</span>
-                        <span className="font-medium">Chronic pain, fatigue</span>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {results.slice(0, 3).map((result, index) => (
+                      <div key={index} className="space-y-3">
+                        <h4 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">
+                          {getCategoryIcon(result.category)}
+                          <span>{result.category}</span>
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Score:</span>
+                            <span className="font-medium">{result.score}/{result.maxScore}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Level:</span>
+                            <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
+                              {result.level}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Pain Intensity:</span>
-                        <span className="font-medium text-yellow-600">Moderate (4-6/10)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Symptom Frequency:</span>
-                        <span className="font-medium">Daily</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Flare Pattern:</span>
-                        <span className="font-medium">Weekly episodes</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-medium flex items-center space-x-2">
-                      <Heart className="h-4 w-4" />
-                      <span>Modifiable Risk Factors</span>
-                    </h4>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span>Diet Quality:</span>
-                        <span className="font-medium text-yellow-600">Mixed diet</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Stress Level:</span>
-                        <span className="font-medium text-yellow-600">Moderate</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Sleep Quality:</span>
-                        <span className="font-medium text-yellow-600">Fair</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Exercise Status:</span>
-                        <span className="font-medium text-green-600">Regular moderate</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Detailed Medical Profile */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Medication & Energy Pattern Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Medication Profile</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Good adherence</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span>3-5 medications</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Minimal side effects</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Energy Patterns</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Morning Energy:</span>
-                        <span className="font-medium text-red-600">Low</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Afternoon Crashes:</span>
-                        <span className="font-medium text-red-600">Frequent</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Sleep Duration:</span>
-                        <span className="font-medium text-yellow-600">5-6 hours</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Healing Factors</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Symptom Recovery:</span>
-                        <span className="font-medium text-yellow-600">Moderate pace</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Support System:</span>
-                        <span className="font-medium text-green-600">Good support</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Stress Impact:</span>
-                        <span className="font-medium text-yellow-600">Moderate effect</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Comparative Analysis Chart */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -410,21 +439,21 @@ export function CompletedChronicSymptomsResultsPage() {
                 <div className="space-y-16">
                   {results.map((result, index) => (
                     <div key={index} className="space-y-4">
-                      <h3 className="text-left font-medium mb-[50px] mt-[0px] mr-[0px] ml-[0px]">{result.category}</h3>
-                      
+                      <h3 className="text-left font-medium mb-[50px]">{result.category}</h3>
+
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = 30;
                           const rangeEnd = 90;
                           const rangeSize = rangeEnd - rangeStart;
-                          
+
                           const yourScorePosition = ((result.score - rangeStart) / rangeSize) * 100;
                           const averagePosition = ((55 - rangeStart) / rangeSize) * 100;
                           const optimalPosition = ((80 - rangeStart) / rangeSize) * 100;
-                          
+
                           return (
                             <>
-                              <div 
+                              <div
                                 className="absolute -top-14 transform -translate-x-1/2 text-center"
                                 style={{ left: `${yourScorePosition}%` }}
                               >
@@ -433,16 +462,16 @@ export function CompletedChronicSymptomsResultsPage() {
                               </div>
 
                               <div className="relative h-2 bg-gray-300 rounded-full">
-                                <div 
+                                <div
                                   className="absolute left-0 top-0 h-full bg-black transition-all duration-1000 ease-out rounded-full"
                                   style={{ width: `${yourScorePosition}%` }}
                                 />
-                                
-                                <div 
+
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${averagePosition}%` }}
                                 />
-                                <div 
+                                <div
                                   className="absolute top-0 h-full w-0.5 bg-white rounded-full"
                                   style={{ left: `${optimalPosition}%` }}
                                 />
@@ -450,7 +479,7 @@ export function CompletedChronicSymptomsResultsPage() {
 
                               <div className="relative mt-3 h-12">
                                 {Math.abs(averagePosition - yourScorePosition) > 8 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${averagePosition}%` }}
                                   >
@@ -459,7 +488,7 @@ export function CompletedChronicSymptomsResultsPage() {
                                   </div>
                                 )}
                                 {Math.abs(optimalPosition - yourScorePosition) > 8 && Math.abs(optimalPosition - averagePosition) > 12 && (
-                                  <div 
+                                  <div
                                     className="absolute text-center transform -translate-x-1/2"
                                     style={{ left: `${optimalPosition}%` }}
                                   >
@@ -478,52 +507,114 @@ export function CompletedChronicSymptomsResultsPage() {
               </CardContent>
             </Card>
 
-            {/* Detailed Category Analysis */}
-            {results.map((result, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center space-x-2">
-                        {getCategoryIcon(result.category)}
-                        <span>{result.category}</span>
-                      </CardTitle>
-                      <CardDescription>Score: {result.score}/{result.maxScore} • Level: {result.level}</CardDescription>
-                    </div>
-                    <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
-                      {result.level.charAt(0).toUpperCase() + result.level.slice(1)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
-                    
-                    <div>
-                      <h4 className="font-medium mb-2 flex items-center space-x-2">
-                        <Target className="h-4 w-4" />
-                        <span>Symptom Assessment</span>
-                      </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {result.description} Optimizing this area can significantly enhance your symptom management and quality of life.
-                      </p>
-                    </div>
+            {results.map((result, index) => {
+              const analysis = result.detailedAnalysis || {
+                clinicalContext: result.description,
+                strengths: ['Assessment completed'],
+                riskFactors: ['Consult with healthcare provider'],
+                timeline: 'Discuss optimization with your medical team.'
+              };
 
-                    <div>
-                      <h4 className="font-medium mb-2">Key Management Strategies</h4>
-                      <div className="space-y-2">
-                        {result.recommendations.slice(0, 2).map((rec, recIndex) => (
-                          <div key={recIndex} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground">{rec}</span>
+              return (
+                <Card key={index}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center space-x-2">
+                          {getCategoryIcon(result.category)}
+                          <span>{result.category}</span>
+                        </CardTitle>
+                        <CardDescription>Score: {result.score}/{result.maxScore} • Level: {result.level}</CardDescription>
+                      </div>
+                      <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
+                        {result.level.charAt(0).toUpperCase() + result.level.slice(1)}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
+
+                      <div>
+                        <h4 className="font-medium mb-2 flex items-center space-x-2">
+                          <Target className="h-4 w-4" />
+                          <span>Clinical Assessment</span>
+                        </h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {analysis.clinicalContext}
+                        </p>
+                      </div>
+
+                      {analysis.strengths.length > 0 && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center space-x-2 text-green-600">
+                              <CheckCircle2 className="h-4 w-4" />
+                              <span>Current Strengths</span>
+                            </h4>
+                            <ul className="space-y-1">
+                              {analysis.strengths.map((strength, strengthIndex) => (
+                                <li key={strengthIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                                  <span className="text-green-500 mt-1">✓</span>
+                                  <span>{strength}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        ))}
+                        </>
+                      )}
+
+                      {analysis.riskFactors.length > 0 && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center space-x-2 text-orange-600">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>Optimization Areas</span>
+                            </h4>
+                            <ul className="space-y-1">
+                              {analysis.riskFactors.map((risk, riskIndex) => (
+                                <li key={riskIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                                  <span className="text-orange-500 mt-1">⚠</span>
+                                  <span>{risk}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </>
+                      )}
+
+                      <Separator />
+
+                      <div>
+                        <h4 className="font-medium mb-2 flex items-center space-x-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Optimization Timeline</span>
+                        </h4>
+                        <p className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
+                          {analysis.timeline}
+                        </p>
+                      </div>
+
+                      <Separator />
+
+                      <div>
+                        <h4 className="font-medium mb-2">Key Management Strategies</h4>
+                        <ul className="space-y-2">
+                          {result.recommendations.map((rec, recIndex) => (
+                            <li key={recIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
@@ -567,7 +658,21 @@ export function CompletedChronicSymptomsResultsPage() {
               </CardContent>
             </Card>
 
-            {/* Next Steps */}
+            {aiReport.summary && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Comprehensive Clinical Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {aiReport.summary}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardHeader>
                 <CardTitle>Next Steps for Symptom Success</CardTitle>
@@ -583,8 +688,8 @@ export function CompletedChronicSymptomsResultsPage() {
                     <p className="text-sm text-muted-foreground">Share these results with your healthcare providers for personalized chronic symptom management optimization.</p>
                   </div>
                   <div>
-                    <h4 className="font-medium">Consider Chronic Symptom Protocol</h4>
-                    <p className="text-sm text-muted-foreground">Our comprehensive 21-day Chronic Symptom Protocol provides structured management for optimal outcomes.</p>
+                    <h4 className="font-medium">Consider Comprehensive Management Protocol</h4>
+                    <p className="text-sm text-muted-foreground">Evidence-based structured management programs provide optimal outcomes for chronic symptom control.</p>
                   </div>
                 </div>
               </CardContent>
@@ -592,7 +697,6 @@ export function CompletedChronicSymptomsResultsPage() {
           </div>
         )}
 
-        {/* Bottom Navigation Tabs */}
         <div className="flex space-x-1 mt-8 mb-6 bg-muted p-1 rounded-lg w-fit mx-auto">
           <Button
             variant={activeTab === 'overview' ? 'default' : 'ghost'}
@@ -626,7 +730,6 @@ export function CompletedChronicSymptomsResultsPage() {
           </Button>
         </div>
 
-        {/* Next Button - Only shown when all tabs have been viewed */}
         {allTabsViewed && (
           <div className="flex justify-center">
             <Button onClick={() => window.location.hash = 'completed-chronic-symptoms-bundle-feedback'} size="lg" className="px-8">
@@ -635,7 +738,6 @@ export function CompletedChronicSymptomsResultsPage() {
           </div>
         )}
 
-        {/* Footer Info */}
         <Card className="mt-8 bg-muted/50">
           <CardContent className="pt-6">
             <div className="flex items-start space-x-3">
@@ -643,7 +745,7 @@ export function CompletedChronicSymptomsResultsPage() {
               <div className="space-y-1">
                 <p className="font-medium">Important Note</p>
                 <p className="text-sm text-muted-foreground">
-                  This comprehensive chronic symptom assessment provides insights into management patterns but does not replace medical evaluation. 
+                  This comprehensive chronic symptom assessment provides insights into management patterns but does not replace medical evaluation.
                   Consult your healthcare team for comprehensive symptom assessment and personalized treatment planning.
                 </p>
               </div>
@@ -651,7 +753,6 @@ export function CompletedChronicSymptomsResultsPage() {
           </CardContent>
         </Card>
 
-        {/* Sources & References */}
         <Card className="mt-6 bg-background border-muted">
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -722,7 +823,5 @@ export function CompletedChronicSymptomsResultsPage() {
         </Card>
       </div>
     </div>
-    </PaymentGate>
-
   );
 }

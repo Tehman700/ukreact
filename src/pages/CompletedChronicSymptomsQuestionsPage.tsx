@@ -598,9 +598,47 @@ const completedChronicSymptomsQuiz: QuizConfig = {
 };
 
 export function CompletedChronicSymptomsQuestionsPage() {
-    return (
+  const convertAnswersToLabels = (answers: Record<string, any>) => {
+    const converted: Array<{ question: string; answer: string }> = [];
+    completedChronicSymptomsQuiz.questions.forEach((q) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+
+      let labels: string;
+      if (q.multiSelect && Array.isArray(answer)) {
+        labels = answer
+          .map((id) => q.options.find((o) => o.id === id)?.label || id)
+          .join(", ");
+      } else {
+        const selectedId = Array.isArray(answer) ? answer[0] : answer;
+        labels =
+          q.options.find((o) => o.id === selectedId)?.label ||
+          selectedId ||
+          "";
+      }
+
+      converted.push({ question: q.question, answer: labels });
+    });
+    return converted;
+  };
+
+  const quizWithSubmit: QuizConfig = {
+    ...completedChronicSymptomsQuiz,
+    informationPageRoute: "completed-chronic-symptoms-bundle-results",
+        onComplete: async (answers) => {
+          console.log("Chronic Bundle Assessment Complete:", answers);
+          sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
+          window.location.hash = "completed-chronic-symptoms-bundle-information"; // go to info page
+        },
+
+    onBack: () => {
+      window.location.hash = "completed-chronic-symptoms-bundle-learn-more";
+    },
+  };
+
+  return (
     <PaymentGate requiredFunnel="chronic">
-      <QuizTemplate config={completedChronicSymptomsQuiz} />
+      <QuizTemplate config={quizWithSubmit} />
     </PaymentGate>
   );
 }
