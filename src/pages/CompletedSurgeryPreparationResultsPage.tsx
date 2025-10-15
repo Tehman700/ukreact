@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp,Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Loader2, Mail} from 'lucide-react';
+import { ArrowLeft, AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, Clock, BarChart3, Target, BookOpen, Shield, Heart, Activity, Zap, Apple, Brain, Users, Loader2,Mail } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 
 interface AssessmentResult {
@@ -61,7 +61,7 @@ export function CompletedSurgeryPreparationResultsPage() {
 
         const report = JSON.parse(storedReport);
 
-        if (storedAssessmentType !== 'Complete Surgery Bundle') {
+        if (storedAssessmentType !== 'Surgery Preparation Bundle') {
           console.warn('Assessment type mismatch:', storedAssessmentType);
         }
 
@@ -125,7 +125,7 @@ export function CompletedSurgeryPreparationResultsPage() {
         body: JSON.stringify({
           userEmail: userInfo.email,
           userName: `${userInfo.first_name} ${userInfo.last_name}`,
-          assessmentType: 'Complete Surgery Bundle',
+          assessmentType: 'Surgery Preparation Bundle',
           report: aiReport,
           reportId: Date.now(),
           pageUrl: currentPageUrl,
@@ -148,7 +148,6 @@ export function CompletedSurgeryPreparationResultsPage() {
   const handleSkipEmail = () => {
     setShowEmailPopup(false);
   };
-
 
   const getScoreColor = (level: string) => {
     switch (level) {
@@ -190,9 +189,9 @@ export function CompletedSurgeryPreparationResultsPage() {
 
   const getOverallRating = (rating: string) => {
     const levelMap: Record<string, 'optimal' | 'high' | 'moderate' | 'low'> = {
-      'Excellent Preparation': 'optimal',
+      'Excellently Prepared': 'optimal',
       'Well Prepared': 'high',
-      'Adequate Preparation': 'moderate',
+      'Adequately Prepared': 'moderate',
       'Needs Improvement': 'low'
     };
     return { rating, level: levelMap[rating] || 'moderate' };
@@ -214,7 +213,7 @@ export function CompletedSurgeryPreparationResultsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your comprehensive surgical preparation report...</p>
+          <p className="text-muted-foreground">Loading your comprehensive surgical preparation analysis...</p>
         </div>
       </div>
     );
@@ -246,7 +245,6 @@ export function CompletedSurgeryPreparationResultsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-          {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <Card className="max-w-md w-full mx-4">
@@ -314,7 +312,7 @@ export function CompletedSurgeryPreparationResultsPage() {
           <CardHeader className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <CheckCircle2 className="h-6 w-6 text-green-600" />
-              <CardTitle>Comprehensive Assessment Complete</CardTitle>
+              <CardTitle>Assessment Complete</CardTitle>
             </div>
             <CardDescription>
               Completed on {completionDate} • Complete 5-assessment surgical preparation bundle
@@ -334,7 +332,7 @@ export function CompletedSurgeryPreparationResultsPage() {
               </div>
               <Progress value={overallScore} className="w-full max-w-md mx-auto" />
               <p className="text-muted-foreground max-w-md mx-auto">
-                Your comprehensive surgery preparation bundle reveals your readiness across all critical surgical factors.
+                Your comprehensive surgery preparation bundle reveals readiness across all critical surgical factors.
               </p>
             </div>
           </CardContent>
@@ -421,6 +419,7 @@ export function CompletedSurgeryPreparationResultsPage() {
                   {results.map((result, index) => (
                     <div key={index} className="space-y-4">
                       <h3 className="text-left font-medium mb-6 px-[0px] py-[10px] pt-[0px] pr-[0px] pb-[35px] pl-[0px]">{result.category}</h3>
+
                       <div className="relative max-w-lg mx-auto">
                         {(() => {
                           const rangeStart = 40;
@@ -473,7 +472,7 @@ export function CompletedSurgeryPreparationResultsPage() {
                                     style={{ left: `${optimalPosition}%` }}
                                   >
                                     <div className="text-sm font-medium">90%</div>
-                                    <div className="text-xs text-muted-foreground">Optimal Preparation</div>
+                                    <div className="text-xs text-muted-foreground">Optimal</div>
                                   </div>
                                 )}
                               </div>
@@ -490,9 +489,9 @@ export function CompletedSurgeryPreparationResultsPage() {
             {results.map((result, index) => {
               const analysis = result.detailedAnalysis || {
                 clinicalContext: result.description,
-                strengths: ['Assessment completed', 'Baseline established'],
-                riskFactors: ['Consult with healthcare team for optimization'],
-                timeline: 'Discuss preparation plan with your surgical team.'
+                strengths: ['Assessment completed'],
+                riskFactors: ['Consult with healthcare provider'],
+                timeline: 'Discuss optimization timeline with your surgical team.'
               };
 
               return (
@@ -505,7 +504,7 @@ export function CompletedSurgeryPreparationResultsPage() {
                           <span>{result.category}</span>
                         </CardTitle>
                         <CardDescription>
-                          Score: {result.score}/{result.maxScore} • Level: {result.level.charAt(0).toUpperCase() + result.level.slice(1)}
+                          Score: {result.score}/{result.maxScore} • Level: {result.level}
                         </CardDescription>
                       </div>
                       <Badge variant={getScoreBadgeVariant(result.level)} className={getScoreColor(result.level)}>
@@ -583,14 +582,14 @@ export function CompletedSurgeryPreparationResultsPage() {
 
                       <div>
                         <h4 className="font-medium mb-2">Key Preparation Strategies</h4>
-                        <div className="space-y-2">
+                        <ul className="space-y-1">
                           {result.recommendations.slice(0, 3).map((rec, recIndex) => (
-                            <div key={recIndex} className="flex items-start gap-3">
-                              <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm text-muted-foreground">{rec}</span>
-                            </div>
+                            <li key={recIndex} className="text-sm text-muted-foreground flex items-start space-x-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{rec}</span>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     </div>
                   </CardContent>
@@ -661,25 +660,27 @@ export function CompletedSurgeryPreparationResultsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">1</div>
-                    <div>
-                      <h4 className="font-medium">Focus on Priority Areas</h4>
-                      <p className="text-sm text-muted-foreground">Address the surgical preparation factors where you scored lowest for maximum risk reduction.</p>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">1</div>
+                      <div>
+                        <h4 className="font-medium">Focus on Priority Areas</h4>
+                        <p className="text-sm text-muted-foreground">Address the surgical preparation factors where you scored lowest for maximum risk reduction.</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">2</div>
-                    <div>
-                      <h4 className="font-medium">Coordinate with Surgical Team</h4>
-                      <p className="text-sm text-muted-foreground">Share these results with your surgeon and anaesthetist for personalized pre-operative optimization.</p>
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">2</div>
+                      <div>
+                        <h4 className="font-medium">Coordinate with Surgical Team</h4>
+                        <p className="text-sm text-muted-foreground">Share these results with your surgeon and anaesthetist for personalized pre-operative optimization.</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">3</div>
-                    <div>
-                      <h4 className="font-medium">Implement Optimization Timeline</h4>
-                      <p className="text-sm text-muted-foreground">Follow the specific timelines for each category to ensure optimal preparation before your surgery date.</p>
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-[2rem] min-h-[2rem] w-8 h-8 sm:w-9 sm:h-9 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0">3</div>
+                      <div>
+                        <h4 className="font-medium">Implement Optimization Timeline</h4>
+                        <p className="text-sm text-muted-foreground">Follow the specific timelines provided for each category to maximize your surgical readiness.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -760,42 +761,70 @@ export function CompletedSurgeryPreparationResultsPage() {
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="surgery-readiness">
                   <AccordionTrigger className="text-sm font-medium">
-                    Surgery Readiness & Preparation
+                    Surgery Readiness Assessment
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• British Journal of Surgery: Pre-operative optimization strategies</li>
+                      <li>• Anesthesia & Analgesia: Patient readiness for elective surgery</li>
+                      <li>• Surgery: Risk stratification and preparation protocols</li>
+                      <li>• Journal of Perioperative Medicine: Evidence-based pre-operative care</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="complication-risk">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Complication Risk Assessment
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Lancet: Surgical risk assessment and prevention strategies</li>
+                      <li>• Annals of Surgery: Modifiable risk factors for complications</li>
+                      <li>• BMJ: Perioperative risk reduction interventions</li>
+                      <li>• European Journal of Anaesthesiology: Risk prediction models</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="recovery-prediction">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Recovery Speed & Anaesthesia Risk
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• British Journal of Anaesthesia: Recovery prediction factors</li>
+                      <li>• Anaesthesia: Risk assessment and safety protocols</li>
+                      <li>• Current Opinion in Anaesthesiology: Recovery optimization</li>
+                      <li>• Journal of Clinical Anesthesia: Perioperative safety guidelines</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="mobility-strength">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Mobility, Nutrition & Psychological Factors
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Physical Therapy: Pre-operative physical assessment</li>
+                      <li>• British Dietetic Association: Perioperative nutrition guidelines</li>
+                      <li>• Health Psychology: Psychological preparation and outcomes</li>
+                      <li>• Clinical Rehabilitation: Strength and mobility assessment protocols</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="comprehensive">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Comprehensive Surgical Preparation
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li>• NICE Guideline NG180: Perioperative care in adults (2020)</li>
-                      <li>• Royal College of Surgeons: Pre-operative assessment guidelines</li>
-                      <li>• Enhanced Recovery After Surgery (ERAS) Society protocols</li>
-                      <li>• British Journal of Surgery: Surgical preparation strategies</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="comprehensive-risk">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Comprehensive Risk Assessment
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• WHO Surgical Safety Checklist and protocols</li>
-                      <li>• American College of Surgeons: Risk assessment tools</li>
-                      <li>• Lancet: Perioperative risk reduction strategies</li>
-                      <li>• BMJ: Evidence-based surgical safety guidelines</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="integrated-care">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Integrated Perioperative Care
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Royal College of Anaesthetists: Perioperative medicine</li>
-                      <li>• British Dietetic Association: Surgical nutrition</li>
-                      <li>• Chartered Society of Physiotherapy: Prehabilitation</li>
-                      <li>• Care Quality Commission: Surgical care standards</li>
+                      <li>• ERAS Society: Enhanced Recovery After Surgery protocols</li>
+                      <li>• Royal College of Surgeons: Comprehensive preoperative guidelines</li>
+                      <li>• Royal College of Anaesthetists: Perioperative medicine standards</li>
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -803,9 +832,7 @@ export function CompletedSurgeryPreparationResultsPage() {
 
               <div className="pt-4 border-t border-muted">
                 <p className="text-xs text-muted-foreground">
-                  <strong>Disclaimer:</strong> This comprehensive surgical preparation bundle is based on validated surgical research across multiple domains.
-                  Results are for informational purposes and should not replace professional surgical evaluation.
-                  Individual surgical risks may vary based on procedure type, medical history, and factors not captured in this assessment.
+                  <strong>Disclaimer:</strong> This comprehensive surgical preparation bundle is based on validated surgical and anaesthetic research. Results are for informational purposes and should not replace professional surgical evaluation. Individual surgical risks may vary based on procedure type, medical history, and factors not captured in this assessment.
                 </p>
               </div>
                   </AccordionContent>

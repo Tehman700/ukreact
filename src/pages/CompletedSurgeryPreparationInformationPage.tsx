@@ -155,7 +155,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assessmentType: "Complete Surgery Bundle",
+          assessmentType: "Surgery Preparation Bundle",
           answers: pendingAnswers,
           userInfo: savedUser,
         }),
@@ -171,7 +171,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       const reportData = await reportResponse.json();
       sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
       sessionStorage.setItem("reportId", reportData.reportId.toString());
-      sessionStorage.setItem("assessmentType", "Complete Surgery Bundle");
+      sessionStorage.setItem("assessmentType", "Surgery Preparation Bundle");
       setReportReady(true);
 
       // Wait for progress animation to complete, then redirect
@@ -191,8 +191,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     alert("There was an error generating your report. Please try again.");
   }
 };
-
-  // Calculate the stroke dash array for the progress circle
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
