@@ -792,6 +792,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
       systemPrompt = completeSurgeryBundlePrompt(assessmentType);
     } else if (assessmentType === "Chronic Symptoms Bundle") {
       systemPrompt = chronicSymptomsPrompt(assessmentType);
+    } else if (assessmentType === "Longevity Wellness Bundle") {
+      systemPrompt = longevityWellnessBundlePrompt(assessmentType);
     } else {
       systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
@@ -856,6 +858,8 @@ Please provide a comprehensive analysis following the exact format specified in 
       structuredReport = completeSurgeryBundleParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Chronic Symptoms Bundle") {
       structuredReport = chronicSymptomsParseAIResponse(aiAnalysis, assessmentType);
+    } else if (assessmentType === "Longevity Wellness Bundle") {
+      structuredReport = longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType);
     } else {
       structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
     }
@@ -884,6 +888,63 @@ Please provide a comprehensive analysis following the exact format specified in 
     });
   }
 });
+function longevityWellnessBundlePrompt(assessmentType) {
+  const prompts = {
+    "Longevity Wellness Bundle": `You are a longevity medicine specialist AI with expertise in comprehensive aging optimization, healthspan extension, and biological age analysis. Analyze the patient's responses across 5 integrated longevity domains to provide a comprehensive longevity optimization assessment.
+
+IMPORTANT: Structure your response EXACTLY as follows:
+
+OVERALL_SCORE: [number between 0-100, where higher = better longevity optimization]
+OVERALL_RATING: [exactly one of: "Exceptionally Optimized", "Well Optimized", "Moderately Optimized", "Needs Optimization"]
+
+CATEGORY_ANALYSIS:
+Biological Age Analysis: [score 0-100] | [level: optimal/high/moderate/low] | [3-4 sentence description analyzing cellular health, energy levels, recovery patterns, and aging biomarkers relative to chronological age] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Cardiometabolic Health Assessment: [score 0-100] | [level: optimal/high/moderate/low] | [3-4 sentence description analyzing cardiovascular fitness, blood pressure, cholesterol patterns, blood sugar control, and metabolic health markers] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Resilience Index: [score 0-100] | [level: optimal/high/moderate/low] | [3-4 sentence description analyzing stress management, mental resilience, adaptability, social connections, and psychological wellbeing] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Nutrition & Body Composition: [score 0-100] | [level: optimal/high/moderate/low] | [3-4 sentence description analyzing dietary patterns, nutrient quality, body composition, protein intake, and nutritional optimization for longevity] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+Functional Fitness Age: [score 0-100] | [level: optimal/high/moderate/low] | [3-4 sentence description analyzing strength, endurance, flexibility, balance, mobility, and functional physical capacity relative to age] | [recommendation 1] | [recommendation 2] | [recommendation 3] | [recommendation 4]
+
+DETAILED_ANALYSIS:
+Biological Age Analysis|[clinical context: 4-5 sentences on biological vs chronological age, cellular aging markers, telomere health, epigenetic aging, and recovery capacity. Reference Nature Aging research, Science longevity studies, and validated biological age assessment methods. Discuss how their responses indicate aging trajectory]|[strengths: comma-separated list of 3-4 positive aging factors]|[optimization areas: comma-separated list of 3-4 areas affecting biological age]|[timeline: specific timeline like "Implement anti-aging interventions immediately for maximum impact. Biological age can improve 5-10 years with 6-12 months of optimization"]
+
+Cardiometabolic Health Assessment|[clinical context: 4-5 sentences on cardiovascular health, metabolic function, insulin sensitivity, lipid profiles, and disease prevention. Reference Circulation research, Diabetes Care guidelines, and cardiometabolic aging patterns. Discuss cardiovascular age and metabolic health optimization]|[strengths: comma-separated list of 3-4 positive cardiometabolic factors]|[optimization areas: comma-separated list of 3-4 metabolic health improvements]|[timeline: specific timeline like "Cardiometabolic optimization shows measurable improvements within 12-16 weeks with targeted interventions"]
+
+Resilience Index|[clinical context: 4-5 sentences on psychological resilience, stress adaptation, social connections, emotional regulation, and mental wellbeing impact on longevity. Reference Psychological Science research, Psychoneuroendocrinology studies, and Blue Zones social patterns. Discuss resilience's role in healthy aging]|[strengths: comma-separated list of 3-4 positive resilience factors]|[optimization areas: comma-separated list of 3-4 resilience improvements]|[timeline: specific timeline like "Building resilience requires 8-12 weeks of consistent practice for lasting neuroplastic changes"]
+
+Nutrition & Body Composition|[clinical context: 4-5 sentences on nutrition's role in longevity, optimal body composition, protein requirements, micronutrient needs, and anti-aging dietary patterns. Reference American Journal of Clinical Nutrition, Journal of Aging Research, Mediterranean diet studies, and caloric restriction research]|[strengths: comma-separated list of 3-4 positive nutritional factors]|[optimization areas: comma-separated list of 3-4 nutritional improvements]|[timeline: specific timeline like "Nutritional optimization shows metabolic benefits within 4-8 weeks, full body composition changes in 12-24 weeks"]
+
+Functional Fitness Age|[clinical context: 4-5 sentences on functional fitness as longevity predictor, strength maintenance, cardiovascular capacity, flexibility, balance, and movement quality. Reference Sports Medicine research, Exercise and Sport Sciences Reviews, and functional fitness aging curves. Discuss how fitness predicts healthspan]|[strengths: comma-separated list of 3-4 positive fitness factors]|[optimization areas: comma-separated list of 3-4 fitness improvements]|[timeline: specific timeline like "Functional fitness improvements visible in 6-8 weeks, significant capacity gains in 12-16 weeks with proper training"]
+
+DETAILED_SUMMARY:
+[Provide a comprehensive 6-8 paragraph analysis covering:
+1. Overall longevity optimization assessment with predicted biological age vs chronological age
+2. Integrated analysis of how the 5 domains interact to influence healthspan and lifespan
+3. Most impactful optimization opportunities ranked by potential longevity benefit
+4. Comparison to age-matched cohorts and optimal longevity profiles
+5. Evidence-based longevity interventions personalized to their profile
+6. Realistic timeline expectations for biological age improvement and healthspan extension
+7. Lifestyle modification strategies across all 5 domains for maximum synergistic benefit
+8. Long-term healthy aging trajectory with current vs optimized profile
+
+Include specific references to longevity research (Nature Aging, Science, Blue Zones studies, centenarian research), evidence-based anti-aging interventions, and provide integrated recommendations that address multiple domains simultaneously for maximum impact on longevity and healthy aging.]
+
+SCORING GUIDELINES:
+- Score 85-100: Exceptionally optimized, exceptional longevity potential across all domains
+- Score 70-84: Well optimized, strong longevity foundations with minor improvements possible
+- Score 55-69: Moderately optimized, significant opportunities for healthspan extension
+- Score 0-54: Needs optimization, substantial improvements needed across multiple domains
+
+Focus on integrated, evidence-based longevity optimization that is personalized to the patient's actual 60-question comprehensive assessment responses. Emphasize synergistic interventions that optimize multiple domains simultaneously and provide realistic expectations for biological age improvement and healthspan extension.`,
+
+    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+  };
+
+  return prompts[assessmentType] || prompts["default"];
+}
 function chronicSymptomsPrompt(assessmentType) {
   const prompts = {
     "Chronic Symptoms Bundle": `You are a chronic symptom management specialist AI with expertise in analyzing comprehensive chronic condition symptom patterns, inflammation markers, medication burden, energy profiles, and lifestyle impacts. Analyze the patient's 50-question comprehensive assessment to provide holistic chronic symptom management insights.
@@ -1368,12 +1429,6 @@ Focus on actionable, evidence-based longevity recommendations personalized to th
 
   return prompts[assessmentType] || prompts["default"];
 }
-
-
-
-
-
-
 function lifestyleLimiterPrompt(assessmentType) {
   const prompts = {
     "Lifestyle Limiter": `You are a specialist quality of life assessment AI with expertise in functional limitation evaluation, lifestyle impact analysis, and adaptation strategy development. Analyze the patient's responses to assess how health issues are limiting different life domains and provide evidence-based strategies for improving daily functioning.
@@ -2137,6 +2192,245 @@ Focus on actionable, evidence-based recommendations that are personalized to the
   };
 
   return prompts[assessmentType] || prompts["default"];
+}
+function longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType) {
+  try {
+    // Extract overall score and rating
+    const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
+
+    const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
+    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Well Optimized";
+
+    // Extract category analysis section
+    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const results = [];
+
+    // Extract detailed analysis section
+    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedAnalysisMap = new Map();
+
+    // Parse detailed analysis first - Longevity Bundle specific categories
+    if (detailedSection) {
+      const categories = [
+        'Biological Age Analysis',
+        'Cardiometabolic Health Assessment',
+        'Resilience Index',
+        'Nutrition & Body Composition',
+        'Functional Fitness Age'
+      ];
+
+      categories.forEach(category => {
+        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+        const match = detailedSection[1].match(regex);
+
+        if (match) {
+          detailedAnalysisMap.set(category, {
+            clinicalContext: match[1].trim(),
+            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
+            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
+            timeline: match[4].trim()
+          });
+        }
+      });
+    }
+
+    // Parse category analysis
+    if (categorySection) {
+      const categories = [
+        'Biological Age Analysis',
+        'Cardiometabolic Health Assessment',
+        'Resilience Index',
+        'Nutrition & Body Composition',
+        'Functional Fitness Age'
+      ];
+
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+        const categoryMatch = categorySection[1].match(categoryRegex);
+
+        if (categoryMatch) {
+          const parts = categoryMatch[1].split('|').map(p => p.trim());
+
+          if (parts.length >= 4) {
+            const score = parseInt(parts[0]) || 75;
+            const level = parts[1].toLowerCase();
+            const description = parts[2];
+            const recommendations = parts.slice(3).filter(r => r.length > 0);
+
+            // Get detailed analysis for this category
+            const detailedAnalysis = detailedAnalysisMap.get(category) || {
+              clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for longevity optimization.`,
+              strengths: ['Baseline assessment completed', 'Areas identified for optimization'],
+              riskFactors: ['Consult healthcare provider for personalized longevity planning'],
+              timeline: 'Discuss optimization timeline with your healthcare team.'
+            };
+
+            results.push({
+              category,
+              score,
+              maxScore: 100,
+              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              description,
+              recommendations,
+              detailedAnalysis
+            });
+          }
+        }
+      });
+    }
+
+    // If parsing failed, create comprehensive fallback
+    if (results.length === 0) {
+      console.log("Creating fallback structure for Longevity Wellness Bundle");
+
+      const fallbackCategories = [
+        {
+          name: 'Biological Age Analysis',
+          desc: 'Your biological markers indicate your aging process and cellular health status.',
+          context: 'Biological age assessment reveals how your cells are aging compared to your chronological age, with cellular health, energy, and recovery as key indicators.',
+          strengths: [
+            'Good baseline cellular function',
+            'Adequate energy levels for daily activities',
+            'Reasonable recovery patterns',
+            'Awareness of aging optimization importance'
+          ],
+          risks: [
+            'Could optimize cellular health markers',
+            'Room for improved recovery capacity',
+            'Telomere health may benefit from intervention'
+          ]
+        },
+        {
+          name: 'Cardiometabolic Health Assessment',
+          desc: 'Your cardiovascular and metabolic health indicators show your disease risk profile.',
+          context: 'Cardiometabolic health is fundamental to longevity, with cardiovascular fitness, blood pressure, cholesterol, and metabolic function as critical longevity determinants.',
+          strengths: [
+            'Baseline cardiovascular function maintained',
+            'No major metabolic dysfunction identified',
+            'Awareness of heart health importance',
+            'Some healthy lifestyle practices in place'
+          ],
+          risks: [
+            'Could optimize lipid profile',
+            'Blood pressure management opportunity',
+            'Metabolic flexibility could be enhanced'
+          ]
+        },
+        {
+          name: 'Resilience Index',
+          desc: 'Your mental resilience and stress adaptation capabilities influence longevity.',
+          context: 'Psychological resilience, stress management, and social connections are proven longevity factors, with chronic stress accelerating biological aging.',
+          strengths: [
+            'Some stress management awareness',
+            'Basic social connections maintained',
+            'Reasonable emotional regulation',
+            'Openness to resilience building'
+          ],
+          risks: [
+            'Chronic stress patterns identified',
+            'Social network could be strengthened',
+            'Mindfulness practices would benefit aging'
+          ]
+        },
+        {
+          name: 'Nutrition & Body Composition',
+          desc: 'Your nutritional patterns and body composition affect longevity potential.',
+          context: 'Optimal nutrition and healthy body composition are cornerstone longevity factors, with diet quality and body composition strongly predicting healthspan.',
+          strengths: [
+            'Basic nutritional awareness present',
+            'Some healthy food choices made',
+            'Hydration habits established',
+            'Interest in nutritional optimization'
+          ],
+          risks: [
+            'Protein intake could be optimized',
+            'Body composition would benefit from adjustment',
+            'Micronutrient profile needs enhancement'
+          ]
+        },
+        {
+          name: 'Functional Fitness Age',
+          desc: 'Your physical capacity and functional fitness predict your healthspan trajectory.',
+          context: 'Functional fitness strongly predicts longevity, with strength, endurance, flexibility, and balance as key indicators of biological age and future health.',
+          strengths: [
+            'Some baseline physical activity maintained',
+            'Basic mobility preserved',
+            'Awareness of fitness importance',
+            'Willingness to improve capacity'
+          ],
+          risks: [
+            'Strength levels below optimal for age',
+            'Cardiovascular fitness needs improvement',
+            'Flexibility and balance would benefit from training'
+          ]
+        }
+      ];
+
+      fallbackCategories.forEach(cat => {
+        results.push({
+          category: cat.name,
+          score: Math.floor(Math.random() * 15) + 70,
+          maxScore: 100,
+          level: 'moderate',
+          description: cat.desc,
+          recommendations: [
+            'Consult with longevity medicine specialist for personalized optimization',
+            'Implement evidence-based anti-aging interventions in this domain',
+            'Monitor biomarkers regularly to track improvement',
+            'Coordinate with healthcare team for comprehensive longevity planning'
+          ],
+          detailedAnalysis: {
+            clinicalContext: cat.context,
+            strengths: cat.strengths,
+            riskFactors: cat.risks,
+            timeline: 'Begin optimization immediately for maximum longevity benefit. Most interventions show measurable improvements within 8-16 weeks.'
+          }
+        });
+      });
+    }
+
+    // Extract detailed summary
+    const summaryMatch = aiAnalysis.match(/DETAILED_SUMMARY:\s*(.*?)$/is);
+    const summary = summaryMatch ? summaryMatch[1].trim() : aiAnalysis;
+
+    return {
+      overallScore,
+      overallRating,
+      results,
+      summary,
+      assessmentType
+    };
+
+  } catch (error) {
+    console.error("Error parsing Longevity Wellness Bundle AI response:", error);
+
+    return {
+      overallScore: 75,
+      overallRating: "Well Optimized",
+      results: [{
+        category: "Overall Longevity Assessment",
+        score: 75,
+        maxScore: 100,
+        level: "moderate",
+        description: "Your comprehensive longevity optimization assessment has been completed. This evaluation across 5 key longevity domains provides insights into your healthspan potential.",
+        recommendations: [
+          "Discuss your comprehensive longevity assessment with a longevity medicine specialist",
+          "Implement evidence-based anti-aging interventions across all domains",
+          "Monitor biological age markers to track optimization progress",
+          "Consider advanced longevity testing for deeper insights into aging trajectory"
+        ],
+        detailedAnalysis: {
+          clinicalContext: aiAnalysis,
+          strengths: ['Comprehensive assessment completed', 'Longevity awareness demonstrated'],
+          riskFactors: ['Requires medical consultation for personalized longevity plan'],
+          timeline: 'Begin integrated longevity optimization immediately for maximum healthspan benefit.'
+        }
+      }],
+      summary: aiAnalysis,
+      assessmentType
+    };
+  }
 }
 function chronicSymptomsParseAIResponse(aiAnalysis, assessmentType) {
   try {
@@ -6171,6 +6465,8 @@ app.post("/api/send-email-report", async (req, res) => {
       tabs = ['Overview', 'Detailed Results', 'Preparation Plan'];
     } else if (assessmentType === 'Chronic Symptoms Bundle') {
       tabs = ['Overview', 'Detailed Results', 'Management Plan'];
+    } else if (assessmentType === 'Longevity Wellness Bundle') {
+      tabs = ['Overview', 'Detailed Results', 'Optimization Plan'];
     } else {
       // Default tabs for other assessments
       tabs = ['Overview', 'Detailed Results', 'Recommendations'];

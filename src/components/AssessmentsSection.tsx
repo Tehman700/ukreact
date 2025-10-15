@@ -218,12 +218,12 @@ export function AssessmentsSection() {
                             )}
                             {assessment.id === '22' && (
                               <span className="block text-xs sm:text-sm text-muted-foreground mt-1">
-                                Save £90.60 vs individual assessments
+                                Save £78 vs individual assessments
                               </span>
                             )}
                             {assessment.id === '23' && (
                               <span className="block text-xs sm:text-sm text-muted-foreground mt-1">
-                                Save £96.95 vs individual assessments
+                                Save £80 vs individual assessments
                               </span>
                             )}
                           </p>
