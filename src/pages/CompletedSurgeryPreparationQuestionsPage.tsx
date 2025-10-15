@@ -758,7 +758,7 @@ export function CompletedSurgeryPreparationQuestionsPage() {
 
   const quizWithSubmit: QuizConfig = {
     ...completedSurgeryPreparationQuiz,
-    informationPageRoute: "surgery-bundle-results",
+    informationPageRoute: "completed-surgery-preparation-bundle-results",
         onComplete: async (answers) => {
           console.log("Surgery Bundle Assessment Complete:", answers);
           sessionStorage.setItem("pendingAnswers", JSON.stringify(convertAnswersToLabels(answers)));
