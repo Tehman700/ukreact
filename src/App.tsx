@@ -598,48 +598,47 @@ useEffect(() => {
 
 
 
-  // Set current assessment based on the current page
-  useEffect(() => {
-    if (currentPage.includes('surgery-readiness-assessment-questions')) {
-      setCurrentAssessment('surgery-readiness');
-    } else if (currentPage.includes('biological-age-calculator-questions')) {
-      setCurrentAssessment('biological-age');
-    } else if (currentPage.includes('cardiometabolic-risk-score-questions')) {
-      setCurrentAssessment('cardiometabolic-risk');
-    } else if (currentPage.includes('resilience-index-questions')) {
-      setCurrentAssessment('resilience-index');
-    } else if (currentPage.includes('nutrition-body-composition-score-questions')) {
-      setCurrentAssessment('nutrition-body-composition');
-    } else if (currentPage.includes('functional-fitness-age-test-questions')) {
-      setCurrentAssessment('functional-fitness-age');
-    } else if (currentPage.includes('completed-surgery-preparation-bundle-questions')) {
-      setCurrentAssessment('completed-surgery-preparation');
-    } else if (currentPage.includes('completed-chronic-symptoms-bundle-questions')) {
-      setCurrentAssessment('completed-chronic-symptoms');
-    } else if (currentPage.includes('longevity-wellness-bundle-questions')) {
-      setCurrentAssessment('longevity-wellness-bundle');
-    } else if (currentPage.includes('complication-risk-checker-questions')) {
-      setCurrentAssessment('complication-risk');
-    } else if (currentPage.includes('recovery-speed-predictor-questions')) {
-      setCurrentAssessment('recovery-speed');
-    } else if (currentPage.includes('anaesthesia-risk-screener-questions')) {
-      setCurrentAssessment('anaesthesia-risk');
-    } else if (currentPage.includes('mobility-strength-score-questions')) {
-      setCurrentAssessment('mobility-strength');
-    } else if (currentPage.includes('symptom-severity-index-questions')) {
-      setCurrentAssessment('symptom-severity');
-    } else if (currentPage.includes('inflammation-risk-score-questions')) {
-      setCurrentAssessment('inflammation-risk');
-    } else if (currentPage.includes('medication-burden-calculator-questions')) {
-      setCurrentAssessment('medication-burden');
-    } else if (currentPage.includes('daily-energy-audit-questions')) {
-      setCurrentAssessment('daily-energy');
-    } else if (currentPage.includes('lifestyle-limiter-score-questions')) {
-      setCurrentAssessment('lifestyle-limiter');
-    } else if (currentPage.includes('health-concierge-questions')) {
-      setCurrentAssessment('health-concierge');
-    }
-  }, [currentPage]);
+useEffect(() => {
+  if (currentPage.includes('surgery-readiness-assessment')) {
+    setCurrentAssessment('surgery-readiness');
+  } else if (currentPage.includes('biological-age-calculator')) {
+    setCurrentAssessment('biological-age');
+  } else if (currentPage.includes('cardiometabolic-risk-score')) {
+    setCurrentAssessment('cardiometabolic-risk');
+  } else if (currentPage.includes('resilience-index')) {
+    setCurrentAssessment('resilience-index');
+  } else if (currentPage.includes('nutrition-body-composition-score')) {
+    setCurrentAssessment('nutrition-body-composition');
+  } else if (currentPage.includes('functional-fitness-age-test')) {
+    setCurrentAssessment('functional-fitness-age');
+  } else if (currentPage.includes('completed-surgery-preparation-bundle')) {
+    setCurrentAssessment('completed-surgery-preparation');
+  } else if (currentPage.includes('completed-chronic-symptoms-bundle')) {
+    setCurrentAssessment('completed-chronic-symptoms');
+  } else if (currentPage.includes('longevity-wellness-bundle')) {
+    setCurrentAssessment('longevity-wellness-bundle');
+  } else if (currentPage.includes('complication-risk-checker')) {
+    setCurrentAssessment('complication-risk');
+  } else if (currentPage.includes('recovery-speed-predictor')) {
+    setCurrentAssessment('recovery-speed');
+  } else if (currentPage.includes('anaesthesia-risk-screener')) {
+    setCurrentAssessment('anaesthesia-risk');
+  } else if (currentPage.includes('mobility-strength-score')) {
+    setCurrentAssessment('mobility-strength');
+  } else if (currentPage.includes('symptom-severity-index')) {
+    setCurrentAssessment('symptom-severity');
+  } else if (currentPage.includes('inflammation-risk-score')) {
+    setCurrentAssessment('inflammation-risk');
+  } else if (currentPage.includes('medication-burden-calculator')) {
+    setCurrentAssessment('medication-burden');
+  } else if (currentPage.includes('daily-energy-audit')) {
+    setCurrentAssessment('daily-energy');
+  } else if (currentPage.includes('lifestyle-limiter-score')) {
+    setCurrentAssessment('lifestyle-limiter');
+  } else if (currentPage.includes('health-concierge')) {
+    setCurrentAssessment('health-concierge');
+  }
+}, [currentPage]);
 
   const handleRequestQuote = (product: Product) => {
     // Store the product context for the contact form
