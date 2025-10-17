@@ -3,7 +3,7 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main  # Trigger this workflow only when pushing to main
+      - main  # Trigger only on main branch
 
 jobs:
   deploy:
@@ -21,17 +21,17 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd webapp-01/ukreact
-            echo "📦 Pulling latest code..."
+            cd ~/ukreact
+            echo "📥 Pulling latest code..."
             git pull origin main
 
-            echo "🧩 Installing dependencies..."
+            echo "📦 Installing dependencies..."
             npm install
 
             echo "🏗️ Building project..."
             npm run build
 
-            echo "🧹 Cleaning old build directory..."
+            echo "🧹 Removing old build..."
             sudo rm -rf /var/www/vhosts/frontend/build
 
             echo "📂 Copying new build to Nginx directory..."
