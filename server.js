@@ -6444,6 +6444,78 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
   }
 }
 
+
+
+// Contact form endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, service, message } = req.body;
+
+    // Create transporter using Gmail SMTP
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    // Email content
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: 'admin@luther.health',
+      subject: `New Contact Form Submission from ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px;">
+            New Contact Form Submission
+          </h2>
+
+          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 10px 0;"><strong>Full Name:</strong> ${name}</p>
+            <p style="margin: 10px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+            <p style="margin: 10px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            <p style="margin: 10px 0;"><strong>Service Interest:</strong> ${service || 'Not specified'}</p>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <h3 style="color: #333;">Message:</h3>
+            <p style="background-color: #ffffff; padding: 15px; border-left: 4px solid #4F46E5; border-radius: 4px;">
+              ${message}
+            </p>
+          </div>
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+            <p>This email was sent from the Luther Health contact form.</p>
+          </div>
+        </div>
+      `,
+      text: `
+New Contact Form Submission
+
+Full Name: ${name}
+Email: ${email}
+Phone: ${phone || 'Not provided'}
+Service Interest: ${service || 'Not specified'}
+
+Message:
+${message}
+      `,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
+
+
+
 app.post("/api/send-email-report", async (req, res) => {
   try {
     const { userEmail, userName, assessmentType, report, reportId, pageUrl } = req.body;
