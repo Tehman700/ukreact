@@ -74,7 +74,7 @@ export function AboutPage() {
             <h2 className="text-3xl font-bold">Our Mission</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                At Luther Health, we exist for men who take their health seriously — men who want the best, expect results, and don't have time for guesswork.
+                We at Luther Health, we exist for men who take their health seriously — men who want the best, expect results, and don't have time for guesswork.
               </p>
               <p>
                 We provide personalised, high-performance health solutions for those facing complex challenges — whether preparing for surgery, recovering from it, or navigating the in-between. Our clients come to us not just for support, but for a plan they can trust. They want clarity, control, and measurable progress. That's what we deliver.
