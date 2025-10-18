@@ -88,7 +88,7 @@ export function SurgeryReadinessUpsellPage({
                 onClick={handleStartAssessment}
                 className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
               >
-                Get my score by luther
+                Get my score
               </Button>
             </div>
           </div>
