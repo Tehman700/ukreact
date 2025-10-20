@@ -1,92 +1,88 @@
 import React from 'react';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { ShieldCheck, FileText, ClipboardCheck, Users } from 'lucide-react';
-import { Separator } from '../components/ui/separator';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Separator } from './ui/separator';
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
-export function CQCPage() {
-  const standards = [
-    {
-      icon: ShieldCheck,
-      title: 'Regulated by the CQC',
-      description:
-        'Luther Health is fully regulated by the Care Quality Commission (CQC), ensuring our services meet the highest standards of clinical governance and patient safety.'
-    },
-    {
-      icon: FileText,
-      title: 'Registered Medical Services',
-      description:
-        'We are registered to provide remote consultations and treatment services under regulated activity frameworks for diagnostic and screening procedures.'
-    },
-    {
-      icon: ClipboardCheck,
-      title: 'Governance & Compliance',
-      description:
-        'Our governance structure ensures ongoing compliance with CQC Key Lines of Enquiry (KLOEs), covering safety, effectiveness, care, responsiveness, and leadership.'
-    },
-    {
-      icon: Users,
-      title: 'Patient-Centered Care',
-      description:
-        'Every patient interaction is guided by clinical excellence and a commitment to compassion, confidentiality, and respect.'
-    }
-  ];
-
+export function Footer() {
   return (
-    <div id="cqc" className="relative space-y-0 text-foreground">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h1 className="text-4xl font-bold">Care Quality Commission (CQC)</h1>
-            <p className="text-muted-foreground text-lg">
-              Our commitment to clinical excellence and regulatory compliance ensures the highest standard of care for every patient we support.
+    <footer className="bg-muted/30 border-t">
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Luther Health</h3>
+            <p className="text-sm text-muted-foreground">
+              Performance healthcare for men who demand excellence. Remote consultations, evidence-based protocols, results-driven care.
             </p>
+            <div className="flex space-x-4">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Facebook className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Instagram className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Youtube className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Services */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Services</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Surgery Conditioning Protocol</a></li>
+              <li><a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Longevity Focus Protocol</a></li>
+              <li><a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Symptom Control Protocol</a></li>
+              <li><a href="#assessments" className="text-muted-foreground hover:text-foreground transition-colors">Health Assessments</a></li>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Company</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
+              <li><a href="#blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
+              <li><a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
+              <li><a href="#cqc" className="text-muted-foreground hover:text-foreground transition-colors">CQC Registration</a></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Legal</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li><a href="#terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
+              <li><a href="#cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a></li>
+              <li><a href="#complaints" className="text-muted-foreground hover:text-foreground transition-colors">Complaints Procedure</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <Separator className="my-8" />
+        
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="text-sm text-muted-foreground">
+            © 2024 Luther Health. All rights reserved.
+          </div>
+          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-1">
+              <Mail className="h-4 w-4" />
+              <span>hello@lutherhealth.co.uk</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Phone className="h-4 w-4" />
+              <span>+44 20 7946 0958</span>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Standards Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {standards.map((item, index) => (
-            <Card key={index} className="shadow-sm">
-              <CardHeader className="flex flex-row items-center space-x-4">
-                <item.icon className="w-8 h-8 text-primary" />
-                <CardTitle>{item.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <Separator />
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl font-bold">Want to Verify Our Registration?</h2>
-          <p className="text-muted-foreground">
-            You can view Luther Health’s official registration and regulatory details directly on the CQC website.
-          </p>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-          >
-            <a
-              href="https://www.cqc.org.uk/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on CQC Website
-            </a>
-          </Button>
-        </div>
-      </section>
-    </div>
+    </footer>
   );
 }
