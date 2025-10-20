@@ -88,7 +88,7 @@ export function AboutPage() {
               <p>
                 Luther Health was built out of frustration. After over a decade inside the NHS, our founder kept seeing the same thing: men facing major surgery or complex health issues left waiting, guessing, and hoping it would work out. <br />
                 They went in unprepared—anxious, out of shape, and unclear on what to expect. Recovery was slow, support was scattered, and outcomes were worse than they needed to be. <br />
-                The system wasn’t built to make men stronger—it was built to patch them up and move on.
+                Then system wasn’t built to make men stronger—it was built to patch them up and move on.
                 <br /><br />
                 So we built what should’ve existed all along.
                 <br /><br />
