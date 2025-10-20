@@ -135,16 +135,20 @@ export function AboutPage() {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-bold">Ready to Start Your Health Journey?</h2>
-          <p className="text-muted-foreground">
-            Join thousands of men who have transformed their health with Luther Health's personalized approach to men's healthcare.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" size="lg">Contact Our Team</Button>
-          </div>
-        </div>
-      </section>
+  <div className="max-w-3xl mx-auto text-center space-y-6">
+    <h2 className="text-3xl font-bold">Ready to Start Your Health Journey?</h2>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button 
+        variant="outline" 
+        size="lg"
+        onClick={() => window.location.href = 'https://luther.health/#contact'}
+      >
+        Contact Our Team
+      </Button>
+    </div>
+  </div>
+</section>
+
     </div>
   );
 }
