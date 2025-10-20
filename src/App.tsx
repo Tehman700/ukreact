@@ -247,7 +247,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '1',
     name: 'Surgery Readiness Score',
-    description: "The first step to taking control of your surgery risks is understanding them. We'll help you get a clear picture of where you are right now, and show you the path toward where you want to be — with guidance and support at every step.",
+    description: "Before any surgery, you need to know your risks. This score gives you a clear snapshot of your current health status and highlights areas that need attention. It helps you lower your chances of complications and sets you up for a smoother recovery. Think of it as your pre-surgery game plan.",
     price: 37.00,
     image: surgeryReadinessImage,
     icon: <Shield className="w-6 h-6" />,
@@ -256,7 +256,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '2',
     name: 'Practical Biological Age Proxy',
-    description: 'Advanced biomarker analysis to determine your true biological age compared to chronological age.',
+    description: 'Your real age isn’t just the number on your ID—it’s how your body is aging on the inside. This test compares your biological age to your actual age using advanced health markers. If your body is aging faster than it should, you’ll know where to make changes. It’s your starting point for living longer and performing better.',
     price: 46,
    image: biologicalAgeImage,
     icon: <Clock className="w-6 h-6" />,
@@ -295,7 +295,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '6',
     name: 'Complication Risk Checker',
-    description: 'Comprehensive lifestyle and comorbidity analysis to predict and prevent surgical complications before they occur.',
+    description: 'Not all health issues are obvious—but they can still mess up your surgery. This check looks at lifestyle and existing conditions that could raise your risk for complications. It shows you where you're vulnerable and what to fix before going under. Get ahead of problems instead of reacting to them later.',
     price: 40.00,
    image: purpleGradientImage,
     icon: <AlertTriangle className="w-6 h-6" />,
@@ -304,7 +304,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '7',
     name: 'Recovery Speed Predictor',
-    description: 'Personalized recovery timeline based on nutrition, mindset, and home support systems to optimize healing.',
+    description: 'Want to know how fast you’ll get back on your feet? This tool gives you a personalized healing timeline based on your habits, mindset, and support system. It shows what’s helping or slowing down your recovery. The better your inputs, the faster your bounce-back.',
     price: 45.00,
    image: nutritionBodyCompositionImage,
     icon: <Zap className="w-6 h-6" />,
@@ -313,7 +313,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '8',
     name: 'Anaesthesia Risk Screener',
-    description: 'Critical screening for anaesthesia complications based on sleep patterns, medications, and lifestyle factors.',
+    description: 'Anaesthesia affects everyone differently—and some people are at higher risk. This screener looks at your sleep, meds, and lifestyle to predict any complications. It helps avoid unwanted surprises during surgery. Peace of mind starts with knowing you're prepared.',
     price: 35.00,
    image: purplesGradientImage,
     icon: <Heart className="w-6 h-6" />,
@@ -322,7 +322,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '9',
     name: 'Mobility & Strength Score',
-    description: 'Baseline physical assessment to track post-operative recovery progress and optimize rehabilitation outcomes.',
+    description: 'Your physical condition plays a big role in how well you recover. This test measures your strength and movement before surgery so you can track improvements after. It sets a performance baseline to guide your rehab. Stronger in, stronger out.',
     price: 50.00,
    image: mobility,
     icon: <Activity className="w-6 h-6" />,
@@ -331,7 +331,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '10',
     name: 'Symptom Severity Index',
-    description: 'Comprehensive assessment capturing frequency and intensity of pain, fatigue, digestive or joint issues.',
+    description: 'If you’re living with pain, fatigue, or gut issues, this will help you measure how much it’s affecting you. It tracks how often and how intense your symptoms are. That way, you can stop guessing and start targeting the real problems. Clear data leads to better decisions.',
     price: 43.00,
    image: sympGradientImage,
     icon: <Thermometer className="w-6 h-6" />,
@@ -340,7 +340,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '11',
     name: 'Inflammation Risk Score',
-    description: 'Evidence-based assessment rooted in diet, lifestyle, sleep patterns, and stress levels.',
+    description: 'Low-grade inflammation can quietly damage your body and speed up aging. This score shows how your diet, sleep, stress, and habits are contributing to it. You’ll learn where your risks are and what changes can lower them. Less inflammation means better energy, recovery, and long-term health.',
     price: 39.00,
    image: inflammation,
     icon: <Heart className="w-6 h-6" />,
@@ -349,7 +349,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '12',
     name: 'Medication Burden Calculator',
-    description: 'Comprehensive analysis weighing prescription load and potential drug interaction risks.',
+    description: 'Too many prescriptions can hurt more than help. This tool checks if your current meds are working against each other or causing side effects. It helps you clean up your medication list and reduce risks. More clarity, fewer complications.',
     price: 47.00,
    image: burden,
     icon: <Pill className="w-6 h-6" />,
@@ -358,7 +358,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '13',
     name: 'Daily Energy Audit',
-    description: 'Detailed snapshot of fatigue patterns, sleep quality metrics, and stamina optimization potential.',
+    description: 'Always tired? This audit looks at your sleep, fatigue patterns, and energy levels throughout the day. It helps pinpoint what’s draining your battery—and how to recharge. You’ll know where to adjust for more focus and stamina.',
     price: 42.00,
    image: daily,
     icon: <Battery className="w-6 h-6" />,
@@ -367,7 +367,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '14',
     name: 'Lifestyle Limiter Score',
-    description: 'Quantifies real-world impact on work performance, social connections, and physical activities.',
+    description: 'Some health issues hold you back more than you realize. This score shows how much your current condition is affecting work, fitness, and social life. It brings hidden problems to the surface so you can fix them. Stop settling for “okay” when you can operate at 100%.',
     price: 45.00,
    image: lifestyle,
     icon: <Users className="w-6 h-6" />,
@@ -396,7 +396,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '17',
     name: 'Cardiometabolic Risk Score',
-    description: 'Comprehensive heart and metabolic health assessment to identify cardiovascular disease and diabetes risk factors.',
+    description: 'Heart disease and diabetes often show no early signs—until it’s too late. This score finds key risk factors based on your blood, habits, and body metrics. Knowing your risk means you can take control before anything serious hits. It’s your early warning system.',
     price: 39.00,
    image: cardio,
     icon: <Heart className="w-6 h-6" />,
@@ -405,7 +405,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '18',
     name: 'Resilience Index',
-    description: 'Comprehensive mental and physical resilience assessment to measure your ability to adapt, recover, and thrive under stress.',
+    description: 'Life hits hard. This test measures how well you handle stress—both mentally and physically. It shows your capacity to adapt, recover, and keep going when others crash. Build the edge that helps you win long-term.',
     price: 42.00,
    image: resilienceIndexImage,
     icon: <Zap className="w-6 h-6" />,
@@ -414,7 +414,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '19',
     name: 'Nutrition & Body Composition Score',
-    description: 'Comprehensive nutritional and body composition assessment to optimize metabolic health, body composition, and nutritional status.',
+    description: 'Your diet and body composition affect everything—energy, strength, even how you age. This test helps you see what’s working and what’s not. It gives you a clear breakdown of how to improve your metabolism and nutrition. Strong body, sharp mind.',
     price: 47.00,
    image: nut,
     icon: <Apple className="w-6 h-6" />,
@@ -423,7 +423,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '20',
     name: 'Functional Fitness Age Test',
-    description: 'Comprehensive physical capability assessment to determine your functional fitness age and identify movement quality decline patterns.',
+    description: 'This test tells you how your body moves compared to your actual age. If your body performs like it’s older than you are, it’s time to act. You’ll learn where you’re losing strength, mobility, or flexibility. Stay ahead of the decline—and stay in the game.',
     price: 44.00,
    image: func,
     icon: <Activity className="w-6 h-6" />,
@@ -432,7 +432,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '21',
     name: 'Completed Surgery Preparation Bundle',
-    description: 'The smarter way to prepare for surgery. This premium package brings every essential check together in one streamlined experience, helping you feel informed, confident, and fully prepared—while saving on the total cost.',
+    description: 'Get everything you need to fully prepare for surgery—without wasting time. This bundle combines all the key risk and recovery assessments in one. You’ll be informed, confident, and ready for a smoother outcome. Better results, lower stress, and smart savings.',
     price: 120.00,
    image: completedSurgeryPreparationBundleImage,
     icon: <Shield className="w-6 h-6" />,
@@ -441,7 +441,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '22',
     name: 'Completed Chronic Symptoms Bundle',
-    description: 'Comprehensive chronic symptom management assessment combining severity analysis, inflammation risk, medication burden, energy patterns, and lifestyle impact evaluation in one complete bundle.',
+    description: 'Tired of dragging through the day with no answers? This bundle tackles your pain, fatigue, inflammation, meds, and energy—all at once. You’ll get a full picture of what’s going on and how to fix it. It’s time to stop managing symptoms and start solving them.',
     price: 138,
    image: chronic,
     icon: <Stethoscope className="w-6 h-6" />,
@@ -450,7 +450,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '23',
     name: 'Complete Longevity Bundle',
-    description: 'Comprehensive longevity optimization assessment combining Biological Age Calculator, Cardiometabolic Risk Score, Resilience Index, Nutrition & Body Composition Score, and Functional Fitness Age Test in one complete bundle.',
+    description: 'If you want to live longer and stay strong, this is your package. It covers biological age, heart health, resilience, nutrition, and physical fitness—all in one test suite. You’ll know where you stand and how to add more high-quality years to your life. Think of it as your long-term performance plan.',
     price: 138.00,
    image: completeLongevityBundleImage,
     icon: <Clock className="w-6 h-6" />,
