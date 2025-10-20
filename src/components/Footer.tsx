@@ -82,7 +82,7 @@ export function Footer() {
         
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
           <div className="text-sm text-muted-foreground text-center sm:text-left">
-            © 2024 Luther Health. All rights reserved.
+            © 2025 Luther Health. All rights reserved.
           </div>
         </div>
       </div>
