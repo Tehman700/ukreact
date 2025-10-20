@@ -101,7 +101,7 @@ export function ContactPage() {
               Get in Touch
             </h1>
             <p className="text-muted-foreground">
-              Ready to optimize your performance? Our remote healthcare specialists provide bespoke, self pay services designed for high-achieving professionals who demand results.
+              Ready to perform at your peak? Our remote healthcare specialists deliver tailored, results-driven services built for high-achieving professionals who don’t settle for average.
             </p>
           </div>
         </div>
@@ -188,7 +188,8 @@ export function ContactPage() {
           <div className="text-center mb-16">
             <h2 className="mb-4">Frequently Asked Questions</h2>
             <p className="text-muted-foreground max-w-3xl mx-auto">
-              Learn about our exclusive remote healthcare model, cash pay approach, and what to expect from your bespoke care experience.
+              Forget generic wellness. This is precision healthcare for men who make moves. Backed by the latest clinical research, our clinical team crafts a customized blueprint in order to achieve your unique health goals. All remote. All built around your schedule.
+Step into a new level of clarity, control, and confidence.
             </p>
           </div>
 
