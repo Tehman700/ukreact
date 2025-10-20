@@ -76,7 +76,7 @@ export function AboutPage() {
               <p>
                 Most healthcare is slow, generic, and built for the average person. That’s not who we serve. <br />
                 At Luther Health, we work with men who take their health seriously—guys who want to fix real problems, get clear answers, and move fast. <br />
-                We don’t do cookie-cutter NHS-style care. We build custom, hands-on plans using real data, expert oversight, and a focus on outcomes—not opinions. <br />
+                We don’t do cookie-cutter NHS style care. We build custom, hands-on plans using real data, expert oversight, and a focus on outcomes—not opinions. <br />
                 Whether it’s pre-surgery, recovery, or long-term performance, our goal isn’t to get you back to baseline. It’s to get you better than you were before. Faster. Smarter. Stronger.
               </p>
             </div>
