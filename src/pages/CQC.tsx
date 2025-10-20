@@ -1,42 +1,65 @@
 import React from 'react';
 import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { Shield, Users, Award, Clock } from 'lucide-react';
 import { Separator } from '../components/ui/separator';
-import { Shield, ClipboardCheck, FileCheck, Users } from 'lucide-react';
 
 export function CQCPage() {
   const values = [
     {
       icon: Shield,
-      title: 'CQC Regulated',
-      description: 'Luther Health is fully regulated by the Care Quality Commission (CQC), ensuring our clinical services meet the highest national standards of quality, safety, and governance.'
-    },
-    {
-      icon: ClipboardCheck,
-      title: 'Commitment to Quality',
-      description: 'Our policies, procedures, and patient pathways are designed to exceed CQC standards across key domains — Safety, Effectiveness, Caring, Responsiveness, and Well-Led.'
-    },
-    {
-      icon: FileCheck,
-      title: 'Transparent Compliance',
-      description: 'We maintain clear, auditable processes for clinical oversight, data security, consent, safeguarding, and risk management — reviewed regularly as part of our compliance framework.'
+      title: 'Regulated Care',
+      description: 'Fully regulated by the CQC and GMC, ensuring the highest standards of medical care and patient safety.'
     },
     {
       icon: Users,
-      title: 'Patient-Centred Care',
-      description: 'Every element of our service is designed around patient wellbeing — ensuring dignity, respect, and individualised treatment that aligns with CQC’s patient-first principles.'
+      title: 'Doctor Led',
+      description: 'All treatments are overseen by experienced medical professionals with specialized training in men\'s health.'
+    },
+    {
+      icon: Award,
+      title: 'Evidence Based',
+      description: 'Our protocols follow the latest clinical guidelines and are backed by peer-reviewed research.'
+    },
+    {
+      icon: Clock,
+      title: '24/7 Support',
+      description: 'Continuous support and monitoring throughout your treatment journey with dedicated care coordinators.'
+    }
+  ];
+
+  const team = [
+    {
+      name: 'Dr. Michael Harrison',
+      role: 'Medical Director',
+      specialization: 'Endocrinology & Men\'s Health',
+      image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+    },
+    {
+      name: 'Dr. Sarah Chen',
+      role: 'Senior Consultant',
+      specialization: 'Sports Medicine & Performance',
+      image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+    },
+    {
+      name: 'Dr. James Rodriguez',
+      role: 'Consultant Physician',
+      specialization: 'Preventive Medicine & Longevity',
+      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80'
     }
   ];
 
   return (
     <div className="relative space-y-0 text-foreground">
-      {/* Hero Section */}
+      {/* Hero Section with Smaller Centered Image */}
       <div className="relative overflow-hidden bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="container mx-auto px-4 py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
             <div className="relative max-w-2xl mx-auto">
               <img
-                src="https://cdn.cosmos.so/7cf6d02e-2ff0-47db-8a6b-b16e4f33aaf1?format=jpeg"
-                alt="CQC Compliance"
+                src="https://cdn.cosmos.so/0d2dca26-af8d-4a33-a775-fc29184144b6?format=jpeg"
+                alt="Luther Health background"
                 className="w-full h-[300px] md:h-[400px] object-cover rounded-lg shadow-lg"
               />
             </div>
@@ -44,86 +67,81 @@ export function CQCPage() {
         </div>
       </div>
 
-      {/* CQC Information */}
+      {/* Mission & Values */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-16">
-          
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Care Quality Commission (CQC)</h2>
+            <h2 className="text-3xl font-bold">Our Mission</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                Luther Health is registered with the Care Quality Commission (CQC), the independent regulator of health and social care services in England. This registration confirms that we meet strict legal requirements for safety, quality, and governance across all aspects of care delivery.
+                We at Luther Health, we exist for men who take their health seriously — men who want the best, expect results, and don't have time for guesswork.
               </p>
               <p>
-                Our clinical operations are reviewed regularly to ensure compliance with the Health and Social Care Act 2008 (Regulated Activities) Regulations 2014 and the CQC’s five key questions:
+                We provide personalised, high-performance health solutions for those facing complex challenges — whether preparing for surgery, recovering from it, or navigating the in-between. Our clients come to us not just for support, but for a plan they can trust. They want clarity, control, and measurable progress. That's what we deliver.
               </p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Safe:</strong> Services are designed to protect patients from avoidable harm and risk.</li>
-                <li><strong>Effective:</strong> Care is evidence-based, outcome-driven, and led by qualified professionals.</li>
-                <li><strong>Caring:</strong> We treat every patient with compassion, dignity, and respect.</li>
-                <li><strong>Responsive:</strong> Services are organised to meet individual needs and preferences.</li>
-                <li><strong>Well-Led:</strong> Leadership promotes transparency, accountability, and continuous improvement.</li>
-              </ul>
               <p>
-                By maintaining this regulatory standard, we provide patients with assurance that our clinical services are delivered ethically, professionally, and in line with national healthcare benchmarks.
+                This isn't standard care. It's tailored, data-informed, and outcome-driven — built by clinicians and designed for individuals who demand precision and performance. We don't just help men recover — we help them elevate. The goal isn't to return to baseline. It's to come back better.
+              </p>
+              <p>
+                At its core, Luther Health is about giving men a clear path forward, built around their goals, their timelines, and their standards. Because when your health is on the line, generic care isn't good enough.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Our CQC Commitment</h2>
+            <h2 className="text-3xl font-bold">Founder Story</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                Our governance framework is built around continuous improvement and proactive compliance. We conduct regular internal audits, team training, and data protection reviews to maintain the highest levels of integrity and operational excellence.
+                Luther Health was born out of a frustration that became impossible to ignore.
               </p>
               <p>
-                We also work closely with our Responsible Officer and designated CQC manager to ensure full accountability across every area of clinical practice, including patient confidentiality, documentation standards, and informed consent.
+                After more than a decade working within the NHS, our founder kept seeing the same pattern: men facing major surgery or complex health issues were left waiting — unsure of what to do, how to prepare, or who to trust. Too often, they entered surgery deconditioned, anxious, and underinformed. And afterward? Recovery was slow, fragmented, and reactive. The system didn't make men stronger — it just tried to patch them up.
               </p>
               <p>
-                Patients can view our CQC registration details, statement of purpose, and inspection outcomes at any time. Transparency and accountability are central to how we operate.
+                So we built what we wished had existed.
+              </p>
+              <p>
+                What started as a side project — helping a handful of patients prepare more intentionally for surgery — quickly grew into a comprehensive approach to personalised health transformation. The goal wasn't just to reduce complications or bounce back faster (though we do that). It was to shift the entire mindset around health: from passive waiting to active ownership.
+              </p>
+              <p>
+                Luther Health is now a platform serving men around the world — men who want to take control of their health, face big moments with confidence, and come out on the other side sharper, stronger, and ready for more. What started as a simple idea has become a new standard for what care should look like — intelligent, proactive, and built around the individual.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Governance and Oversight</h2>
+            <h2 className="text-3xl font-bold">Culture</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                Clinical governance is at the heart of our model. Every service is led by qualified medical professionals who uphold the standards set by both the CQC and the General Medical Council (GMC). 
+                We're a team of clinicians, coaches, and creators driven by one thing: results that matter.
               </p>
               <p>
-                Our governance structure ensures oversight in the following areas:
+                At Luther Health, our culture is built on performance and purpose. We work with men who operate at a high level — and we hold ourselves to the same standard. That means we're not here to tick boxes or follow outdated protocols. We're here to solve problems, deliver outcomes, and raise the bar for what health support can be.
               </p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Clinical safety and incident management</li>
-                <li>Safeguarding and patient protection</li>
-                <li>Staff training and professional development</li>
-                <li>Information governance and data protection</li>
-                <li>Quality assurance and outcome measurement</li>
-              </ul>
               <p>
-                This multi-layered approach guarantees that patients receive care that is safe, effective, and compliant — while continuously driving improvements in clinical performance and patient satisfaction.
+                We value precision over platitudes, clarity over complexity, and excellence over ego. We collaborate across disciplines, we challenge each other to improve, and we keep the focus where it belongs — on the men we serve and the results we deliver.
+              </p>
+              <p>
+                But we also lead with compassion. We know that behind every case is a person with goals, fears, and high expectations. We treat each client with the same care we'd want for ourselves or our families. That human side — the deep respect for what our clients are navigating — is what shapes how we work.
+              </p>
+              <p>
+                Luther Health is a place where high standards meet deep care. Where curiosity fuels innovation. And where every member of the team plays a role in redefining what world-class health support looks like for men who expect more — and won't settle for less.
               </p>
             </div>
           </div>
         </div>
       </section>
-
       <Separator />
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-bold">View Our CQC Registration</h2>
+          <h2 className="text-3xl font-bold">Ready to Start Your Health Journey?</h2>
           <p className="text-muted-foreground">
-            For full details about our regulatory status and inspection reports, visit the official CQC website.
+            Join thousands of men who have transformed their health with Luther Health's personalized approach to men's healthcare.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" size="lg" asChild>
-              <a href="https://www.cqc.org.uk" target="_blank" rel="noopener noreferrer">
-                Visit CQC Website
-              </a>
-            </Button>
+            <Button variant="outline" size="lg">Contact Our Team</Button>
           </div>
         </div>
       </section>
