@@ -17,13 +17,14 @@ export function Hero() {
               Expert-led, data-driven, and designed exclusively for men's health.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button 
-                size="lg" 
-                className="w-full sm:w-auto"
-                onClick={() => window.location.hash = 'health-concierge-information'}
-              >
-                Discover
-              </Button>
+<Button 
+  size="lg" 
+  className="w-full sm:w-auto"
+  onClick={() => window.location.href = 'https://luther.health/#contact'}
+>
+  Discover
+</Button>
+
             </div>
             <div className="flex items-center justify-center lg:justify-start flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
