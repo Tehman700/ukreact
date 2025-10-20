@@ -74,7 +74,11 @@ export function AboutPage() {
             <h2 className="text-3xl font-bold">Our Mission</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-             Most healthcare is slow, generic, and built for the average person. That’s not who we serve. At Luther Health, we work with men who take their health seriously—guys who want to fix real problems, get clear answers, and move fast. We don’t do cookie-cutter NHS-style care. We build custom, hands-on plans using real data, expert oversight, and a focus on outcomes—not opinions. Whether it’s pre-surgery, recovery, or long-term performance, our goal isn’t to get you back to baseline. It’s to get you better than you were before. Faster. Smarter. Stronger.</p>
+                Most healthcare is slow, generic, and built for the average person. That’s not who we serve. <br />
+                At Luther Health, we work with men who take their health seriously—guys who want to fix real problems, get clear answers, and move fast. <br />
+                We don’t do cookie-cutter NHS-style care. We build custom, hands-on plans using real data, expert oversight, and a focus on outcomes—not opinions. <br />
+                Whether it’s pre-surgery, recovery, or long-term performance, our goal isn’t to get you back to baseline. It’s to get you better than you were before. Faster. Smarter. Stronger.
+              </p>
             </div>
           </div>
 
@@ -82,13 +86,18 @@ export function AboutPage() {
             <h2 className="text-3xl font-bold">Founder Story</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-Luther Health was built out of frustration. After over a decade inside the NHS, our founder kept seeing the same thing: men facing major surgery or complex health issues left waiting, guessing, and hoping it would work out. They went in unprepared—anxious, out of shape, and unclear on what to expect. Recovery was slow, support was scattered, and outcomes were worse than they needed to be. The system wasn’t built to make men stronger—it was built to patch them up and move on.
-
-So we built what should’ve existed all along.
-
-What started as a side project—helping a few men prepare smarter for surgery—quickly grew into a full-stack, personalized health platform. Not just to reduce complications or speed up recovery (we do that), but to flip the script: from passive patients to active owners of their health.
-
-Today, Luther Health serves men around the world who want to take control of their bodies, face big moments with confidence, and come out the other side stronger than they went in. It’s not traditional care. It’s what care should’ve been all along—intelligent, proactive, and built for performance.</p>
+                Luther Health was built out of frustration. After over a decade inside the NHS, our founder kept seeing the same thing: men facing major surgery or complex health issues left waiting, guessing, and hoping it would work out. <br />
+                They went in unprepared—anxious, out of shape, and unclear on what to expect. Recovery was slow, support was scattered, and outcomes were worse than they needed to be. <br />
+                The system wasn’t built to make men stronger—it was built to patch them up and move on.
+                <br /><br />
+                So we built what should’ve existed all along.
+                <br /><br />
+                What started as a side project—helping a few men prepare smarter for surgery—quickly grew into a full-stack, personalized health platform. <br />
+                Not just to reduce complications or speed up recovery (we do that), but to flip the script: from passive patients to active owners of their health.
+                <br /><br />
+                Today, Luther Health serves men around the world who want to take control of their bodies, face big moments with confidence, and come out the other side stronger than they went in. <br />
+                It’s not traditional care. It’s what care should’ve been all along—intelligent, proactive, and built for performance.
+              </p>
             </div>
           </div>
 
@@ -96,37 +105,40 @@ Today, Luther Health serves men around the world who want to take control of the
             <h2 className="text-3xl font-bold">Culture</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-We’re a team of clinicians, coaches, and creators focused on one thing: results that matter.
-
-At Luther Health, we work with men who operate at a high level—and we hold ourselves to the same standard. That means no box-ticking, no outdated playbooks, and no fluff. Just clear goals, custom plans, and measurable outcomes.
-
-We value precision over guesswork, clarity over complexity, and performance over ego. We challenge each other, collaborate across disciplines, and keep the focus where it belongs—on the men we serve and the results we deliver.
-
-But we don’t just push for outcomes—we lead with care. We know every case is personal. Behind every lab result is a man with a life, a family, and something at stake. We treat our clients like we’d treat our own—and that mindset drives everything we do.
-
-Luther Health is where high standards meet human care. Where elite support isn't the exception—it’s the baseline. </p>
+                We’re a team of clinicians, coaches, and creators focused on one thing: results that matter.
+                <br /><br />
+                At Luther Health, we work with men who operate at a high level—and we hold ourselves to the same standard. <br />
+                That means no box-ticking, no outdated playbooks, and no fluff. Just clear goals, custom plans, and measurable outcomes.
+                <br /><br />
+                We value precision over guesswork, clarity over complexity, and performance over ego. <br />
+                We challenge each other, collaborate across disciplines, and keep the focus where it belongs—on the men we serve and the results we deliver.
+                <br /><br />
+                But we don’t just push for outcomes—we lead with care. <br />
+                We know every case is personal. Behind every lab result is a man with a life, a family, and something at stake. <br />
+                We treat our clients like we’d treat our own—and that mindset drives everything we do.
+                <br /><br />
+                Luther Health is where high standards meet human care. <br />
+                Where elite support isn't the exception—it’s the baseline.
+              </p>
             </div>
           </div>
         </div>
       </section>
+
       <Separator />
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
-  <div className="max-w-3xl mx-auto text-center space-y-6">
-    <h2 className="text-3xl font-bold">Ready to Start Your Health Journey?</h2>
-    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-      <Button 
-        variant="outline" 
-        size="lg"
-        onClick={() => window.location.href = 'https://luther.health/#contact'}
-      >
-        Contact Our Team
-      </Button>
-    </div>
-  </div>
-</section>
-
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h2 className="text-3xl font-bold">Ready to Start Your Health Journey?</h2>
+          <p className="text-muted-foreground">
+            Join thousands of men who have transformed their health with Luther Health's personalized approach to men's healthcare.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="outline" size="lg">Contact Our Team</Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
