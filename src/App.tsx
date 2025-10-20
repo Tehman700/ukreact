@@ -714,6 +714,8 @@ useEffect(() => {
     switch (currentPage) {
       case 'about':
         return <AboutPage />;
+      case 'cqc':
+        return <CQCPage />;
       case 'services':
         return <ServicesPage onRequestQuote={handleRequestQuote} />;
       case 'assessments':
