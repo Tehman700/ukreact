@@ -176,16 +176,16 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
   return (
     <Card className="group overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col">
       {/* Image Section */}
-      <div 
-        className="relative aspect-[4/3] overflow-hidden"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <ImageWithFallback
-          src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
-          alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
-          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-        />
+<div 
+  className="relative w-full h-[260px] sm:h-[300px] md:h-[340px] overflow-hidden rounded-t-lg"
+  onMouseEnter={() => setIsHovered(true)}
+  onMouseLeave={() => setIsHovered(false)}
+>
+  <ImageWithFallback
+    src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
+    alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
+    className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+  />
         
         {/* FREE 14 day trial badge */}
         {product.isTrialOffer && (
