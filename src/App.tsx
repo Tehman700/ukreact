@@ -13,6 +13,7 @@ import { ShoppingBasket } from './components/ShoppingBasket';
 // Main Pages
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
+import { CQC } from './pages/CQC';
 import { ServicesPage } from './pages/ServicesPage';
 import { ContactPage } from './pages/ContactPage';
 import { AssessmentsPage } from './pages/AssessmentsPage';
