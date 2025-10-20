@@ -732,7 +732,7 @@ useEffect(() => {
       case 'privacy':
         return <PrivacyPage />;
       case 'cookies':
-
+        return <CookiePage />;
       case 'cancel':
           return <Cancel />;
 
