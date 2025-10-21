@@ -6,14 +6,12 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
 // import { ResultsNotification } from './components/ResultsNotification';
-import { HealthConciergeOptIn } from './components/HealthConciergeOptIn';
 import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
 
 // Main Pages
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
-import { CQCPage } from './pages/CQC';
 import { ServicesPage } from './pages/ServicesPage';
 import { ContactPage } from './pages/ContactPage';
 import { AssessmentsPage } from './pages/AssessmentsPage';
@@ -295,7 +293,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '6',
     name: 'Complication Risk Checker',
-    description: 'Not all health issues are obvious—but they can still mess up your surgery. This check looks at lifestyle and existing conditions that could raise your risk for complications. It shows you where you're vulnerable and what to fix before going under. Get ahead of problems instead of reacting to them later.',
+    description: 'Not all health issues are obvious—but they can still mess up your surgery. This check looks at lifestyle and existing conditions that could raise your risk for complications. It shows you where you are vulnerable and what to fix before going under. Get ahead of problems instead of reacting to them later.',
     price: 40.00,
    image: purpleGradientImage,
     icon: <AlertTriangle className="w-6 h-6" />,
@@ -313,7 +311,7 @@ const globalAssessments: Assessment[] = [
   {
     id: '8',
     name: 'Anaesthesia Risk Screener',
-    description: 'Anaesthesia affects everyone differently—and some people are at higher risk. This screener looks at your sleep, meds, and lifestyle to predict any complications. It helps avoid unwanted surprises during surgery. Peace of mind starts with knowing you're prepared.',
+    description: 'Anaesthesia affects everyone differently—and some people are at higher risk. This screener looks at your sleep, meds, and lifestyle to predict any complications. It helps avoid unwanted surprises during surgery. Peace of mind starts with knowing you are prepared.',
     price: 35.00,
    image: purplesGradientImage,
     icon: <Heart className="w-6 h-6" />,
@@ -517,8 +515,6 @@ export default function App() {
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<string | null>(null);
-  const [showHealthConciergeOptIn, setShowHealthConciergeOptIn] = useState(false);
-  const [hasSeenOptIn, setHasSeenOptIn] = useState(false);
 
   // Initialize analytics
   const analytics = useAnalytics();
@@ -561,18 +557,6 @@ const handleUpgradeToBundle = useCallback((bundleId: string) => {
     alert('There was an error upgrading to the bundle. Please try again.');
   }
 }, [basketItems, analytics, currentPage]); // Add dependencies
-
-  // Health Concierge opt-in timer
-  useEffect(() => {
-    if (hasSeenOptIn) return;
-
-    const timer = setTimeout(() => {
-      setShowHealthConciergeOptIn(true);
-      analytics.trackUserJourneyMilestone('health_concierge_popup_shown', 20000);
-    }, 20000); // 20 seconds
-
-    return () => clearTimeout(timer);
-  }, [hasSeenOptIn, analytics]);
 
 useEffect(() => {
   const handleHashChange = () => {
@@ -714,8 +698,6 @@ useEffect(() => {
     switch (currentPage) {
       case 'about':
         return <AboutPage />;
-      case 'cqc':
-        return <CQCPage />;
       case 'services':
         return <ServicesPage onRequestQuote={handleRequestQuote} />;
       case 'assessments':
@@ -732,7 +714,7 @@ useEffect(() => {
       case 'privacy':
         return <PrivacyPage />;
       case 'cookies':
-        return <CookiePage />;
+
       case 'cancel':
           return <Cancel />;
 
@@ -1212,20 +1194,6 @@ useEffect(() => {
       {!isQuizPage() && <Footer />}
       <CookieConsent />
       {currentPage.endsWith('-results')}
-      <HealthConciergeOptIn
-        isOpen={showHealthConciergeOptIn}
-        onClose={() => {
-          setShowHealthConciergeOptIn(false);
-          setHasSeenOptIn(true);
-          analytics.trackUserJourneyMilestone('health_concierge_popup_dismissed');
-        }}
-        onAccept={() => {
-          setShowHealthConciergeOptIn(false);
-          setHasSeenOptIn(true);
-          analytics.trackHealthConciergeOptIn('popup_opt_in');
-          window.location.hash = 'health-concierge-questions';
-        }}
-      />
       <ShoppingBasket
         isOpen={isBasketOpen}
         onClose={() => setIsBasketOpen(false)}
