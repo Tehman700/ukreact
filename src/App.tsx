@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 // Core Components
-
-
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
@@ -23,6 +21,7 @@ import { QuizPage } from './pages/QuizPage';
 import { LoadingPage } from './pages/LoadingPage';
 import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
+import { CQCPage } from './pages/CQC';
 
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
@@ -714,25 +713,22 @@ useEffect(() => {
       case 'privacy':
         return <PrivacyPage />;
       case 'cookies':
-
+          return <CookiePage />;
       case 'cancel':
           return <Cancel />;
-
       case 'success':
           return <Success />;
-
-
-        return <CookiePage />;
       case 'complaints':
         return <ComplaintsPage />;
       case 'quiz':
         return <QuizPage />;
+      case 'cqc':
+          return <CQCPage />;
       case 'surgery-readiness-assessment-learn-more':
           return <SurgeryReadinessUpsellPage
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
-
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
       case 'surgery-readiness-assessment-information':

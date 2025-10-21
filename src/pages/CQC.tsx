@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Shield, Users, Award, Clock } from 'lucide-react';
+import { Shield, Users, Award, Clock, ClipboardCheck, FileCheck } from 'lucide-react';
 import { Separator } from '../components/ui/separator';
 
 export function CQCPage() {
