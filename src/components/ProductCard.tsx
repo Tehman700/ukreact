@@ -176,17 +176,17 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
   return (
     <Card className="group overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col">
       {/* Image Section */}
-<div 
-  className="relative w-full h-[260px] sm:h-[300px] md:h-[340px] overflow-hidden rounded-t-lg"
-  onMouseEnter={() => setIsHovered(true)}
-  onMouseLeave={() => setIsHovered(false)}
->
-  <ImageWithFallback
-    src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
-    alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
-    className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-  />
-        
+      <div
+        className="relative aspect-[4/3] overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <ImageWithFallback
+          src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
+          alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
+          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+        />
+
         {/* FREE 14 day trial badge */}
         {product.isTrialOffer && (
           <div className="absolute top-4 left-4">
@@ -195,7 +195,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
             </Badge>
           </div>
         )}
-        
+
         <div className={`absolute inset-0 bg-black/20 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
       </div>
 
@@ -206,7 +206,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
             <h3 className="font-medium line-clamp-2">{protocolInfo.name}</h3>
             <p className="text-sm text-muted-foreground">{protocolInfo.description}</p>
           </div>
-          
+
           {/* Trial badges - only for trial offers */}
           {product.isTrialOffer && (
             <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground mb-4 px-[0px] py-[10px]">
@@ -239,7 +239,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
                       <div className="flex flex-wrap gap-2 mx-[0px] my-[3px] px-[0px py-[-6px]] py-[22px] px-[0px] py-[20px]">
                         {item.badges.map((badge, badgeIndex) => (
                           <Button
-                            key={badgeIndex} 
+                            key={badgeIndex}
                             variant="outline"
                             size="sm"
                             className="h-auto py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 bg-white text-foreground border-border hover:bg-muted/50 py-[2px] px-[12px] px-[13px] mx-[0px] my-[1px] rounded-[7px]"
@@ -254,10 +254,10 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
               ))}
             </Accordion>
           </div>
-          
+
           {/* Request Quote CTA */}
           <div className="mt-auto pt-4">
-            <Button 
+            <Button
               onClick={product.isTrialOffer && onAddToCart ? handleAddToCart : handleRequestQuote}
               className="w-full"
             >
