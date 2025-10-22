@@ -25,31 +25,16 @@ export function CQCPage() {
     {
       icon: Users,
       title: 'Patient-Centred Care',
-      description: 'Every element of our service is designed around patient wellbeing — ensuring dignity, respect, and individualised treatment that aligns with CQC’s patient-first principles.'
+      description: 'Every element of our service is designed around patient wellbeing — ensuring dignity, respect, and individualised treatment that aligns with CQC patient-first principles.'
     }
   ];
 
   return (
     <div className="relative space-y-0 text-foreground">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative max-w-2xl mx-auto">
-              <img
-                src="https://cdn.cosmos.so/7cf6d02e-2ff0-47db-8a6b-b16e4f33aaf1?format=jpeg"
-                alt="CQC Compliance"
-                className="w-full h-[300px] md:h-[400px] object-cover rounded-lg shadow-lg"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* CQC Information */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-16">
-          
+
           <div className="space-y-4">
             <h2 className="text-3xl font-bold">Care Quality Commission (CQC)</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
@@ -57,7 +42,7 @@ export function CQCPage() {
                 Luther Health is registered with the Care Quality Commission (CQC), the independent regulator of health and social care services in England. This registration confirms that we meet strict legal requirements for safety, quality, and governance across all aspects of care delivery.
               </p>
               <p>
-                Our clinical operations are reviewed regularly to ensure compliance with the Health and Social Care Act 2008 (Regulated Activities) Regulations 2014 and the CQC’s five key questions:
+                Our clinical operations are reviewed regularly to ensure compliance with the Health and Social Care Act 2008 (Regulated Activities) Regulations 2014 and the CQC five key questions:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Safe:</strong> Services are designed to protect patients from avoidable harm and risk.</li>
@@ -91,7 +76,7 @@ export function CQCPage() {
             <h2 className="text-3xl font-bold">Governance and Oversight</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                Clinical governance is at the heart of our model. Every service is led by qualified medical professionals who uphold the standards set by both the CQC and the General Medical Council (GMC). 
+                Clinical governance is at the heart of our model. Every service is led by qualified medical professionals who uphold the standards set by both the CQC and the General Medical Council (GMC).
               </p>
               <p>
                 Our governance structure ensures oversight in the following areas:
