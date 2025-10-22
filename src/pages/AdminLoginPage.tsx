@@ -115,11 +115,14 @@ export function AdminLoginPage() {
           </form>
 
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <h4 className="text-sm font-medium mb-2">Demo Credentials:</h4>
-            <p className="text-sm text-muted-foreground">
-              Email: admin@lutherhealth.com<br />
-              Password: admin123
-            </p>
+{/* 
+<h4 className="text-sm font-medium mb-2">Demo Credentials:</h4>
+<p className="text-sm text-muted-foreground">
+  Email: admin@lutherhealth.com<br />
+  Password: admin123
+</p>
+*/}
+
           </div>
         </CardContent>
       </Card>
