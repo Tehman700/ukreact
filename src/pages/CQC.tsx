@@ -122,8 +122,8 @@ export function CQCPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="outline" size="lg" asChild>
-              <a href="https://www.cqc.org.uk" target="_blank" rel="noopener noreferrer">
-                Visit CQC Website
+              <a href="https://www.cqc.org.uk/provider/1-20395743142">
+                View Our Registration
               </a>
             </Button>
           </div>
