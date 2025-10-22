@@ -135,7 +135,13 @@ export function AboutPage() {
             Join thousands of men who have transformed their health with Luther Health's personalized approach to men's healthcare.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" size="lg">Contact Our Team</Button>
+            <Button 
+  size="lg" 
+  className="w-full sm:w-auto"
+  onClick={() => window.location.href = 'https://luther.health/#contact'}
+>
+  Discover
+</Button>
           </div>
         </div>
       </section>
