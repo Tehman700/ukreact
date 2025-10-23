@@ -18,7 +18,7 @@ const anaesthesiaRiskAssessment: Assessment = {
   name: 'Anaesthesia Risk Screener',
   description:
     'Fast, evidence-based screening to flag sleep apnoea risk, drug interactions, and lifestyle factors that raise anaesthesia complications—before you go to theatre.',
-  price: 35,
+  price: 0.30,
   image: heroImage,
   icon: <Heart className="w-6 h-6" />,
   features: [
