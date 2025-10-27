@@ -104,15 +104,16 @@ export function SurgeryReadinessUpsellPage({
         importantly how to fix it before the operation.
       </h2>
       <p className="text-left text-muted-foreground mt-6 whitespace-pre-line">
-        🔍 Uncover hidden health risks that standard pre-op checks often miss.
-        {"\n"}🛡️ Prevent complications by fixing issues before surgery, not after.
-        {"\n"}⏱️ Speed up your recovery with a body that’s truly prepared to heal.
-        {"\n"}🧠 Get a personalized, doctor-reviewed plan to optimize your health for surgery.
-        {"\n"}💸 Avoid costly setbacks like infections, readmissions, or extended downtime.
+        🔍 <strong>Spot hidden risks</strong> before they become problems.
+        {"\n\n"}🛡️ <strong>Prevent complications</strong> before they happen.
+        {"\n\n"}⏱️ <strong>Recover faster</strong> with a body that’s ready.
+        {"\n\n"}🧠 <strong>Get a custom plan</strong> built by real doctors.
+        {"\n\n"}💸 <strong>Avoid setbacks</strong> that cost time, money, and health.
       </p>
     </div>
   </div>
 </section>
+
 
 
       {/* Benefits Section with Overlapping Cards */}
