@@ -76,12 +76,11 @@ export function SurgeryReadinessUpsellPage({
               Surgery Readiness Assessment
             </h2>
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Optimize Your Surgery.
-              <span className="block text-primary">Minimize Risks.</span>
+              Ready for Surgery.
+              <span className="block text-primary">Or Just Hoping.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-md">
-              Get your personalized readiness score and evidence-based strategies for the best
-              possible outcomes.
+              Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
