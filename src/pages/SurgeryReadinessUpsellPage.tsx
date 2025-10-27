@@ -87,7 +87,7 @@ export function SurgeryReadinessUpsellPage({
                 onClick={handleStartAssessment}
                 className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
               >
-                Get my score
+                Reduce my surgical risks now
               </Button>
             </div>
           </div>
@@ -95,23 +95,25 @@ export function SurgeryReadinessUpsellPage({
       </section>
 
       {/* New Heading Section */}
-      <section className="py-8 pt-[35px] pb-[28px]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h1 className="text-left my-[14px] font-bold">Reduce Risks. Improve Recovery.</h1>
-            <h2 className="text-muted-foreground text-left">
-              Your personalised Surgery Readiness Score shows what could hold you back — and
-              importantly how to fix it before the operation.
-            </h2>
-            <p className="text-left text-muted-foreground mt-6">
-              This report identifies factors unique to you that may affect your readiness for
-              surgery. Knowing your surgery-specific risks is vital because it helps you make
-              informed decisions, prepare for potential challenges, and work with your healthcare
-              team to minimize complications and support a safer recovery.
-            </p>
-          </div>
-        </div>
-      </section>
+<section className="py-8 pt-[35px] pb-[28px]">
+  <div className="container mx-auto px-4">
+    <div className="max-w-4xl mx-auto text-center space-y-4">
+      <h1 className="text-left my-[14px] font-bold">Reduce Risks. Improve Recovery.</h1>
+      <h2 className="text-muted-foreground text-left">
+        Your personalised Surgery Readiness Score shows what could hold you back — and
+        importantly how to fix it before the operation.
+      </h2>
+      <p className="text-left text-muted-foreground mt-6 whitespace-pre-line">
+        🔍 Uncover hidden health risks that standard pre-op checks often miss.
+        {"\n"}🛡️ Prevent complications by fixing issues before surgery, not after.
+        {"\n"}⏱️ Speed up your recovery with a body that’s truly prepared to heal.
+        {"\n"}🧠 Get a personalized, doctor-reviewed plan to optimize your health for surgery.
+        {"\n"}💸 Avoid costly setbacks like infections, readmissions, or extended downtime.
+      </p>
+    </div>
+  </div>
+</section>
+
 
       {/* Benefits Section with Overlapping Cards */}
       <section className="py-16 md:py-24 bg-muted/10">
@@ -319,7 +321,7 @@ export function SurgeryReadinessUpsellPage({
                     onClick={handleStartAssessment}
                     className="w-full bg-black text-white hover:bg-black/90 transition-colors duration-200"
                   >
-                    Get my score now
+                    Reduce my surgical risks now
                   </Button>
                 </div>
               </CardContent>
