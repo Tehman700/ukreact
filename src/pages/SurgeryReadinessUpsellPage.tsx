@@ -63,23 +63,16 @@ export function SurgeryReadinessUpsellPage({
           {/* Text */}
           <div className="space-y-6 mt-10">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Reduce your surgical risks. Today.
-              <span className="block text-primary">Or Just Hoping.</span>
+              Reduce your surgical risks.<strong> Today</strong>.
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
               Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                onClick={handleStartAssessment}
-                className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
-              >
-                Reduce my surgical risks now
-              </Button>
             </div>
 
             {/* Trust badges */}
-            <div className="flex items-center justify-start flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
+            <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 bg-blue-600 rounded-full" />
                 <span>Regulated</span>
