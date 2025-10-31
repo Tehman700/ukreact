@@ -246,22 +246,6 @@ export function SurgeryReadinessUpsellPage({
   </div>
 </section>
 
-{/* CTA Section */}
-<section className="relative bg-white py-20">
-  <div className="max-w-5xl mx-auto px-[14px] text-center">
-
-    {/* Text */}
-    <div className="space-y-6 mt-10">
-      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
-        Don’t Walk Into Surgery Blind.<br />
-        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
-      </h2>
-
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-        If you're over 60 and have health issues, don't leave your recovery to chance. 
-        This quick assessment could save you weeks of pain and problems.
-      </p>
-    </div>
 
     {/* CTA Section (single, properly closed) */}
     <section className="relative bg-white py-20">
@@ -300,3 +284,4 @@ export function SurgeryReadinessUpsellPage({
 </section>       
 </div>           
 );
+} 
