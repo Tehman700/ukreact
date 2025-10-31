@@ -6,6 +6,12 @@ import { Shield } from 'lucide-react';
 import { LogoCarousel } from '../components/LogoCarousel';
 import surgeryReadinessImage from 'figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png';
 import heroImage from '/assests/surgery-hero.webp';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../components/ui/accordion';
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -109,7 +115,71 @@ export function SurgeryReadinessUpsellPage({
           </div>
         </div>
       </section>
+{/* FAQ Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-center mb-12">Frequently Asked Questions</h2>
+            
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  What is the Surgery Readiness Score?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  The Surgery Readiness Score is a comprehensive pre-surgical assessment that evaluates your current health status and identifies potential risk factors that could affect your surgery or recovery. It provides personalized recommendations to optimize your health before your procedure.
+                </AccordionContent>
+              </AccordionItem>
 
+              <AccordionItem value="item-2" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  How long does the assessment take?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  The assessment typically takes 10-15 minutes to complete. You'll answer questions about your medical history, current health status, lifestyle factors, and the specific surgery you're preparing for.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  When should I complete this assessment?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Ideally, complete the assessment as soon as your surgery is scheduled. The earlier you identify and address risk factors, the better your outcomes. Most patients benefit from completing this 4-8 weeks before their procedure, though it's valuable at any stage.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-4" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  Will this replace my surgeon's pre-op assessment?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  No. This assessment complements your surgeon's evaluation. It helps you proactively optimize your health and provides additional insights you can discuss with your surgical team. Always follow your surgeon's specific instructions.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-5" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  What happens after I complete the assessment?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  You'll receive a detailed report with your Surgery Readiness Score, personalized risk factors, and evidence-based recommendations to optimize your health before surgery. You can share this report with your healthcare team.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-6" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+                <AccordionTrigger className="hover:no-underline">
+                  Is my information secure?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Yes. All data is encrypted and stored securely in compliance with UK healthcare regulations. We never share your personal information with third parties without your explicit consent.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+      
       {/* Logo carousel at the bottom */}
       <div className="container mx-auto px-4 pb-12">
         <LogoCarousel />
