@@ -121,96 +121,151 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 {/* FAQ Section */}
-<section
-  id="surgery-faq"
-  className="py-16 bg-gray-50"
-  style={{ fontFamily: 'sans-serif', maxWidth: '800px', margin: 'auto', lineHeight: 1.6 }}
->
-  <h2>Who is this assessment for?</h2>
-  <ul className="list-disc ml-6">
-    <li>Men over 60 preparing for surgery</li>
-    <li>Those with health issues like diabetes, high blood pressure, or heart problems</li>
-    <li>Anyone worried about healing slow or facing complications</li>
-    <li>Men who want to stay strong and independent after surgery</li>
-    <li>Anyone who wants a simple plan to improve their outcome</li>
-  </ul>
+<section className="py-16 bg-gray-50">
+  <div className="container mx-auto px-4">
+    <div className="max-w-3xl mx-auto">
 
-  <h2>Who is this NOT for?</h2>
-  <ul className="list-disc ml-6">
-    <li>Anyone not planning surgery soon</li>
-    <li>Those expecting the doctor to handle everything</li>
-    <li>People unwilling to make changes</li>
-    <li>Anyone okay with risking a long or painful recovery</li>
-  </ul>
+      <Accordion type="single" collapsible className="space-y-4">
+        
+        <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            Who is this assessment for?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Men over 60 preparing for surgery</li>
+              <li>Those with health issues like diabetes, high blood pressure, or heart problems</li>
+              <li>Anyone worried about healing slow or facing complications</li>
+              <li>Men who want to stay strong and independent after surgery</li>
+              <li>Anyone who wants a simple plan to improve their outcome</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>How will it help you?</h2>
-  <p>You might be asking yourself:</p>
-  <ul className="list-disc ml-6">
-    <li>“Will my body handle the surgery?”</li>
-    <li>“What if I don’t bounce back?”</li>
-    <li>“What if something goes wrong?”</li>
-  </ul>
-  <p>This assessment gives you control. You’ll get:</p>
-  <ul className="list-disc ml-6">
-    <li>A clear picture of your current readiness</li>
-    <li>Insight into what’s putting you at risk</li>
-    <li>Steps to take before surgery to lower that risk</li>
-    <li>A simple plan to heal faster and recover stronger</li>
-  </ul>
+        <AccordionItem value="item-2" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            Who is this NOT for?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Anyone not planning surgery soon</li>
+              <li>Those expecting the doctor to handle everything</li>
+              <li>People unwilling to make changes</li>
+              <li>Anyone okay with risking a long or painful recovery</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>What do I get?</h2>
-  <ul className="list-disc ml-6">
-    <li>A short, easy assessment (under 10 minutes)</li>
-    <li>Instant results — no waiting</li>
-    <li>A clear, custom action plan</li>
-    <li>The option to get expert help if you want it</li>
-  </ul>
+        <AccordionItem value="item-3" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            How will it help you?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <p>You might be asking yourself:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>“Will my body handle the surgery?”</li>
+              <li>“What if I don’t bounce back?”</li>
+              <li>“What if something goes wrong?”</li>
+            </ul>
+            <p>This assessment gives you control. You’ll get:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>A clear picture of your current readiness</li>
+              <li>Insight into what’s putting you at risk</li>
+              <li>Steps to take before surgery to lower that risk</li>
+              <li>A simple plan to heal faster and recover stronger</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>Why does this matter?</h2>
-  <p>Most people show up for surgery unprepared. That leads to:</p>
-  <ul className="list-disc ml-6">
-    <li>Longer hospital stays</li>
-    <li>Pain that drags on for weeks</li>
-    <li>Getting stuck in bed</li>
-    <li>Needing more help from others</li>
-    <li>Even re-hospitalization</li>
-  </ul>
-  <p>But you can avoid that. This assessment helps you:</p>
-  <ul className="list-disc ml-6">
-    <li>Recover faster</li>
-    <li>Lower your risk</li>
-    <li>Feel more confident</li>
-    <li>Stay independent</li>
-  </ul>
+        <AccordionItem value="item-4" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            What do I get?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <ul className="list-disc pl-6 space-y-1">
+              <li>A short, easy assessment (under 10 minutes)</li>
+              <li>Instant results — no waiting</li>
+              <li>A clear, custom action plan</li>
+              <li>The option to get expert help if you want it</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>How long does it take?</h2>
-  <p>Less than 10 minutes.</p>
-  <p>No fluff. No medical jargon. Just real answers.</p>
+        <AccordionItem value="item-5" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            Why does this matter?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <p>Most people show up for surgery unprepared. That leads to:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Longer hospital stays</li>
+              <li>Pain that drags on for weeks</li>
+              <li>Getting stuck in bed</li>
+              <li>Needing more help from others</li>
+              <li>Even re-hospitalization</li>
+            </ul>
+            <p>But you can avoid that. This assessment helps you:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Recover faster</li>
+              <li>Lower your risk</li>
+              <li>Feel more confident</li>
+              <li>Stay independent</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>What happens after I take it?</h2>
-  <ul className="list-disc ml-6">
-    <li>A breakdown of how prepared your body is</li>
-    <li>What needs improvement — and how to do it</li>
-    <li>Clear next steps (you decide how far to go)</li>
-  </ul>
+        <AccordionItem value="item-6" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            How long does it take?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <p>Less than 10 minutes.</p>
+            <p>No fluff. No medical jargon. Just real answers.</p>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>Is it private?</h2>
-  <p>Yes. 100%. Your answers are safe and confidential.</p>
+        <AccordionItem value="item-7" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            What happens after I take it?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <ul className="list-disc pl-6 space-y-1">
+              <li>A breakdown of how prepared your body is</li>
+              <li>What needs improvement — and how to do it</li>
+              <li>Clear next steps (you decide how far to go)</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
 
-  <h2>Why should I take this now?</h2>
-  <p>Waiting is risky.</p>
-  <p>The sooner you prepare, the better your recovery will be.</p>
-  <p>Don’t wait until it’s too late. Take action now — while you can.</p>
+        <AccordionItem value="item-8" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            Is it private?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground">
+            Yes. 100%. Your answers are safe and confidential.
+          </AccordionContent>
+        </AccordionItem>
 
-  <div className="mt-8 p-6 bg-gray-100 rounded-lg text-center">
-    <h3>Ready to see how prepared you really are?</h3>
-    <p>
-      <strong>Take the Surgery Readiness Assessment now.</strong>
-      <br />
-      Be the man who’s ready — not the one who regrets waiting.
-    </p>
+        <AccordionItem value="item-9" className="bg-white rounded-lg px-6 border-0 shadow-sm">
+          <AccordionTrigger className="hover:no-underline">
+            Why should I take this now?
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground space-y-2">
+            <p>Waiting is risky.</p>
+            <p>The sooner you prepare, the better your recovery will be.</p>
+            <p>Don’t wait until it’s too late. Take action now — while you can.</p>
+            <div className="mt-6 p-4 bg-gray-100 rounded-md text-center">
+              <h3 className="font-semibold text-lg mb-2">Ready to see how prepared you really are?</h3>
+              <p><strong>Take the Surgery Readiness Assessment now.</strong><br />Be the man who’s ready — not the one who regrets waiting.</p>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+      </Accordion>
+    </div>
   </div>
 </section>
+
 
       
       {/* Logo carousel at the bottom */}
