@@ -263,48 +263,38 @@ export function SurgeryReadinessUpsellPage({
       </p>
     </div>
 
-   {/* CTA Section */}
-<section className="relative bg-white py-20">
-  <div className="max-w-5xl mx-auto px-[14px] text-center">
+    {/* CTA Section (single, properly closed) */}
+    <section className="relative bg-white py-20">
+      <div className="max-w-5xl mx-auto px-[14px] text-center">
+        <div className="space-y-6 mt-10">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
+            Don’t Walk Into Surgery Blind.<br />
+            <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            If you're over 60 and have health issues, don't leave your recovery to chance. 
+            This quick assessment could save you weeks of pain and problems.
+          </p>
+        </div>
 
-    {/* Text */}
-    <div className="space-y-6 mt-10">
-      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
-        Don’t Walk Into Surgery Blind.<br />
-        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
-      </h2>
+        <div className="mt-10 flex justify-center">
+          <Button
+            onClick={handleStartAssessment}
+            size="lg"
+            className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
+          >
+            Reduce my surgical risks now <br />
+            (only £37)
+          </Button>
+        </div>
 
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-        If you're over 60 and have health issues, don't leave your recovery to chance. 
-        This quick assessment could save you weeks of pain and problems.
-      </p>
-    </div>
-
-    {/* CTA Button */}
-    <div className="mt-10 flex justify-center">
-      <Button
-        onClick={handleStartAssessment}
-        size="lg"
-        className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
-      >
-        Reduce my surgical risks now <br />
-        (only £37)
-      </Button>
-    </div>
-
-    {/* Subtle bottom accent (optional, for visual polish) */}
-    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-  </div>
-</section>
-
-
-
-
-      
-      {/* Logo carousel at the bottom */}
-      <div className="container mx-auto px-4 pb-12">
-        <LogoCarousel />
+        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
       </div>
+    </section>
+
+    {/* Logo carousel at the bottom */}
+    <div className="container mx-auto px-4 pb-12">
+      <LogoCarousel />
     </div>
-  );
-}
+  </div>
+);
