@@ -296,5 +296,7 @@ export function SurgeryReadinessUpsellPage({
     <div className="container mx-auto px-4 pb-12">
       <LogoCarousel />
     </div>
-  </div>
+  </div>          
+</section>       
+</div>           
 );
