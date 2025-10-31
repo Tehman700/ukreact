@@ -46,55 +46,59 @@ export function SurgeryReadinessUpsellPage({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section (Single Column) */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="max-w-5xl mx-auto px-[14px] py-8">
-          {/* Image */}
-          <div className="relative">
-            <div className="relative aspect-[3/4] max-w-md mx-auto">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Surgery Readiness Score Report"
-                width={1600}
-                height={2000}
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 640px"
-                quality={85}
-                priority
-                className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
+     {/* Hero Section (Single Column) */}
+<section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
+  <div className="max-w-5xl mx-auto px-[14px] py-8">
+    {/* Image */}
+    <div className="relative">
+      {/* ↓ changed max-w-md → max-w-sm to make the image smaller */}
+      <div className="relative aspect-[3/4] max-w-sm mx-auto">
+        <ImageWithFallback
+          src={heroImage}
+          alt="Surgery Readiness Score Report"
+          width={800}
+          height={1000}
+          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 500px"
+          quality={85}
+          priority
+          className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
+        />
+        <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+      </div>
+    </div>
 
-          {/* Text */}
-          <div className="space-y-6 mt-10">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Reduce your surgical risks.<strong> Today</strong>.
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-            </div>
+    {/* Text */}
+    <div className="space-y-6 mt-10 text-center">
+      <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
+        Reduce your surgical risks.<strong> Today</strong>.
+      </h1>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
+      </p>
 
-            {/* Trust badges */}
-            <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-blue-600 rounded-full" />
-                <span>Regulated</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-green-600 rounded-full" />
-                <span>Doctor Led</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-purple-600 rounded-full" />
-                <span>Evidence Based</span>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Buttons or CTA could go here */}
+      </div>
+
+      {/* Trust badges */}
+      <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full" />
+          <span>Regulated</span>
         </div>
-      </section>
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 bg-green-600 rounded-full" />
+          <span>Doctor Led</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 bg-purple-600 rounded-full" />
+          <span>Evidence Based</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* New Heading Section */}
       <section className="py-8 pt-[35px] pb-[28px]">
