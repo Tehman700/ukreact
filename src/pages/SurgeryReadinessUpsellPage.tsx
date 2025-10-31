@@ -45,59 +45,60 @@ export function SurgeryReadinessUpsellPage({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-     {/* Hero Section (Single Column) */}
-<section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-  <div className="max-w-5xl mx-auto px-[14px] py-8">
-    {/* Image */}
-    <div className="relative">
-      {/* ↓ changed max-w-md → max-w-sm to make the image smaller */}
-      <div className="relative aspect-[3/4] max-w-sm mx-auto">
-        <ImageWithFallback
-          src={heroImage}
-          alt="Surgery Readiness Score Report"
-          width={800}
-          height={1000}
-          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 500px"
-          quality={85}
-          priority
-          className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-        />
-        <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+   <div className="min-h-screen bg-background">
+  {/* Hero Section (Single Column) */}
+  <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
+    <div className="max-w-5xl mx-auto px-[14px] py-8">
+
+      {/* Text */}
+      <div className="space-y-6 mt-10 text-left">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
+          Reduce your surgical risks.<strong> Today</strong>.
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Buttons or CTA could go here */}
+        </div>
+
+        {/* Trust badges */}
+        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full" />
+            <span>Regulated</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-green-600 rounded-full" />
+            <span>Doctor Led</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-purple-600 rounded-full" />
+            <span>Evidence Based</span>
+          </div>
+        </div>
       </div>
+
+      {/* Image moved to bottom */}
+      <div className="relative mt-10">
+        <div className="relative aspect-[3/4] max-w-sm mx-auto">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Surgery Readiness Score Report"
+            width={800}
+            height={1000}
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 500px"
+            quality={85}
+            priority
+            className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
+          />
+          <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
+        </div>
+      </div>
+
     </div>
-
-    {/* Text */}
-    <div className="space-y-6 mt-10 text-center">
-      <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-        Reduce your surgical risks.<strong> Today</strong>.
-      </h1>
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-        Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
-      </p>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        {/* Buttons or CTA could go here */}
-      </div>
-
-      {/* Trust badges */}
-      <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
-        <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full" />
-          <span>Regulated</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 bg-green-600 rounded-full" />
-          <span>Doctor Led</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 bg-purple-600 rounded-full" />
-          <span>Evidence Based</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
 
       {/* New Heading Section */}
@@ -120,69 +121,97 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-center mb-12">Frequently Asked Questions</h2>
-            
-            <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  What is the Surgery Readiness Score?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  The Surgery Readiness Score is a comprehensive pre-surgical assessment that evaluates your current health status and identifies potential risk factors that could affect your surgery or recovery. It provides personalized recommendations to optimize your health before your procedure.
-                </AccordionContent>
-              </AccordionItem>
+<section
+  id="surgery-faq"
+  className="py-16 bg-gray-50"
+  style={{ fontFamily: 'sans-serif', maxWidth: '800px', margin: 'auto', lineHeight: 1.6 }}
+>
+  <h2>Who is this assessment for?</h2>
+  <ul className="list-disc ml-6">
+    <li>Men over 60 preparing for surgery</li>
+    <li>Those with health issues like diabetes, high blood pressure, or heart problems</li>
+    <li>Anyone worried about healing slow or facing complications</li>
+    <li>Men who want to stay strong and independent after surgery</li>
+    <li>Anyone who wants a simple plan to improve their outcome</li>
+  </ul>
 
-              <AccordionItem value="item-2" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  How long does the assessment take?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  The assessment typically takes 10-15 minutes to complete. You'll answer questions about your medical history, current health status, lifestyle factors, and the specific surgery you're preparing for.
-                </AccordionContent>
-              </AccordionItem>
+  <h2>Who is this NOT for?</h2>
+  <ul className="list-disc ml-6">
+    <li>Anyone not planning surgery soon</li>
+    <li>Those expecting the doctor to handle everything</li>
+    <li>People unwilling to make changes</li>
+    <li>Anyone okay with risking a long or painful recovery</li>
+  </ul>
 
-              <AccordionItem value="item-3" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  When should I complete this assessment?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  Ideally, complete the assessment as soon as your surgery is scheduled. The earlier you identify and address risk factors, the better your outcomes. Most patients benefit from completing this 4-8 weeks before their procedure, though it's valuable at any stage.
-                </AccordionContent>
-              </AccordionItem>
+  <h2>How will it help you?</h2>
+  <p>You might be asking yourself:</p>
+  <ul className="list-disc ml-6">
+    <li>“Will my body handle the surgery?”</li>
+    <li>“What if I don’t bounce back?”</li>
+    <li>“What if something goes wrong?”</li>
+  </ul>
+  <p>This assessment gives you control. You’ll get:</p>
+  <ul className="list-disc ml-6">
+    <li>A clear picture of your current readiness</li>
+    <li>Insight into what’s putting you at risk</li>
+    <li>Steps to take before surgery to lower that risk</li>
+    <li>A simple plan to heal faster and recover stronger</li>
+  </ul>
 
-              <AccordionItem value="item-4" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  Will this replace my surgeon's pre-op assessment?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  No. This assessment complements your surgeon's evaluation. It helps you proactively optimize your health and provides additional insights you can discuss with your surgical team. Always follow your surgeon's specific instructions.
-                </AccordionContent>
-              </AccordionItem>
+  <h2>What do I get?</h2>
+  <ul className="list-disc ml-6">
+    <li>A short, easy assessment (under 10 minutes)</li>
+    <li>Instant results — no waiting</li>
+    <li>A clear, custom action plan</li>
+    <li>The option to get expert help if you want it</li>
+  </ul>
 
-              <AccordionItem value="item-5" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  What happens after I complete the assessment?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  You'll receive a detailed report with your Surgery Readiness Score, personalized risk factors, and evidence-based recommendations to optimize your health before surgery. You can share this report with your healthcare team.
-                </AccordionContent>
-              </AccordionItem>
+  <h2>Why does this matter?</h2>
+  <p>Most people show up for surgery unprepared. That leads to:</p>
+  <ul className="list-disc ml-6">
+    <li>Longer hospital stays</li>
+    <li>Pain that drags on for weeks</li>
+    <li>Getting stuck in bed</li>
+    <li>Needing more help from others</li>
+    <li>Even re-hospitalization</li>
+  </ul>
+  <p>But you can avoid that. This assessment helps you:</p>
+  <ul className="list-disc ml-6">
+    <li>Recover faster</li>
+    <li>Lower your risk</li>
+    <li>Feel more confident</li>
+    <li>Stay independent</li>
+  </ul>
 
-              <AccordionItem value="item-6" className="bg-white rounded-lg px-6 border-0 shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  Is my information secure?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  Yes. All data is encrypted and stored securely in compliance with UK healthcare regulations. We never share your personal information with third parties without your explicit consent.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-      </section>
+  <h2>How long does it take?</h2>
+  <p>Less than 10 minutes.</p>
+  <p>No fluff. No medical jargon. Just real answers.</p>
+
+  <h2>What happens after I take it?</h2>
+  <ul className="list-disc ml-6">
+    <li>A breakdown of how prepared your body is</li>
+    <li>What needs improvement — and how to do it</li>
+    <li>Clear next steps (you decide how far to go)</li>
+  </ul>
+
+  <h2>Is it private?</h2>
+  <p>Yes. 100%. Your answers are safe and confidential.</p>
+
+  <h2>Why should I take this now?</h2>
+  <p>Waiting is risky.</p>
+  <p>The sooner you prepare, the better your recovery will be.</p>
+  <p>Don’t wait until it’s too late. Take action now — while you can.</p>
+
+  <div className="mt-8 p-6 bg-gray-100 rounded-lg text-center">
+    <h3>Ready to see how prepared you really are?</h3>
+    <p>
+      <strong>Take the Surgery Readiness Assessment now.</strong>
+      <br />
+      Be the man who’s ready — not the one who regrets waiting.
+    </p>
+  </div>
+</section>
+
       
       {/* Logo carousel at the bottom */}
       <div className="container mx-auto px-4 pb-12">
