@@ -5,7 +5,7 @@ import { Assessment } from '../App';
 import { Shield } from 'lucide-react';
 import { LogoCarousel } from '../components/LogoCarousel';
 import surgeryReadinessImage from 'figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png';
-import heroImage from '/assets/surgery-hero.webp';
+import heroImage from '/assests/surgery-hero.webp';
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -42,16 +42,16 @@ export function SurgeryReadinessUpsellPage({
     <div className="min-h-screen bg-background">
       {/* Hero Section (Single Column) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="flex flex-col gap-8 items-center py-0 px-[14px] pb-[30px]">
+        <div className="max-w-5xl mx-auto px-[14px] py-8">
           {/* Image */}
-          <div className="relative w-full max-w-md mx-auto">
-            <div className="relative aspect-[3/4]">
+          <div className="relative">
+            <div className="relative aspect-[3/4] max-w-md mx-auto">
               <ImageWithFallback
                 src={heroImage}
                 alt="Surgery Readiness Score Report"
                 width={1600}
                 height={2000}
-                sizes="(max-width: 640px) 70vw, (max-width: 1024px) 70vw, 500px"
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 640px"
                 quality={85}
                 priority
                 className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
@@ -61,15 +61,15 @@ export function SurgeryReadinessUpsellPage({
           </div>
 
           {/* Text */}
-          <div className="space-y-6 text-center">
+          <div className="space-y-6 mt-10">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
               Reduce your surgical risks. Today.
               <span className="block text-primary">Or Just Hoping.</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={handleStartAssessment}
                 className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
@@ -78,8 +78,8 @@ export function SurgeryReadinessUpsellPage({
               </Button>
             </div>
 
-            {/* Trust Badges */}
-            <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
+            {/* Trust badges */}
+            <div className="flex items-center justify-start flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 bg-blue-600 rounded-full" />
                 <span>Regulated</span>
@@ -117,11 +117,10 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 
-      {/* Logos */}
-      <section className="py-8">
+      {/* Logo carousel at the bottom */}
+      <div className="container mx-auto px-4 pb-12">
         <LogoCarousel />
-      </section>
+      </div>
     </div>
   );
 }
-.
