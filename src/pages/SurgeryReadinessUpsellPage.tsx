@@ -47,23 +47,21 @@ export function SurgeryReadinessUpsellPage({
   return (
    <div className="min-h-screen bg-background">
   {/* Hero Section (Single Column) */}
-  <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-    <div className="max-w-5xl mx-auto px-[14px] py-8">
+<section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
+  <div className="max-w-5xl mx-auto px-[14px] py-8">
 
-      {/* Text */}
-      <div className="space-y-6 mt-10 text-left">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-          Reduce your surgical risks.<strong> Today</strong>.
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
-        </p>
+    {/* Text */}
+    <div className="space-y-6 mt-10 text-left">
+      <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
+        Reduce your surgical risks.<strong> Today</strong>.
+      </h1>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
+      </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {/* Buttons or CTA could go here */}
-        </div>
-
-        
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Buttons or CTA could go here */}
+      </div>
 
       {/* Image moved to bottom */}
       <div className="relative mt-10">
@@ -81,33 +79,37 @@ export function SurgeryReadinessUpsellPage({
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
         </div>
       </div>
-{/* Trust badges */}
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
-        </div>
-      </div>
     </div>
-  </section>
+  </div>
+</section>
+
+     {/* Trust Badges */}
+<section className="py-4 bg-white">
+  <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+    <div className="flex items-center space-x-2">
+      <span className="w-2 h-2 bg-blue-600 rounded-full" />
+      <span>Regulated</span>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span className="w-2 h-2 bg-green-600 rounded-full" />
+      <span>Doctor Led</span>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span className="w-2 h-2 bg-purple-600 rounded-full" />
+      <span>Evidence Based</span>
+    </div>
+  </div>
+</section>
+
 
 {/* FAQ Section */}
-<section className="py-16 bg-gray-50">
+<section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
   <div className="container mx-auto px-4">
     <div className="max-w-3xl mx-auto">
 
       {/* 'defaultValue' makes the first item open initially */}
       <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
-        
+
         <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
           <AccordionTrigger className="hover:no-underline">
             Who is this assessment for?
@@ -244,24 +246,58 @@ export function SurgeryReadinessUpsellPage({
   </div>
 </section>
 
-<section className="py-20 bg-white">
-  <div className="space-y-6 mt-10 text-center">
-    <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight">
-      Don’t Walk Into Surgery Blind. Know Your Risks.  <span className="text-primary">Fix Them Now.</span>
-    </h1>
-    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-    If you're over 60 and have health issues, don't leave your recovery to chance. This quick assessment could save you weeks of pain and problems.
-    </p>
-    <div className="flex flex-col sm:flex-row justify-center gap-4">
+{/* CTA Section */}
+<section className="relative bg-white py-20">
+  <div className="max-w-5xl mx-auto px-[14px] text-center">
+
+    {/* Text */}
+    <div className="space-y-6 mt-10">
+      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
+        Don’t Walk Into Surgery Blind.<br />
+        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+      </h2>
+
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        If you're over 60 and have health issues, don't leave your recovery to chance. 
+        This quick assessment could save you weeks of pain and problems.
+      </p>
+    </div>
+
+   {/* CTA Section */}
+<section className="relative bg-white py-20">
+  <div className="max-w-5xl mx-auto px-[14px] text-center">
+
+    {/* Text */}
+    <div className="space-y-6 mt-10">
+      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
+        Don’t Walk Into Surgery Blind.<br />
+        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+      </h2>
+
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        If you're over 60 and have health issues, don't leave your recovery to chance. 
+        This quick assessment could save you weeks of pain and problems.
+      </p>
+    </div>
+
+    {/* CTA Button */}
+    <div className="mt-10 flex justify-center">
       <Button
         onClick={handleStartAssessment}
-        className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+        size="lg"
+        className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
       >
-        Reduce my surgical risks now (only £37)
+        Reduce my surgical risks now <br />
+        (only £37)
       </Button>
     </div>
+
+    {/* Subtle bottom accent (optional, for visual polish) */}
+    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
   </div>
 </section>
+
+
 
 
       
