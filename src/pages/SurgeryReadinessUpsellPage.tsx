@@ -63,22 +63,7 @@ export function SurgeryReadinessUpsellPage({
           {/* Buttons or CTA could go here */}
         </div>
 
-        {/* Trust badges */}
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
-        </div>
-      </div>
+        
 
       {/* Image moved to bottom */}
       <div className="relative mt-10">
@@ -96,36 +81,32 @@ export function SurgeryReadinessUpsellPage({
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
         </div>
       </div>
-
+{/* Trust badges */}
+        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground pt-2">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full" />
+            <span>Regulated</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-green-600 rounded-full" />
+            <span>Doctor Led</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-purple-600 rounded-full" />
+            <span>Evidence Based</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-
-      {/* New Heading Section */}
-      <section className="py-8 pt-[35px] pb-[28px]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h1 className="text-left my-[14px] font-bold">Reduce Risks. Improve Recovery.</h1>
-            <h2 className="text-muted-foreground text-left">
-              Your personalised Surgery Readiness Score shows what could hold you back — and
-              importantly how to fix it before the operation.
-            </h2>
-            <p className="text-left text-muted-foreground mt-6 whitespace-pre-line">
-              🔍 <strong>Spot hidden risks</strong> before they become problems.
-              {"\n\n"}🛡️ <strong>Prevent complications</strong> before they happen.
-              {"\n\n"}⏱️ <strong>Recover faster</strong> with a body that’s ready.
-              {"\n\n"}🧠 <strong>Get a custom plan</strong> built by real doctors.
-              {"\n\n"}💸 <strong>Avoid setbacks</strong> that cost time, money, and health.
-            </p>
-          </div>
-        </div>
-      </section>
 {/* FAQ Section */}
 <section className="py-16 bg-gray-50">
   <div className="container mx-auto px-4">
     <div className="max-w-3xl mx-auto">
 
-      <Accordion type="single" collapsible className="space-y-4">
+      {/* 'defaultValue' makes the first item open initially */}
+      <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
         
         <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
           <AccordionTrigger className="hover:no-underline">
@@ -254,14 +235,30 @@ export function SurgeryReadinessUpsellPage({
             <p>Waiting is risky.</p>
             <p>The sooner you prepare, the better your recovery will be.</p>
             <p>Don’t wait until it’s too late. Take action now — while you can.</p>
-            <div className="mt-6 p-4 bg-gray-100 rounded-md text-center">
-              <h3 className="font-semibold text-lg mb-2">Ready to see how prepared you really are?</h3>
-              <p><strong>Take the Surgery Readiness Assessment now.</strong><br />Be the man who’s ready — not the one who regrets waiting.</p>
-            </div>
+
           </AccordionContent>
         </AccordionItem>
 
       </Accordion>
+    </div>
+  </div>
+</section>
+
+<section className="py-20 bg-white">
+  <div className="space-y-6 mt-10 text-center">
+    <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight">
+      Don’t Walk Into Surgery Blind. Know Your Risks.  <span className="text-primary">Fix Them Now.</span>
+    </h1>
+    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+    If you're over 60 and have health issues, don't leave your recovery to chance. This quick assessment could save you weeks of pain and problems.
+    </p>
+    <div className="flex flex-col sm:flex-row justify-center gap-4">
+      <Button
+        onClick={handleStartAssessment}
+        className="px-8 bg-black text-white hover:bg-black/90 transition-colors duration-200"
+      >
+        Reduce my surgical risks now (only £37)
+      </Button>
     </div>
   </div>
 </section>
