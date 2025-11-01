@@ -226,18 +226,25 @@ export function SurgeryReadinessUpsellPage({
 
       {/* CTA Section (single, properly closed) */}
       <section className="relative bg-white py-20">
-        <div className="max-w-5xl mx-auto px-[14px] text-center">
-          <div className="space-y-6 mt-10">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
-              Don’t Walk Into Surgery Blind.
-              <br />
-              <span className="text-primary">Know Your Risks. Fix Them Now.</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              If you're over 60 and have health issues, don't leave your recovery to chance.
-              This quick assessment could save you weeks of pain and problems.
-            </p>
-          </div>
+   <div className="max-w-3xl mx-auto px-4 text-left">
+  <div className="space-y-5 mt-8">
+    <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+      Don’t Walk Into Surgery Blind.
+      <br />
+      <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+    </h2>
+    <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+      If you're over 60 and have health issues, don't leave your recovery to chance.
+      This quick assessment could save you weeks of pain and problems.
+    </p>
+    <div className="pt-4">
+      <button className="bg-black hover:bg-neutral-800 text-white text-base md:text-lg font-medium py-3 px-6 rounded-full shadow-md transition-colors duration-200">
+        Reduce my surgical risks now
+        <span className="block text-sm opacity-80">(only £37)</span>
+      </button>
+    </div>
+  </div>
+</div>
 
           <div className="mt-10 flex justify-center">
             <Button
