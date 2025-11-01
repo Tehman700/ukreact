@@ -225,41 +225,37 @@ export function SurgeryReadinessUpsellPage({
       </section>
 
       {/* CTA Section (single, properly closed) */}
-      <section className="relative bg-white py-20">
-   <div className="max-w-3xl mx-auto px-4 text-left">
-  <div className="space-y-5 mt-8">
-    <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
-      Don’t Walk Into Surgery Blind.
-      <br />
-      <span className="text-primary">Know Your Risks. Fix Them Now.</span>
-    </h2>
-    <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-      If you're over 60 and have health issues, don't leave your recovery to chance.
-      This quick assessment could save you weeks of pain and problems.
-    </p>
-    <div className="pt-4">
-      <button className="bg-black hover:bg-neutral-800 text-white text-base md:text-lg font-medium py-3 px-6 rounded-full shadow-md transition-colors duration-200">
-        Reduce my surgical risks now
-        <span className="block text-sm opacity-80">(only £37)</span>
-      </button>
+<section className="relative bg-white py-20">
+  <div className="max-w-3xl mx-auto px-4 text-left">
+    <div className="space-y-5 mt-8">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+        Don’t Walk Into Surgery Blind.
+        <br />
+        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+      </h2>
+
+      <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+        If you're over 60 and have health issues, don't leave your recovery to chance.
+        This quick assessment could save you weeks of pain and problems.
+      </p>
+
+      <div className="pt-4">
+        <Button
+          onClick={handleStartAssessment}
+          size="lg"
+          className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
+        >
+          <span className="leading-tight">Reduce my surgical risks now</span>
+          <span className="block text-sm opacity-80">(only £37)</span>
+        </Button>
+      </div>
     </div>
   </div>
-</div>
 
-          <div className="mt-10 flex justify-center">
-            <Button
-              onClick={handleStartAssessment}
-              size="lg"
-              className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
-            >
-              Reduce my surgical risks now <br />
-              (only £37)
-            </Button>
-          </div>
+  {/* subtle hairline divider */}
+  <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+</section>
 
-          <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-        </div>
-      </section>
 
       {/* Logo carousel at the bottom */}
       <div className="container mx-auto px-4 pb-12">
