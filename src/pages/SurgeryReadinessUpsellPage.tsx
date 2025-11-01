@@ -225,7 +225,7 @@ export function SurgeryReadinessUpsellPage({
       </section>
 
 
-      {/* CTA Section */}
+  {/* CTA Section */}
 <section className="relative bg-white py-16">
   <div className="max-w-5xl mx-auto px-[14px] text-left">
     <div className="space-y-6 mt-10">
@@ -239,14 +239,28 @@ export function SurgeryReadinessUpsellPage({
         This quick assessment could save you weeks of pain and problems.
       </p>
 
-      <div className="pt-6">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
         <Button
+          type="button"
           onClick={handleStartAssessment}
+          aria-label="Start the Surgery Readiness Assessment (only £37)"
           size="lg"
-          className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300 flex flex-col items-center leading-tight"
+          className="
+            w-full md:w-[560px]
+            mx-auto lg:mx-0
+            h-12 md:h-14
+            rounded-2xl
+            bg-[#0A0A14] text-white
+            font-semibold tracking-wide
+            shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.35)]
+            hover:bg-[#0D0D1B] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_28px_rgba(0,0,0,0.4)]
+            active:translate-y-px
+            transition-all duration-200
+            flex items-center justify-center gap-2
+          "
         >
-          <span className="block">Reduce my surgical risks now</span>
-          <span className="block text-sm opacity-80 mt-1">(only £37)</span>
+          <span>Reduce my surgical risks now</span>
+          <span className="text-sm opacity-80">(only £37)</span>
         </Button>
       </div>
     </div>
@@ -255,6 +269,7 @@ export function SurgeryReadinessUpsellPage({
   {/* Subtle hairline divider */}
   <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 </section>
+
 
 
       {/* Logo carousel at the bottom */}
