@@ -224,29 +224,29 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 
-      {/* CTA Section (single, properly closed) */}
-<section className="relative bg-white py-20">
-  <div className="max-w-3xl mx-auto px-4 text-left">
-    <div className="space-y-5 mt-8">
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+     {/* CTA Section — Luxury Spacing Applied */}
+<section className="relative bg-white py-28">
+  <div className="max-w-3xl mx-auto px-6 text-left">
+    <div className="space-y-10 mt-16">
+      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
         Don’t Walk Into Surgery Blind.
         <br />
         <span className="text-primary">Know Your Risks. Fix Them Now.</span>
       </h2>
 
-      <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+      <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
         If you're over 60 and have health issues, don't leave your recovery to chance.
         This quick assessment could save you weeks of pain and problems.
       </p>
 
-      <div className="pt-4">
+      <div className="pt-10">
         <Button
           onClick={handleStartAssessment}
           size="lg"
-          className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300"
+          className="px-10 py-7 text-lg font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300 flex flex-col items-center leading-tight"
         >
-          <span className="leading-tight">Reduce my surgical risks now</span>
-          <span className="block text-sm opacity-80">(only £37)</span>
+          <span className="block">Reduce my surgical risks now</span>
+          <span className="block text-sm opacity-80 mt-2">(only £37)</span>
         </Button>
       </div>
     </div>
@@ -255,6 +255,7 @@ export function SurgeryReadinessUpsellPage({
   {/* subtle hairline divider */}
   <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 </section>
+
 
 
       {/* Logo carousel at the bottom */}
