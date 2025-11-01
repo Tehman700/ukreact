@@ -224,38 +224,37 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 
-     {/* CTA Section — Luxury Spacing Applied */}
-<section className="relative bg-white py-28">
-  <div className="max-w-3xl mx-auto px-6 text-left">
-    <div className="space-y-10 mt-16">
-      <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
-        Don’t Walk Into Surgery Blind.
-        <br />
+
+      {/* CTA Section */}
+<section className="relative bg-white py-16">
+  <div className="max-w-5xl mx-auto px-[14px] text-left">
+    <div className="space-y-6 mt-10">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+        Don’t Walk Into Surgery Blind. <br />
         <span className="text-primary">Know Your Risks. Fix Them Now.</span>
       </h2>
 
-      <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-        If you're over 60 and have health issues, don't leave your recovery to chance.
+      <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+        If you're over 60 and have health issues, don't leave your recovery to chance. 
         This quick assessment could save you weeks of pain and problems.
       </p>
 
-      <div className="pt-10">
+      <div className="pt-6">
         <Button
           onClick={handleStartAssessment}
           size="lg"
-          className="px-10 py-7 text-lg font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300 flex flex-col items-center leading-tight"
+          className="px-8 py-6 text-base font-medium bg-black text-white rounded-full shadow-sm hover:shadow-md hover:bg-black/90 transition-all duration-300 flex flex-col items-center leading-tight"
         >
           <span className="block">Reduce my surgical risks now</span>
-          <span className="block text-sm opacity-80 mt-2">(only £37)</span>
+          <span className="block text-sm opacity-80 mt-1">(only £37)</span>
         </Button>
       </div>
     </div>
   </div>
 
-  {/* subtle hairline divider */}
+  {/* Subtle hairline divider */}
   <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 </section>
-
 
 
       {/* Logo carousel at the bottom */}
