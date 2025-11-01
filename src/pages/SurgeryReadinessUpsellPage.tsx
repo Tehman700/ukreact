@@ -231,7 +231,7 @@ export function SurgeryReadinessUpsellPage({
     <div className="space-y-6 mt-10">
       <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
         Don’t Walk Into Surgery Blind. <br />
-        <span className="text-primary">Know Your Risks. Fix Them Now.</span>
+        <span className="text-primary">Know Your Risks. <br />Fix Them Now.</span>
       </h2>
 
       <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
