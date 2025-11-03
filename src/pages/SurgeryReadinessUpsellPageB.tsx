@@ -6,6 +6,8 @@ import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 import heroImage from "/assests/surgery-hero.webp";
+import SurgeryHeroVarient1 from "/assests/SurgeryHeroVarient1.webp";
+
 import {
   Accordion,
   AccordionContent,
@@ -66,7 +68,7 @@ export function SurgeryReadinessUpsellPageB({
             <div className="relative mt-10">
               <div className="relative aspect-[3/4] max-w-sm mx-auto">
                 <ImageWithFallback
-                  src={heroImage}
+                 src={SurgeryHeroVarient1}
                   alt="Surgery Readiness Score Report"
                   width={800}
                   height={1000}
