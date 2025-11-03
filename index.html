@@ -6,31 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-
-          <!-- ContentSquare - Only on specific pages -->
-    <script>
-      // Define which pages should load ContentSquare
-      const CS_ENABLED_PATHS = [
-        '/Health-Audit.html#surgery-readiness-assessment-learn-more',
-        '/surgery-readiness'
-      ];
-
-      // Check if current path matches
-      const shouldLoadCS = CS_ENABLED_PATHS.some(path =>
-        window.location.pathname + window.location.hash === path ||
-        window.location.pathname === path
-      );
-
-      if (shouldLoadCS) {
-        (function() {
-          var script = document.createElement('script');
-          script.src='https://t.contentsquare.net/uxa/219bcd9d9b144.js';
-          script.async = true;
-          document.head.appendChild(script);
-        })();
-      }
-    </script>
-
     <title>Luther Health</title>
     <link rel="icon" type="image/png" href="/assests/favi.png" />
 
