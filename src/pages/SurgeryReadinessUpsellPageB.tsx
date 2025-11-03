@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Assessment } from "../App";
@@ -14,6 +14,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../components/ui/accordion";
+
+// ---- Hotjar types (for TS friendliness)
+declare global {
+  interface Window {
+    hj?: (...args: any[]) => void;
+    _hjSettings?: { hjid: number; hjsv: number };
+  }
+}
+
+// ---- Replace this with your real Hotjar Site ID.
+// Optionally wire to an env var like import.meta.env.VITE_HOTJAR_ID
+const HOTJAR_SITE_ID = 0000000; // <-- TODO: put your Hotjar ID here
+const HOTJAR_SV = 6; // Hotjar snippet version
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -46,6 +59,55 @@ export function SurgeryReadinessUpsellPageB({
     onOpenBasket();
   };
 
+  // ✅ Inject Hotjar ONLY on this page (mount/unmount cleanly)
+  useEffect(() => {
+    if (!HOTJAR_SITE_ID) {
+      console.warn(
+        "[Hotjar] Missing HOTJAR_SITE_ID. Set HOTJAR_SITE_ID or VITE_HOTJAR_ID."
+      );
+      return;
+    }
+
+    // Inline bootstrap snippet so it only runs here
+    const bootstrap = document.createElement("script");
+    bootstrap.type = "text/javascript";
+    bootstrap.innerHTML = `(function(h,o,t,j,a,r){
+      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+      h._hjSettings={hjid:${HOTJAR_SITE_ID},hjsv:${HOTJAR_SV}};
+      a=o.getElementsByTagName('head')[0];
+      r=o.createElement('script');r.async=1;
+      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');`;
+    document.head.appendChild(bootstrap);
+
+    // Optional: mark this specific page view (handy when you only run Hotjar here)
+    const markView = () => {
+      try {
+        window.hj && window.hj("event", "surgery_readiness_upsell_B_view");
+      } catch (e) {}
+    };
+    const onLoadTimer = window.setTimeout(markView, 1500);
+
+    return () => {
+      // Clean up: remove our bootstrap script
+      document.head.removeChild(bootstrap);
+      window.clearTimeout(onLoadTimer);
+
+      // Remove the dynamically-added Hotjar loader script(s)
+      const loaders = document.querySelectorAll<HTMLScriptElement>(
+        'script[src^="https://static.hotjar.com/c/hotjar-"]'
+      );
+      loaders.forEach((s) => s.parentNode?.removeChild(s));
+
+      // Best-effort: clear globals so Hotjar doesn’t persist between routes
+      try {
+        delete window.hj;
+        delete window._hjSettings;
+      } catch {}
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section (Single Column) */}
@@ -57,7 +119,8 @@ export function SurgeryReadinessUpsellPageB({
               Reduce your surgical risks.<strong> Today</strong>.
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
+              Most surgical complications are predictable and preventable. We
+              show you exactly what to fix before it's too late.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -94,8 +157,9 @@ export function SurgeryReadinessUpsellPageB({
         <div className="max-w-5xl mx-auto px-[14px] text-left">
           <div className="space-y-6 mt-10">
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-              If you're over 60 and have health issues, don't leave your recovery to chance.
-              This quick assessment could save you weeks of pain and problems.
+              If you're over 60 and have health issues, don't leave your
+              recovery to chance. This quick assessment could save you weeks of
+              pain and problems.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
