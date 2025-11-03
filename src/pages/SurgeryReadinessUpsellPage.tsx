@@ -43,7 +43,7 @@ export function SurgeryReadinessUpsellPage({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b144.js";
+    const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b14.js";
     const CS_ATTR = "data-cs";
     const CS_ATTR_VALUE = "surgery-readiness";
 
