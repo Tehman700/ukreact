@@ -6,7 +6,8 @@ import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 import heroImage from "/assests/surgery-hero.webp";
-import SurgeryHeroVarient1 from "/assests/SurgeryHeroVarient1.webp";
+import SurgeryHeroVarient1 from "../assets/SurgeryHeroVarient1.webp";
+
 
 import {
   Accordion,
