@@ -39,44 +39,57 @@ export function SurgeryReadinessUpsellPage({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
-  // ContentSquare script injection - only on this page
+  // ✅ Inject Contentsquare script only on this page + avoid duplicates
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const CS_SCRIPT_ID = "contentsquare-surgery-readiness";
     const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b144.js";
+    const CS_ATTR = "data-cs";
+    const CS_ATTR_VALUE = "surgery-readiness";
 
-    // Check if script already exists
-    if (document.getElementById(CS_SCRIPT_ID)) {
-      console.log("✅ ContentSquare already loaded");
-      return;
-    }
+    const matchesTarget = () =>
+      window.location.pathname.endsWith("/Health-Audit.html") &&
+      window.location.hash === "#surgery-readiness-assessment-learn-more";
 
-    // Create and inject script
-    const script = document.createElement("script");
-    script.id = CS_SCRIPT_ID;
-    script.src = CS_SRC;
-    script.async = true;
+    const inject = () => {
+      // Only inject on our exact target URL and if it's not already present
+      if (!matchesTarget()) return;
+      if (document.querySelector(`script[${CS_ATTR}="${CS_ATTR_VALUE}"]`)) return;
 
-    script.onload = () => {
-      console.log("✅ ContentSquare loaded successfully on Surgery Readiness page");
+      const script = document.createElement("script");
+      script.src = CS_SRC;
+      script.async = true;
+      script.setAttribute(CS_ATTR, CS_ATTR_VALUE);
+      script.onload = () =>
+        console.log("✅ Contentsquare loaded on Surgery Readiness Upsell Page");
+      document.head.appendChild(script);
     };
 
-    script.onerror = () => {
-      console.error("❌ Failed to load ContentSquare script");
-    };
-
-    document.head.appendChild(script);
-
-    // Cleanup: Remove script when component unmounts (user navigates away)
-    return () => {
-      const existingScript = document.getElementById(CS_SCRIPT_ID);
-      if (existingScript) {
-        console.log("🧹 Removing ContentSquare script");
-        existingScript.remove();
+    const remove = () => {
+      const s = document.querySelector<HTMLScriptElement>(
+        `script[${CS_ATTR}="${CS_ATTR_VALUE}"]`
+      );
+      if (s) {
+        console.log("🧹 Removing Contentsquare script");
+        s.remove();
       }
     };
-  }, []); // Empty dependency array = runs once on mount
+
+    // Initial run on mount
+    inject();
+
+    // Handle hash changes in case routing updates only the anchor
+    const onHashChange = () => {
+      if (matchesTarget()) inject();
+      else remove();
+    };
+    window.addEventListener("hashchange", onHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      remove();
+    };
+  }, []);
 
   const handleStartAssessment = () => {
     onAddToBasket(surgeryReadinessAssessment);
@@ -142,10 +155,12 @@ export function SurgeryReadinessUpsellPage({
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
+              {/* FAQ Items... (unchanged) */}
+              {/* Keep your existing AccordionItems here */}
               <AccordionItem value="item-1">
                 <AccordionTrigger>What is the Surgery Readiness Score?</AccordionTrigger>
                 <AccordionContent>
-                  It's a structured health assessment designed to identify and reduce modifiable risks before surgery.
+                  It’s a structured health assessment designed to identify and reduce modifiable risks before surgery.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
@@ -167,10 +182,10 @@ export function SurgeryReadinessUpsellPage({
 
       {/* CTA Section */}
       <section className="relative bg-white py-16">
-        <div className="max-w-5xl mx-auto px-[14px] text-left">
+        <div className="max-w-5xl mx-auto px={[14] + 'px'} text-left">
           <div className="space-y-6 mt-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
-              Don't Walk Into Surgery Blind. <br />
+              Don’t Walk Into Surgery Blind. <br />
               <span className="text-primary">Know Your Risks. <br />Fix Them Now.</span>
             </h2>
 
