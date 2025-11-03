@@ -67,12 +67,17 @@ export function SurgeryReadinessUpsellPage({
               <div className="relative aspect-[3/4] max-w-sm mx-auto">
                 <ImageWithFallback
                   src={heroImage}
-                  alt="Surgery Readiness Score Report"
+                  alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
                   width={800}
                   height={1000}
-                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 500px"
+                  /* Help the browser choose correctly early */
+                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
+                  /* LCP performance hints */
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  /* Keep reasonable quality — main win is right-sizing the source file */
                   quality={85}
-                  priority
                   className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
                 />
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
@@ -104,7 +109,6 @@ export function SurgeryReadinessUpsellPage({
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            {/* 'defaultValue' makes the first item open initially */}
             <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
               <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border-0 shadow-sm">
                 <AccordionTrigger className="hover:no-underline">
@@ -224,39 +228,36 @@ export function SurgeryReadinessUpsellPage({
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="relative bg-white py-16">
+        <div className="max-w-5xl mx-auto px-[14px] text-left">
+          <div className="space-y-6 mt-10">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+              Don’t Walk Into Surgery Blind. <br />
+              <span className="text-primary">Know Your Risks. <br />Fix Them Now.</span>
+            </h2>
 
-  {/* CTA Section */}
-<section className="relative bg-white py-16">
-  <div className="max-w-5xl mx-auto px-[14px] text-left">
-    <div className="space-y-6 mt-10">
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
-        Don’t Walk Into Surgery Blind. <br />
-        <span className="text-primary">Know Your Risks. <br />Fix Them Now.</span>
-      </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+              If you're over 60 and have health issues, don't leave your recovery to chance.
+              This quick assessment could save you weeks of pain and problems.
+            </p>
 
-      <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-        If you're over 60 and have health issues, don't leave your recovery to chance. 
-        This quick assessment could save you weeks of pain and problems.
-      </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleStartAssessment}
+                aria-label="Start Surgery Readiness Score assessment"
+              >
+                Reduce my surgical risk now (only £37)
+              </Button>
+            </div>
+          </div>
+        </div>
 
-     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-  <Button 
-    size="lg" 
-    className="w-full sm:w-auto"
-    onClick={handleStartAssessment}
-  >
-    Reduce my surgical risk now (only £37)
-  </Button>
-</div>
-
-    </div>
-  </div>
-
-  {/* Subtle hairline divider */}
-  <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-</section>
-
-
+        {/* Subtle hairline divider */}
+        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      </section>
 
       {/* Logo carousel at the bottom */}
       <div className="container mx-auto px-4 pb-12">
