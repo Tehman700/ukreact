@@ -39,20 +39,55 @@ export function SurgeryReadinessUpsellPage({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
-
-  // ✅ Inject Contentsquare script only on this page
+  // ✅ Inject Contentsquare script only on this page + avoid duplicates
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+    if (typeof window === "undefined") return;
 
-    script.onload = () => console.log("✅ Contentsquare loaded on Surgery Readiness Upsell Page");
+    const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
+    const CS_ATTR = "data-cs";
+    const CS_ATTR_VALUE = "surgery-readiness";
+
+    const matchesTarget = () =>
+      window.location.pathname.endsWith("/Health-Audit.html") &&
+      window.location.hash === "#surgery-readiness-assessment-learn-more";
+
+    const inject = () => {
+      // Only inject on our exact target URL and if it's not already present
+      if (!matchesTarget()) return;
+      if (document.querySelector(`script[${CS_ATTR}="${CS_ATTR_VALUE}"]`)) return;
+
+      const script = document.createElement("script");
+      script.src = CS_SRC;
+      script.async = true;
+      script.setAttribute(CS_ATTR, CS_ATTR_VALUE);
+      script.onload = () =>
+        console.log("✅ Contentsquare loaded on Surgery Readiness Upsell Page");
+      document.head.appendChild(script);
+    };
+
+    const remove = () => {
+      const s = document.querySelector<HTMLScriptElement>(
+        `script[${CS_ATTR}="${CS_ATTR_VALUE}"]`
+      );
+      if (s) {
+        console.log("🧹 Removing Contentsquare script");
+        s.remove();
+      }
+    };
+
+    // Initial run on mount
+    inject();
+
+    // Handle hash changes in case routing updates only the anchor
+    const onHashChange = () => {
+      if (matchesTarget()) inject();
+      else remove();
+    };
+    window.addEventListener("hashchange", onHashChange);
 
     return () => {
-      console.log("🧹 Removing Contentsquare script");
-      document.head.removeChild(script);
+      window.removeEventListener("hashchange", onHashChange);
+      remove();
     };
   }, []);
 
@@ -122,6 +157,24 @@ export function SurgeryReadinessUpsellPage({
             <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
               {/* FAQ Items... (unchanged) */}
               {/* Keep your existing AccordionItems here */}
+              <AccordionItem value="item-1">
+                <AccordionTrigger>What is the Surgery Readiness Score?</AccordionTrigger>
+                <AccordionContent>
+                  It’s a structured health assessment designed to identify and reduce modifiable risks before surgery.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Who is this for?</AccordionTrigger>
+                <AccordionContent>
+                  Adults preparing for elective surgery—especially those over 60 or with existing health conditions.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>How long does it take?</AccordionTrigger>
+                <AccordionContent>
+                  The assessment itself takes about 10–15 minutes; your personalized guidance is immediate.
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </div>
         </div>
@@ -129,7 +182,7 @@ export function SurgeryReadinessUpsellPage({
 
       {/* CTA Section */}
       <section className="relative bg-white py-16">
-        <div className="max-w-5xl mx-auto px-[14px] text-left">
+        <div className="max-w-5xl mx-auto px={[14] + 'px'} text-left">
           <div className="space-y-6 mt-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
               Don’t Walk Into Surgery Blind. <br />
@@ -138,4 +191,28 @@ export function SurgeryReadinessUpsellPage({
 
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
               If you're over 60 and have health issues, don't leave your recovery to chance.
-              T
+              This quick assessment could save you weeks of pain and problems.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleStartAssessment}
+                aria-label="Start Surgery Readiness Score assessment"
+              >
+                Reduce my surgical risk now (only £37)
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      </section>
+
+      {/* Logo carousel */}
+      <div className="container mx-auto px-4 pb-12">
+        <LogoCarousel />
+      </div>
+    </div>
+  );
+}
