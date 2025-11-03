@@ -44,7 +44,7 @@ export function SurgeryReadinessUpsellPageD({
     if (typeof window === "undefined") return;
 
     const CS_SCRIPT_ID = "contentsquare-surgery-readiness-d";
-    const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b144.js";
+    const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
     // Check if script already exists
     if (document.getElementById(CS_SCRIPT_ID)) {
