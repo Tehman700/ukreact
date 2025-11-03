@@ -35,7 +35,7 @@ interface SurgeryReadinessUpsellPageProps {
   onOpenBasket: () => void;
 }
 
-export function SurgeryReadinessUpsellPage({
+export function SurgeryReadinessUpsellPageB({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
@@ -43,7 +43,7 @@ export function SurgeryReadinessUpsellPage({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const CS_SCRIPT_ID = "contentsquare-surgery-readiness";
+    const CS_SCRIPT_ID = "contentsquare-surgery-readiness-b";
     const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b144.js";
 
     // Check if script already exists

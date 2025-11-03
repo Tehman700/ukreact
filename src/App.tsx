@@ -25,6 +25,7 @@ import { CQCPage } from './pages/CQC';
 
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
+import { SurgeryReadinessUpsellPageB } from './pages/SurgeryReadinessUpsellPageB';
 import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
 import { SurgeryReadinessInformationPage } from './pages/SurgeryReadinessInformationPage';
 import { SurgeryReadinessResultsPage } from './pages/SurgeryReadinessResultsPage';
@@ -726,6 +727,12 @@ useEffect(() => {
           return <CQCPage />;
       case 'surgery-readiness-assessment-learn-more':
           return <SurgeryReadinessUpsellPage
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
+            case 'surgery-readiness-assessment-learn-more-b':
+          return <SurgeryReadinessUpsellPageB
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
