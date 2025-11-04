@@ -1107,6 +1107,10 @@ useEffect(() => {
     const quizPages = [
       'surgery-readiness-assessment-learn-more',
       'surgery-readiness-assessment-learn-more-b',
+      'surgery-readiness-assessment-learn-more-c',
+    'surgery-readiness-assessment-learn-more-d',
+    'surgery-readiness-assessment-learn-more-e',
+
       'surgery-readiness-assessment-questions',
       'surgery-readiness-assessment-information',
       'biological-age-calculator-learn-more',
