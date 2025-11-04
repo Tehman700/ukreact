@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Assessment } from "../App";
-import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
+import { Shield, CheckCircle2, TrendingUp, Heart, Activity, X, Star } from "lucide-react";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-import heroImage from "/assests/surgery-hero.webp";
+import heroImage from "../assets/SurgeryHeroVarient1.webp";
 import {
   Accordion,
   AccordionContent,
@@ -35,7 +35,7 @@ interface SurgeryReadinessUpsellPageProps {
   onOpenBasket: () => void;
 }
 
-export function SurgeryReadinessUpsellPageC({
+export function SurgeryReadinessUpsellPageB({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
@@ -43,7 +43,7 @@ export function SurgeryReadinessUpsellPageC({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const CS_SCRIPT_ID = "contentsquare-surgery-readiness-c";
+    const CS_SCRIPT_ID = "contentsquare-surgery-readiness-b";
     const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
     // Check if script already exists
@@ -68,7 +68,7 @@ export function SurgeryReadinessUpsellPageC({
 
     document.head.appendChild(script);
 
-    // Cleanup: Remove script when component unmounts (user navigates away)
+    // Cleanup on unmount
     return () => {
       const existingScript = document.getElementById(CS_SCRIPT_ID);
       if (existingScript) {
@@ -76,7 +76,7 @@ export function SurgeryReadinessUpsellPageC({
         existingScript.remove();
       }
     };
-  }, []); // Empty dependency array = runs once on mount
+  }, []);
 
   const handleStartAssessment = () => {
     onAddToBasket(surgeryReadinessAssessment);
@@ -90,114 +90,20 @@ export function SurgeryReadinessUpsellPageC({
         <div className="max-w-5xl mx-auto px-[14px] py-8">
           <div className="space-y-6 mt-10 text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Reduce your surgical risks.<strong> Today</strong>.
+              The £37 Pre-Op Check That Could Save You Weeks of Recovery
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
+              If you’ve got a surgery date, your biggest risk isn’t the operation.
+              It’s showing up under-prepared.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center"></div>
-
-            <div className="relative mt-10">
-              <div className="relative aspect-[3/4] max-w-sm mx-auto">
-                <ImageWithFallback
-                  src={heroImage}
-                  alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
-                  width={800}
-                  height={1000}
-                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  quality={85}
-                  className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-                />
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-4 bg-white">
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>What is the Surgery Readiness Score?</AccordionTrigger>
-                <AccordionContent>
-                  It's a structured health assessment designed to identify and reduce modifiable risks before surgery.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Who is this for?</AccordionTrigger>
-                <AccordionContent>
-                  Adults preparing for elective surgery—especially those over 60 or with existing health conditions.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>How long does it take?</AccordionTrigger>
-                <AccordionContent>
-                  The assessment itself takes about 10–15 minutes; your personalized guidance is immediate.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative bg-white py-16">
-        <div className="max-w-5xl mx-auto px-[14px] text-left">
-          <div className="space-y-6 mt-10">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
-              Don't Walk Into Surgery Blind. <br />
-              <span className="text-primary">Know Your Risks. <br />Fix Them Now.</span>
-            </h2>
-
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-              If you're over 60 and have health issues, don't leave your recovery to chance.
-              This quick assessment could save you weeks of pain and problems.
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+              When “Martin,” 59, got his hip replacement date, the hospital sent a
+              leaflet and a checklist. Helpful—until he realised nobody was looking at
+              his actual risks: blood pressure creeping up, stubborn belly fat, poor
+              sleep, and a medicine cabinet that looked like a mini-pharmacy. He felt
+              like he was rolling the dice.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto"
-                onClick={handleStartAssessment}
-                aria-label="Start Surgery Readiness Score assessment"
-              >
-                Reduce my surgical risk now (only £37)
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-      </section>
-
-      {/* Logo carousel */}
-      <div className="container mx-auto px-4 pb-12">
-        <LogoCarousel />
-      </div>
-    </div>
-  );
-}
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+              That’s the gap <strong>Surgical Readiness Assessment</strong> was built
