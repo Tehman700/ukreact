@@ -11,9 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../components/ui/accordion";
-
-// Use string path for /public/assests
-const heroImage = "/assests/SurgeryHeroVarient1.webp";
+import heroImage from "../assets/SurgeryHeroVarient1.webp";
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -87,7 +85,7 @@ export function SurgeryReadinessUpsellPageC({
       {/* Hero Section (Single Column) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="max-w-5xl mx-auto px-[14px] py-8">
-          <div className="space-y-6 mt-10 text-left">
+          <div className="space-y-8 mt-10 text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
               The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
             </h1>
@@ -154,7 +152,7 @@ export function SurgeryReadinessUpsellPageC({
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            What Most Men Miss Before Surgery
+            What most men miss before surgery
           </h2>
 
           <p className="mt-4 text-muted-foreground max-w-3xl">
@@ -205,10 +203,10 @@ export function SurgeryReadinessUpsellPageC({
       <li className="text-base">
         <span className="font-semibold">Priority Action Plan (2–3 moves)</span> — the smallest set of changes that move the score the most.
       </li>
-    </ul> {/* ✅ close the UL here */}
+    </ul> 
 
-    {/* ✅ card moved outside the UL */}
-    <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
+   
+    <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-6">
       <div className="flex gap-1 mb-3">
         {[...Array(5)].map((_, i) => (
           <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -222,10 +220,6 @@ export function SurgeryReadinessUpsellPageC({
         <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
       </div>
     </div>
-
-    <blockquote className="mt-6 border-l-4 border-primary pl-4 italic text-muted-foreground max-w-3xl">
-      “It turned noise into a plan. I knew exactly which two things would move my score the most.” — Composite client feedback
-    </blockquote>
   </div>
 </section>
 
@@ -238,7 +232,7 @@ export function SurgeryReadinessUpsellPageC({
           </h2>
         <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
              (Without turning your life upside down)
-            </p>
+            </p><p></p>
           <p className="mt-4 text-muted-foreground max-w-3xl">
             Most pre-op advice is generic. We focus on <strong>high-yield inputs</strong>: the 20% of actions that drive 80% of your readiness.
             No complicated meal plans. No two-hour gym sessions. Just clear, measurable changes that compound quickly over a few weeks.
@@ -280,6 +274,7 @@ export function SurgeryReadinessUpsellPageC({
         </p>
       </li>
     </ul>
+    <p></p>
 
     <p className="mt-10 text-muted-foreground max-w-3xl">
       If you’ve got a date, the best time to start was yesterday. The second best is today.
@@ -326,15 +321,15 @@ export function SurgeryReadinessUpsellPageC({
              (And what it’s worth)
             </p>
 
-          <ul className="mt-6 space-y-3 list-disc pl-6">
-            <li className="text-base">
-              <span className="font-semibold">Surgical Readiness Assessment</span> — £37 one-time.
-            </li>
-            <li className="text-base">
-              Designed to help you avoid the costly stuff: extra nights in hospital, delayed recovery,
-              time off work, anxiety from not knowing.
-            </li>
-          </ul>
+<ul className="mt-6 space-y-3 list-disc pl-6">
+  <li className="text-base">
+    <span className="font-semibold">Surgical Readiness Assessment</span> — £37 one-time.
+  </li>
+</ul>
+<p className="mt-3 text-base">
+  Designed to help you avoid the costly stuff: extra nights in hospital, delayed recovery,
+  time off work, anxiety from not knowing.
+</p>
 
           <p className="mt-6 text-base max-w-3xl">
             <span className="font-semibold">Simple math:</span> if this helps you shave even <strong>2–3 days</strong> off recovery or
