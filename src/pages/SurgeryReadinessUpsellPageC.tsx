@@ -5,7 +5,7 @@ import { Assessment } from "../App";
 import { LogoCarousel } from "../components/LogoCarousel";
 import { Shield, CheckCircle2, TrendingUp, Heart, Activity, X, Star } from "lucide-react";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-import heroImage from "../assets/SurgeryHeroVarient1.webp";
+import heroImage from "/assests/SurgeryHeroVarient1.webp";
 import {
   Accordion,
   AccordionContent,
@@ -46,13 +46,11 @@ export function SurgeryReadinessUpsellPageB({
     const CS_SCRIPT_ID = "contentsquare-surgery-readiness-b";
     const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
-    // Check if script already exists
     if (document.getElementById(CS_SCRIPT_ID)) {
       console.log("✅ ContentSquare already loaded");
       return;
     }
 
-    // Create and inject script
     const script = document.createElement("script");
     script.id = CS_SCRIPT_ID;
     script.src = CS_SRC;
@@ -68,7 +66,6 @@ export function SurgeryReadinessUpsellPageB({
 
     document.head.appendChild(script);
 
-    // Cleanup on unmount
     return () => {
       const existingScript = document.getElementById(CS_SCRIPT_ID);
       if (existingScript) {
@@ -112,8 +109,6 @@ export function SurgeryReadinessUpsellPageB({
               difference between hoping you’re ready and knowing you are.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center"></div>
-
             <div className="relative mt-10">
               <div className="relative aspect-[3/4] max-w-sm mx-auto">
                 <ImageWithFallback
@@ -135,7 +130,7 @@ export function SurgeryReadinessUpsellPageB({
         </div>
       </section>
 
-      {/* Trust Badges */}
+     {/* Trust Badges */}
       <section className="py-4 bg-white">
         <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
