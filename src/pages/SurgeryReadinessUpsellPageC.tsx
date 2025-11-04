@@ -89,7 +89,7 @@ export function SurgeryReadinessUpsellPageC({
         <div className="max-w-5xl mx-auto px-[14px] py-8">
           <div className="space-y-6 mt-10 text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              The £37 Pre-Op Check That Could Save You Weeks of Recovery
+              The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               If you’ve got a surgery date, your biggest risk isn’t the operation.
@@ -150,7 +150,7 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      {/* What Most Men Miss Before Surgery */}
+      {/* What most men miss before surgery */}
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
@@ -183,117 +183,116 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      {/* The 10-Minute Solution */}
-      <section className="bg-gray-50">
-        <div className="max-w-5xl mx-auto px-[14px] py-12">
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            The 10-Minute Solution
-          </h2>
+     <section className="bg-gray-50">
+  <div className="max-w-5xl mx-auto px-[14px] py-12">
+    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+      The 10-Minute Solution
+    </h2>
 
-          <p className="mt-4 text-muted-foreground max-w-3xl">
-            <strong>Surgical Readiness Assessment</strong> distills your pre-op picture into a clear plan you can act on today.
-          </p>
+    <p className="mt-4 text-muted-foreground max-w-3xl">
+      Surgical Readiness Assessment distills your pre-op picture into a clear plan you can act on today.
+    </p>
 
-          <h3 className="mt-6 font-semibold text-base">What you get immediately:</h3>
+    <h3 className="mt-6 font-semibold text-base">What you get immediately:</h3>
 
-          <ul className="mt-4 space-y-3 list-disc pl-6">
-            <li className="text-base">
-              <span className="font-semibold">Readiness Score</span> — a single number that shows where you stand now.
-            </li>
-            <li className="text-base">
-              <span className="font-semibold">Risk Breakdown</span> — anaesthesia tolerance, cardiometabolic flags, inflammation markers, medication burden, mobility/strength.
-            </li>
-            <li className="text-base">
-              <span className="font-semibold">Priority Action Plan (2–3 moves)</span> — the smallest set of changes that move the score the most.
-            </li>
-            <li className="text-base">
-              <span className="font-semibold">Clear Next Step</span> — keep it DIY, or upgrade to our <strong>21-Day Prehab Challenge</strong> for accelerated results. If you want white-glove support, step into our <strong>Surgery Conditioning Protocol</strong> for full pre- and post-op optimisation.
-            </li>
-          </ul>
+    <ul className="mt-4 space-y-3 list-disc pl-6">
+      <li className="text-base">
+        <span className="font-semibold">Readiness Score</span> — a single number that shows where you stand now.
+      </li>
+      <li className="text-base">
+        <span className="font-semibold">Risk Breakdown</span> — anaesthesia tolerance, cardiometabolic flags, inflammation markers, medication burden, mobility/strength.
+      </li>
+      <li className="text-base">
+        <span className="font-semibold">Priority Action Plan (2–3 moves)</span> — the smallest set of changes that move the score the most.
+      </li>
+    </ul> {/* ✅ close the UL here */}
 
-          <p className="mt-6 text-muted-foreground max-w-3xl">
-            <strong>Price:</strong> £37. Designed for UK men who want a smoother surgery and faster return to normal life.
-          </p>
+    {/* ✅ card moved outside the UL */}
+    <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
+      <div className="flex gap-1 mb-3">
+        {[...Array(5)].map((_, i) => (
+          <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+        ))}
+      </div>
+      <p className="text-muted-foreground mb-4">
+        "I'm 67 and was terrified about my hip replacement. This assessment showed me I had low protein and poor fitness—things my surgeon never mentioned. I spent 6 weeks preparing properly. Recovery was faster than expected and I was walking without a stick in 3 weeks."
+      </p>
+      <div className="space-y-1">
+        <p className="font-medium">Michael R.</p>
+        <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
+      </div>
+    </div>
 
-          <blockquote className="mt-6 border-l-4 border-primary pl-4 italic text-muted-foreground max-w-3xl">
-            “It turned noise into a plan. I knew exactly which two things would move my score the most.” — Composite client feedback
-          </blockquote>
-        </div>
-      </section>
+    <blockquote className="mt-6 border-l-4 border-primary pl-4 italic text-muted-foreground max-w-3xl">
+      “It turned noise into a plan. I knew exactly which two things would move my score the most.” — Composite client feedback
+    </blockquote>
+  </div>
+</section>
+
 
       {/* Why This Works (Without Turning Your Life Upside Down) */}
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Why This Works <span className="text-muted-foreground">(Without Turning Your Life Upside Down)</span>
+            Why this works 
           </h2>
-
+        <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
+             (Without turning your life upside down)
+            </p>
           <p className="mt-4 text-muted-foreground max-w-3xl">
             Most pre-op advice is generic. We focus on <strong>high-yield inputs</strong>: the 20% of actions that drive 80% of your readiness.
             No complicated meal plans. No two-hour gym sessions. Just clear, measurable changes that compound quickly over a few weeks.
           </p>
 
-          <h3 className="mt-6 font-semibold text-base">Examples of high-leverage actions:</h3>
-
-          <ul className="mt-4 space-y-3 list-disc pl-6">
-            <li className="text-base">
-              Tighten evening routine for deeper sleep <span className="text-muted-foreground">(improves recovery capacity)</span>
-            </li>
-            <li className="text-base">
-              Adjust timing of specific medications <span className="text-muted-foreground">(reduces interaction risk)</span>
-            </li>
-            <li className="text-base">
-              Short, progressive strength &amp; breathing work <span className="text-muted-foreground">(improves mobility and anaesthesia tolerance)</span>
-            </li>
-          </ul>
-
+          
           <p className="mt-6 text-muted-foreground max-w-3xl">
             You’ll know exactly <em>what</em> to do, <em>why</em> it matters, and <em>how</em> it affects your score.
           </p>
         </div>
       </section>
 
-      {/* Real-World Use Cases */}
-      <section className="bg-gray-50">
-        <div className="max-w-5xl mx-auto px-[14px] py-12">
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Real-World Use Cases
-          </h2>
+    {/* Real-World Use Cases */}
+<section className="bg-gray-50">
+  <div className="max-w-5xl mx-auto px-[14px] py-12">
+    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+      Real-world use cases
+    </h2>
 
-          <ul className="mt-6 space-y-5">
-            <li className="flex items-start gap-3">
-              <Activity className="w-5 h-5 text-primary mt-1" />
-              <p className="text-base">
-                <span className="font-semibold">Hip/knee replacements</span> — show up stronger, walk sooner.
-              </p>
-            </li>
+    <ul className="mt-6 space-y-8">
+      <li className="flex items-start gap-3">
+        <Activity className="w-5 h-5 text-primary mt-1" />
+        <p className="text-base">
+          <span className="font-semibold">Hip/knee replacements</span> — show up stronger, walk sooner.
+        </p>
+      </li>
 
-            <li className="flex items-start gap-3">
-              <TrendingUp className="w-5 h-5 text-primary mt-1" />
-              <p className="text-base">
-                <span className="font-semibold">Hernia &amp; general surgery</span> — reduce strain, accelerate wound healing basics.
-              </p>
-            </li>
+      <li className="flex items-start gap-3">
+        <TrendingUp className="w-5 h-5 text-primary mt-1" />
+        <p className="text-base">
+          <span className="font-semibold">Hernia &amp; general surgery</span> — reduce strain, accelerate wound healing basics.
+        </p>
+      </li>
 
-            <li className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-primary mt-1" />
-              <p className="text-base">
-                <span className="font-semibold">Urology procedures</span> — manage blood pressure, hydration, and sleep for smoother recovery.
-              </p>
-            </li>
-          </ul>
+      <li className="flex items-start gap-3">
+        <Heart className="w-5 h-5 text-primary mt-1" />
+        <p className="text-base">
+          <span className="font-semibold">Urology procedures</span> — manage blood pressure, hydration, and sleep for smoother recovery.
+        </p>
+      </li>
+    </ul>
 
-          <p className="mt-8 text-muted-foreground max-w-3xl">
-            If you’ve got a date, the best time to start was yesterday. The second best is today.
-          </p>
-        </div>
-      </section>
+    <p className="mt-10 text-muted-foreground max-w-3xl">
+      If you’ve got a date, the best time to start was yesterday. The second best is today.
+    </p>
+  </div>
+</section>
+
 
       {/* What Happens After You Buy */}
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            What Happens After You Buy
+            What happens after you buy
           </h2>
 
           <ol className="mt-6 space-y-4 list-decimal pl-6">
@@ -306,19 +305,7 @@ export function SurgeryReadinessUpsellPageC({
             <li className="text-base">
               <span className="font-semibold">Implement your 2–3 Priority Moves.</span> We include simple how-to guides.
             </li>
-            <li className="text-base">
-              <span className="font-semibold">Optionally upgrade</span> at checkout:
-              <ul className="mt-3 space-y-2 list-disc pl-6">
-                <li>
-                  <span className="font-semibold">21-Day Prehab Challenge</span> — compress months of prep into three focused weeks.
-                  <strong> £300</strong>, completion-guarantee.
-                </li>
-                <li>
-                  <span className="font-semibold">Surgery Conditioning Protocol</span> — concierge-level pre- and post-op optimisation with our team.
-                </li>
-              </ul>
-            </li>
-          </ol>
+            </ol>
 
           <div className="mt-8 flex items-center gap-3 text-primary">
             <CheckCircle2 className="w-5 h-5" />
@@ -329,12 +316,15 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      {/* What It Costs (And What It’s Worth) */}
+      {/* What it costs (And What It’s Worth) */}
       <section className="bg-gray-50">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            What It Costs <span className="text-muted-foreground">(And What It’s Worth)</span>
+            What it costs
           </h2>
+                  <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
+             (And what it’s worth)
+            </p>
 
           <ul className="mt-6 space-y-3 list-disc pl-6">
             <li className="text-base">
@@ -353,7 +343,7 @@ export function SurgeryReadinessUpsellPageC({
 
           <div className="mt-8 flex items-center gap-3 text-primary">
             <Star className="w-5 h-5" />
-            <p className="font-medium">Clinically designed. No subscriptions. No upsells.</p>
+            <p className="font-medium">Clinically designed. Bespoke to you.</p>
           </div>
         </div>
       </section>
@@ -362,7 +352,7 @@ export function SurgeryReadinessUpsellPageC({
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Who This Is For
+            Who this is for
           </h2>
 
           <ul className="mt-6 space-y-3 list-disc pl-6">
@@ -395,9 +385,9 @@ export function SurgeryReadinessUpsellPageC({
                 <Star key={i} className="w-5 h-5 fill-primary text-primary" />
               ))}
             </div>
-            <h2 className="text-3xl md:text-4xl tracking-tight mb-2">
+            <h3 className="text-3xl md:text-4xl tracking-tight mb-2">
               What Our Patients Say
-            </h2>
+            </h3>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -445,56 +435,11 @@ export function SurgeryReadinessUpsellPageC({
                 <p className="text-sm text-muted-foreground">Prostate Surgery Patient</p>
               </div>
             </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="flex gap-1 mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="text-muted-foreground mb-4">
-                "I'm a surgeon myself and I took this before my own knee replacement. It's exactly the kind of systematic pre-operative assessment we should all be doing but rarely have time for. Invaluable for patients who want to optimize their outcomes."
-              </p>
-              <div className="space-y-1">
-                <p className="font-medium">Dr. Andrew M.</p>
-                <p className="text-sm text-muted-foreground">Orthopedic Surgeon & Patient</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Image Section (uses SurgeryHeroVarient1.webp 3x) */}
-      <section className="relative bg-white py-16">
-        <div className="max-w-5xl mx-auto px-[14px] text-left">
-          <div className="space-y-6 mt-10">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
-              See What’s Possible <br />
-              <span className="text-primary">When You Prepare Properly.</span>
-            </h2>
-
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-              A picture speaks louder than words — here’s a glimpse of the difference
-              proper preparation can make before surgery.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-              <div className="overflow-hidden rounded-2xl shadow-md">
-                <ImageWithFallback
-                  src={heroImage}
-                  alt="Preparation example"
-                  width={1024}
-                  height={768}
-                  loading="lazy"
-                  decoding="async"
-                  className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-      </section>
+     
 
       {/* FAQ Section */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
