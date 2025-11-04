@@ -6,6 +6,9 @@ import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 import heroImage from "/assets/surgery-hero.webp";
+import img1 from "../assets/01c579a5598743915ff434681ec8bb1f394d7816.png";
+import img2 from "../assets/1d3650155b960261d923b43759d5822627f2ff7f.png";
+import img3 from "../assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png";
 import SimpleSwipeCarousel from "../components/SimpleSwipeCarousel";
 import {
   Accordion,
@@ -16,11 +19,7 @@ import {
 
 // --- NEW FUNCTION ADDED HERE ---
 export function GallerySection() {
-  const images = [
-    "/assets/01c579a5598743915ff434681ec8bb1f394d7816.png",
-    "/assets/1d3650155b960261d923b43759d5822627f2ff7f.png",
-    "/assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png",
-  ];
+  const images = [img1, img2, img3]; // ✅ use imported URLs
 
   return (
     <section className="w-full py-8 md:py-12 bg-gray-50">
