@@ -5,51 +5,13 @@ import { Assessment } from "../App";
 import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-
-// ✅ Use module imports from src/assets (not /assets strings)
-import heroImage from "../assets/surgery-hero.webp";
-import img1 from "../assets/01c579a5598743915ff434681ec8bb1f394d7816.png";
-import img2 from "../assets/1d3650155b960261d923b43759d5822627f2ff7f.png";
-import img3 from "../assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png";
-
-import SimpleSwipeCarousel from "../components/SimpleSwipeCarousel";
+import heroImage from "/assests/surgery-hero.webp";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../components/ui/accordion";
-
-// --- SIMPLE GALLERY ---
-export function GallerySection() {
-  const images = [img1, img2, img3]; // ✅ use imported URLs
-
-  return (
-    <section className="w-full py-8 md:py-12 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-8">
-          See the Surgery Journey
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {images.map((src, index) => (
-            <div key={index} className="overflow-hidden rounded-2xl shadow-md">
-              <ImageWithFallback
-                src={src}
-                alt={`Surgery gallery image ${index + 1}`}
-                width={800}
-                height={600}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-// --- END GALLERY ---
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -77,17 +39,20 @@ export function SurgeryReadinessUpsellPageB({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
+  // ContentSquare script injection - only on this page
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const CS_SCRIPT_ID = "contentsquare-surgery-readiness-b";
     const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
+    // Check if script already exists
     if (document.getElementById(CS_SCRIPT_ID)) {
       console.log("✅ ContentSquare already loaded");
       return;
     }
 
+    // Create and inject script
     const script = document.createElement("script");
     script.id = CS_SCRIPT_ID;
     script.src = CS_SRC;
@@ -103,6 +68,7 @@ export function SurgeryReadinessUpsellPageB({
 
     document.head.appendChild(script);
 
+    // Cleanup: Remove script when component unmounts (user navigates away)
     return () => {
       const existingScript = document.getElementById(CS_SCRIPT_ID);
       if (existingScript) {
@@ -110,15 +76,12 @@ export function SurgeryReadinessUpsellPageB({
         existingScript.remove();
       }
     };
-  }, []);
+  }, []); // Empty dependency array = runs once on mount
 
   const handleStartAssessment = () => {
     onAddToBasket(surgeryReadinessAssessment);
     onOpenBasket();
   };
-
-  // ✅ Use imported images so the bundler emits correct URLs
-  const carouselImages = [img1, img2, img3];
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,7 +96,7 @@ export function SurgeryReadinessUpsellPageB({
               Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center"></div>
 
             <div className="relative mt-10">
               <div className="relative aspect-[3/4] max-w-sm mx-auto">
@@ -174,18 +137,7 @@ export function SurgeryReadinessUpsellPageB({
         </div>
       </section>
 
-      {/* Gallery */}
-      <GallerySection />
-
-      {/* Recovery Progress Photos */}
-      <section className="py-12 bg-gray-50">
-        <h2 className="text-center text-2xl font-semibold mb-6">
-          Recovery Progress Photos
-        </h2>
-        <SimpleSwipeCarousel images={carouselImages} className="mt-4" />
-      </section>
-
-      {/* FAQ Section */}
+ {/* FAQ Section */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
@@ -307,6 +259,7 @@ export function SurgeryReadinessUpsellPageB({
           </div>
         </div>
       </section>
+
 
       {/* CTA Section */}
       <section className="relative bg-white py-16">
