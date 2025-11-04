@@ -4,6 +4,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Assessment } from "../App";
 import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
+import { Shield, CheckCircle2, Clock, TrendingUp, Heart, Activity, X, Check, Star } from "lucide-react";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 import heroImage from "/assests/surgery-hero.webp";
 import heroImage from "../assets/SurgeryHeroVarient1.webp";
@@ -138,6 +139,222 @@ export function SurgeryReadinessUpsellPageB({
         </div>
       </section>
 
+ {/* Us vs Them Section */}
+      <section className="relative bg-white py-16">
+        <div className="max-w-5xl mx-auto px-[14px]">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl tracking-tight mb-4">
+              The Luther Health Difference
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Most surgical preparation is reactive. We're proactive.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-4 px-4 min-w-[200px]"></th>
+                  <th className="text-center py-4 px-4 min-w-[200px]">
+                    <div className="inline-block px-4 py-2 bg-primary/10 rounded-lg">
+                      Luther Health
+                    </div>
+                  </th>
+                  <th className="text-center py-4 px-4 min-w-[200px] text-muted-foreground">
+                    Standard NHS Pathway
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                <tr>
+                  <td className="py-4 px-4">Pre-surgical risk assessment</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm text-muted-foreground">Basic only</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Personalized optimization plan</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <X className="w-6 h-6 text-gray-300" />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Nutrition & fitness guidance</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <X className="w-6 h-6 text-gray-300" />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Medication review for surgery</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm text-muted-foreground">Limited</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Instant results</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm text-muted-foreground">Weeks wait</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Specialist follow-up available</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <X className="w-6 h-6 text-gray-300" />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Recovery timeline prediction</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <X className="w-6 h-6 text-gray-300" />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Time to complete</td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm">10 minutes</span>
+                    </div>
+                  </td>
+                  <td className="text-center py-4 px-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm text-muted-foreground">Multiple appointments</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      
+ {/* Testimonial Section */}
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+        <div className="max-w-4xl mx-auto px-[14px]">
+          <div className="text-center mb-12">
+            <div className="flex justify-center gap-1 mb-4">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+              ))}
+            </div>
+            <h2 className="text-3xl md:text-4xl tracking-tight mb-2">
+              What Our Patients Say
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-muted-foreground mb-4">
+                "I'm 67 and was terrified about my hip replacement. This assessment showed me I had low protein and poor fitness—things my surgeon never mentioned. I spent 6 weeks preparing properly. Recovery was faster than expected and I was walking without a stick in 3 weeks."
+              </p>
+              <div className="space-y-1">
+                <p className="font-medium">Michael R.</p>
+                <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-muted-foreground mb-4">
+                "After taking the assessment, I realized my diabetes wasn't as well controlled as I thought. My doctor adjusted my medication 2 months before surgery. No infections, no complications. I wish every surgical patient knew about this."
+              </p>
+              <div className="space-y-1">
+                <p className="font-medium">James T.</p>
+                <p className="text-sm text-muted-foreground">Cardiac Surgery Patient</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-muted-foreground mb-4">
+                "The assessment flagged that I was taking too many medications that could interfere with anesthesia. My GP reviewed everything and stopped two unnecessary ones. I felt safer going into surgery knowing this had been addressed."
+              </p>
+              <div className="space-y-1">
+                <p className="font-medium">Robert K.</p>
+                <p className="text-sm text-muted-foreground">Prostate Surgery Patient</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-muted-foreground mb-4">
+                "I'm a surgeon myself and I took this before my own knee replacement. It's exactly the kind of systematic pre-operative assessment we should all be doing but rarely have time for. Invaluable for patients who want to optimize their outcomes."
+              </p>
+              <div className="space-y-1">
+                <p className="font-medium">Dr. Andrew M.</p>
+                <p className="text-sm text-muted-foreground">Orthopedic Surgeon & Patient</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
 {/* Image Section (uses SurgeryHeroVarient1.webp 3x) */}
 <section className="relative bg-white py-16">
   <div className="max-w-5xl mx-auto px-[14px] text-left">
