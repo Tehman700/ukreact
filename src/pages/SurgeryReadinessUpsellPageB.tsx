@@ -5,10 +5,13 @@ import { Assessment } from "../App";
 import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-import heroImage from "/assets/surgery-hero.webp";
+
+// ✅ Use module imports from src/assets (not /assets strings)
+import heroImage from "../assets/surgery-hero.webp";
 import img1 from "../assets/01c579a5598743915ff434681ec8bb1f394d7816.png";
 import img2 from "../assets/1d3650155b960261d923b43759d5822627f2ff7f.png";
 import img3 from "../assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png";
+
 import SimpleSwipeCarousel from "../components/SimpleSwipeCarousel";
 import {
   Accordion,
@@ -17,7 +20,7 @@ import {
   AccordionTrigger,
 } from "../components/ui/accordion";
 
-// --- NEW FUNCTION ADDED HERE ---
+// --- SIMPLE GALLERY ---
 export function GallerySection() {
   const images = [img1, img2, img3]; // ✅ use imported URLs
 
@@ -33,6 +36,10 @@ export function GallerySection() {
               <ImageWithFallback
                 src={src}
                 alt={`Surgery gallery image ${index + 1}`}
+                width={800}
+                height={600}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
               />
             </div>
@@ -42,7 +49,7 @@ export function GallerySection() {
     </section>
   );
 }
-// --- END OF NEW FUNCTION ---
+// --- END GALLERY ---
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -110,12 +117,8 @@ export function SurgeryReadinessUpsellPageB({
     onOpenBasket();
   };
 
-  // Images for the SimpleSwipeCarousel
-  const carouselImages = [
-    "/assets/01c579a5598743915ff434681ec8bb1f394d7816.png",
-    "/assets/1d3650155b960261d923b43759d5822627f2ff7f.png",
-    "/assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png",
-  ];
+  // ✅ Use imported images so the bundler emits correct URLs
+  const carouselImages = [img1, img2, img3];
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,7 +133,7 @@ export function SurgeryReadinessUpsellPageB({
               Most surgical complications are predictable and preventable. We show you exactly what to fix before it's too late.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center"></div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center" />
 
             <div className="relative mt-10">
               <div className="relative aspect-[3/4] max-w-sm mx-auto">
