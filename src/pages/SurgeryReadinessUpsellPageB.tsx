@@ -4,9 +4,9 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Assessment } from "../App";
 import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
-import { Shield, CheckCircle2, Clock, TrendingUp, Heart, Activity, X, Check, Star } from "lucide-react";
+import { CheckCircle2, Clock, TrendingUp, Heart, Activity, X, Check, Star } from "lucide-react";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-import heroImage from "/assests/surgery-hero.webp";
+// import heroImage from "/assests/surgery-hero.webp";
 import heroImage from "../assets/SurgeryHeroVarient1.webp";
 import {
   Accordion,

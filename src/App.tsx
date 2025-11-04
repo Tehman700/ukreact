@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
-// import { ResultsNotification } from './components/ResultsNotification';
 import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
 
@@ -1108,9 +1107,8 @@ useEffect(() => {
       'surgery-readiness-assessment-learn-more',
       'surgery-readiness-assessment-learn-more-b',
       'surgery-readiness-assessment-learn-more-c',
-    'surgery-readiness-assessment-learn-more-d',
-    'surgery-readiness-assessment-learn-more-e',
-
+      'surgery-readiness-assessment-learn-more-d',
+      'surgery-readiness-assessment-learn-more-e',
       'surgery-readiness-assessment-questions',
       'surgery-readiness-assessment-information',
       'biological-age-calculator-learn-more',

@@ -13,6 +13,14 @@ import {
   AccordionTrigger,
 } from "../components/ui/accordion";
 
+declare global {
+  interface Window {
+    _uxa?: {
+      push: (args: any[]) => void;
+    };
+  }
+}
+
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
   id: "1",
@@ -39,12 +47,26 @@ export function SurgeryReadinessUpsellPage({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
+  const handleStartAssessment = () => {
+    // Track ContentSquare event
+    if (window._uxa && typeof window._uxa.push === 'function') {
+      window._uxa.push(['trackDynamicVariable', {
+        key: 'cta_click',
+        value: 'reduce_surgical_risk_button'
+      }]);
+      console.log('✅ ContentSquare event tracked: CTA button clicked');
+    }
+
+    onAddToBasket(surgeryReadinessAssessment);
+    onOpenBasket();
+  };
+
   // ContentSquare script injection - only on this page
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const CS_SCRIPT_ID = "contentsquare-surgery-readiness";
-    const CS_SRC = "https://t.contentsquare.net/uxa/219bcd9d9b144.js";
+    const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
     // Check if script already exists
     if (document.getElementById(CS_SCRIPT_ID)) {
@@ -76,12 +98,7 @@ export function SurgeryReadinessUpsellPage({
         existingScript.remove();
       }
     };
-  }, []); // Empty dependency array = runs once on mount
-
-  const handleStartAssessment = () => {
-    onAddToBasket(surgeryReadinessAssessment);
-    onOpenBasket();
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
