@@ -2,18 +2,18 @@ import React, { useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Assessment } from "../App";
-import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
-import { Shield, CheckCircle2, Clock, TrendingUp, Heart, Activity, X, Check, Star } from "lucide-react";
+import { Shield, CheckCircle2, TrendingUp, Heart, Activity, X, Star } from "lucide-react";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
-import heroImage from "/assests/surgery-hero.webp";
-import heroImage from "../assets/SurgeryHeroVarient1.webp";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../components/ui/accordion";
+
+// Use string path for /public/assests
+const heroImage = "/assests/SurgeryHeroVarient1.webp";
 
 // Surgery Readiness Assessment definition
 const surgeryReadinessAssessment: Assessment = {
@@ -37,7 +37,7 @@ interface SurgeryReadinessUpsellPageProps {
   onOpenBasket: () => void;
 }
 
-export function SurgeryReadinessUpsellPageB({
+export function SurgeryReadinessUpsellPageC({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
@@ -45,11 +45,11 @@ export function SurgeryReadinessUpsellPageB({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const CS_SCRIPT_ID = "contentsquare-surgery-readiness-b";
+    const CS_SCRIPT_ID = "contentsquare-surgery-readiness-c"; // unique for page C
     const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
     if (document.getElementById(CS_SCRIPT_ID)) {
-      console.log("✅ ContentSquare already loaded");
+      console.log("✅ ContentSquare already loaded on C");
       return;
     }
 
@@ -59,11 +59,11 @@ export function SurgeryReadinessUpsellPageB({
     script.async = true;
 
     script.onload = () => {
-      console.log("✅ ContentSquare loaded successfully on Surgery Readiness page");
+      console.log("✅ ContentSquare loaded successfully on Surgery Readiness page C");
     };
 
     script.onerror = () => {
-      console.error("❌ Failed to load ContentSquare script");
+      console.error("❌ Failed to load ContentSquare script (C)");
     };
 
     document.head.appendChild(script);
@@ -71,7 +71,7 @@ export function SurgeryReadinessUpsellPageB({
     return () => {
       const existingScript = document.getElementById(CS_SCRIPT_ID);
       if (existingScript) {
-        console.log("🧹 Removing ContentSquare script");
+        console.log("🧹 Removing ContentSquare script (C)");
         existingScript.remove();
       }
     };
@@ -132,7 +132,7 @@ export function SurgeryReadinessUpsellPageB({
         </div>
       </section>
 
-     {/* Trust Badges */}
+      {/* Trust Badges */}
       <section className="py-4 bg-white">
         <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
@@ -260,28 +260,28 @@ export function SurgeryReadinessUpsellPageB({
             Real-World Use Cases
           </h2>
 
-        <ul className="mt-6 space-y-5">
-          <li className="flex items-start gap-3">
-            <Activity className="w-5 h-5 text-primary mt-1" />
-            <p className="text-base">
-              <span className="font-semibold">Hip/knee replacements</span> — show up stronger, walk sooner.
-            </p>
-          </li>
+          <ul className="mt-6 space-y-5">
+            <li className="flex items-start gap-3">
+              <Activity className="w-5 h-5 text-primary mt-1" />
+              <p className="text-base">
+                <span className="font-semibold">Hip/knee replacements</span> — show up stronger, walk sooner.
+              </p>
+            </li>
 
-          <li className="flex items-start gap-3">
-            <TrendingUp className="w-5 h-5 text-primary mt-1" />
-            <p className="text-base">
-              <span className="font-semibold">Hernia &amp; general surgery</span> — reduce strain, accelerate wound healing basics.
-            </p>
-          </li>
+            <li className="flex items-start gap-3">
+              <TrendingUp className="w-5 h-5 text-primary mt-1" />
+              <p className="text-base">
+                <span className="font-semibold">Hernia &amp; general surgery</span> — reduce strain, accelerate wound healing basics.
+              </p>
+            </li>
 
-          <li className="flex items-start gap-3">
-            <Heart className="w-5 h-5 text-primary mt-1" />
-            <p className="text-base">
-              <span className="font-semibold">Urology procedures</span> — manage blood pressure, hydration, and sleep for smoother recovery.
-            </p>
-          </li>
-        </ul>
+            <li className="flex items-start gap-3">
+              <Heart className="w-5 h-5 text-primary mt-1" />
+              <p className="text-base">
+                <span className="font-semibold">Urology procedures</span> — manage blood pressure, hydration, and sleep for smoother recovery.
+              </p>
+            </li>
+          </ul>
 
           <p className="mt-8 text-muted-foreground max-w-3xl">
             If you’ve got a date, the best time to start was yesterday. The second best is today.
@@ -310,7 +310,7 @@ export function SurgeryReadinessUpsellPageB({
               <span className="font-semibold">Optionally upgrade</span> at checkout:
               <ul className="mt-3 space-y-2 list-disc pl-6">
                 <li>
-                  <span className="font-semibold">21-Day Prehab Challenge</span> — compress months of prep into three focused weeks. 
+                  <span className="font-semibold">21-Day Prehab Challenge</span> — compress months of prep into three focused weeks.
                   <strong> £300</strong>, completion-guarantee.
                 </li>
                 <li>
