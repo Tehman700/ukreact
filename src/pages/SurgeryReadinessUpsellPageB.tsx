@@ -6,6 +6,7 @@ import { Shield } from "lucide-react";
 import { LogoCarousel } from "../components/LogoCarousel";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 import heroImage from "/assests/surgery-hero.webp";
+import heroImage from "../assets/SurgeryHeroVarient1.webp";
 import {
   Accordion,
   AccordionContent,
@@ -137,6 +138,60 @@ export function SurgeryReadinessUpsellPageB({
         </div>
       </section>
 
+{/* Image Section (uses SurgeryHeroVarient1.webp 3x) */}
+<section className="relative bg-white py-16">
+  <div className="max-w-5xl mx-auto px-[14px] text-left">
+    <div className="space-y-6 mt-10">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
+        See What’s Possible <br />
+        <span className="text-primary">When You Prepare Properly.</span>
+      </h2>
+
+      <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+        A picture speaks louder than words — here’s a glimpse of the difference
+        proper preparation can make before surgery.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+        <div className="overflow-hidden rounded-2xl shadow-md">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Preparation example"
+            width={1024}
+            height={768}
+            loading="lazy"
+            decoding="async"
+            className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="overflow-hidden rounded-2xl shadow-md">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Recovery example"
+            width={1024}
+            height={768}
+            loading="lazy"
+            decoding="async"
+            className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="overflow-hidden rounded-2xl shadow-md">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Results example"
+            width={1024}
+            height={768}
+            loading="lazy"
+            decoding="async"
+            className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+</section>
+      
  {/* FAQ Section */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
         <div className="container mx-auto px-4">
