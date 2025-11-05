@@ -127,6 +127,23 @@ export function SurgeryReadinessUpsellPageC({
               </div>
             </div>
           </div>
+          
+     {/* Trust Badges */}
+                  <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full" />
+            <span>Regulated</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-green-600 rounded-full" />
+            <span>Doctor Led</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-purple-600 rounded-full" />
+            <span>Evidence Based</span>
+          </div>
+        </div>
+          
         </div>
       </section>
 
@@ -181,6 +198,8 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
+      
+    {/* The 10-Minute Solution */}
      <section className="bg-gray-50">
   <div className="max-w-5xl mx-auto px-[14px] py-12">
     <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
@@ -205,8 +224,8 @@ export function SurgeryReadinessUpsellPageC({
       </li>
     </ul> 
 
-   
-    <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-6">
+     {/* Testimonial */}
+<div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-12">
       <div className="flex gap-1 mb-3">
         {[...Array(5)].map((_, i) => (
           <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -245,46 +264,11 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-    {/* Real-World Use Cases */}
-<section className="bg-gray-50">
-  <div className="max-w-5xl mx-auto px-[14px] py-12">
-    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-      Real-world use cases
-    </h2>
 
-    <ul className="mt-6 space-y-8">
-      <li className="flex items-start gap-3">
-        <Activity className="w-5 h-5 text-primary mt-1" />
-        <p className="text-base">
-          <span className="font-semibold">Hip/knee replacements</span> — show up stronger, walk sooner.
-        </p>
-      </li>
-
-      <li className="flex items-start gap-3">
-        <TrendingUp className="w-5 h-5 text-primary mt-1" />
-        <p className="text-base">
-          <span className="font-semibold">Hernia &amp; general surgery</span> — reduce strain, accelerate wound healing basics.
-        </p>
-      </li>
-
-      <li className="flex items-start gap-3">
-        <Heart className="w-5 h-5 text-primary mt-1" />
-        <p className="text-base">
-          <span className="font-semibold">Urology procedures</span> — manage blood pressure, hydration, and sleep for smoother recovery.
-        </p>
-      </li>
-    </ul>
-    <p></p>
-
-    <p className="mt-10 text-muted-foreground max-w-3xl">
-      If you’ve got a date, the best time to start was yesterday. The second best is today.
-    </p>
-  </div>
-</section>
 
 
       {/* What Happens After You Buy */}
-      <section className="bg-white">
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
             What happens after you buy
@@ -292,13 +276,13 @@ export function SurgeryReadinessUpsellPageC({
 
           <ol className="mt-6 space-y-4 list-decimal pl-6">
             <li className="text-base">
-              <span className="font-semibold">Take the 10-minute assessment online.</span> No clinics, no waiting rooms.
+              Take the 10-minute assessment online. No clinics, no waiting rooms.
             </li>
             <li className="text-base">
-              <span className="font-semibold">See your Readiness Score and Risk Breakdown</span> instantly.
+              See your Readiness Score and Risk Breakdown instantly.
             </li>
             <li className="text-base">
-              <span className="font-semibold">Implement your 2–3 Priority Moves.</span> We include simple how-to guides.
+             Implement your 2–3 Priority Moves. We include simple how-to guides.
             </li>
             </ol>
 
@@ -344,7 +328,7 @@ export function SurgeryReadinessUpsellPageC({
       </section>
 
       {/* Who This Is For */}
-      <section className="bg-white">
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
             Who this is for
@@ -372,18 +356,8 @@ export function SurgeryReadinessUpsellPageC({
       </section>
 
       {/* Testimonial Section */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+      <section className="bg-white">
         <div className="max-w-4xl mx-auto px-[14px]">
-          <div className="text-center mb-12">
-            <div className="flex justify-center gap-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <h3 className="text-3xl md:text-4xl tracking-tight mb-2">
-              What Our Patients Say
-            </h3>
-          </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -501,7 +475,7 @@ export function SurgeryReadinessUpsellPageC({
 
       {/* CTA Section */}
       <section className="relative bg-white py-16">
-        <div className="max-w-5xl mx-auto px-[14px] text-left">
+        <div className="max-w-5xl mx-auto px-[14px] text-centre">
           <div className="space-y-6 mt-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
               The Bottom Line
