@@ -88,14 +88,11 @@ export function SurgeryReadinessUpsellPageC({
     { label: "Hernia Repair" },
     { label: "Cataract Surgery" },
     { label: "Gallbladder Surgery" },
-    { label: "Varicose Vein" },
+    { label: "Heart Surgery" },
     { label: "Cosmetic Surgery" },
     { label: "Weight Loss Surgery" },
     { label: "Prostate Surgery" },
-    { label: "Vasectomy" },
     { label: "Spinal Surgery" },
-    { label: "Carpal Tunnel" },
-    { label: "Tonsillectomy" },
   ];
 
   return (
@@ -103,28 +100,13 @@ export function SurgeryReadinessUpsellPageC({
       {/* Hero Section (Single Column) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="max-w-5xl mx-auto px-[14px] py-8">
-          <div className="space-y-8 mt-10 text-left">
+          <div className="space-y-8 mt-30 text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
               The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               If you’ve got a surgery date, your biggest risk isn’t the operation.
               It’s showing up under-prepared.
-            </p>
-
-            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-              When “Martin,” 59, got his hip replacement date, the hospital sent a
-              leaflet and a checklist. Helpful—until he realised nobody was looking at
-              his actual risks: blood pressure creeping up, stubborn belly fat, poor
-              sleep, and a medicine cabinet that looked like a mini-pharmacy. He felt
-              like he was rolling the dice.
-            </p>
-
-            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-              That’s the gap <strong>Surgical Readiness Assessment</strong> was built
-              to close—a fast, clinician-designed pre-op check that gives you a single
-              score and a small set of high-leverage actions to move it. It’s the
-              difference between hoping you’re ready and knowing you are.
             </p>
 
             <div className="relative mt-10">
@@ -164,17 +146,26 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      {/* NEW SECTION: Surgery types buttons (directly under the hero) */}
-      <section className="bg-white">
-        <div className="max-w-5xl mx-auto px-[14px] py-8">
+{/* Who This Is For */}
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+        <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Preparing for one of these?
+            Who this is for
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            Select your surgery type to see how the Readiness Assessment helps you focus on the right moves.
-          </p>
 
-          <div className="mt-5 flex flex-wrap gap-2">
+          <ul className="mt-6 space-y-3 list-disc pl-6">
+            <li className="text-base">
+              Men 55+ in the UK with an upcoming elective surgery
+            </li>
+            <li className="text-base">
+              Self-starters who want a clear plan and measurable progress
+            </li>
+            <li className="text-base">
+              Anyone who wants to walk into pre-assessment confident and well-prepared
+            </li>
+          </ul>
+ {/* NEW SECTION: Surgery types buttons (directly under the hero) */}
+<div className="mt-5 flex flex-wrap gap-2">
             {surgeryBadges.map((badge, badgeIndex) => (
               <Button
                 key={badgeIndex}
@@ -187,26 +178,16 @@ export function SurgeryReadinessUpsellPageC({
               </Button>
             ))}
           </div>
+          <div className="mt-6 flex items-start gap-2">
+            <X className="w-5 h-5 text-muted-foreground mt-1" />
+            <p className="text-base">
+              <span className="font-semibold">Who it’s not for:</span> if you want a magic pill or plan to ignore the action steps, skip this.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Trust Badges (separate section already on page) */}
-      <section className="py-4 bg-white">
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
-        </div>
-      </section>
+      
 
       {/* What most men miss before surgery */}
       <section className="bg-white">
@@ -267,18 +248,21 @@ export function SurgeryReadinessUpsellPageC({
           </ul>
 
           {/* Testimonial */}
-          <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-12">
+          <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-30">
             <div className="flex gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-primary text-primary" />
               ))}
             </div>
             <p className="text-muted-foreground mb-4">
-              "I'm 67 and was terrified about my hip replacement. This assessment showed me I had low protein and poor fitness—things my surgeon never mentioned. I spent 6 weeks preparing properly. Recovery was faster than expected and I was walking without a stick in 3 weeks."
+              “At 59, I was nervous about my shoulder surgery—mostly because I didn’t feel ready. I’d lost confidence in my strength and worried recovery would take forever. Then I went through this assessment and worked with specialist doctors who actually showed me what was holding me back. They helped me build strength safely, improve my nutrition, and prepare properly.
+            </p>
+             <p className="text-muted-foreground mb-4">
+              By the time surgery came, I felt stronger and more in control. My recovery was smoother than I ever expected—I was moving comfortably and feeling like myself again far sooner than I thought possible.”
             </p>
             <div className="space-y-1">
-              <p className="font-medium">Michael R.</p>
-              <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
+              <p className="font-medium">David M.</p>
+              <p className="text-sm text-muted-foreground">Shoulder Surgery Patient</p>
             </div>
           </div>
         </div>
@@ -364,33 +348,7 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      {/* Who This Is For */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
-        <div className="max-w-5xl mx-auto px-[14px] py-12">
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Who this is for
-          </h2>
-
-          <ul className="mt-6 space-y-3 list-disc pl-6">
-            <li className="text-base">
-              Men 55+ in the UK with an upcoming elective surgery
-            </li>
-            <li className="text-base">
-              Self-starters who want a clear plan and measurable progress
-            </li>
-            <li className="text-base">
-              Anyone who wants to walk into pre-assessment confident and well-prepared
-            </li>
-          </ul>
-
-          <div className="mt-6 flex items-start gap-2">
-            <X className="w-5 h-5 text-muted-foreground mt-1" />
-            <p className="text-base">
-              <span className="font-semibold">Who it’s not for:</span> if you want a magic pill or plan to ignore the action steps, skip this.
-            </p>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Testimonial Section */}
       <section className="bg-white">
