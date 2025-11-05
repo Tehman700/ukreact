@@ -80,6 +80,24 @@ export function SurgeryReadinessUpsellPageC({
     onOpenBasket();
   };
 
+  // NEW: badges for the button section (same shape as your original snippet)
+  const surgeryBadges: { label: string }[] = [
+    { label: "Knee Surgery" },
+    { label: "Hip Replacement" },
+    { label: "Shoulder Surgery" },
+    { label: "Hernia Repair" },
+    { label: "Cataract Surgery" },
+    { label: "Gallbladder Surgery" },
+    { label: "Varicose Vein" },
+    { label: "Cosmetic Surgery" },
+    { label: "Weight Loss Surgery" },
+    { label: "Prostate Surgery" },
+    { label: "Vasectomy" },
+    { label: "Spinal Surgery" },
+    { label: "Carpal Tunnel" },
+    { label: "Tonsillectomy" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section (Single Column) */}
@@ -127,27 +145,52 @@ export function SurgeryReadinessUpsellPageC({
               </div>
             </div>
           </div>
-          
-     {/* Trust Badges */}
-                  <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
+
+          {/* Trust Badges (inside hero) */}
+          <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 bg-blue-600 rounded-full" />
+              <span>Regulated</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 bg-green-600 rounded-full" />
+              <span>Doctor Led</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 bg-purple-600 rounded-full" />
+              <span>Evidence Based</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
-        </div>
-          
         </div>
       </section>
 
-      {/* Trust Badges */}
+      {/* NEW SECTION: Surgery types buttons (directly under the hero) */}
+      <section className="bg-white">
+        <div className="max-w-5xl mx-auto px-[14px] py-8">
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+            Preparing for one of these?
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Select your surgery type to see how the Readiness Assessment helps you focus on the right moves.
+          </p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {surgeryBadges.map((badge, badgeIndex) => (
+              <Button
+                key={badgeIndex}
+                variant="outline"
+                size="sm"
+                className="h-auto py-1 px-3 text-xs font-medium w-fit whitespace-nowrap shrink-0 bg-white text-foreground border-border hover:bg-muted/50 rounded-lg"
+                aria-label={`Surgery type: ${badge.label}`}
+              >
+                {badge.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Badges (separate section already on page) */}
       <section className="py-4 bg-white">
         <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
@@ -198,74 +241,68 @@ export function SurgeryReadinessUpsellPageC({
         </div>
       </section>
 
-      
-    {/* The 10-Minute Solution */}
-     <section className="bg-gray-50">
-  <div className="max-w-5xl mx-auto px-[14px] py-12">
-    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-      The 10-Minute Solution
-    </h2>
+      {/* The 10-Minute Solution */}
+      <section className="bg-gray-50">
+        <div className="max-w-5xl mx-auto px-[14px] py-12">
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+            The 10-Minute Solution
+          </h2>
 
-    <p className="mt-4 text-muted-foreground max-w-3xl">
-      Surgical Readiness Assessment distills your pre-op picture into a clear plan you can act on today.
-    </p>
+          <p className="mt-4 text-muted-foreground max-w-3xl">
+            Surgical Readiness Assessment distills your pre-op picture into a clear plan you can act on today.
+          </p>
 
-    <h3 className="mt-6 font-semibold text-base">What you get immediately:</h3>
+          <h3 className="mt-6 font-semibold text-base">What you get immediately:</h3>
 
-    <ul className="mt-4 space-y-3 list-disc pl-6">
-      <li className="text-base">
-        <span className="font-semibold">Readiness Score</span> — a single number that shows where you stand now.
-      </li>
-      <li className="text-base">
-        <span className="font-semibold">Risk Breakdown</span> — anaesthesia tolerance, cardiometabolic flags, inflammation markers, medication burden, mobility/strength.
-      </li>
-      <li className="text-base">
-        <span className="font-semibold">Priority Action Plan (2–3 moves)</span> — the smallest set of changes that move the score the most.
-      </li>
-    </ul> 
+          <ul className="mt-4 space-y-3 list-disc pl-6">
+            <li className="text-base">
+              <span className="font-semibold">Readiness Score</span> — a single number that shows where you stand now.
+            </li>
+            <li className="text-base">
+              <span className="font-semibold">Risk Breakdown</span> — anaesthesia tolerance, cardiometabolic flags, inflammation markers, medication burden, mobility/strength.
+            </li>
+            <li className="text-base">
+              <span className="font-semibold">Priority Action Plan (2–3 moves)</span> — the smallest set of changes that move the score the most.
+            </li>
+          </ul>
 
-     {/* Testimonial */}
-<div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-12">
-      <div className="flex gap-1 mb-3">
-        {[...Array(5)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-        ))}
-      </div>
-      <p className="text-muted-foreground mb-4">
-        "I'm 67 and was terrified about my hip replacement. This assessment showed me I had low protein and poor fitness—things my surgeon never mentioned. I spent 6 weeks preparing properly. Recovery was faster than expected and I was walking without a stick in 3 weeks."
-      </p>
-      <div className="space-y-1">
-        <p className="font-medium">Michael R.</p>
-        <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
-      </div>
-    </div>
-  </div>
-</section>
-
+          {/* Testimonial */}
+          <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-12">
+            <div className="flex gap-1 mb-3">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+              ))}
+            </div>
+            <p className="text-muted-foreground mb-4">
+              "I'm 67 and was terrified about my hip replacement. This assessment showed me I had low protein and poor fitness—things my surgeon never mentioned. I spent 6 weeks preparing properly. Recovery was faster than expected and I was walking without a stick in 3 weeks."
+            </p>
+            <div className="space-y-1">
+              <p className="font-medium">Michael R.</p>
+              <p className="text-sm text-muted-foreground">Hip Replacement Patient</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Why This Works (Without Turning Your Life Upside Down) */}
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Why this works 
+            Why this works
           </h2>
-        <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
-             (Without turning your life upside down)
-            </p><p></p>
+          <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
+            (Without turning your life upside down)
+          </p>
           <p className="mt-4 text-muted-foreground max-w-3xl">
             Most pre-op advice is generic. We focus on <strong>high-yield inputs</strong>: the 20% of actions that drive 80% of your readiness.
             No complicated meal plans. No two-hour gym sessions. Just clear, measurable changes that compound quickly over a few weeks.
           </p>
 
-          
           <p className="mt-6 text-muted-foreground max-w-3xl">
             You’ll know exactly <em>what</em> to do, <em>why</em> it matters, and <em>how</em> it affects your score.
           </p>
         </div>
       </section>
-
-
-
 
       {/* What Happens After You Buy */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
@@ -274,7 +311,7 @@ export function SurgeryReadinessUpsellPageC({
             What happens after you buy
           </h2>
 
-          <ol className="mt-6 space-y-4 list-decimal pl-6">
+        <ol className="mt-6 space-y-4 list-decimal pl-6">
             <li className="text-base">
               Take the 10-minute assessment online. No clinics, no waiting rooms.
             </li>
@@ -282,9 +319,9 @@ export function SurgeryReadinessUpsellPageC({
               See your Readiness Score and Risk Breakdown instantly.
             </li>
             <li className="text-base">
-             Implement your 2–3 Priority Moves. We include simple how-to guides.
+              Implement your 2–3 Priority Moves. We include simple how-to guides.
             </li>
-            </ol>
+          </ol>
 
           <div className="mt-8 flex items-center gap-3 text-primary">
             <CheckCircle2 className="w-5 h-5" />
@@ -301,19 +338,19 @@ export function SurgeryReadinessUpsellPageC({
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
             What it costs
           </h2>
-                  <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
-             (And what it’s worth)
-            </p>
+          <p className="mt-4 text-sm text-muted-foreground max-w-3xl">
+            (And what it’s worth)
+          </p>
 
-<ul className="mt-6 space-y-3 list-disc pl-6">
-  <li className="text-base">
-    <span className="font-semibold">Surgical Readiness Assessment</span> — £37 one-time.
-  </li>
-</ul>
-<p className="mt-3 text-base">
-  Designed to help you avoid the costly stuff: extra nights in hospital, delayed recovery,
-  time off work, anxiety from not knowing.
-</p>
+          <ul className="mt-6 space-y-3 list-disc pl-6">
+            <li className="text-base">
+              <span className="font-semibold">Surgical Readiness Assessment</span> — £37 one-time.
+            </li>
+          </ul>
+          <p className="mt-3 text-base">
+            Designed to help you avoid the costly stuff: extra nights in hospital, delayed recovery,
+            time off work, anxiety from not knowing.
+          </p>
 
           <p className="mt-6 text-base max-w-3xl">
             <span className="font-semibold">Simple math:</span> if this helps you shave even <strong>2–3 days</strong> off recovery or
@@ -358,7 +395,6 @@ export function SurgeryReadinessUpsellPageC({
       {/* Testimonial Section */}
       <section className="bg-white">
         <div className="max-w-4xl mx-auto px-[14px]">
-
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex gap-1 mb-3">
@@ -407,8 +443,6 @@ export function SurgeryReadinessUpsellPageC({
           </div>
         </div>
       </section>
-
-     
 
       {/* FAQ Section */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
