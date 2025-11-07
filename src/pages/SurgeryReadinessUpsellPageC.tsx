@@ -91,53 +91,53 @@ export function SurgeryReadinessUpsellPageC({
  return (
   <div className="min-h-screen bg-background">
     {/* Hero Section (Single Column) */}
-    <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-      <div className="max-w-5xl mx-auto px-3.5 py-8">
-        <div className="space-y-8 mt-28 text-left">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-            The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            If you’ve got a surgery date, your biggest risk isn’t the operation. It’s showing up under-prepared.
-          </p>
+<section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
+  <div className="max-w-5xl mx-auto px-3.5 py-8">
+    <div className="space-y-8 mt-28 text-left">
+      <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
+        The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
+      </h1>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        If you’ve got a surgery date, your biggest risk isn’t the operation. It’s showing up under-prepared.
+      </p>
 
-          <div className="relative mt-10">
-            {/* tighter space below the image on mobile */}
-            <div className="relative aspect-[3/4] max-w-sm mx-auto mx-1 -mb-8 sm:-mb-6 pb-5">
-              <ImageWithFallback
-                src={heroImage}
-                alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
-                width={800}
-                height={1000}
-                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                quality={85}
-                className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
-            </div>
-          </div>
-        </div>
-
-        {/* Trust Badges (inside hero) */}
-        <div className="mt-0 sm:mt-2 flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full" />
-            <span>Regulated</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-green-600 rounded-full" />
-            <span>Doctor Led</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 bg-purple-600 rounded-full" />
-            <span>Evidence Based</span>
-          </div>
+      <div className="relative mt-10">
+        {/* tighten space below the image on mobile */}
+        <div className="relative aspect-[3/4] max-w-sm mx-auto mx-1 -mb-12 sm:-mb-8 pb-0 sm:pb-2">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
+            width={800}
+            height={1000}
+            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            quality={85}
+            className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
+          />
+          <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
         </div>
       </div>
-    </section>
+    </div>
+
+    {/* Trust Badges (inside hero) */}
+    <div className="mt-1 sm:mt-3 flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+      <div className="flex items-center space-x-2">
+        <span className="w-2 h-2 bg-blue-600 rounded-full" />
+        <span>Regulated</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <span className="w-2 h-2 bg-green-600 rounded-full" />
+        <span>Doctor Led</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <span className="w-2 h-2 bg-purple-600 rounded-full" />
+        <span>Evidence Based</span>
+      </div>
+    </div>
+  </div>
+</section>
 
     {/* Who This Is For */}
     <section className="bg-white">
