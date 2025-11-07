@@ -88,7 +88,7 @@ export function SurgeryReadinessUpsellPageC({
     { label: "Spinal Surgery" },
   ];
 
-  return (
+ return (
     <div className="min-h-screen bg-background">
       {/* Hero Section (Single Column) */}
       <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
@@ -101,7 +101,7 @@ export function SurgeryReadinessUpsellPageC({
               If you’ve got a surgery date, your biggest risk isn’t the operation. It’s showing up under-prepared.
             </p>
             <div className="relative mt-10">
-              <div className="relative aspect-[3/4] max-w-sm mx-auto">
+              <div className="relative aspect-[3/4] max-w-sm mx-auto mt-[0px] mr-[3px] mb-[-45px] ml-[3px] pt-[0px] pr-[0px] pb-[20px] pl-[0px]">
                 <ImageWithFallback
                   src={heroImage}
                   alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
@@ -145,6 +145,7 @@ export function SurgeryReadinessUpsellPageC({
             <li className="text-base">Men 55+ in the UK with an upcoming elective surgery</li>
             <li className="text-base">Self-starters who want a clear plan and measurable progress</li>
             <li className="text-base">Anyone who wants to walk into pre-assessment confident and well-prepared</li>
+          <li className="text-base mt-[0px] mr-[0px] mb-[20px] ml-[0px]">Surgeries we support men with:</li>
           </ul>
 
           {/* NEW SECTION: Surgery types buttons (directly under the hero) */}
@@ -224,7 +225,7 @@ export function SurgeryReadinessUpsellPageC({
           </ul>
 
           {/* Testimonial */}
-          <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-30">
+          <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-[50px] mr-[0px] mb-[0px] ml-[0px]">
             <div className="flex gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -265,7 +266,7 @@ export function SurgeryReadinessUpsellPageC({
       </section>
 
       {/* What Happens After You Buy */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16 py-[20px] px-[0px]">
         <div className="max-w-5xl mx-auto px-[14px] py-12">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">What happens after you buy</h2>
           <ol className="mt-6 space-y-4 list-decimal pl-6">
@@ -309,9 +310,9 @@ export function SurgeryReadinessUpsellPageC({
 
       {/* Testimonial Section */}
       <section className="bg-white">
-        <div className="max-w-4xl mx-auto px-[14px]">
+        <div className="max-w-4xl mx-auto px-[14px] mt-[0px] mr-[0px] mb-[30px] ml-[0px]">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm mt-[30px] mr-[0px] mb-[0px] ml-[0px]">
               <div className="flex gap-1 mb-3">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -366,7 +367,7 @@ export function SurgeryReadinessUpsellPageC({
       </section>
 
       {/* FAQ Section */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+      <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16 px-[0px] py-[40px]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
@@ -422,7 +423,7 @@ export function SurgeryReadinessUpsellPageC({
       </section>
 
       {/* CTA Section */}
-      <section className="relative bg-white py-16">
+      <section className="relative bg-white py-16 px-[0px] pt-[20px] pr-[0px] pb-[40px] pl-[0px]">
         <div className="max-w-5xl mx-auto px-[14px] text-centre">
           <div className="space-y-6 mt-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
@@ -453,4 +454,3 @@ export function SurgeryReadinessUpsellPageC({
     </div>
   );
 }
-
