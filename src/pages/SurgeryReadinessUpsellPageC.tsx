@@ -102,7 +102,8 @@ export function SurgeryReadinessUpsellPageC({
           </p>
 
           <div className="relative mt-10">
-            <div className="relative aspect-[3/4] max-w-sm mx-auto mx-1 -mb-11 pb-5">
+            {/* tighter space below the image on mobile */}
+            <div className="relative aspect-[3/4] max-w-sm mx-auto mx-1 -mb-8 sm:-mb-6 pb-5">
               <ImageWithFallback
                 src={heroImage}
                 alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
@@ -121,7 +122,7 @@ export function SurgeryReadinessUpsellPageC({
         </div>
 
         {/* Trust Badges (inside hero) */}
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+        <div className="mt-0 sm:mt-2 flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 bg-blue-600 rounded-full" />
             <span>Regulated</span>
