@@ -92,16 +92,17 @@ export function SurgeryReadinessUpsellPageC({
   <div className="min-h-screen bg-background">
     {/* Hero Section (Single Column) */}
     <section className="relative bg-gradient-to-r from-gray-50 to-gray-100">
-      <div className="max-w-5xl mx-auto px-[14px] py-8">
-        <div className="space-y-8 mt-32 text-left">
+      <div className="max-w-5xl mx-auto px-3.5 py-8">
+        <div className="space-y-8 mt-28 text-left">
           <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
             The £37 Pre-Op check that could <strong>save you weeks of recovery</strong>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             If you’ve got a surgery date, your biggest risk isn’t the operation. It’s showing up under-prepared.
           </p>
+
           <div className="relative mt-10">
-            <div className="relative aspect-[3/4] max-w-sm mx-auto mb-[-45px] pb-[20px]">
+            <div className="relative aspect-[3/4] max-w-sm mx-auto mx-1 -mb-11 pb-5">
               <ImageWithFallback
                 src={heroImage}
                 alt="Smiling male patient in hospital gown representing the Surgery Readiness Score"
@@ -139,7 +140,7 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* Who This Is For */}
     <section className="bg-white">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Who this is for</h2>
         <ul className="mt-6 space-y-3 list-disc pl-6">
           <li className="text-base">Men 55+ in the UK with an upcoming elective surgery</li>
@@ -148,7 +149,7 @@ export function SurgeryReadinessUpsellPageC({
           <li className="text-base mb-5">Surgeries we support men with:</li>
         </ul>
 
-        {/* NEW SECTION: Surgery types buttons (directly under the hero) */}
+        {/* Surgery types buttons */}
         <div className="mt-5 flex flex-wrap gap-2">
           {surgeryBadges.map((badge, badgeIndex) => (
             <Button
@@ -175,7 +176,7 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* What most men miss before surgery */}
     <section className="bg-white">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">What most men miss before surgery</h2>
         <p className="mt-4 text-muted-foreground max-w-3xl">
           Hospitals focus on the operation. Smart patients focus on the <em>inputs</em> that drive outcomes:
@@ -204,7 +205,7 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* The 10-Minute Solution */}
     <section className="bg-gray-50">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">The 10-Minute Solution</h2>
         <p className="mt-4 text-muted-foreground max-w-3xl">
           Surgical Readiness Assessment distills your pre-op picture into a clear plan you can act on today.
@@ -225,7 +226,7 @@ export function SurgeryReadinessUpsellPageC({
         </ul>
 
         {/* Testimonial */}
-        <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-[50px]">
+        <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 shadow-sm mt-12">
           <div className="flex gap-1 mb-3">
             {[...Array(5)].map((_, i) => (
               <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -251,7 +252,7 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* Why This Works (Without Turning Your Life Upside Down) */}
     <section className="bg-white">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Why this works</h2>
         <p className="mt-4 text-sm text-muted-foreground max-w-3xl">(Without turning your life upside down)</p>
         <p className="mt-4 text-muted-foreground max-w-3xl">
@@ -266,8 +267,8 @@ export function SurgeryReadinessUpsellPageC({
     </section>
 
     {/* What Happens After You Buy */}
-    <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16 px-0">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+    <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">What happens after you buy</h2>
         <ol className="mt-6 space-y-4 list-decimal pl-6">
           <li className="text-base">Take the 10-minute assessment online. No clinics, no waiting rooms.</li>
@@ -285,7 +286,7 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* What it costs (And What It’s Worth) */}
     <section className="bg-gray-50">
-      <div className="max-w-5xl mx-auto px-[14px] py-12">
+      <div className="max-w-5xl mx-auto px-3.5 py-12">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">What it costs</h2>
         <p className="mt-4 text-sm text-muted-foreground max-w-3xl">(And what it’s worth)</p>
         <ul className="mt-6 space-y-3 list-disc pl-6">
@@ -310,9 +311,9 @@ export function SurgeryReadinessUpsellPageC({
 
     {/* Testimonial Section */}
     <section className="bg-white">
-      <div className="max-w-4xl mx-auto px-[14px] my-8">
+      <div className="max-w-4xl mx-auto px-3.5 mb-8">
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg p-6 shadow-sm mt-[30px]">
+          <div className="bg-white rounded-lg p-6 shadow-sm mt-8">
             <div className="flex gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-primary text-primary" />
@@ -367,7 +368,7 @@ export function SurgeryReadinessUpsellPageC({
     </section>
 
     {/* FAQ Section */}
-    <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-16 px-0">
+    <section className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-10">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
@@ -423,13 +424,13 @@ export function SurgeryReadinessUpsellPageC({
     </section>
 
     {/* CTA Section */}
-    <section className="relative bg-white py-16 px-0">
-      <div className="max-w-5xl mx-auto px-[14px] text-center">
+    <section className="relative bg-white pt-5 pb-10 px-0">
+      <div className="max-w-5xl mx-auto px-3.5 text-center">
         <div className="space-y-6 mt-10">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-snug">
             The Bottom Line
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             You’ve got one shot at showing up ready. For £37, you can replace guesswork with a plan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
