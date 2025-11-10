@@ -5,6 +5,7 @@ import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
 import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
+import { PlasmicHost } from './pages/PlasmicHost';
 
 // Main Pages
 import { HomePage } from './pages/HomePage';
@@ -851,6 +852,9 @@ useEffect(() => {
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
+
+      case 'plasmic-host':
+           return <PlasmicHost />;
       case 'resilience-index-questions':
         return <ResilienceIndexQuestionsPage />;
       case 'resilience-index-information':
