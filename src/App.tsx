@@ -6,7 +6,7 @@ import { CookieConsent } from './components/CookieConsent';
 import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
 
-// Main Pages
+
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
