@@ -22,6 +22,13 @@ import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
 import { CQCPage } from './pages/CQC';
 
+import { SurgeryReadinessUpsellPageWithPuck } from './pages/SurgeryReadinessUpsellPageWithPuck';
+import { SurgeryReadinessUpsellPageBWithPuck } from './pages/SurgeryReadinessUpsellPageBWithPuck';
+import { SurgeryReadinessUpsellPageCWithPuck } from './pages/SurgeryReadinessUpsellPageCWithPuck';
+import { SurgeryReadinessUpsellPageDWithPuck } from './pages/SurgeryReadinessUpsellPageDWithPuck';
+import { SurgeryReadinessUpsellPageEWithPuck } from './pages/SurgeryReadinessUpsellPageEWithPuck';
+
+
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
 import { SurgeryReadinessUpsellPageB } from './pages/SurgeryReadinessUpsellPageB';
@@ -728,27 +735,27 @@ useEffect(() => {
       case 'cqc':
           return <CQCPage />;
       case 'surgery-readiness-assessment-learn-more':
-          return <SurgeryReadinessUpsellPage
+          return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
 
             case 'surgery-readiness-assessment-learn-more-b':
-          return <SurgeryReadinessUpsellPageB
+          return <SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
 
 
       case 'surgery-readiness-assessment-learn-more-c':
-          return <SurgeryReadinessUpsellPageC
+          return <SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
 
 
       case 'surgery-readiness-assessment-learn-more-d':
-          return <SurgeryReadinessUpsellPageD
+          return <SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
@@ -756,7 +763,7 @@ useEffect(() => {
 
 
       case 'surgery-readiness-assessment-learn-more-e':
-          return <SurgeryReadinessUpsellPageE
+          return <SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
