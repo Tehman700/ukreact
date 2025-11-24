@@ -1,0 +1,154 @@
+/* Basic Puck Editor Styles */
+.puck-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.puck-editor {
+  display: flex;
+  height: 100vh;
+}
+
+.puck-sidebar {
+  width: 280px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+}
+
+.puck-canvas {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9fafb;
+  position: relative;
+}
+
+.puck-preview {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.puck-component {
+  position: relative;
+}
+
+.puck-component:hover {
+  outline: 2px dashed #3b82f6;
+  outline-offset: 2px;
+}
+
+.puck-component-selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.puck-droppable-zone {
+  min-height: 40px;
+  border: 2px dashed #d1d5db;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  margin: 8px 0;
+}
+
+.puck-droppable-zone--hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Loading Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Edit Mode Toggle Button */
+.edit-toggle-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.edit-toggle-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Basic responsive typography */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Utility classes for components */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.text-center { text-align: center; }
+.font-bold { font-weight: bold; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mb-8 { margin-bottom: 32px; }
+.mt-8 { margin-top: 32px; }
+.mt-12 { margin-top: 48px; }
+
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+/* Basic card styling */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
