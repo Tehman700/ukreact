@@ -1,131 +1,66 @@
-import React, { useState, createContext, useContext } from 'react';
+"use client";
 
-interface AccordionContextType {
-  type: 'single' | 'multiple';
-  openItems: Set<string>;
-  toggleItem: (value: string) => void;
+import * as React from "react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion@1.2.3";
+import { ChevronDownIcon } from "lucide-react@0.487.0";
+
+import { cn } from "./utils";
+
+function Accordion({
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Root>) {
+  return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
 }
 
-const AccordionContext = createContext<AccordionContextType | null>(null);
-
-interface AccordionProps {
-  type: 'single' | 'multiple';
-  children: React.ReactNode;
-  className?: string;
-  collapsible?: boolean;
-  defaultValue?: string;
-}
-
-export const Accordion: React.FC<AccordionProps> = ({
-  type,
-  children,
-  className = '',
-  collapsible = false,
-  defaultValue = '',
-}) => {
-  const [openItems, setOpenItems] = useState<Set<string>>(
-    new Set(defaultValue ? [defaultValue] : [])
-  );
-
-  const toggleItem = (value: string) => {
-    setOpenItems(prev => {
-      const newSet = new Set(prev);
-      if (type === 'single') {
-        newSet.clear();
-        if (!prev.has(value) || collapsible) {
-          newSet.add(value);
-        }
-      } else {
-        if (newSet.has(value)) {
-          newSet.delete(value);
-        } else {
-          newSet.add(value);
-        }
-      }
-      return newSet;
-    });
-  };
-
+function AccordionItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Item>) {
   return (
-    <AccordionContext.Provider value={{ type, openItems, toggleItem }}>
-      <div className={`space-y-4 ${className}`}>
+    <AccordionPrimitive.Item
+      data-slot="accordion-item"
+      className={cn("border-b last:border-b-0", className)}
+      {...props}
+    />
+  );
+}
+
+function AccordionTrigger({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+  return (
+    <AccordionPrimitive.Header className="flex">
+      <AccordionPrimitive.Trigger
+        data-slot="accordion-trigger"
+        className={cn(
+          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
+          className,
+        )}
+        {...props}
+      >
         {children}
-      </div>
-    </AccordionContext.Provider>
+        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
+      </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
   );
-};
-
-interface AccordionItemProps {
-  value: string;
-  children: React.ReactNode;
-  className?: string;
 }
 
-export const AccordionItem: React.FC<AccordionItemProps> = ({
-  value,
+function AccordionContent({
+  className,
   children,
-  className = '',
-}) => {
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Content>) {
   return (
-    <div className={`border border-gray-200 rounded-lg ${className}`}>
-      {children}
-    </div>
-  );
-};
-
-interface AccordionTriggerProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
-  children,
-  className = '',
-}) => {
-  const context = useContext(AccordionContext);
-  const [value, setValue] = useState('');
-
-  if (!context) {
-    throw new Error('AccordionTrigger must be used within Accordion');
-  }
-
-  // Get the value from the parent AccordionItem
-  const handleClick = () => {
-    // We'll need to get the value from the parent somehow
-    // For now, let's use a simpler approach
-    context.toggleItem(value);
-  };
-
-  return (
-    <button
-      className={`flex justify-between items-center w-full px-6 py-4 text-left font-medium hover:bg-gray-50 ${className}`}
-      onClick={handleClick}
+    <AccordionPrimitive.Content
+      data-slot="accordion-content"
+      className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      {...props}
     >
-      {children}
-      <span className="text-gray-400">+</span>
-    </button>
+      <div className={cn("pt-0 pb-4", className)}>{children}</div>
+    </AccordionPrimitive.Content>
   );
-};
-
-interface AccordionContentProps {
-  children: React.ReactNode;
-  className?: string;
 }
 
-export const AccordionContent: React.FC<AccordionContentProps> = ({
-  children,
-  className = '',
-}) => {
-  const context = useContext(AccordionContext);
-  
-  if (!context) {
-    throw new Error('AccordionContent must be used within Accordion');
-  }
-
-  // For now, just show the content - we'll need to properly implement the open/close logic
-  return (
-    <div className={`px-6 pb-4 text-gray-600 ${className}`}>
-      {children}
-    </div>
-  );
-};
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
