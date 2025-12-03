@@ -32,7 +32,7 @@ import { SurgeryReadinessUpsellPageGWithPuck } from './pages/SurgeryReadinessUps
 import { SurgeryReadinessUpsellPageHWithPuck } from './pages/SurgeryReadinessUpsellPageHWithPuck';
 import { SurgeryReadinessUpsellPageIWithPuck } from './pages/SurgeryReadinessUpsellPageIWithPuck';
 import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUpsellPageJWithPuck';
-
+import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
 
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
@@ -739,6 +739,9 @@ useEffect(() => {
         return <QuizPage />;
       case 'cqc':
           return <CQCPage />;
+      case 'surgeryChecklist':
+          return <SurgeryPreparationChecklistPage />;
+
       case 'surgery-readiness-assessment-learn-more':
           return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
