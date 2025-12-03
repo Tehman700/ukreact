@@ -2,15 +2,21 @@ import React from "react";
 import { ComponentConfig } from "@measured/puck";
 import * as Icons from "lucide-react";
 
-const iconOptions = Object.keys(Icons)
-  .filter((iconName) => {
-    const Icon = Icons[iconName as keyof typeof Icons];
-    return typeof Icon === "function";
-  })
-  .map((iconName) => ({
-    label: iconName,
-    value: iconName,
-  }));
+const popularIcons = [
+  "Heart", "Star", "Zap", "Check", "X", "AlertCircle", "Info",
+  "Mail", "Phone", "User", "Users", "Home", "Search", "Settings",
+  "ShoppingCart", "Clock", "Calendar", "TrendingUp", "Award",
+  "Briefcase", "Camera", "Coffee", "CreditCard", "Database",
+  "Download", "Upload", "Eye", "FileText", "Gift", "Globe",
+  "Lock", "Unlock", "Map", "MessageCircle", "Play", "Plus",
+  "Minus", "Save", "Send", "Share2", "Shield", "ThumbsUp",
+  "Trash2", "Video", "Wifi", "Bookmark", "Edit", "Filter",
+];
+
+const iconOptions = popularIcons.map((iconName) => ({
+  label: iconName,
+  value: iconName,
+}));
 
 export type CardProps = {
   title?: string;

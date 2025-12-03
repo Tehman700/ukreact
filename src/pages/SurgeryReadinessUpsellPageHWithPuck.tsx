@@ -21,20 +21,20 @@ const surgeryReadinessAssessment: Assessment = {
   ],
 };
 
+
 interface SurgeryReadinessUpsellPageProps {
   onAddToBasket: (assessment: Assessment) => void;
   onOpenBasket: () => void;
 }
 
-
-export function SurgeryReadinessUpsellPageCWithPuck({
+export function SurgeryReadinessUpsellPageHWithPuck({
   onAddToBasket,
   onOpenBasket,
 }: SurgeryReadinessUpsellPageProps) {
   return (
     <SurgeryPageWithPuck
-      pageName="surgery-readiness-assessment-learn-more-c"
-      pageTitle="Surgery Readiness Page C"
+      pageName="surgery-readiness-assessment-learn-more-h"
+      pageTitle="Surgery Readiness Page"
       defaultData={surgeryReadinessDefaultData}
       assessment={surgeryReadinessAssessment}
       onAddToBasket={onAddToBasket}

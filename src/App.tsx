@@ -27,6 +27,11 @@ import { SurgeryReadinessUpsellPageBWithPuck } from './pages/SurgeryReadinessUps
 import { SurgeryReadinessUpsellPageCWithPuck } from './pages/SurgeryReadinessUpsellPageCWithPuck';
 import { SurgeryReadinessUpsellPageDWithPuck } from './pages/SurgeryReadinessUpsellPageDWithPuck';
 import { SurgeryReadinessUpsellPageEWithPuck } from './pages/SurgeryReadinessUpsellPageEWithPuck';
+import { SurgeryReadinessUpsellPageFWithPuck } from './pages/SurgeryReadinessUpsellPageFWithPuck';
+import { SurgeryReadinessUpsellPageGWithPuck } from './pages/SurgeryReadinessUpsellPageGWithPuck';
+import { SurgeryReadinessUpsellPageHWithPuck } from './pages/SurgeryReadinessUpsellPageHWithPuck';
+import { SurgeryReadinessUpsellPageIWithPuck } from './pages/SurgeryReadinessUpsellPageIWithPuck';
+import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUpsellPageJWithPuck';
 
 
 // Assessment Pages - Surgery Readiness
@@ -739,34 +744,52 @@ useEffect(() => {
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
-
-            case 'surgery-readiness-assessment-learn-more-b':
+      case 'surgery-readiness-assessment-learn-more-b':
           return <SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
-
-
       case 'surgery-readiness-assessment-learn-more-c':
           return <SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
-
-
       case 'surgery-readiness-assessment-learn-more-d':
           return <SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
-
-
-
       case 'surgery-readiness-assessment-learn-more-e':
           return <SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
           />;
+      case 'surgery-readiness-assessment-learn-more-f':
+          return <SurgeryReadinessUpsellPageFWithPuck
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+      case 'surgery-readiness-assessment-learn-more-g':
+          return <SurgeryReadinessUpsellPageGWithPuck
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+      case 'surgery-readiness-assessment-learn-more-h':
+          return <SurgeryReadinessUpsellPageHWithPuck
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+      case 'surgery-readiness-assessment-learn-more-i':
+          return <SurgeryReadinessUpsellPageIWithPuck
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+          
+      case 'surgery-readiness-assessment-learn-more-j':
+          return <SurgeryReadinessUpsellPageJWithPuck
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;    
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
       case 'surgery-readiness-assessment-information':

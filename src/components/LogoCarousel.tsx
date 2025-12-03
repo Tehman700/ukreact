@@ -24,7 +24,7 @@ const logos = [
 export function LogoCarousel() {
   return (
     <section className="border-b bg-muted/30">
-      <div className="container mx-auto px-4 py-12 px-[14px] py-[42px]">
+      <div className=" mx-auto px-4 py-12 px-[14px] py-[42px]">
         <div className="text-center mb-8">
           <p className="text-muted-foreground">Regulated and accredited by UK healthcare authorities</p>
         </div>
