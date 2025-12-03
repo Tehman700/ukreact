@@ -739,9 +739,8 @@ useEffect(() => {
         return <QuizPage />;
       case 'cqc':
           return <CQCPage />;
-      case 'surgeryChecklist':
+      case 'surgery-checklist':
           return <SurgeryPreparationChecklistPage />;
-
       case 'surgery-readiness-assessment-learn-more':
           return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
