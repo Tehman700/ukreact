@@ -305,12 +305,12 @@ export function SurgeryPageWithPuck({
       <div style={{ height: "100vh" }}>
           <div className="fixed top-4 right-4 z-50">
             <Button
-               variant="outline"
-            size="sm"
-            onClick={toggleEditMode}
-            className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
+              variant="outline"
+              size="sm"
+              onClick={toggleEditMode}
+              className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
             >
-              👁️ Preview
+              👁️ Preview Page
             </Button>
           </div>
         <Puck
