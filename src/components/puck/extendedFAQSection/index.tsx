@@ -19,6 +19,11 @@ export const ExtendedFAQSection: ComponentConfig<{
   marginLeft: number;
   marginRight: number;
   fontSize: number;
+  accordionItemBackgroundColor?: string;
+  accordionItemBorderRadius?: string;
+  accordionItemPadding?: number;
+  accordionItemBorder?: string;
+  accordionFontColor?: string;
 }> = {
   fields: {
     title: { type: "text", label: "Section Title", contentEditable: true },
@@ -93,6 +98,11 @@ export const ExtendedFAQSection: ComponentConfig<{
       min: 10,
       max: 100,
     },
+    accordionItemBackgroundColor: { type: "text", label: "Accordion Item Background Color" },
+    accordionItemBorderRadius: { type: "text", label: "Accordion Item Border Radius (e.g., '8px')" },
+    accordionItemPadding: { type: "number", label: "Accordion Item Padding (px)", min: 0, max: 100 },
+    accordionItemBorder: { type: "text", label: "Accordion Item Border (e.g., 'none')" },
+    accordionFontColor: { type: "text", label: "Accordion Font Color" },
   },
   defaultProps: {
     title: "Frequently Asked Questions",
@@ -121,8 +131,13 @@ export const ExtendedFAQSection: ComponentConfig<{
     marginLeft: 0,
     marginRight: 0,
     fontSize: 16,
+    accordionItemBackgroundColor: "#f9fafb",
+    accordionItemBorderRadius: "8px",
+    accordionItemPadding: 24,
+    accordionItemBorder: "none",
+    accordionFontColor: "#374151",
   },
-  render: ({ title, items, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize }) => (
+  render: ({ title, items, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, accordionItemBackgroundColor, accordionItemBorderRadius, accordionItemPadding, accordionItemBorder, accordionFontColor }) => (
     <section className="relative bg-gradient-to-r from-gray-50 to-gray-100" style={{ 
       paddingTop: `${paddingTop}px`,
       paddingBottom: `${paddingBottom}px`,
@@ -138,9 +153,25 @@ export const ExtendedFAQSection: ComponentConfig<{
           <h2 className="font-semibold tracking-tight text-center mb-8" style={{ fontSize: `clamp(${fontSize * 1.25}px, 4vw, ${fontSize * 1.875}px)` }}>{title}</h2>
           <Accordion type="single" collapsible className="space-y-4">
             {items.map((item, idx) => (
-              <AccordionItem key={idx} value={`item-${idx + 1}`} className="bg-white rounded-lg px-6 border-0 shadow-sm">
+              <AccordionItem 
+                key={idx} 
+                value={`item-${idx + 1}`} 
+                className="bg-white rounded-lg px-6 border-0 shadow-sm"
+                style={{
+                  backgroundColor: accordionItemBackgroundColor || '#f9fafb',
+                  borderRadius: accordionItemBorderRadius || '8px',
+                  padding: `${accordionItemPadding || 24}px`,
+                  border: accordionItemBorder || 'none'
+                }}
+              >
                 <AccordionTrigger className="hover:no-underline" style={{ fontSize: `${fontSize}px` }}>{item.question}</AccordionTrigger>
-                <AccordionContent className="text-muted-foreground space-y-2" style={{ fontSize: `${fontSize * 0.875}px` }}>
+                <AccordionContent 
+                  className="text-muted-foreground space-y-2" 
+                  style={{ 
+                    fontSize: `${fontSize * 0.875}px`,
+                    color: accordionFontColor || '#374151'
+                  }}
+                >
                   {item.answer && <p>{item.answer}</p>}
                   {Array.isArray(item.bullets) && item.bullets.length > 0 && (
                     <ul className="list-disc pl-6 space-y-1">

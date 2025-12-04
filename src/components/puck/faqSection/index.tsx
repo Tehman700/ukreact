@@ -6,12 +6,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../ui/accordion";
+import { Button } from "../../ui/button";
 
 export const FAQSection: ComponentConfig<{
   title: string;
   faqs: Array<{
     question: string;
     answer: string;
+    badges?: Array<{ label: string }>;
   }>;
   paddingTop: number;
   paddingBottom: number;
@@ -24,6 +26,11 @@ export const FAQSection: ComponentConfig<{
   fontSize: number;
   fontColor?: string;
   backgroundColor?: string;
+  accordionItemBackgroundColor?: string;
+  accordionItemBorderRadius?: string;
+  accordionItemPadding?: number;
+  accordionItemBorder?: string;
+  accordionFontColor?: string;
 }> = {
   fields: {
     title: {
@@ -44,7 +51,16 @@ export const FAQSection: ComponentConfig<{
         answer: {
           type: "textarea", 
           label: "Answer",
-          contentEditable: true,
+        },
+        badges: {
+          type: "array",
+          label: "Badges (optional)",
+          arrayFields: {
+            label: {
+              type: "text",
+              label: "Badge Label",
+            },
+          },
         },
       },
     },
@@ -102,6 +118,13 @@ export const FAQSection: ComponentConfig<{
       min: 10,
       max: 100,
     },
+    fontColor: { type: "text", label: "Font Color (hex or name)" },
+    backgroundColor: { type: "text", label: "Background Color (hex or name)" },
+    accordionItemBackgroundColor: { type: "text", label: "Accordion Item Background Color" },
+    accordionItemBorderRadius: { type: "text", label: "Accordion Item Border Radius (e.g., '8px')" },
+    accordionItemPadding: { type: "number", label: "Accordion Item Padding (px)", min: 0, max: 100 },
+    accordionItemBorder: { type: "text", label: "Accordion Item Border (e.g., 'none')" },
+    accordionFontColor: { type: "text", label: "Accordion Font Color" },
   },
   defaultProps: {
     title: "Frequently Asked Questions",
@@ -122,8 +145,13 @@ export const FAQSection: ComponentConfig<{
     fontSize: 16,
     fontColor: "#111827",
     backgroundColor: "#ffffff",
+    accordionItemBackgroundColor: "#f9fafb",
+    accordionItemBorderRadius: "8px",
+    accordionItemPadding: 24,
+    accordionItemBorder: "none",
+    accordionFontColor: "#374151",
   },
-  render: ({ title, faqs, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor, backgroundColor }) => (
+  render: ({ title, faqs, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor, backgroundColor, accordionItemBackgroundColor, accordionItemBorderRadius, accordionItemPadding, accordionItemBorder, accordionFontColor }) => (
     <section style={{ 
       backgroundColor: backgroundColor || '#ffffff', 
       paddingTop: `${paddingTop}px`,
@@ -155,10 +183,10 @@ export const FAQSection: ComponentConfig<{
               key={index} 
               value={`item-${index + 1}`} 
               style={{
-                backgroundColor: '#f9fafb',
-                borderRadius: '8px',
-                padding: '24px',
-                border: 'none'
+                backgroundColor: accordionItemBackgroundColor || '#f9fafb',
+                borderRadius: accordionItemBorderRadius || '8px',
+                padding: `${accordionItemPadding || 24}px`,
+                border: accordionItemBorder || 'none'
               }}
             >
               <AccordionTrigger style={{
@@ -170,11 +198,37 @@ export const FAQSection: ComponentConfig<{
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent style={{
-                color: '#374151',
+                color: accordionFontColor || '#374151',
                 paddingTop: '8px',
                 fontSize: `${fontSize * 0.875}px`
               }}>
-                {faq.answer}
+                <div style={{ whiteSpace: 'pre-line' }}>{faq.answer}</div>
+                {faq.badges && faq.badges.length > 0 && (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    gap: '8px', 
+                    marginTop: '12px' 
+                  }}>
+                    {faq.badges.map((badge, badgeIndex) => (
+                      <Button
+                        key={badgeIndex}
+                        variant="outline"
+                        size="sm"
+                        style={{
+                          height: 'auto',
+                          padding: '2px 13px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          whiteSpace: 'nowrap',
+                          borderRadius: '7px'
+                        }}
+                      >
+                        {badge.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
