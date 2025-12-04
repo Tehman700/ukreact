@@ -422,14 +422,17 @@ export function SurgeryPreparationChecklistPage() {
         </Accordion>
 
         {/* Bonus Guides Label */}
-        <div className="mt-8 mb-4 text-center mx-[0px] my-[28px]">
-          <Badge
-            variant="outline"
-            className="text-xs !text-white bg-black py-[5px] px-[7px] border-white"
-          >
-            Bonus Guides
-          </Badge>
-        </div>
+<div className="mt-8 mb-4 text-center mx-[0px] my-[32px]">
+  <Badge
+    variant="outline"
+    className="text-sm text-white bg-black py-[7px] px-[12px] border-black"
+  >
+    Bonus Guides
+  </Badge>
+</div>
+
+
+
 
 
         {/* Additional Carousels */}
