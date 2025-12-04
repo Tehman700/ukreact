@@ -1,5 +1,6 @@
 import React from "react";
 import { ComponentConfig } from "@measured/puck";
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 export const Image: ComponentConfig<{
   src: string;
@@ -179,7 +180,7 @@ export const Image: ComponentConfig<{
 
     return (
       <div style={containerStyle}>
-        <img src={src} alt={alt} style={imageStyle} />
+        <ImageWithFallback src={src} alt={alt} style={imageStyle} />
       </div>
     );
   },
