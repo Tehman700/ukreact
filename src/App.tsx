@@ -1142,6 +1142,7 @@ useEffect(() => {
       'surgery-readiness-assessment-learn-more-d',
       'surgery-readiness-assessment-learn-more-e',
       'surgery-readiness-assessment-questions',
+      'surgery-checklist',
       'surgery-readiness-assessment-information',
       'biological-age-calculator-learn-more',
       'biological-age-calculator-questions',
