@@ -18,6 +18,8 @@ export const HeroSection: ComponentConfig<{
   fontSize: number;
   fontColor?: string;
   backgroundColor?: string;
+  fontHeaderColor?: string;
+  fontSubHeaderColor?: string;
 }> = {
   fields: {
     title: {
@@ -92,6 +94,13 @@ export const HeroSection: ComponentConfig<{
       min: 10,
       max: 100,
     },
+    fontColor: { type: "text", label: "Font Color (hex or name)" },
+    backgroundColor: {
+      type: "text",
+      label: "Background Color",
+    },
+    fontSubHeaderColor: { type: "text", label: "Subheader Font Color" },
+
   },
   defaultProps: {
     title: "The £37 Pre-Op check that could save you weeks of recovery",
@@ -109,8 +118,9 @@ export const HeroSection: ComponentConfig<{
     fontSize: 16,
     fontColor: "#111827",
     backgroundColor: "linear-gradient(to right, #f9fafb, #f3f4f6)",
+    fontSubHeaderColor: "#6b7280",
   },
-  render: ({ title, subtitle, image, imageAlt, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor = "#111827", backgroundColor = "linear-gradient(to right, #f9fafb, #f3f4f6)" }) => (
+  render: ({ title, subtitle, image, imageAlt, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor = "#111827", backgroundColor = "linear-gradient(to right, #f9fafb, #f3f4f6)", fontSubHeaderColor = "#6b7280" }) => (
     <section style={{
       position: 'relative',
       background: backgroundColor,
@@ -145,10 +155,10 @@ export const HeroSection: ComponentConfig<{
           </h1>
           <p style={{
             fontSize: `${fontSize * 0.875}px`,
-            color: '#4b5563',
             maxWidth: '768px',
             margin: '0 auto',
-            lineHeight: '1.6'
+            lineHeight: '1.6',
+            color: fontSubHeaderColor || "#6b7280"
           }}>
             {subtitle}
           </p>

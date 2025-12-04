@@ -17,6 +17,10 @@ export const ComparisonTableSection: ComponentConfig<{
   marginLeft: number;
   marginRight: number;
   fontSize: number;
+  fontColor?: string;
+  backgroundColor?: string;
+  fontHeaderColor?: string;
+  fontSubHeaderColor?: string;
 }> = {
   fields: {
     title: { type: "text", label: "Title", contentEditable: true },
@@ -103,6 +107,13 @@ export const ComparisonTableSection: ComponentConfig<{
       min: 10,
       max: 100,
     },
+    fontColor: { type: "text", label: "Font Color (hex or name)" },
+    backgroundColor: {
+      type: "text",
+      label: "Background Color",
+    },
+    fontHeaderColor: { type: "text", label: "Header Font Color" },
+    fontSubHeaderColor: { type: "text", label: "Subheader Font Color" },
   },
   defaultProps: {
     title: "The Luther Health Difference",
@@ -127,8 +138,12 @@ export const ComparisonTableSection: ComponentConfig<{
     marginLeft: 0,
     marginRight: 0,
     fontSize: 16,
+    fontColor: "#111827",
+    backgroundColor: "#ffffff",
+    fontHeaderColor: "#111827",
+    fontSubHeaderColor: "#6b7280",
   },
-  render: ({ title, subtitle, lhsLabel, rhsLabel, rows, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize }) => (
+  render: ({ title, subtitle, lhsLabel, rhsLabel, rows, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor = "#111827", backgroundColor = "#ffffff", fontHeaderColor = "#111827", fontSubHeaderColor = "#6b7280" }) => (
     <section className="relative bg-white" style={{ 
       paddingTop: `${paddingTop}px`,
       paddingBottom: `${paddingBottom}px`,
@@ -137,28 +152,29 @@ export const ComparisonTableSection: ComponentConfig<{
       marginTop: `${marginTop}px`,
       marginBottom: `${marginBottom}px`,
       marginLeft: `${marginLeft}px`,
-      marginRight: `${marginRight}px`
+      marginRight: `${marginRight}px`,
+      backgroundColor: backgroundColor
     }}>
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="tracking-tight mb-4" style={{ fontSize: `clamp(${fontSize * 1.5}px, 4vw, ${fontSize * 2.5}px)` }}>{title}</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto" style={{ fontSize: `${fontSize * 1.125}px` }}>{subtitle}</p>
+          <h2 className="tracking-tight mb-4" style={{ fontSize: `clamp(${fontSize * 1.5}px, 4vw, ${fontSize * 2.5}px)`, color: fontColor }}>{title}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto" style={{ fontSize: `${fontSize * 1.125}px`, color: fontSubHeaderColor }}>{subtitle}</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-4 px-4 min-w-[200px]" style={{ fontSize: `${fontSize}px` }}></th>
+                <th className="text-left py-4 px-4 min-w-[200px]" style={{ fontSize: `${fontSize}px`,color: fontColor  }}></th>
                 <th className="text-center py-4 px-4 min-w-[200px]">
-                  <div className="inline-block px-4 py-2 bg-primary/10 rounded-lg" style={{ fontSize: `${fontSize}px` }}>{lhsLabel}</div>
+                  <div className="inline-block px-4 py-2 bg-primary/10 rounded-lg" style={{ fontSize: `${fontSize}px`, color: fontHeaderColor }}>{lhsLabel}</div>
                 </th>
-                <th className="text-center py-4 px-4 min-w-[200px] text-muted-foreground" style={{ fontSize: `${fontSize}px` }}>{rhsLabel}</th>
+                <th className="text-center py-4 px-4 min-w-[200px] text-muted-foreground" style={{ fontSize: `${fontSize}px`, color: fontSubHeaderColor }}>{rhsLabel}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {rows.map((row, idx) => (
                 <tr key={idx}>
-                  <td className="py-4 px-4" style={{ fontSize: `${fontSize}px` }}>{row.label}</td>
+                  <td className="py-4 px-4" style={{ fontSize: `${fontSize}px`, color: fontColor }}>{row.label}</td>
                   <td className="text-center py-4 px-4">
                     <div className="flex justify-center">
                       {row.lhsCheck ? (
@@ -173,7 +189,7 @@ export const ComparisonTableSection: ComponentConfig<{
                       {row.rhsCheck ? (
                         <Check className="w-6 h-6 text-green-600" />
                       ) : row.rhs ? (
-                        <span className="text-muted-foreground" style={{ fontSize: `${fontSize * 0.875}px` }}>{row.rhs}</span>
+                        <span className="text-muted-foreground" style={{ fontSize: `${fontSize * 0.875}px`, color: fontSubHeaderColor}}>{row.rhs}</span>
                       ) : (
                         <X className="w-6 h-6 text-gray-300" />
                       )}

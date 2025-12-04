@@ -15,6 +15,9 @@ export const ImageGallerySection: ComponentConfig<{
   marginLeft: number;
   marginRight: number;
   fontSize: number;
+  backgroundColor?: string;
+  fontHeaderColor?: string;
+  fontSubHeaderColor?: string;
 }> = {
   fields: {
     title: { type: "text", label: "Title", contentEditable: true },
@@ -82,6 +85,18 @@ export const ImageGallerySection: ComponentConfig<{
       min: 10,
       max: 100,
     },
+    backgroundColor: {
+      type: "text",
+      label: "Background Color",
+    },
+    fontHeaderColor: {
+      type: "text",
+      label: "Font Color",
+    },
+    fontSubHeaderColor: {
+      type: "text",
+      label: "Subtitle Font Color",
+    },
   },
   defaultProps: {
     title: "See What's Possible\nWhen You Prepare Properly.",
@@ -101,9 +116,12 @@ export const ImageGallerySection: ComponentConfig<{
     marginLeft: 0,
     marginRight: 0,
     fontSize: 16,
+    backgroundColor: "#ffffff",
+    fontHeaderColor: "#111827",
+    fontSubHeaderColor: "#6b7280",
   },
-  render: ({ title, subtitle, images, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize }) => (
-    <section className="relative bg-white" style={{ 
+  render: ({ title, subtitle, images, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, backgroundColor, fontHeaderColor, fontSubHeaderColor }) => (
+    <section className="relative " style={{ 
       paddingTop: `${paddingTop}px`,
       paddingBottom: `${paddingBottom}px`,
       paddingLeft: `${paddingLeft}px`,
@@ -111,14 +129,16 @@ export const ImageGallerySection: ComponentConfig<{
       marginTop: `${marginTop}px`,
       marginBottom: `${marginBottom}px`,
       marginLeft: `${marginLeft}px`,
-      marginRight: `${marginRight}px`
+      marginRight: `${marginRight}px`,
+      backgroundColor: backgroundColor || "#ffffff",
+
     }}>
       <div className="max-w-5xl mx-auto px-4 text-left">
         <div className="space-y-6 mt-10">
-          <h2 className="font-semibold tracking-tight leading-snug whitespace-pre-line" style={{ fontSize: `clamp(${fontSize * 1.5}px, 4vw, ${fontSize * 3.125}px)` }}>
+          <h2 className="font-semibold tracking-tight leading-snug whitespace-pre-line" style={{ fontSize: `clamp(${fontSize * 1.5}px, 4vw, ${fontSize * 3.125}px)`, color: fontHeaderColor || "#111827" }}>
             {title}
           </h2>
-          <p className="text-muted-foreground max-w-2xl" style={{ fontSize: `clamp(${fontSize}px, 2vw, ${fontSize * 1.125}px)` }}>{subtitle}</p>
+          <p className="text-muted-foreground max-w-2xl" style={{ fontSize: `clamp(${fontSize}px, 2vw, ${fontSize * 1.125}px)`, color: fontSubHeaderColor || "#6b7280" }}>{subtitle}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
             {images.map((img, i) => (
               <div key={i} className="overflow-hidden rounded-2xl shadow-md">
