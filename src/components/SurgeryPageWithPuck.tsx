@@ -62,17 +62,6 @@ export function SurgeryPageWithPuck({
   useEffect(() => {
     const hasPermission = checkEditPermission();
     setHasEditPermission(hasPermission);
-
-    if (hasPermission) {
-      console.log(
-        "✅ Edit permission granted for user:",
-        sessionStorage.getItem("luther_user_id")
-      );
-    } else {
-      console.log(
-        "❌ No edit permission - adminAuthenticated not found in sessionStorage"
-      );
-    }
   }, []);
 
   // ContentSquare script injection
@@ -83,7 +72,6 @@ export function SurgeryPageWithPuck({
     const CS_SRC = "https://t.contentsquare.net/uxa/e1e286c6ac3ab.js";
 
     if (document.getElementById(CS_SCRIPT_ID)) {
-      console.log("✅ ContentSquare already loaded");
       return;
     }
 
@@ -92,20 +80,11 @@ export function SurgeryPageWithPuck({
     script.src = CS_SRC;
     script.async = true;
 
-    script.onload = () => {
-      console.log("✅ ContentSquare loaded successfully");
-    };
-
-    script.onerror = () => {
-      console.error("❌ Failed to load ContentSquare script");
-    };
-
     document.head.appendChild(script);
 
     return () => {
       const existingScript = document.getElementById(CS_SCRIPT_ID);
       if (existingScript) {
-        console.log("🧹 Removing ContentSquare script");
         existingScript.remove();
       }
     };
@@ -186,7 +165,6 @@ export function SurgeryPageWithPuck({
       setIsLoading(true);
 
       // Test connection first
-      console.log("🔍 Testing Supabase connection...");
       const isConnected = await testSupabaseConnection();
 
       if (!isConnected) {
@@ -195,11 +173,9 @@ export function SurgeryPageWithPuck({
         return;
       }
 
-      console.log("📥 Loading page...");
       const publishedData = await PuckDatabase.getPublishedPage(pageName);
 
       if (publishedData?.page_data) {
-        console.log("✅ Loaded published data from Supabase");
         setData(publishedData.page_data);
         return;
       }
@@ -207,16 +183,11 @@ export function SurgeryPageWithPuck({
       // Fallback to localStorage
       const savedData = localStorage.getItem(`puck-${pageName}-data`);
       if (savedData) {
-        console.log("📦 Loaded fallback data from localStorage");
         setData(JSON.parse(savedData));
         return;
       }
-
-      console.log("🔧 Using default data");
       setData(defaultData);
     } catch (error) {
-      console.error("❌ Error loading from Supabase:", error);
-      // Fallback to localStorage
       const savedData = localStorage.getItem(`puck-${pageName}-data`);
       if (savedData) {
         try {
@@ -332,21 +303,16 @@ export function SurgeryPageWithPuck({
   if (isEditing) {
     return (
       <div style={{ height: "100vh" }}>
-        {/* Edit Mode Header */}
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">✏️ Editing: {pageTitle}</h2>
-          <div className="flex gap-3">
+          <div className="fixed top-4 right-4 z-50">
             <Button
-              variant="secondary"
-              onClick={toggleEditMode}
-              className="bg-white text-blue-600 hover:bg-gray-100"
+               variant="outline"
+            size="sm"
+            onClick={toggleEditMode}
+            className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
             >
               👁️ Preview
             </Button>
           </div>
-        </div>
-
-        {/* Puck Editor */}
         <Puck
           config={enhancedConfig}
           data={data}
@@ -369,7 +335,6 @@ export function SurgeryPageWithPuck({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Edit Mode Toggle Button - Only show if user has permission */}
       {hasEditPermission && (
         <div className="fixed top-4 right-4 z-50">
           <Button
@@ -382,8 +347,6 @@ export function SurgeryPageWithPuck({
           </Button>
         </div>
       )}
-
-      {/* Render the page using Puck */}
       <Render config={enhancedConfig} data={data} />
     </div>
   );
