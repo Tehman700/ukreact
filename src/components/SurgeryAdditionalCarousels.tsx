@@ -6,18 +6,23 @@ import Slider from 'react-slick';
 export function SurgeryAdditionalCarousels() {
   const guides = [
     {
-      title: "Recovery Timeline",
-      description: "Week-by-week guide to what to expect during your recovery period.",
-      badge: "7-day guide"
-    },
-    {
-      title: "Nutrition Plan",
-      description: "Meal suggestions and nutritional targets for optimal healing.",
+      title: "14 Pre-Op Mistakes",
+      description: "The most common errors men 60+ make - and how to avoid each with simple, evidence-backed fixes. Lower risk, pain, and delays.",
       badge: "30-day plan"
     },
     {
-      title: "Exercise Protocol",
-      description: "Safe, progressive exercises to rebuild strength and mobility.",
+      title: "First 7 Days",
+      description: "A day-by-day home plan for week one:meds, walking sleep,bowel care, and red flags. Regain independence faster.",
+      badge: "30-day plan"
+    },
+    {
+      title: "Protein Playbook",
+      description: "Exactly how much protein you need and when to eat it for wound healing. Includes 14-day menu, shopping list and protein guide.",
+      badge: "6-week program"
+    },
+    {
+      title: "10-Minute Prehab",
+      description: "Five targeted 2-minute drills for strength, balance, and breathing. Do at home, no equipment. Build resilience before the operation.",
       badge: "6-week program"
     }
   ];
