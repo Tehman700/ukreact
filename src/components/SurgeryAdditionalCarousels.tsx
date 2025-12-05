@@ -687,7 +687,7 @@ export function SurgeryAdditionalCarousels() {
                         <CardContent className="space-y-4">
                           {/* Options */}
                           <div>
-                            <h3 className="text-sm font-medium mb-3">Steps:</h3>
+                            <h3 className="text-sm font-medium mb-3">The Routine:</h3>
                             <ul className="space-y-2">
                               {exercise.options.map((option, idx) => (
                                 <li key={idx} className="flex items-start space-x-2">
@@ -702,8 +702,8 @@ export function SurgeryAdditionalCarousels() {
 
                           {/* Pro Tip */}
                           <div>
-                            <h3 className="text-sm font-medium mb-2">Pro Tip:</h3>
-                            <p style={{ fontStyle: 'italic' }} className="text-sm text-muted-foreground leading-relaxed">
+                            <h3 className="text-sm font-medium mb-2">Why This Matters:</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                               {exercise.proTip}
                             </p>
                           </div>
