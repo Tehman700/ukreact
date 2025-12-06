@@ -422,66 +422,76 @@ export function SurgeryPreparationChecklistPage() {
         </Accordion>
 
         {/* Bonus Guides Label */}
-<div className="mt-8 mb-4 text-center mx-[0px] my-[32px]">
-  <Badge
-    variant="outline"
-    className="text-sm text-white bg-black py-[7px] px-[12px] border-black"
-  >
-    Bonus Guides
-  </Badge>
-</div>
-
-
-
-
+        <div className="mt-8 mb-4 text-center mx-[0px] my-[28px]">
+          <Badge
+            variant="outline"
+            className="text-xs text-white bg-black py-[5px] px-[7px] border-black"
+          >
+            Bonus Guides
+          </Badge>
+        </div>
 
         {/* Additional Carousels */}
         <div>
           <SurgeryAdditionalCarousels />
         </div>
 
-        {/* Dark Overlay - appears when emailFormVisible is true */}
-        {emailFormVisible && (
-          <div 
-            className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-500"
-            onClick={() => setEmailFormVisible(false)}
-          />
-        )}
-
         {/* Ready for Surgery Section - Moved to bottom */}
-        <div className={`mt-8 transition-all duration-500 ease-in-out ${emailFormVisible ? 'relative z-50' : ''}`}>
-          {!emailFormVisible ? (
-            <div className="text-center space-y-4">
-              <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-                Get every resource in one click. Sent straight to your emial. Delivered immediately.</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-[15px] pr-[0px] pb-[10px] pl-[0px] px-[0px] py-[15px]">
-                <Button onClick={() => setEmailFormVisible(true)} className="pt-[15px] pr-[10px] pb-[7px] pl-[10px] px-[10px] py-[15px]">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Email me the resource bundle
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center space-y-6">
-              <div className="p-6 rounded-lg bg-background border-0 border-primary shadow-2xl">
-                <TrendingUp className="h-12 w-12 mx-auto text-primary mb-4" />
-                <h3 className="font-medium text-lg mb-2">Your next step</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
-                  Recover faster, with fewer complications. Turn today's answers into a customised Readiness Score and bespoke plan tailored to you.</p>
-                <Button size="lg" className="w-full sm:w-auto">
-                  Get my bespoke plan
-                </Button>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setEmailFormVisible(false)}
-              >
-                Go back
+        <div className="mt-8">
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+              Get every resource in one click. Sent straight to your email. Delivered immediately.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-[15px] pr-[0px] pb-[10px] pl-[0px] px-[0px] py-[15px]">
+              <Button onClick={() => setEmailFormVisible(true)} className="pt-[15px] pr-[10px] pb-[7px] pl-[10px] px-[10px] py-[15px]">
+                <Mail className="h-4 w-4 mr-2" />
+                Email me the resource bundle
               </Button>
             </div>
-          )}
+          </div>
         </div>
+
+        {/* Popup Modal */}
+        {emailFormVisible && (
+          <>
+            {/* Dark Overlay */}
+            <div
+              className="fixed inset-0 bg-black/80 z-50 transition-opacity duration-300"
+              onClick={() => setEmailFormVisible(false)}
+            />
+
+            {/* Popup Content */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+              <div
+                className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 pointer-events-auto transform transition-all duration-300"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Success Icon */}
+                <div className="flex justify-center mb-6">
+                  <TrendingUp className="h-16 w-16 text-black" />
+                </div>
+
+                {/* Content */}
+                <div className="text-center space-y-4">
+                  <h3 className="font-semibold text-xl">Your next step</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Recover faster, with fewer complications. Turn today's answers into a customised Readiness Score and bespoke plan tailored to you.
+                  </p>
+                  <Button size="lg" className="w-full mt-6">
+                    Get my bespoke plan
+                  </Button>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setEmailFormVisible(false)}
+                  className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Important Information - Moved to bottom */}
         <Card className="mt-8 mb-4 border-blue-200 bg-blue-50">
@@ -492,7 +502,7 @@ export function SurgeryPreparationChecklistPage() {
                   <span className="text-white text-xs">i</span>
                 </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 pl-2">
                 <h3 className="font-medium mb-2">Important Information</h3>
                 <p className="text-sm text-muted-foreground">
                   This checklist is designed to complement, not replace, guidance from your surgical team. Always follow the specific instructions provided by your surgeon and anesthesiologist. If you have any concerns or questions, contact your healthcare provider directly.
