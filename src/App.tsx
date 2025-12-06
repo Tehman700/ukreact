@@ -740,7 +740,10 @@ useEffect(() => {
       case 'cqc':
           return <CQCPage />;
       case 'surgery-checklist':
-          return <SurgeryPreparationChecklistPage />;
+            return <SurgeryPreparationChecklistPage
+              onAddToBasket={addToBasket}
+              onOpenBasket={() => setIsBasketOpen(true)}
+            />;
       case 'surgery-readiness-assessment-learn-more':
           return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}

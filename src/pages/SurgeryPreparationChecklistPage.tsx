@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import Slider from 'react-slick';
+import { ShoppingBasket } from '../components/ShoppingBasket';
+import { Assessment, BasketItem } from './AssessmentsPage';
 import { SurgeryAdditionalCarousels } from '../components/SurgeryAdditionalCarousels';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  Circle,
+import biologicalAgeImage from '/assests/completed02.webp';
+import {
+  ArrowLeft,
   Activity,
   Apple,
   Pill,
@@ -21,17 +21,28 @@ import {
   Users,
   ShoppingBag,
   Calendar,
-  AlertTriangle,
   TrendingUp,
-  Utensils,
-  Clock,
   X,
-  Brain,
-  Droplet,
-  Wind,
   Shield,
   Mail
 } from 'lucide-react';
+
+// Completed Surgery Preparation Bundle Assessment definition
+const completedSurgeryPreparationAssessment: Assessment = {
+  id: '21',
+  name: 'Completed Surgery Preparation Bundle',
+  description:
+    'Comprehensive surgical preparation assessment combining readiness, complication risk, recovery prediction, anaesthesia screening, and mobility evaluation in one complete bundle.',
+  price: 120,
+  image: biologicalAgeImage,
+  icon: <Shield className="w-6 h-6" />,
+  category: 'Surgery',
+  features: [
+    'Complete surgical readiness assessment',
+    'Comprehensive risk factor analysis',
+    'Personalized preparation strategies'
+  ]
+};
 
 interface ChecklistStep {
   id: number;
@@ -45,9 +56,85 @@ interface ChecklistStep {
   completed: boolean;
 }
 
-export function SurgeryPreparationChecklistPage() {
+interface SurgeryPreparationChecklistPageProps {
+  onAddToBasket?: (assessment: Assessment) => void;
+  onOpenBasket?: () => void;
+}
+
+export function SurgeryPreparationChecklistPage({
+  onAddToBasket: externalAddToBasket,
+  onOpenBasket: externalOpenBasket
+}: SurgeryPreparationChecklistPageProps = {}) {
+  console.log('🏗️ SurgeryPreparationChecklistPage MOUNTED');
+  console.log('🔧 Props received:', {
+    hasExternalAddToBasket: !!externalAddToBasket,
+    hasExternalOpenBasket: !!externalOpenBasket
+  });
+
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [emailFormVisible, setEmailFormVisible] = useState(false);
+  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
+  const [isBasketOpen, setIsBasketOpen] = useState(false);
+
+  const addToBasket = (assessment: Assessment) => {
+    console.log('🛒 addToBasket called with:', assessment.name);
+
+    // Use external basket function if provided, otherwise use local state
+    if (externalAddToBasket) {
+      console.log('📤 Using EXTERNAL addToBasket function');
+      externalAddToBasket(assessment);
+      if (externalOpenBasket) {
+        console.log('📤 Calling EXTERNAL openBasket');
+        externalOpenBasket();
+      }
+      return;
+    }
+
+    console.log('📥 Using LOCAL basket state');
+    // Fallback to local state management
+    setBasketItems(prev => {
+      const existingItem = prev.find(item => item.assessment.id === assessment.id);
+      if (existingItem) {
+        return prev.map(item =>
+          item.assessment.id === assessment.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { assessment, quantity: 1 }];
+    });
+  };
+
+  const removeFromBasket = (assessmentId: string) => {
+    setBasketItems(prev => prev.filter(item => item.assessment.id !== assessmentId));
+  };
+
+  const getTotalPrice = () => {
+    return basketItems.reduce((total, item) => total + item.assessment.price * item.quantity, 0);
+  };
+
+  const handleBackToAssessments = () => {
+    window.history.back();
+  };
+
+  const handleStartAssessment = () => {
+    console.log('🎯 handleStartAssessment called');
+    console.log('📦 Assessment to add:', completedSurgeryPreparationAssessment);
+    console.log('🔧 externalAddToBasket exists:', !!externalAddToBasket);
+    console.log('🔧 externalOpenBasket exists:', !!externalOpenBasket);
+
+    addToBasket(completedSurgeryPreparationAssessment);
+    setEmailFormVisible(false);
+
+    // Open basket - either external or local
+    if (externalOpenBasket) {
+      console.log('✅ Opening EXTERNAL basket');
+      externalOpenBasket();
+    } else {
+      console.log('✅ Opening LOCAL basket');
+      setIsBasketOpen(true);
+    }
+  };
 
   const steps: ChecklistStep[] = [
     {
@@ -249,12 +336,6 @@ export function SurgeryPreparationChecklistPage() {
     });
   };
 
-  const completionPercentage = (completedSteps.size / steps.length) * 100;
-
-  const handleBackToAssessments = () => {
-    window.location.hash = 'assessments';
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Simplified Header */}
@@ -271,12 +352,12 @@ export function SurgeryPreparationChecklistPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl pt-[28px] pr-[14px] pb-[0px] pl-[14px]">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Page Title */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl mb-2 text-left">Surgery Preparation Bundle</h1>
-          <p className="text-muted-foreground text-left m-[0px] pt-[0px] pr-[0px] pb-[20px] pl-[0px]">
-            Here is are your comprehensive guides to optimal surgical preparation and recovery.
+          <p className="text-muted-foreground text-left">
+            Here are your comprehensive guides to optimal surgical preparation and recovery.
           </p>
         </div>
 
@@ -285,8 +366,8 @@ export function SurgeryPreparationChecklistPage() {
           <AccordionItem value="prep-steps" className="border border-border rounded-lg overflow-hidden shadow-sm">
             <AccordionTrigger className="px-4 py-3 hover:no-underline">
               <div className="text-left">
-                <h2 className="text-lg font-medium pt-[10px] pr-[0px] pb-[0px] pl-[0px]">Prep Checklist</h2>
-                <p className="text-sm text-muted-foreground mt-[3px] mr-[0px] mb-[0px] ml-[0px] pt-[0px] pr-[0px] pb-[20px] pl-[0px]">
+                <h2 className="text-lg font-medium">Prep Checklist</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   Ten essential steps to cut complications and speed recovery. Print-and-go, with timelines for 90/60/30/7/1 days before surgery.
                 </p>
               </div>
@@ -294,39 +375,6 @@ export function SurgeryPreparationChecklistPage() {
             <AccordionContent>
               <div className="px-4 pb-4">
                 <div className="overflow-visible py-8">
-                  <style>{`
-                    .slick-slider {
-                      position: relative;
-                      display: block;
-                      box-sizing: border-box;
-                      user-select: none;
-                      touch-action: pan-y;
-                    }
-                    .slick-list {
-                      position: relative;
-                      display: block;
-                      overflow: hidden;
-                      margin: 0;
-                      padding: 0;
-                    }
-                    .slick-track {
-                      position: relative;
-                      top: 0;
-                      left: 0;
-                      display: flex;
-                    }
-                    .slick-slide {
-                      float: left;
-                      height: 100%;
-                      min-height: 1px;
-                    }
-                    .slick-slide > div {
-                      height: 100%;
-                    }
-                    .slick-slide .shadow-lg {
-                      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                    }
-                  `}</style>
                   <Slider
                     dots={false}
                     arrows={false}
@@ -336,14 +384,12 @@ export function SurgeryPreparationChecklistPage() {
                     slidesToScroll={1}
                     swipeToSlide={true}
                     touchThreshold={10}
-                    className="surgery-checklist-slider"
                   >
-                    {steps.map((step, index) => (
+                    {steps.map((step) => (
                       <div key={step.id} className="px-3">
-                        <Card className={`h-full shadow-lg ${completedSteps.has(step.id) ? 'border-green-200 bg-green-50/30' : ''}`}>
+                        <Card className="h-full shadow-lg">
                           <CardHeader>
                             <div className="space-y-3">
-                              {/* Icon and Title */}
                               <div className="flex items-start space-x-3">
                                 <div className="p-2 rounded-lg bg-muted flex-shrink-0">
                                   {step.icon}
@@ -352,15 +398,13 @@ export function SurgeryPreparationChecklistPage() {
                                   Step {step.id}: {step.title}
                                 </CardTitle>
                               </div>
-                              
-                              {/* Timeline Badge */}
+
                               <div>
                                 <Badge variant="outline" className="text-xs">
                                   {step.timeline}
                                 </Badge>
                               </div>
-                              
-                              {/* Description */}
+
                               <CardDescription>
                                 {step.description}
                               </CardDescription>
@@ -422,7 +466,7 @@ export function SurgeryPreparationChecklistPage() {
         </Accordion>
 
         {/* Bonus Guides Label */}
-        <div className="mt-8 mb-4 text-center mx-[0px] my-[28px]">
+        <div className="mt-8 mb-4 text-center">
           <Badge
             variant="outline"
             className="text-xs text-white bg-black py-[5px] px-[7px] border-black"
@@ -436,13 +480,14 @@ export function SurgeryPreparationChecklistPage() {
           <SurgeryAdditionalCarousels />
         </div>
 
-        {/* Ready for Surgery Section - Moved to bottom */}
+        {/* Ready for Surgery Section */}
         <div className="mt-8">
           <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              Get every resource in one click. Sent straight to your email. Delivered immediately.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-[15px] pr-[0px] pb-[10px] pl-[0px] px-[0px] py-[15px]">
-              <Button onClick={() => setEmailFormVisible(true)} className="pt-[15px] pr-[10px] pb-[7px] pl-[10px] px-[10px] py-[15px]">
+              Get every resource in one click. Sent straight to your email. Delivered immediately.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => setEmailFormVisible(true)} className="px-4 py-3">
                 <Mail className="h-4 w-4 mr-2" />
                 Email me the resource bundle
               </Button>
@@ -453,37 +498,43 @@ export function SurgeryPreparationChecklistPage() {
         {/* Popup Modal */}
         {emailFormVisible && (
           <>
-            {/* Dark Overlay */}
             <div
               className="fixed inset-0 bg-black/80 z-50 transition-opacity duration-300"
-              onClick={() => setEmailFormVisible(false)}
             />
 
-            {/* Popup Content */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div
-                className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 pointer-events-auto transform transition-all duration-300"
-                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 relative"
               >
-                {/* Success Icon */}
                 <div className="flex justify-center mb-6">
                   <TrendingUp className="h-16 w-16 text-black" />
                 </div>
 
-                {/* Content */}
                 <div className="text-center space-y-4">
                   <h3 className="font-semibold text-xl">Your next step</h3>
                   <p className="text-sm text-muted-foreground">
                     Recover faster, with fewer complications. Turn today's answers into a customised Readiness Score and bespoke plan tailored to you.
                   </p>
-                  <Button size="lg" className="w-full mt-6">
+                  <Button
+                    onMouseDown={(e) => {
+                      console.log('🖱️ BUTTON MOUSE DOWN!');
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleStartAssessment();
+                    }}
+                    size="lg"
+                    className="w-full mt-6"
+                    type="button"
+                  >
                     Get my bespoke plan
                   </Button>
                 </div>
 
-                {/* Close Button */}
                 <button
-                  onClick={() => setEmailFormVisible(false)}
+                  onClick={() => {
+                    console.log('❌ Close button clicked');
+                    setEmailFormVisible(false);
+                  }}
                   className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="h-5 w-5" />
@@ -493,9 +544,9 @@ export function SurgeryPreparationChecklistPage() {
           </>
         )}
 
-        {/* Important Information - Moved to bottom */}
+        {/* Important Information */}
         <Card className="mt-8 mb-4 border-blue-200 bg-blue-50">
-          <CardContent className="p-[21px] mt-[20px] mr-[0px] mb-[0px] ml-[0px] m-[0px]">
+          <CardContent className="p-6">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-0.5">
                 <div className="h-5 w-5 rounded-full bg-blue-600 flex items-center justify-center">
@@ -512,6 +563,18 @@ export function SurgeryPreparationChecklistPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Shopping Basket - Only render if using local state */}
+      {!externalAddToBasket && (
+        <ShoppingBasket
+          isOpen={isBasketOpen}
+          onClose={() => setIsBasketOpen(false)}
+          items={basketItems}
+          onRemoveItem={removeFromBasket}
+          onUpgradeToBundle={() => {}}
+          totalPrice={getTotalPrice()}
+        />
+      )}
     </div>
   );
 }
