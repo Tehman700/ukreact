@@ -33,6 +33,8 @@ import { SurgeryReadinessUpsellPageHWithPuck } from './pages/SurgeryReadinessUps
 import { SurgeryReadinessUpsellPageIWithPuck } from './pages/SurgeryReadinessUpsellPageIWithPuck';
 import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUpsellPageJWithPuck';
 import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
+import { SurgeryPreparationChecklistPageB } from './pages/SurgeryPreparationChecklistPageB';
+import { SurgeryPreparationChecklistPageC } from './pages/SurgeryPreparationChecklistPageC';
 
 // Assessment Pages - Surgery Readiness
 import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
@@ -741,6 +743,21 @@ useEffect(() => {
           return <CQCPage />;
       case 'surgery-checklist':
             return <SurgeryPreparationChecklistPage
+              onAddToBasket={addToBasket}
+              onOpenBasket={() => setIsBasketOpen(true)}
+            />;
+
+
+      case 'surgery-checklist-b':
+            return <SurgeryPreparationChecklistPageB
+              onAddToBasket={addToBasket}
+              onOpenBasket={() => setIsBasketOpen(true)}
+            />;
+
+
+
+      case 'surgery-checklist-c':
+            return <SurgeryPreparationChecklistPageC
               onAddToBasket={addToBasket}
               onOpenBasket={() => setIsBasketOpen(true)}
             />;
