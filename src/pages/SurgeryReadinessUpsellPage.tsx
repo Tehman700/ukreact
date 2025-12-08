@@ -203,7 +203,7 @@ export function SurgeryReadinessUpsellPage({
                 onClick={handleStartAssessment}
                 aria-label="Start Surgery Readiness Score assessment"
               >
-                Reduce my surgical risk now (only £37)
+                Reduce my surgical risk now (only £39)
               </Button>
             </div>
           </div>

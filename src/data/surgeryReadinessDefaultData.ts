@@ -7,7 +7,7 @@ export const surgeryReadinessDefaultData: Data = {
       title: "Surgery Readiness Assessment",
       assessmentName: "Surgery Readiness Score",
       assessmentDescription: "Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.",
-      assessmentPrice: 37.0,
+      assessmentPrice: 39.0,
     } as any // Type assertion needed for custom root fields
   },
   zones: {},

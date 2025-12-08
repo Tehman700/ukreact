@@ -262,7 +262,7 @@ const globalAssessments: Assessment[] = [
     id: '1',
     name: 'Surgery Readiness Score',
     description: "Before any surgery, you need to know your risks. This score gives you a clear snapshot of your current health status and highlights areas that need attention. It helps you lower your chances of complications and sets you up for a smoother recovery. Think of it as your pre-surgery game plan.",
-    price: 37.00,
+    price: 39.00,
     image: surgeryReadinessImage,
     icon: <Shield className="w-6 h-6" />,
     features: ['Your personalized readiness score', 'An in-depth report detailing your current health status', 'Bespoke recommendations designed to reduce risks and optimise your outcome']
