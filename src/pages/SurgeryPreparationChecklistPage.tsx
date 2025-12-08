@@ -9,6 +9,8 @@ import { ShoppingBasket } from '../components/ShoppingBasket';
 import { Assessment, BasketItem } from './AssessmentsPage';
 import { SurgeryAdditionalCarousels } from '../components/SurgeryAdditionalCarousels';
 import biologicalAgeImage from '/assests/completed02.webp';
+import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
+
 import {
   ArrowLeft,
   Activity,
@@ -27,21 +29,20 @@ import {
   Mail
 } from 'lucide-react';
 
-// Completed Surgery Preparation Bundle Assessment definition
-const completedSurgeryPreparationAssessment: Assessment = {
-  id: '21',
-  name: 'Completed Surgery Preparation Bundle',
+const surgeryReadinessAssessment: Assessment = {
+  id: "1",
+  name: "Surgery Readiness Score",
   description:
-    'Comprehensive surgical preparation assessment combining readiness, complication risk, recovery prediction, anaesthesia screening, and mobility evaluation in one complete bundle.',
-  price: 120,
-  image: biologicalAgeImage,
+    "Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.",
+  price: 37.0,
+  image: surgeryReadinessImage,
   icon: <Shield className="w-6 h-6" />,
-  category: 'Surgery',
+  category: "Pre-Surgery",
   features: [
-    'Complete surgical readiness assessment',
-    'Comprehensive risk factor analysis',
-    'Personalized preparation strategies'
-  ]
+    "Pre-surgical health optimization",
+    "Risk assessment protocols",
+    "Recovery timeline planning",
+  ],
 };
 
 interface ChecklistStep {
@@ -56,9 +57,9 @@ interface ChecklistStep {
   completed: boolean;
 }
 
-interface SurgeryPreparationChecklistPageProps {
-  onAddToBasket?: (assessment: Assessment) => void;
-  onOpenBasket?: () => void;
+interface SurgeryReadinessUpsellPageProps {
+  onAddToBasket: (assessment: Assessment) => void;
+  onOpenBasket: () => void;
 }
 
 export function SurgeryPreparationChecklistPage({
@@ -119,11 +120,11 @@ export function SurgeryPreparationChecklistPage({
 
   const handleStartAssessment = () => {
     console.log('🎯 handleStartAssessment called');
-    console.log('📦 Assessment to add:', completedSurgeryPreparationAssessment);
+    console.log('📦 Assessment to add:', surgeryReadinessAssessment);
     console.log('🔧 externalAddToBasket exists:', !!externalAddToBasket);
     console.log('🔧 externalOpenBasket exists:', !!externalOpenBasket);
 
-    addToBasket(completedSurgeryPreparationAssessment);
+    addToBasket(surgeryReadinessAssessment);
     setEmailFormVisible(false);
 
     // Open basket - either external or local
@@ -466,14 +467,18 @@ export function SurgeryPreparationChecklistPage({
         </Accordion>
 
         {/* Bonus Guides Label */}
-        <div className="mt-8 mb-4 text-center">
-          <Badge
-            variant="outline"
-            className="text-xs text-white bg-black py-[5px] px-[7px] border-black"
-          >
-            Bonus Guides
-          </Badge>
-        </div>
+<div className="mt-8 mb-4 text-center">
+  <Badge
+    variant="outline"
+    className="text-sm text-white bg-black py-[10px] px-[12px] border-black"
+  >
+    Bonus Guides
+  </Badge>
+</div>
+
+
+
+
 
         {/* Additional Carousels */}
         <div>

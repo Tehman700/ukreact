@@ -27,7 +27,7 @@ const surgeryReadinessAssessment: Assessment = {
   name: "Surgery Readiness Score",
   description:
     "Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.",
-  price: 37.0,
+  price: 39.0,
   image: surgeryReadinessImage,
   icon: <Shield className="w-6 h-6" />,
   category: "Pre-Surgery",
