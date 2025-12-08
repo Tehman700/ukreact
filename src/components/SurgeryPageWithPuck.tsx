@@ -127,15 +127,14 @@ export function SurgeryPageWithPuck({
       console.log("✅ ContentSquare event tracked: CTA button clicked");
     }
 
-    console.log("🛒 Adding to basket:", {
+    console.log("🎯 Navigating to quiz questions:", {
       name: assessment.name,
       price: assessment.price,
       description: assessment.description,
     });
 
-    
-    onAddToBasket(assessment);
-    onOpenBasket();
+    // Navigate directly to quiz questions page
+    window.location.hash = "surgery-readiness-assessment-questions";
   };
 
   // Save data to Supabase

@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Shield, BarChart3, Clock, Target, BookOpen, Loader2, Mail } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -202,17 +203,23 @@ export function SurgeryReadinessResultsPage() {
 
   if (loading) {
     return (
+              <PaymentGate requiredFunnel="surgery-readiness">
+
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Analyzing your surgical readiness...</p>
         </div>
       </div>
+      </PaymentGate>
+
     );
   }
 
   if (error || !aiReport) {
     return (
+              <PaymentGate requiredFunnel="surgery-readiness">
+
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
@@ -229,6 +236,8 @@ export function SurgeryReadinessResultsPage() {
           </CardContent>
         </Card>
       </div>
+            </PaymentGate>
+
     );
   }
 
@@ -236,6 +245,8 @@ export function SurgeryReadinessResultsPage() {
   const rating = getOverallRating(overallRating);
 
   return (
+                    <PaymentGate requiredFunnel="surgery-readiness">
+
     <div className="min-h-screen bg-background">
       {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
@@ -696,7 +707,7 @@ export function SurgeryReadinessResultsPage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6 bg-background border-muted">
+<Card className="mt-6 bg-background border-muted">
           <CardContent className="pt-6">
             <div className="space-y-4">
               <Accordion type="single" collapsible className="w-full">
@@ -746,7 +757,18 @@ export function SurgeryReadinessResultsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-8 text-center">
+          <Button
+            onClick={() => window.location.hash = "surgery-readiness-assessment-feedback"}
+            size="lg"
+          >
+            Continue to Review
+          </Button>
+        </div>
       </div>
     </div>
+    </PaymentGate>
+
   );
 }

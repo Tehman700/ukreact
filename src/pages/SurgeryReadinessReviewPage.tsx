@@ -329,6 +329,16 @@ export function SurgeryReadinessReviewPage() {
 
             </div>
           )}
+
+          {/* New button at the bottom */}
+          <div className="text-center mt-8">
+            <Button
+              onClick={() => window.location.hash = "surgery-readiness-upsell-final"}
+              size="lg"
+            >
+              See Recommended Next Steps
+            </Button>
+          </div>
         </div>
       </div>
     </PaymentGate>

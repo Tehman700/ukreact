@@ -172,7 +172,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const funnelRouteMap = {
       "complication-risk": "complication-risk-checker-questions",
       "recovery-speed": "recovery-speed-predictor-questions",
-      "surgery-readiness": "surgery-readiness-assessment-questions",
+      "surgery-readiness": "surgery-readiness-assessment-results",  // Changed
       "anesthesia": "anaesthesia-risk-screener-questions",
       "mobility": "mobility-strength-score-questions",
       "symptom": "symptom-severity-index-questions",

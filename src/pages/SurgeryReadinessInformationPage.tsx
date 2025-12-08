@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight } from 'lucide-react';
-import { PaymentGate } from '../components/PaymentGate';
+// import { PaymentGate } from '../components/PaymentGate';
 
 const AUTHORITY_STATEMENTS = [
   "Checking NICE guidelines",
@@ -168,7 +168,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Wait for progress animation to complete, then redirect
     setTimeout(() => {
-      window.location.hash = "surgery-readiness-assessment-results";
+      window.location.hash = "surgery-checklist";
     }, 1500);
 
   } catch (err) {
@@ -183,7 +183,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <PaymentGate requiredFunnel="surgery-readiness">
       <div className="min-h-screen bg-background py-16 relative">
         {/* Full-page loading overlay with LoadingPage UI */}
         <AnimatePresence>
@@ -434,6 +433,5 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       </div>
-    </PaymentGate>
   );
 }
