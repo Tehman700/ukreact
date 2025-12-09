@@ -45,8 +45,26 @@ import { SurgeryReadinessUpsellPageE } from './pages/SurgeryReadinessUpsellPageE
 import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
 import { SurgeryReadinessInformationPage } from './pages/SurgeryReadinessInformationPage';
 import { SurgeryReadinessResultsPage } from './pages/SurgeryReadinessResultsPage';
+import { SurgeryReadinessResultsPageA } from './pages/SurgeryReadinessResultsPageA';
+import { SurgeryReadinessResultsPageB } from './pages/SurgeryReadinessResultsPageB';
+import { SurgeryReadinessResultsPageC } from './pages/SurgeryReadinessResultsPageC';
 import { SurgeryReadinessReviewPage } from './pages/SurgeryReadinessReviewPage';
+import { SurgeryReadinessReviewPageA } from './pages/SurgeryReadinessReviewPageA';
+import { SurgeryReadinessReviewPageB } from './pages/SurgeryReadinessReviewPageB';
+import { SurgeryReadinessReviewPageC } from './pages/SurgeryReadinessReviewPageC';
+import { SurgeryReadinessUpsellFinalA } from './pages/SurgeryReadinessUpsellFinalA';
+import { SurgeryReadinessUpsellFinalB } from './pages/SurgeryReadinessUpsellFinalB';
+import { SurgeryReadinessUpsellFinalC } from './pages/SurgeryReadinessUpsellFinalC';
 import { HealthConciergeInformationUser } from './pages/HealthConciergeInformationUser';
+
+
+
+import { Questions_1 } from './pages/Questions_1';
+import { Questions_2 } from './pages/Questions_2';
+import { Questions_3 } from './pages/Questions_3';
+import { Information_1 } from './pages/Information_1';
+import { Information_2 } from './pages/Information_2';
+import { Information_3 } from './pages/Information_3';
 
 // Assessment Pages - Biological Age
 import { BiologicalAgeUpsellPage } from './pages/BiologicalAgeUpsellPage';
@@ -748,6 +766,36 @@ useEffect(() => {
             />;
 
 
+      // New Routing added by Tehman for the Duplicate Pages for A/B Testing
+      case 'surgery-readiness-one':
+          return <Questions_1
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+      case 'surgery-readiness-two':
+          return <Questions_2
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+      case 'surgery-readiness-three':
+          return <Questions_3
+            onAddToBasket={addToBasket}
+            onOpenBasket={() => setIsBasketOpen(true)}
+          />;
+
+      case 'surgery-readiness-information-one':
+        return <Information_1 />;
+
+      case 'surgery-readiness-information-two':
+        return <Information_2 />;
+
+      case 'surgery-readiness-information-three':
+        return <Information_3 />;
+
+
+
+
+
       case 'surgery-checklist-b':
             return <SurgeryPreparationChecklistPageB
               onAddToBasket={addToBasket}
@@ -883,8 +931,26 @@ useEffect(() => {
         }} />;
       case 'surgery-readiness-assessment-results':
         return <SurgeryReadinessResultsPage />;
+      case 'surgery-readiness-assessment-results-a':
+        return <SurgeryReadinessResultsPageA />;
+      case 'surgery-readiness-assessment-results-b':
+        return <SurgeryReadinessResultsPageB />;
+      case 'surgery-readiness-assessment-results-c':
+        return <SurgeryReadinessResultsPageC />;
       case 'surgery-readiness-assessment-feedback':
         return <SurgeryReadinessReviewPage />;
+      case 'surgery-readiness-assessment-feedback-a':
+        return <SurgeryReadinessReviewPageA />;
+      case 'surgery-readiness-assessment-feedback-b':
+        return <SurgeryReadinessReviewPageB />;
+      case 'surgery-readiness-assessment-feedback-c':
+        return <SurgeryReadinessReviewPageC />;
+      case 'surgery-readiness-upsell-final-a':
+        return <SurgeryReadinessUpsellFinalA />;
+      case 'surgery-readiness-upsell-final-b':
+        return <SurgeryReadinessUpsellFinalB />;
+      case 'surgery-readiness-upsell-final-c':
+        return <SurgeryReadinessUpsellFinalC />;
       case 'surgery-conditioning-protocol-challenge':
         return <UpsellPage onAddToCart={handleAddToCart} />;
       case 'biological-age-calculator-results':

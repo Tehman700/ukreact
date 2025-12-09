@@ -343,7 +343,14 @@ const makePayment = async (funnelType = "complication-risk") => {
     const funnelMap: Record<string, string> = {
       "6": "complication-risk",      // Complication Risk Checker
       "7": "recovery-speed",          // Recovery Speed Predictor
-      "1": "surgery-readiness",       // Surgery Readiness
+      "1": (() => {
+        // Check variant for Surgery Readiness
+        const variant = sessionStorage.getItem("surgery_variant");
+        if (variant === "A") return "surgery-readiness-a";
+        if (variant === "B") return "surgery-readiness-b";
+        if (variant === "C") return "surgery-readiness-c";
+        return "surgery-readiness"; // Default fallback
+      })(),
       "8": "anesthesia",              // Anaesthesia Risk
       "9": "mobility",                // Mobility Recovery
       "10": "symptom",                // Symptom Severity

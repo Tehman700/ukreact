@@ -124,6 +124,8 @@ export function SurgeryPreparationChecklistPage({
     console.log('🔧 externalAddToBasket exists:', !!externalAddToBasket);
     console.log('🔧 externalOpenBasket exists:', !!externalOpenBasket);
 
+    sessionStorage.setItem("surgery_variant", "A");
+
     addToBasket(surgeryReadinessAssessment);
     setEmailFormVisible(false);
 
