@@ -199,7 +199,7 @@ export function SurgeryReadinessReviewPageA() {
   const hasSelectedFeedback = selectedPositiveFeedback.length > 0;
 
   return (
-    <PaymentGate requiredFunnel="surgery-readiness">
+    <PaymentGate requiredFunnel="surgery-readiness-a">
       <div className="min-h-screen bg-background py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-8">
