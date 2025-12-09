@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, AlertCircle, CheckCircle2, TrendingUp, Shield, BarChart3, Clock, Target, BookOpen, Loader2, Mail } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { PaymentGate } from '../components/PaymentGate';
 
 interface AssessmentResult {
   category: string;
@@ -128,7 +129,8 @@ export function SurgeryReadinessResultsPageA() {
           report: aiReport,
           reportId: Date.now(),
           pageUrl: currentPageUrl,
-          activeTab: activeTab
+          activeTab: activeTab,
+          stripeSessionId: sessionStorage.getItem('stripe_session_id') // ✅ Pass session_id for PaymentGate
         })
       })
         .then(response => response.json())
@@ -236,7 +238,8 @@ export function SurgeryReadinessResultsPageA() {
   const rating = getOverallRating(overallRating);
 
   return (
-    <div className="min-h-screen bg-background">
+    <PaymentGate requiredFunnel="surgery-readiness-a">
+      <div className="min-h-screen bg-background">
       {/* Email Popup - Shows immediately on page load */}
       {showEmailPopup && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
@@ -757,5 +760,6 @@ export function SurgeryReadinessResultsPageA() {
         </div>
       </div>
     </div>
+    </PaymentGate>
   );
 }

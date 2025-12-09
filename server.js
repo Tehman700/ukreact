@@ -6521,7 +6521,7 @@ ${message}
 
 app.post("/api/send-email-report", async (req, res) => {
   try {
-    const { userEmail, userName, assessmentType, report, reportId, pageUrl } = req.body;
+    const { userEmail, userName, assessmentType, report, reportId, pageUrl, stripeSessionId } = req.body;
 
     if (!userEmail || !userName || !assessmentType || !report || !pageUrl) {
       return res.status(400).json({ success: false, error: "Missing required fields" });
@@ -6541,16 +6541,19 @@ app.post("/api/send-email-report", async (req, res) => {
     await page.setViewport({ width: 1280, height: 800 });
 
     // ✅ FIX: Use the assessmentType from the request instead of hardcoding
-    await page.evaluateOnNewDocument((reportData, userInfoData, assessType) => {
+    await page.evaluateOnNewDocument((reportData, userInfoData, assessType, sessionId) => {
       sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
       sessionStorage.setItem('assessmentType', assessType); // ✅ Dynamic now
       sessionStorage.setItem('userInfo', JSON.stringify(userInfoData));
       sessionStorage.setItem('currentUser', JSON.stringify(userInfoData));
+      if (sessionId) {
+        sessionStorage.setItem('stripe_session_id', sessionId); // ✅ Set session_id for PaymentGate
+      }
     }, report, {
       email: userEmail,
       first_name: userName.split(' ')[0],
       last_name: userName.split(' ').slice(1).join(' ')
-    }, assessmentType); // ✅ Pass assessmentType as third parameter
+    }, assessmentType, stripeSessionId); // ✅ Pass stripeSessionId as fourth parameter
 
     // Navigate to page
     await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 0 });
