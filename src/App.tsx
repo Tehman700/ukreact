@@ -753,9 +753,6 @@ useEffect(() => {
               onAddToBasket={addToBasket}
               onOpenBasket={() => setIsBasketOpen(true)}
             />;
-
-
-
       case 'surgery-checklist-c':
             return <SurgeryPreparationChecklistPageC
               onAddToBasket={addToBasket}
