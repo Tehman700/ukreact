@@ -6,6 +6,7 @@ export const Image: ComponentConfig<{
   src: string;
   alt: string;
   fullScreen: boolean;
+  align: "left" | "center" | "right" | "justify";
   shadowSize: "none" | "xs" | "small" | "medium" | "large" | "xl" | "2xl";
   borderRadius: number;
   width?: number;
@@ -34,6 +35,16 @@ export const Image: ComponentConfig<{
       options: [
         { label: "Card Shaped", value: false },
         { label: "Full Screen", value: true },
+      ],
+    },
+    align: {
+      type: "select",
+      label: "Alignment",
+      options: [
+        { label: "Left", value: "left" },
+        { label: "Center", value: "center" },
+        { label: "Right", value: "right" },
+        { label: "Justify", value: "justify" },
       ],
     },
     shadowSize: {
@@ -120,6 +131,7 @@ export const Image: ComponentConfig<{
     src: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop",
     alt: "Image",
     fullScreen: false,
+    align: "center",
     shadowSize: "medium",
     borderRadius: 8,
     paddingTop: 0,
@@ -131,7 +143,7 @@ export const Image: ComponentConfig<{
     marginLeft: 0,
     marginRight: 0,
   },
-  render: ({ src, alt, fullScreen, shadowSize, borderRadius, width, height, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight }) => {
+  render: ({ src, alt, fullScreen, align, shadowSize, borderRadius, width, height, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight }) => {
     const shadowStyles = {
       none: "none",
       xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
@@ -156,6 +168,7 @@ export const Image: ComponentConfig<{
           right: "50%",
           marginLeft: "-50vw",
           marginRight: "-50vw",
+          textAlign: align,
         }
       : {
           paddingTop: `${paddingTop}px`,
@@ -167,15 +180,16 @@ export const Image: ComponentConfig<{
           marginLeft: `${marginLeft}px`,
           marginRight: `${marginRight}px`,
           width: "100%",
-
+          textAlign: align,
         };
 
     const imageStyle: React.CSSProperties = {
       ...(width && { width: `${width}px` }) ||  { width: "100%" },
       ...(height && { height: `${height}px` }) || { height: "auto" },
-      display: "block",
+      display: "inline-block",
       borderRadius: fullScreen ? "0" : `${borderRadius}px`,
       boxShadow: shadowStyles[shadowSize],
+      margin: "0 auto",
     };
 
     return (
