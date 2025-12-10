@@ -333,7 +333,7 @@ export function SurgeryReadinessReviewPageB() {
           {/* New button at the bottom */}
           <div className="text-center mt-8">
             <Button
-              onClick={() => window.location.hash = "surgery-readiness-assessment-learn-more"}
+              onClick={() => window.location.hash = "surgery-conditioning-protocol-challenge"}
               size="lg"
             >
               See Recommended Next Steps
