@@ -5,7 +5,6 @@ import { puckConfig } from "./puck/SurgeryPageComponents";
 import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
-import surgeryReadinessImage from '../assets/surgery-hero.webp';
 
 /**
  * Common Surgery Page with Puck Editor Integration
@@ -104,7 +103,7 @@ export function SurgeryPageWithPuck({
       name: (rootProps.assessmentName as string) || fallbackAssessment?.name || "Surgery Readiness Score",
       description: (rootProps.assessmentDescription as string) || fallbackAssessment?.description || "Comprehensive pre-surgical evaluation",
       price: typeof rootProps.assessmentPrice === 'number' ? rootProps.assessmentPrice : (fallbackAssessment?.price || 37.0),
-      image: surgeryReadinessImage,
+      image: '/surgery-hero.webp',
       icon: fallbackAssessment?.icon || null,
       features: fallbackAssessment?.features || [],
       hidden: fallbackAssessment?.hidden,
