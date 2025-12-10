@@ -114,7 +114,7 @@ export function SurgeryPageWithPuck({
     return finalAssessment;
   }, [data, fallbackAssessment]);
 
-  const handleStartAssessment = () => {
+  const handleStartAssessmentModal = () => {
     // Track ContentSquare event
     if (window._uxa && typeof window._uxa.push === "function") {
       window._uxa.push([
@@ -134,7 +134,8 @@ export function SurgeryPageWithPuck({
     });
 
     // Navigate directly to quiz questions page
-    window.location.hash = "surgery-readiness-assessment-questions";
+    onAddToBasket(assessment);
+    onOpenBasket();
   };
 
   // Save data to Supabase
@@ -213,7 +214,7 @@ export function SurgeryPageWithPuck({
           return (
             <OriginalComponent
               {...props}
-              onButtonClick={handleStartAssessment}
+              onButtonClick={handleStartAssessmentModal}
             />
           );
         },
@@ -223,7 +224,7 @@ export function SurgeryPageWithPuck({
         render: (props: any) => {
           const OriginalComponent = puckConfig.components.Button.render;
           return (
-            <OriginalComponent {...props} onClick={handleStartAssessment} />
+            <OriginalComponent {...props} onClick={handleStartAssessmentModal} />
           );
         },
       },
