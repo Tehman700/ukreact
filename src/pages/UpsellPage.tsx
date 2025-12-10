@@ -83,7 +83,7 @@ export function UpsellPage({ onAddToCart }: UpsellPageProps) {
             It’s fast. Structured. And proven to work.
           </p>
           <p className="text-sm text-muted-foreground font-bold">
-            All for only £300.
+            All for only £200.
           </p>
         </div>
       </CardContent>
