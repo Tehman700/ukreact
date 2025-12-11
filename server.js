@@ -172,7 +172,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const funnelRouteMap = {
       "complication-risk": "complication-risk-checker-questions",
       "recovery-speed": "recovery-speed-predictor-questions",
-      "surgery-readiness": "surgery-readiness-assessment-results",  // Changed
+      "surgery-readiness": "success",  // Changed
       "surgery-readiness-a": "surgery-readiness-assessment-results-a",  // Variant A
       "surgery-readiness-b": "surgery-readiness-assessment-results-b",  // Variant B
       "surgery-readiness-c": "surgery-readiness-assessment-results-c",  // Variant C
@@ -206,8 +206,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         funnel_type: funnel_type
       },
       // Redirect directly to the questions page for this funnel
-      // success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
-      success_url: "https://luther.health/Health-Audit.html#success",
+      success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 //      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
