@@ -181,8 +181,8 @@ export function SurgeryReadinessReviewPageA() {
       positiveFeedback: selectedPositiveFeedback
     });
 
-    // Navigate to the upsell page
-    window.location.hash = 'surgery-readiness-upsell-final-a';
+    // Navigate to the conditioning page
+    window.location.hash = 'surgery-conditioning-protocol-challenge';
   };
 
   const handleSkip = () => {
@@ -329,16 +329,6 @@ export function SurgeryReadinessReviewPageA() {
 
             </div>
           )}
-
-          {/* New button at the bottom */}
-          <div className="text-center mt-8">
-            <Button
-              onClick={() => window.location.hash = "surgery-conditioning-protocol-challenge"}
-              size="lg"
-            >
-              See Recommended Next Steps
-            </Button>
-          </div>
         </div>
       </div>
     </PaymentGate>
