@@ -172,7 +172,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const funnelRouteMap = {
       "complication-risk": "complication-risk-checker-questions",
       "recovery-speed": "recovery-speed-predictor-questions",
-      "surgery-readiness": "quiz",  // Changed
+      "surgery-readiness": "surgery-readiness-assessment-questions",  // Changed
       "surgery-readiness-a": "surgery-readiness-assessment-results-a",  // Variant A
       "surgery-readiness-b": "surgery-readiness-assessment-results-b",  // Variant B
       "surgery-readiness-c": "surgery-readiness-assessment-results-c",  // Variant C
