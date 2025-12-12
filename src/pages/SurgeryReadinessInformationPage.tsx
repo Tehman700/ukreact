@@ -168,7 +168,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Wait for progress animation to complete, then redirect
     setTimeout(() => {
-      window.location.hash = "surgery-checklist";
+      window.location.hash = "surgery-readiness-assessment-results";
     }, 1500);
 
   } catch (err) {
