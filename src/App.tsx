@@ -792,10 +792,6 @@ useEffect(() => {
       case 'surgery-readiness-information-three':
         return <Information_3 />;
 
-
-
-
-
       case 'surgery-checklist-b':
             return <SurgeryPreparationChecklistPageB
               onAddToBasket={addToBasket}
@@ -850,8 +846,7 @@ useEffect(() => {
           return <SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
-          
+          />;    
       case 'surgery-readiness-assessment-learn-more-j':
           return <SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
