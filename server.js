@@ -746,6 +746,46 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
+app.post('/api/process-surgery-assessment', async (req, res) => {
+    try {
+      const { funnelName, userInfo, questions } = req.body;
+
+      const n8n = await fetch('https://tehman600.app.n8n.cloud/webhook-test/0168cf8f-2289-4927-aa8e-320ecf41c160', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          funnelName,
+          userInfo,
+          questions
+        })
+      });
+
+      const aliData = await n8n.json();
+
+
+
+    } catch (error) {
+      console.error('sgdfhsdfhsgfhfsghsfghj');
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ----------------------------
 // Generate AI Assessment Report
 // ----------------------------

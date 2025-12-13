@@ -117,80 +117,71 @@ export function CompletedSurgeryPreparationInformationPage() {
     }
   }, [reportReady, progress]);
 
+// NEW WORKFLOW BY USING N8N FOR MORE ADVANCED AUTOMATION
 const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!isFormValid()) return;
+    e.preventDefault();
+    if (!isFormValid()) return;
 
-  setIsSubmitting(true);
-  setReportReady(false);
-
-  try {
-    // Save user
-    const response = await fetch("https://luther.health/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name: userInfo.firstName,
-        last_name: userInfo.lastName,
-        email: userInfo.email,
-        phone: userInfo.phone,
-        age_range: userInfo.age,
-      }),
-    });
-
-    const savedUser = await response.json();
-
-    sessionStorage.setItem("currentUser", JSON.stringify(savedUser));
-    sessionStorage.setItem("userInfo", JSON.stringify(savedUser));
-
-    // Get stored answers
-    const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
-
-    // Generate AI report with extended timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 240000); // 4 minutes timeout
+    setIsSubmitting(true);
+    setReportReady(false);
 
     try {
-      const reportResponse = await fetch("https://luther.health/api/generate-assessment-report", {
+      // Get stored answers from sessionStorage
+      const pendingAnswers = JSON.parse(sessionStorage.getItem("pendingAnswers") || "[]");
+
+      // SINGLE API CALL - Send everything at once
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 240000);
+
+      const response = await fetch("https://luther.health/api/process-surgery-assessment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assessmentType: "Surgery Preparation Bundle",
-          answers: pendingAnswers,
-          userInfo: savedUser,
+          funnelName: "Surgery Preparation Bundle",
+          userInfo: {
+            first_name: userInfo.firstName,
+            last_name: userInfo.lastName,
+            email: userInfo.email,
+            phone: userInfo.phone,
+            age_range: userInfo.age,
+          },
+          questions: pendingAnswers,
         }),
-        signal: controller.signal, // Add abort signal
+        signal: controller.signal,
       });
 
-      clearTimeout(timeoutId); // Clear timeout if request succeeds
+      clearTimeout(timeoutId);
 
-      if (!reportResponse.ok) {
-        throw new Error(`Server responded with ${reportResponse.status}`);
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
       }
 
-      const reportData = await reportResponse.json();
-      sessionStorage.setItem("assessmentReport", JSON.stringify(reportData.report));
-      sessionStorage.setItem("reportId", reportData.reportId.toString());
+      const data = await response.json();
+
+      // Store the response
+      sessionStorage.setItem("currentUser", JSON.stringify(data.user));
+      sessionStorage.setItem("userInfo", JSON.stringify(data.user));
+      sessionStorage.setItem("assessmentReport", JSON.stringify(data.report));
+      sessionStorage.setItem("reportId", data.reportId.toString());
       sessionStorage.setItem("assessmentType", "Surgery Preparation Bundle");
+
       setReportReady(true);
 
-      // Wait for progress animation to complete, then redirect
+      // Redirect to results
       setTimeout(() => {
         window.location.hash = "completed-surgery-preparation-bundle-results";
       }, 1500);
 
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      throw fetchError;
+    } catch (err) {
+      console.error("Error processing surgery assessment:", err);
+      setIsSubmitting(false);
+      alert("There was an error generating your report. Please try again.");
     }
+  };
 
-  } catch (err) {
-    console.error("Error saving user info and generating report:", err);
-    setIsSubmitting(false);
-    // Optionally show an error message to the user
-    alert("There was an error generating your report. Please try again.");
-  }
-};
+
+
+
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
