@@ -182,7 +182,7 @@ export function UpsellPage({ onAddToCart }: UpsellPageProps) {
             <Button
               size="lg"
               className="w-full lg:w-auto mt-6"
-              onClick={() => (window.location.hash = 'assessments')}
+              onClick={() => onAddToCart(surgeryConditioningProduct)}
             >
               Start preparing for surgery now
             </Button>

@@ -315,12 +315,12 @@ const globalAssessments: Assessment[] = [
   },
   {
     id: '5',
-    name: 'Surgery Conditioning Protocol - 14 Day Free Trial',
-    description: 'Comprehensive 14-day program to optimize your physical and mental preparation for upcoming surgery.',
+    name: '21 day surgery preparation protocol',
+    description: 'Comprehensive 21-day program to optimize your physical and mental preparation for upcoming surgery.',
     price: 200.00,
   //  image: multiColorStripesImage,
     icon: <Shield className="w-6 h-6" />,
-    features: ['Pre-surgical conditioning protocol', '14-day structured program', 'Recovery optimization guidance'],
+    features: ['Pre-surgical conditioning protocol', '21-day structured program', 'Recovery optimization guidance'],
     hidden: true
   },
   {
