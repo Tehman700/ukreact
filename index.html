@@ -8,18 +8,9 @@
     />
     <title>Luther Health</title>
     <link rel="icon" type="image/png" href="/assests/favi.png" />
+    <link rel="canonical" href="https://luther.health/" />
 
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V7D82M70TL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag("js", new Date());
-      gtag("config", "G-V7D82M70TL");
-    </script>
-
-    <!-- Meta Pixel Code -->
+    <!-- Meta Pixel Code (high priority) -->
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -31,8 +22,18 @@
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '2198423147310150');
       fbq('track', 'PageView');
+      fbq('track', 'ViewContent'); // Landing Page View
     </script>
     <!-- End Meta Pixel Code -->
+
+    <!-- Google tag (gtag.js) - deferred -->
+    <script defer src="https://www.googletagmanager.com/gtag/js?id=G-V7D82M70TL"></script>
+    <script defer>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", "G-V7D82M70TL");
+    </script>
   </head>
 
   <body>
