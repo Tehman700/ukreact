@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 // Core Components
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -21,16 +21,17 @@ import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
 import { CQCPage } from './pages/CQC';
 
-import { SurgeryReadinessUpsellPageWithPuck } from './pages/SurgeryReadinessUpsellPageWithPuck';
-import { SurgeryReadinessUpsellPageBWithPuck } from './pages/SurgeryReadinessUpsellPageBWithPuck';
-import { SurgeryReadinessUpsellPageCWithPuck } from './pages/SurgeryReadinessUpsellPageCWithPuck';
-import { SurgeryReadinessUpsellPageDWithPuck } from './pages/SurgeryReadinessUpsellPageDWithPuck';
-import { SurgeryReadinessUpsellPageEWithPuck } from './pages/SurgeryReadinessUpsellPageEWithPuck';
-import { SurgeryReadinessUpsellPageFWithPuck } from './pages/SurgeryReadinessUpsellPageFWithPuck';
-import { SurgeryReadinessUpsellPageGWithPuck } from './pages/SurgeryReadinessUpsellPageGWithPuck';
-import { SurgeryReadinessUpsellPageHWithPuck } from './pages/SurgeryReadinessUpsellPageHWithPuck';
-import { SurgeryReadinessUpsellPageIWithPuck } from './pages/SurgeryReadinessUpsellPageIWithPuck';
-import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUpsellPageJWithPuck';
+// Lazy load Puck pages for better performance
+const SurgeryReadinessUpsellPageWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageWithPuck })));
+const SurgeryReadinessUpsellPageBWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageBWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageBWithPuck })));
+const SurgeryReadinessUpsellPageCWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageCWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageCWithPuck })));
+const SurgeryReadinessUpsellPageDWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageDWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageDWithPuck })));
+const SurgeryReadinessUpsellPageEWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageEWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageEWithPuck })));
+const SurgeryReadinessUpsellPageFWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageFWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageFWithPuck })));
+const SurgeryReadinessUpsellPageGWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageGWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageGWithPuck })));
+const SurgeryReadinessUpsellPageHWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageHWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageHWithPuck })));
+const SurgeryReadinessUpsellPageIWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageIWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageIWithPuck })));
+const SurgeryReadinessUpsellPageJWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageJWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageJWithPuck })));
 import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
 import { SurgeryPreparationChecklistPageB } from './pages/SurgeryPreparationChecklistPageB';
 import { SurgeryPreparationChecklistPageC } from './pages/SurgeryPreparationChecklistPageC';
@@ -800,55 +801,55 @@ useEffect(() => {
               onOpenBasket={() => setIsBasketOpen(true)}
             />;
       case 'surgery-readiness-assessment-learn-more':
-          return <SurgeryReadinessUpsellPageWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-b':
-          return <SurgeryReadinessUpsellPageBWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-c':
-          return <SurgeryReadinessUpsellPageCWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-d':
-          return <SurgeryReadinessUpsellPageDWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-e':
-          return <SurgeryReadinessUpsellPageEWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-f':
-          return <SurgeryReadinessUpsellPageFWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageFWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-g':
-          return <SurgeryReadinessUpsellPageGWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageGWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-h':
-          return <SurgeryReadinessUpsellPageHWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageHWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;
+          /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-i':
-          return <SurgeryReadinessUpsellPageIWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;    
+          /></Suspense>;    
       case 'surgery-readiness-assessment-learn-more-j':
-          return <SurgeryReadinessUpsellPageJWithPuck
+          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
-          />;    
+          /></Suspense>;    
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
       case 'surgery-readiness-assessment-information':

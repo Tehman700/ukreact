@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Render, Puck, Data } from "@measured/puck";
+import React, { useEffect, useState, lazy, Suspense } from "react";
+import { Render, Data } from "@measured/puck";
 import { Button } from "./ui/button";
 import { puckConfig } from "./puck/SurgeryPageComponents";
 import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
+
+// Lazy load Puck editor for better performance
+const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
 
 /**
  * Common Surgery Page with Puck Editor Integration
@@ -94,8 +97,6 @@ export function SurgeryPageWithPuck({
     // Clear any old assessment data from button components
    
     const rootProps = data?.root?.props || {};
-
-    console.log("🔍 Puck root props:", rootProps);
     
     // Build assessment with Puck data taking priority
     const finalAssessment: Assessment = {
@@ -109,7 +110,6 @@ export function SurgeryPageWithPuck({
       hidden: fallbackAssessment?.hidden,
     };
     
-    console.log("✅ Final assessment for basket:", finalAssessment);
     return finalAssessment;
   }, [data, fallbackAssessment]);
 
@@ -123,14 +123,8 @@ export function SurgeryPageWithPuck({
           value: "reduce_surgical_risk_button",
         },
       ]);
-      console.log("✅ ContentSquare event tracked: CTA button clicked");
     }
 
-    console.log("🎯 Navigating to quiz questions:", {
-      name: assessment.name,
-      price: assessment.price,
-      description: assessment.description,
-    });
 
     // Navigate directly to quiz questions page
     onAddToBasket(assessment);
@@ -312,22 +306,28 @@ export function SurgeryPageWithPuck({
               👁️ Preview Page
             </Button>
           </div>
-        <Puck
-          config={enhancedConfig}
-          data={data}
-          onPublish={async (newData) => {
-            setData(newData);
-            const success = await saveToSupabase(newData, true);
-            if (success) {
-              alert("🚀 Page published successfully!");
-            } else {
-              alert(
-                "⚠️ Failed to publish Page. Check your internet connection."
-              );
-            }
-            console.log("📤 Published Page data:", newData);
-          }}
-        />
+        <Suspense fallback={
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+            <p>Loading editor...</p>
+          </div>
+        }>
+          <Puck
+            config={enhancedConfig}
+            data={data}
+            onPublish={async (newData) => {
+              setData(newData);
+              const success = await saveToSupabase(newData, true);
+              if (success) {
+                alert("🚀 Page published successfully!");
+              } else {
+                alert(
+                  "⚠️ Failed to publish Page. Check your internet connection."
+                );
+              }
+              console.log("📤 Published Page data:", newData);
+            }}
+          />
+        </Suspense>
       </div>
     );
   }

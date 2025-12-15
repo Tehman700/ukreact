@@ -72,6 +72,25 @@
     build: {
       target: 'esnext',
       outDir: 'build',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split vendor libraries into separate chunks
+            'react-vendor': ['react', 'react-dom'],
+            'puck-editor': ['@measured/puck'],
+            'ui-vendor': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-switch',
+              '@radix-ui/react-tabs',
+            ],
+            'utils': ['clsx', 'class-variance-authority'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
     },
     server: {
       port: 3000,
