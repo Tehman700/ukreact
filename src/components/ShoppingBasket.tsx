@@ -184,7 +184,8 @@ const makePayment = async (funnelType = "complication-risk") => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       products: checkoutItems,
-      funnel_type: funnelType  // Add this parameter
+      funnel_type: funnelType,
+      page: currentHash  // Add this parameter
     }),
   });
 

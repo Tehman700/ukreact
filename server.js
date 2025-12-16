@@ -158,18 +158,16 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
+    const { products, funnel_type = "complication-risk", page = "" } = req.body; // Add funnel_type parameter
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
 
     // Determine which Stripe instance to use based on funnel_type
-    const useSpecialStripe = ['surgery-readiness-a', 'surgery-readiness-b'].includes(funnel_type);
+    const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b'].includes(page);
     const stripeInstance = useSpecialStripe ? stripeSpecial : stripe;
     
-    console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} Stripe account for funnel: ${funnel_type}`);
-
     const line_items = products.map((item) => ({
       price_data: {
         currency: "gbp",
