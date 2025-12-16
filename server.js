@@ -70,11 +70,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
-// Special Stripe instance for specific pages (surgery-readiness-assessment-learn-more and -b)
-const stripeSpecial = new Stripe('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' || process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2022-11-15",
-});
-
 // ----------------------------
 // POSTGRES
 // ----------------------------
@@ -158,16 +153,12 @@ app.post("/api/assessments", async (req, res) => {
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { products, funnel_type = "complication-risk", page = "" } = req.body; // Add funnel_type parameter
+    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
 
-    // Determine which Stripe instance to use based on funnel_type
-    const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b'].includes(page);
-    const stripeInstance = useSpecialStripe ? stripeSpecial : stripe;
-    
     const line_items = products.map((item) => ({
       price_data: {
         currency: "gbp",
@@ -206,7 +197,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
 
-    const session = await stripeInstance.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
