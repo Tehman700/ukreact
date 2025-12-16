@@ -71,7 +71,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 // Special Stripe instance for specific pages (surgery-readiness-assessment-learn-more and -b)
-const stripeSpecial = new Stripe(process.env.STRIPE_SECRET_KEY_SPECIAL || process.env.STRIPE_SECRET_KEY, {
+const stripeSpecial = new Stripe('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' || process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
