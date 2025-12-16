@@ -93,7 +93,16 @@ export function ShoppingBasket({
     });
   }, [isOpen, items.length, totalPrice, onUpgradeToBundle]);
 
-  const bundleSuggestion = getBundleSuggestion(items);
+  // Check if we're on specific surgery pages where bundle should be hidden
+  const currentHash = window.location.hash.replace('#', '');
+  const hideBundlePages = [
+    'surgery-readiness-assessment-learn-more',
+    'surgery-readiness-assessment-learn-more-b',
+    'surgery-readiness-assessment-learn-more-c'
+  ];
+  const shouldHideBundle = hideBundlePages.includes(currentHash);
+
+  const bundleSuggestion = shouldHideBundle ? null : getBundleSuggestion(items);
   const basketItemIds = items.map(item => item.assessment.id);
 
   const calculateSavings = () => {
