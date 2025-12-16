@@ -157,7 +157,19 @@ export function ShoppingBasket({
 
 // THIS IS THE NEW PAYMENT METHOD BUTTON THAT I CREATED
 const makePayment = async (funnelType = "complication-risk") => {
-  const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  // Check current page hash to determine which Stripe key to use
+  const currentHash = window.location.hash.replace('#', '');
+  const useSpecialStripeKey = [
+    'surgery-readiness-assessment-learn-more',
+    'surgery-readiness-assessment-learn-more-b'
+  ].includes(currentHash);
+
+  // Use special Stripe key for specific pages, otherwise use default
+  const stripeKey = useSpecialStripeKey 
+    ? import.meta.env.VITE_STRIPE_PUBLIC_KEY_SPECIAL
+    : import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+
+  const stripe = await loadStripe(stripeKey);
 
   const checkoutItems = items.map(item => ({
     item_id: item.assessment.id,
