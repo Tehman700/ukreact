@@ -165,6 +165,9 @@ app.post("/api/create-checkout-session", async (req, res) => {
       return res.status(400).json({ error: "No products provided" });
     }
 
+    console.log("💳 Products for checkout:", products);
+    console.log("💳 Page for checkout:", page);
+
     const line_items = products.map((item) => ({
       price_data: {
         currency: "gbp",
@@ -208,6 +211,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
       'surgery-readiness-assessment-learn-more',
       'surgery-readiness-assessment-learn-more-b'
     ].includes(page) ? stripeSpecial : stripe;
+
+    console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
 
     const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],

@@ -164,6 +164,8 @@ const makePayment = async (funnelType = "complication-risk") => {
     'surgery-readiness-assessment-learn-more-b'
   ].includes(currentPage);
 
+  
+
   // Load the appropriate Stripe key
   const stripePublicKey = useSpecialStripe 
     ? import.meta.env.VITE_STRIPE_PUBLIC_KEY_SPECIAL 
@@ -172,6 +174,9 @@ const makePayment = async (funnelType = "complication-risk") => {
   console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} Stripe key for page: ${currentPage}`);
 
   const stripe = await loadStripe(stripePublicKey);
+  console.log("💳 Stripe initialized");
+
+  console.log("🛒 Initiating checkout with items:", items);
 
   const checkoutItems = items.map(item => ({
     item_id: item.assessment.id,
@@ -180,6 +185,7 @@ const makePayment = async (funnelType = "complication-risk") => {
     price: item.assessment.price,
     quantity: item.quantity,
   }));
+  console.log("💳 Stripe Api request payload prepared");
 
   const response = await fetch("https://luther.health/api/create-checkout-session", {
     method: "POST",
@@ -190,6 +196,9 @@ const makePayment = async (funnelType = "complication-risk") => {
       page: currentPage  // Send page to backend for Stripe account selection
     }),
   });
+
+  console.log("💳 Stripe Api request sent");
+
 
   const data = await response.json();
 
