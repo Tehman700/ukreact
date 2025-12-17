@@ -209,7 +209,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
     // Choose Stripe instance based on page
     const stripeInstance = [
       'surgery-readiness-assessment-learn-more',
-      'surgery-readiness-assessment-learn-more-b'
+      'surgery-readiness-assessment-learn-more-b',
+      'surgery-conditioning-protocol-challenge'
     ].includes(page) ? stripeSpecial : stripe;
 
     console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
@@ -252,7 +253,7 @@ app.post("/api/webhook", async (req, res) => {
 
   // Check if this is from the special Stripe account based on session metadata
   const sessionPage = parsedEvent?.data?.object?.metadata?.page || '';
-  const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b'].includes(sessionPage);
+  const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b','surgery-conditioning-protocol-challenge'].includes(sessionPage);
   
   console.log(`🔔 Webhook received for page: ${sessionPage}`);
   console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} webhook secret`);

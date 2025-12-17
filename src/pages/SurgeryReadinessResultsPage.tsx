@@ -747,14 +747,14 @@ export function SurgeryReadinessResultsPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center">
+        {/* <div className="mt-8 text-center">
           <Button
             onClick={() => window.location.hash = "surgery-readiness-assessment-feedback"}
             size="lg"
           >
             Continue to Review
           </Button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

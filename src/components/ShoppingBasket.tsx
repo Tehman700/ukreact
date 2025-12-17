@@ -161,7 +161,8 @@ const makePayment = async (funnelType = "complication-risk") => {
   const currentPage = window.location.hash.replace('#', '') || 'home-test';
   const useSpecialStripe = [
     'surgery-readiness-assessment-learn-more',
-    'surgery-readiness-assessment-learn-more-b'
+    'surgery-readiness-assessment-learn-more-b',
+    'surgery-conditioning-protocol-challenge'
   ].includes(currentPage);
 
   
