@@ -168,7 +168,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
     {
       question: "How do I get started?",
       answer: product.isTrialOffer 
-        ? "Click 'Let's prepare together' to schedule a consultation with one of our doctors who will assess your needs and create your 14 day personalized treatment plan."
+        ? "Click 'Let's prepare together' to schedule a consultation with one of our doctors who will assess your needs and create your 21 day personalized treatment plan."
         : "Click 'Request Quote' to schedule a consultation with one of our specialists who will assess your needs and create a personalized treatment plan."
     }
   ];
