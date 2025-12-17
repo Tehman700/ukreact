@@ -211,7 +211,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       'surgery-readiness-assessment-learn-more',
       'surgery-readiness-assessment-learn-more-b',
       'surgery-conditioning-protocol-challenge'
-    ].includes(page) ? stripeSpecial : stripe;
+    ].includes(page) ? stripe : stripeSpecial;
 
     console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
 
