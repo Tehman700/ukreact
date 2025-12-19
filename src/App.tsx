@@ -543,7 +543,7 @@ export { globalAssessments };
 
 export default function App() {
   const [showDesignSystem, setShowDesignSystem] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('');
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<string | null>(null);
@@ -1204,8 +1204,10 @@ useEffect(() => {
         return <AdminDashboardPage />;
       case 'analytics-test':
         return <AnalyticsTestPage />;
+      case 'home':
+         return <HomePage onRequestQuote={handleRequestQuote} />;  
       default:
-        return <HomePage onRequestQuote={handleRequestQuote} />;
+        return '';
     }
   };
 
