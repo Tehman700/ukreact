@@ -593,7 +593,7 @@ const handleUpgradeToBundle = useCallback((bundleId: string) => {
 useEffect(() => {
   const handleHashChange = () => {
     const hash = window.location.hash.replace('#', '');
-    const newPage = hash || 'home';
+    const newPage = hash || '';
 
     // Only update page and scroll if it's actually a different page
     if (newPage !== currentPage) {
