@@ -6,6 +6,10 @@ import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
 
+// Import Puck styles only when this component is used
+import "@measured/puck/dist/index.css";
+import "../puck-basic.css";
+
 // Lazy load Puck editor for better performance
 const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
 
