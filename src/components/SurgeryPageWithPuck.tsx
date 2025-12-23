@@ -5,6 +5,7 @@ import { puckConfig } from "./puck/SurgeryPageComponents";
 import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
+import { useSearchAnalytics, useAnalytics } from '../hooks/useAnalytics';
 
 // Lazy load Puck editor for better performance
 const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
@@ -121,6 +122,9 @@ export function SurgeryPageWithPuck({
     return finalAssessment;
   }, [data, fallbackAssessment]);
 
+   const { trackAssessmentStart, trackAddToBasket } = useAnalytics();
+
+
   const handleStartAssessmentModal = () => {
     // Track ContentSquare event
     if (window._uxa && typeof window._uxa.push === "function") {
@@ -132,8 +136,9 @@ export function SurgeryPageWithPuck({
         },
       ]);
     }
-
-
+    
+     trackAssessmentStart(assessment.id, assessment.name, assessment.price);
+     trackAddToBasket(assessment.id, assessment.name, assessment.price);
     // Navigate directly to quiz questions page
     onAddToBasket(assessment);
     onOpenBasket();

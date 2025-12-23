@@ -110,7 +110,6 @@ export function SurgeryReadinessUpsellPageC({
             width={800}
             height={1000}
             sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
-            loading="eager"
             fetchPriority="high"
             decoding="async"
             quality={85}
