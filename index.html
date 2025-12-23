@@ -2,31 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Luther Health provides personalized health assessments and wellness solutions. Get expert guidance on surgery readiness, anaesthesia risk, and comprehensive health evaluations." />
     <meta name="facebook-domain-verification" content="t50xunm0s4uj1tggc3i0j0svac81y0" />
     <title>Luther Health</title>
     <link rel="icon" type="image/png" href="/assests/favi.png" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#2563eb" />
-    
-    <!-- Preconnect to critical third-party origins -->
-    <link rel="preconnect" href="https://vzfmkofzkrgawlmoidlg.supabase.co" crossorigin />
-    <link rel="dns-prefetch" href="https://vzfmkofzkrgawlmoidlg.supabase.co" />
+    <!-- Critical preconnects only -->
     <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
-    <link rel="dns-prefetch" href="https://connect.facebook.net" />
-    <link rel="preconnect" href="https://www.facebook.com" crossorigin />
     <link rel="preconnect" href="https://js.stripe.com" crossorigin />
-    <link rel="dns-prefetch" href="https://js.stripe.com" />
-    <link rel="preconnect" href="https://t.contentsquare.net" crossorigin />
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    
+    <!-- DNS prefetch for other origins -->
+    <link rel="dns-prefetch" href="https://vzfmkofzkrgawlmoidlg.supabase.co" />
+    <link rel="dns-prefetch" href="https://www.facebook.com" />
+    <link rel="dns-prefetch" href="https://t.contentsquare.net" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  </head>
 
-    <!-- Meta Pixel Code (high priority) -->
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Meta Pixel Code (moved to end) -->
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -38,32 +35,21 @@
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '2198423147310150');
       fbq('track', 'PageView');
-      fbq('track', 'ViewContent'); // Landing Page View
+      fbq('track', 'ViewContent');
     </script>
-    <!-- End Meta Pixel Code -->
-
-    <!-- Google tag (gtag.js) - deferred -->
-    <script defer src="https://www.googletagmanager.com/gtag/js?id=G-V7D82M70TL"></script>
-    <script defer>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V7D82M70TL"></script>
+    <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag("js", new Date());
       gtag("config", "G-V7D82M70TL");
     </script>
-  </head>
-
-  <body>
+    
     <!-- Meta Pixel noscript fallback -->
     <noscript>
-      <img
-        height="1"
-        width="1"
-        style="display:none"
-        src="https://www.facebook.com/tr?id=2198423147310150&ev=PageView&noscript=1"
-      />
+      <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2198423147310150&ev=PageView&noscript=1" />
     </noscript>
-
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

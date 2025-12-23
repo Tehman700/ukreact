@@ -144,15 +144,15 @@ export const HeroSection: ComponentConfig<{
           flexDirection: 'column',
           gap: '32px'
         }}>
-          <h1 style={{
+          <div style={{
             fontSize: `clamp(${fontSize * 1.25}px, 5vw, ${fontSize * 2.34}px)`,
-            fontWeight: 'bold',
+            fontWeight: '700',
             lineHeight: '1.1',
             color: fontColor,
             margin: 0
           }}>
             {title}
-          </h1>
+          </div>
           <p style={{
             fontSize: `${fontSize * 0.875}px`,
             maxWidth: '768px',
