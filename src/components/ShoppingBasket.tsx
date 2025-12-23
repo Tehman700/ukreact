@@ -188,7 +188,7 @@ const makePayment = async (funnelType = "complication-risk") => {
   }));
   console.log("💳 Stripe Api request payload prepared");
 
-  const response = await fetch("http://localhost:3003/api/create-checkout-session", {
+  const response = await fetch("https://luther.health/api/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
