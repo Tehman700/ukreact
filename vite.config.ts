@@ -77,8 +77,12 @@
       minify: 'esbuild', // Use esbuild for fast, effective minification
       rollupOptions: {
         output: {
+          // Enable content-based file naming for better caching
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
           manualChunks: {
-            // Split vendor libraries into separate chunks
+            // Split vendor libraries into separate chunks for better caching
             'react-vendor': ['react', 'react-dom'],
             'puck-editor': ['@measured/puck'],
             'ui-vendor': [
@@ -94,6 +98,8 @@
         },
       },
       chunkSizeWarningLimit: 1000,
+      // Enable asset inlining for small files
+      assetsInlineLimit: 4096,
     },
     server: {
       port: 3000,

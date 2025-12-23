@@ -1,7 +1,7 @@
 import React from "react";
 import { CheckCircle } from "lucide-react";
 
-export function PurchaseThankYouPage() {
+export const PurchaseThankYouPage = React.memo(() => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-green-50 p-6">
       <CheckCircle className="w-20 h-20 text-green-600 mb-6" />
@@ -24,4 +24,4 @@ export function PurchaseThankYouPage() {
       </a>
     </div>
   );
-}
+});
