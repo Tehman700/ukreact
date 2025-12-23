@@ -225,7 +225,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         page: page
       },
       // Redirect directly to the questions page for this funnel
-      success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
+      success_url: `https://luther.health/Health-Audit.html#thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 //      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,

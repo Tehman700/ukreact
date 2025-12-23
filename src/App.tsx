@@ -20,6 +20,7 @@ import { LoadingPage } from './pages/LoadingPage';
 import { QuizResultsPage } from './pages/QuizResultsPage';
 import { UpsellPage } from './pages/UpsellPage';
 import { CQCPage } from './pages/CQC';
+import { PurchaseThankYouPage } from './pages/PurchaseThankYouPage';
 
 // Lazy load Puck pages for better performance
 const SurgeryReadinessUpsellPageWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageWithPuck })));
@@ -751,6 +752,8 @@ useEffect(() => {
           return <Cancel />;
       case 'success':
           return <Success />;
+        case 'thank-you':
+          return <PurchaseThankYouPage />;
       case 'complaints':
         return <ComplaintsPage />;
       case 'quiz':
