@@ -136,6 +136,9 @@ export function AssessmentsSection() {
                         src={assessment.image}
                         alt={assessment.name}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        fetchPriority={"high"}
+                        loading={"eager"}
+                        decoding={"async"}
                       />
                       
                       <div className={`absolute inset-0 bg-black/20 transition-opacity ${isHovered === assessment.id ? 'opacity-100' : 'opacity-0'}`} />

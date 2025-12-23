@@ -72,8 +72,9 @@
     build: {
       target: 'esnext',
       outDir: 'build',
-      sourcemap: true,
+      sourcemap: false, // Disable sourcemaps to reduce file size
       cssCodeSplit: true,
+      minify: 'esbuild', // Use esbuild for fast, effective minification
       rollupOptions: {
         output: {
           manualChunks: {
@@ -96,6 +97,6 @@
     },
     server: {
       port: 3000,
-      open: true,
+      open: false,
     },
   });

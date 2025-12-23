@@ -61,7 +61,9 @@ const handleTryDemo = () => {
       height={2000}
       sizes="(max-width: 640px) 70vw, (max-width: 1024px) 45vw, 500px"
       quality={85}
-      priority
+      fetchPriority={"high"}
+      loading={"eager"}
+      decoding={"async"}
       className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
     />
     <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />
@@ -116,6 +118,9 @@ const handleTryDemo = () => {
                   src={benefitsImage}
                   alt="Luther Health Surgery Benefits"
                   className="w-200 h-auto object-cover rounded-lg"
+                  fetchPriority={"high"}
+                  loading={"eager"}
+                  decoding={"async"}
                 />
               </div>
 

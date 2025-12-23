@@ -147,8 +147,9 @@ export const ImageGallerySection: ComponentConfig<{
                   alt={img.alt ?? "Gallery Image"}
                   width={1024}
                   height={768}
-                  loading="lazy"
-                  decoding="async"
+                  fetchPriority={"high"}
+                  loading={"eager"}
+                  decoding={"async"}
                   className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
                 />
               </div>
