@@ -543,7 +543,7 @@ export { globalAssessments };
 
 export default function App() {
   const [showDesignSystem, setShowDesignSystem] = useState(false);
-  const [currentPage, setCurrentPage] = useState('');
+  const [currentPage, setCurrentPage] = useState('home-basic');
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<string | null>(null);
@@ -593,7 +593,7 @@ const handleUpgradeToBundle = useCallback((bundleId: string) => {
 useEffect(() => {
   const handleHashChange = () => {
     const hash = window.location.hash.replace('#', '');
-    const newPage = hash || '';
+    const newPage = hash || 'home';
 
     // Only update page and scroll if it's actually a different page
     if (newPage !== currentPage) {
