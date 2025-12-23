@@ -22,7 +22,7 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
           <div className="flex items-center">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="Open navigation menu">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
