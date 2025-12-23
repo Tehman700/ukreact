@@ -106,7 +106,7 @@ export const HeroSection: ComponentConfig<{
     title: "The £37 Pre-Op check that could save you weeks of recovery",
     subtitle: "If you've got a surgery date, your biggest risk isn't the operation. It's showing up under-prepared.",
     image: "/assets/surgery-hero.webp",
-    imageAlt: "Smiling male patient in hospital gown representing the Surgery Readiness Score",
+    imageAlt: "Image",
     paddingTop: 96,
     paddingBottom: 96,
     paddingLeft: 0,
@@ -180,6 +180,9 @@ export const HeroSection: ComponentConfig<{
                 borderRadius: '16px',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
               }}
+              fetchPriority={"high"}
+              loading={"eager"}
+              decoding={"async"}
             />
           </div>
         </div>

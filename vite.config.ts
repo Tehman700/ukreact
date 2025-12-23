@@ -73,6 +73,7 @@
       target: 'esnext',
       outDir: 'build',
       sourcemap: true,
+      cssCodeSplit: true,
       rollupOptions: {
         output: {
           manualChunks: {
