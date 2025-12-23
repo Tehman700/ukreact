@@ -6,12 +6,16 @@ import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
 
-// Import Puck styles only when this component is used
-import "@measured/puck/dist/index.css";
-import "../puck-basic.css";
-
 // Lazy load Puck editor for better performance
 const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
+
+// Dynamically load Puck styles only when needed
+const loadPuckStyles = () => {
+  if (!document.querySelector('link[href*="puck"]')) {
+    import("@measured/puck/dist/index.css");
+    import("../puck-basic.css");
+  }
+};
 
 /**
  * Common Surgery Page with Puck Editor Integration
@@ -244,6 +248,11 @@ export function SurgeryPageWithPuck({
     const editMode =
       urlParams.get("edit") === "true" ||
       localStorage.getItem("puck-edit-mode") === "true";
+    
+    if (editMode) {
+      loadPuckStyles();
+    }
+    
     setIsEditing(editMode);
   }, [hasEditPermission]);
 
@@ -258,6 +267,11 @@ export function SurgeryPageWithPuck({
     const newEditMode = !isEditing;
     setIsEditing(newEditMode);
     localStorage.setItem("puck-edit-mode", newEditMode.toString());
+
+    // Load Puck styles when entering edit mode
+    if (newEditMode) {
+      loadPuckStyles();
+    }
 
     // Update URL
     const url = new URL(window.location.href);
