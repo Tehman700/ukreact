@@ -351,7 +351,7 @@ export function SurgeryPageWithPuck({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {hasEditPermission && (
         <div className="fixed top-4 right-4 z-50">
           <Button
