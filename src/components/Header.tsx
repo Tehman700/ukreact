@@ -61,6 +61,9 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
                 src={lutherHealthLogo}
                 alt="Luther Health"
                 className="h-8 w-auto"
+                fetchPriority="high"
+                loading="eager"
+                decoding={"async"}
               />
             </a>
           </div>

@@ -1,12 +1,9 @@
-import { Data } from "@measured/puck";
-
-// Common default Puck data for all Surgery Readiness Upsell pages
-export const surgeryReadinessDefaultData: Data = {
+export const surgeryReadinessDefaultData = {
   root: {
     props: {
       title: "Surgery Readiness Assessment",
       assessmentName: "Surgery Readiness Score",
-      assessmentDescription: "Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.",
+      assessmentDescription: "",
       assessmentPrice: 39.0,
     } as any // Type assertion needed for custom root fields
   },
