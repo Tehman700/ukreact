@@ -104,13 +104,10 @@ export function SurgeryPageWithPuck({
     };
   }, []);
 
-  // Create assessment object from Puck data or use fallback
   const assessment: Assessment = React.useMemo(() => {
-    // Clear any old assessment data from button components
    
     const rootProps = data?.root?.props || {};
     
-    // Build assessment with Puck data taking priority
     const finalAssessment: Assessment = {
       id: fallbackAssessment?.id || "1",
       name: (rootProps.assessmentName as string) || fallbackAssessment?.name || "Surgery Readiness Score",
@@ -127,7 +124,6 @@ export function SurgeryPageWithPuck({
 
    const { trackAssessmentStart, trackAddToBasket } = useAnalytics();
 
-  // Notify parent when assessment data changes (e.g., price from Supabase)
   useEffect(() => {
     if (onAssessmentUpdate && assessment) {
       onAssessmentUpdate(assessment);
@@ -135,7 +131,6 @@ export function SurgeryPageWithPuck({
   }, [assessment, onAssessmentUpdate]);
 
   const handleStartAssessmentModal = React.useCallback(() => {
-    // Track ContentSquare event
     if (window._uxa && typeof window._uxa.push === "function") {
       window._uxa.push([
         "trackDynamicVariable",
@@ -148,12 +143,10 @@ export function SurgeryPageWithPuck({
     console.log("Starting assessment:", assessment);
      trackAssessmentStart(assessment.id, assessment.name, assessment.price);
      trackAddToBasket(assessment.id, assessment.name, assessment.price);
-    // Navigate directly to quiz questions page
     onAddToBasket(assessment);
     onOpenBasket();
   }, [assessment, trackAssessmentStart, trackAddToBasket, onAddToBasket, onOpenBasket]);
 
-  // Save data to Supabase
   const saveToSupabase = async (pageData: Data, isPublished = false) => {
     setIsSaving(true);
     try {
@@ -174,7 +167,6 @@ export function SurgeryPageWithPuck({
     }
   };
 
-  // Load data from Supabase
   const loadFromSupabase = async () => {
     try {
       setIsLoading(true);
@@ -217,7 +209,6 @@ export function SurgeryPageWithPuck({
     }
   };
 
-  // Enhanced config with button functionality
   const enhancedConfig = {
     ...puckConfig,
     components: {
@@ -246,12 +237,10 @@ export function SurgeryPageWithPuck({
     },
   };
 
-  // Load saved data from Supabase on component mount
   useEffect(() => {
     loadFromSupabase();
   }, []);
 
-  // Check for edit mode - only allow if user has permission
   useEffect(() => {
     if (!hasEditPermission) {
       setIsEditing(false);
@@ -271,7 +260,6 @@ export function SurgeryPageWithPuck({
   }, [hasEditPermission]);
 
   const toggleEditMode = () => {
-    // Check permission before allowing edit mode toggle
     if (!hasEditPermission) {
       alert("Access denied. You need to be logged in to edit pages.");
       return;
@@ -281,12 +269,10 @@ export function SurgeryPageWithPuck({
     setIsEditing(newEditMode);
     localStorage.setItem("puck-edit-mode", newEditMode.toString());
 
-    // Load Puck styles when entering edit mode
     if (newEditMode) {
       loadPuckStyles();
     }
 
-    // Update URL
     const url = new URL(window.location.href);
     if (newEditMode) {
       url.searchParams.set("edit", "true");
@@ -296,7 +282,6 @@ export function SurgeryPageWithPuck({
     window.history.pushState({}, "", url.toString());
   };
 
-  // Show loading state while fetching from Supabase
   if (isLoading) {
     return ( <PageLoader />);
   }
