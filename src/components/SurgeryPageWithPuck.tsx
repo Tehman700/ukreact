@@ -273,7 +273,6 @@ export function SurgeryPageWithPuck({
   const toggleEditMode = () => {
     // Check permission before allowing edit mode toggle
     if (!hasEditPermission) {
-      console.warn("❌ Edit mode denied - adminAuthenticated not found");
       alert("Access denied. You need to be logged in to edit pages.");
       return;
     }
@@ -299,8 +298,7 @@ export function SurgeryPageWithPuck({
 
   // Show loading state while fetching from Supabase
   if (isLoading) {
-    return (<PageLoader />    
-    );
+    return ( <PageLoader />);
   }
 
   if (isEditing) {
@@ -316,11 +314,7 @@ export function SurgeryPageWithPuck({
               👁️ Preview Page
             </Button>
           </div>
-        <Suspense fallback={
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-            <p>Loading editor...</p>
-          </div>
-        }>
+        <Suspense fallback={<PageLoader />}>
           <Puck
             config={enhancedConfig}
             data={data}
@@ -334,7 +328,6 @@ export function SurgeryPageWithPuck({
                   "⚠️ Failed to publish Page. Check your internet connection."
                 );
               }
-              console.log("📤 Published Page data:", newData);
             }}
           />
         </Suspense>

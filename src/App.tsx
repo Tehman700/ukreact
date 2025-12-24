@@ -809,65 +809,65 @@ useEffect(() => {
               onOpenBasket={() => setIsBasketOpen(true)}
             />;
       case 'surgery-readiness-assessment-learn-more':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageWithPuck
+          return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-b':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageBWithPuck
+          return <SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-c':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageCWithPuck
+          return <SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-d':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageDWithPuck
+          return <SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-e':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageEWithPuck
+          return <SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-f':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageFWithPuck
+          return <SurgeryReadinessUpsellPageFWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-g':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageGWithPuck
+          return <SurgeryReadinessUpsellPageGWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-h':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageHWithPuck
+          return <SurgeryReadinessUpsellPageHWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;
+          />;
       case 'surgery-readiness-assessment-learn-more-i':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageIWithPuck
+          return <SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;    
+          />;    
       case 'surgery-readiness-assessment-learn-more-j':
-          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageJWithPuck
+          return <SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
-          /></Suspense>;    
+          />;    
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
       case 'surgery-readiness-assessment-information':
