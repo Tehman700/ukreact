@@ -536,7 +536,7 @@ export { globalAssessments };
 
 export default function App() {
   const [showDesignSystem, setShowDesignSystem] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home-basic');
+  const [currentPage, setCurrentPage] = useState('page-loading');
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<string | null>(null);
@@ -1224,8 +1224,8 @@ useEffect(() => {
         return <AnalyticsTestPage />;
       case 'home':
          return <HomePage onRequestQuote={handleRequestQuote} />;
-      case 'home-basic':
-         return '';     
+      case 'page-loading':
+         return <PageLoader />;     
       default:
         return <HomePage onRequestQuote={handleRequestQuote} />;
     }
