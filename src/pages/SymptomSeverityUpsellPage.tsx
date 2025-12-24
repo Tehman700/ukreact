@@ -57,7 +57,7 @@ export function SymptomSeverityUpsellPage({ onAddToBasket, onOpenBasket }: Sympt
       quality={85}
       priority
       className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-      fetchPriority="high"
+      fetchpriority="high"
       decoding="async"
     />
     <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10" />

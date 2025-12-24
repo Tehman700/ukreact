@@ -136,7 +136,7 @@ export function AssessmentsSection() {
                         src={assessment.image}
                         alt={assessment.name}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        fetchPriority={"high"}
+                        fetchpriority={"high"}
                         loading={"eager"}
                         decoding={"async"}
                       />

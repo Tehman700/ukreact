@@ -123,7 +123,7 @@ export function SurgeryReadinessUpsellPage({
                   width={800}
                   height={1000}
                   sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
-                  fetchPriority="high"
+                  fetchpriority="high"
                   decoding="async"
                   quality={85}
                   className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"

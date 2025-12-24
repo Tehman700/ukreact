@@ -26,11 +26,13 @@ const surgeryReadinessAssessment: Assessment = {
 interface SurgeryReadinessUpsellPageProps {
   onAddToBasket: (assessment: Assessment) => void;
   onOpenBasket: () => void;
+  onAssessmentUpdate?: (assessment: Assessment) => void;
 }
 
 export function SurgeryReadinessUpsellPageWithPuck({
   onAddToBasket,
   onOpenBasket,
+  onAssessmentUpdate,
 }: SurgeryReadinessUpsellPageProps) {
   return (
     <SurgeryPageWithPuck
@@ -40,6 +42,7 @@ export function SurgeryReadinessUpsellPageWithPuck({
       assessment={surgeryReadinessAssessment}
       onAddToBasket={onAddToBasket}
       onOpenBasket={onOpenBasket}
+      onAssessmentUpdate={onAssessmentUpdate}
     />
   );
 }

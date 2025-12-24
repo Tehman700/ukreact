@@ -57,7 +57,7 @@ export function Cart({ isOpen, onClose, items, onUpdateItem, total }: CartProps)
                           src={item.product.image}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
-                          fetchPriority={"high"}
+                          fetchpriority={"high"}
                           loading={"eager"}
                           decoding={"async"}
                         />

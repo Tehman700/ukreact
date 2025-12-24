@@ -194,7 +194,7 @@ export const Image: ComponentConfig<{
 
     return (
       <div style={containerStyle}>
-        <ImageWithFallback src={src} alt={alt ?? "Image"} style={imageStyle} fetchPriority={"high"} loading={"eager"} decoding={"async"} />
+        <ImageWithFallback src={src} alt={alt ?? "Image"} style={imageStyle} fetchpriority={"high"} loading={"eager"} decoding={"async"} />
       </div>
     );
   },

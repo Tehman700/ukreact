@@ -47,6 +47,7 @@ interface SurgeryPageWithPuckProps {
   assessment?: Assessment; // Make optional since we'll use Puck data
   onAddToBasket: (assessment: Assessment) => void;
   onOpenBasket: () => void;
+  onAssessmentUpdate?: (assessment: Assessment) => void; // Notify when assessment data changes
 }
 
 export function SurgeryPageWithPuck({
@@ -56,6 +57,7 @@ export function SurgeryPageWithPuck({
   assessment: fallbackAssessment,
   onAddToBasket,
   onOpenBasket,
+  onAssessmentUpdate,
 }: SurgeryPageWithPuckProps) {
   const [data, setData] = useState<Data>(defaultData);
   const [isEditing, setIsEditing] = useState(false);
@@ -124,8 +126,14 @@ export function SurgeryPageWithPuck({
 
    const { trackAssessmentStart, trackAddToBasket } = useAnalytics();
 
+  // Notify parent when assessment data changes (e.g., price from Supabase)
+  useEffect(() => {
+    if (onAssessmentUpdate && assessment) {
+      onAssessmentUpdate(assessment);
+    }
+  }, [assessment, onAssessmentUpdate]);
 
-  const handleStartAssessmentModal = () => {
+  const handleStartAssessmentModal = React.useCallback(() => {
     // Track ContentSquare event
     if (window._uxa && typeof window._uxa.push === "function") {
       window._uxa.push([
@@ -136,13 +144,13 @@ export function SurgeryPageWithPuck({
         },
       ]);
     }
-    
+    console.log("Starting assessment:", assessment);
      trackAssessmentStart(assessment.id, assessment.name, assessment.price);
      trackAddToBasket(assessment.id, assessment.name, assessment.price);
     // Navigate directly to quiz questions page
     onAddToBasket(assessment);
     onOpenBasket();
-  };
+  }, [assessment, trackAssessmentStart, trackAddToBasket, onAddToBasket, onOpenBasket]);
 
   // Save data to Supabase
   const saveToSupabase = async (pageData: Data, isPublished = false) => {

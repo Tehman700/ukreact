@@ -48,7 +48,7 @@ export function Hero() {
                 src={heroImage}
                 alt="Successful professional enjoying an active lifestyle"
                 className="w-full h-full object-cover object-center"
-                fetchPriority={"high"}
+                fetchpriority={"high"}
                 loading={"eager"}
                 decoding={"async"}
 

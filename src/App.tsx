@@ -706,6 +706,19 @@ useEffect(() => {
     setIsBasketOpen(true);
   };
 
+  const updateBasketItem = useCallback((assessment: Assessment) => {
+    setBasketItems(prev => {
+      const existingItemIndex = prev.findIndex(item => item.assessment.id === assessment.id);
+      if (existingItemIndex !== -1) {
+        // Item exists in basket, update it with new data
+        const newItems = [...prev];
+        newItems[existingItemIndex] = { assessment, quantity: 1 };
+        return newItems;
+      }
+      return prev;
+    });
+  }, []);
+
   const removeFromBasket = (assessmentId: string) => {
     const removedItem = basketItems.find(item => item.assessment.id === assessmentId);
     if (removedItem) {
@@ -799,51 +812,61 @@ useEffect(() => {
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-b':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-c':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-d':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-e':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-f':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageFWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-g':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageGWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-h':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageHWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-i':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;    
       case 'surgery-readiness-assessment-learn-more-j':
           return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           /></Suspense>;    
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;

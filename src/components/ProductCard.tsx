@@ -185,7 +185,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
           src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
           alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
           className="w-full h-full object-cover transition-transform group-hover:scale-105"
-          fetchPriority={"high"}
+          fetchpriority={"high"}
           loading={"eager"}
           decoding={"async"} 
         />

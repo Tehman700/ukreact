@@ -108,7 +108,7 @@ export function SurgeryReadinessUpsellPageE({
                   sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 500px"
                   quality={85}
                   className="w-full h-auto object-cover rounded-lg mt-6 max-h-[600px]"
-                  fetchPriority="high"
+                  fetchpriority="high"
                   decoding="async"
                 />
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl -z-10"
