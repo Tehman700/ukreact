@@ -6,6 +6,7 @@ import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
 import { useSearchAnalytics, useAnalytics } from '../hooks/useAnalytics';
+import { PageLoader } from '../components/PageLoader';
 
 // Lazy load Puck editor for better performance
 const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
@@ -298,29 +299,7 @@ export function SurgeryPageWithPuck({
 
   // Show loading state while fetching from Supabase
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        <div
-          style={{
-            width: "50px",
-            height: "50px",
-            border: "3px solid #f3f3f3",
-            borderTop: "3px solid #3498db",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <p style={{ fontSize: "18px", color: "#666" }}>Loading page...</p>
-      </div>
+    return (<PageLoader />    
     );
   }
 

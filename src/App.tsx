@@ -809,61 +809,61 @@ useEffect(() => {
               onOpenBasket={() => setIsBasketOpen(true)}
             />;
       case 'surgery-readiness-assessment-learn-more':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-b':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageBWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-c':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageCWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-d':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageDWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-e':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageEWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-f':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageFWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageFWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-g':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageGWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageGWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-h':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageHWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageHWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;
       case 'surgery-readiness-assessment-learn-more-i':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageIWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
           /></Suspense>;    
       case 'surgery-readiness-assessment-learn-more-j':
-          return <Suspense fallback={<LoadingPage onComplete={() => {}} />}><SurgeryReadinessUpsellPageJWithPuck
+          return <Suspense fallback={<PageLoader />}><SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
             onAssessmentUpdate={updateBasketItem}
