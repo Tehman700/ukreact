@@ -1223,9 +1223,11 @@ useEffect(() => {
       case 'analytics-test':
         return <AnalyticsTestPage />;
       case 'home':
-         return <HomePage onRequestQuote={handleRequestQuote} />;  
+         return <HomePage onRequestQuote={handleRequestQuote} />;
+      case 'home-basic':
+         return '';     
       default:
-        return '';
+        return <HomePage onRequestQuote={handleRequestQuote} />;
     }
   };
 
