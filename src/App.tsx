@@ -1222,8 +1222,6 @@ useEffect(() => {
         return <AdminDashboardPage />;
       case 'analytics-test':
         return <AnalyticsTestPage />;
-      case 'home':
-         return <HomePage onRequestQuote={handleRequestQuote} />;
       case 'page-loading':
          return <PageLoader />;     
       default:
