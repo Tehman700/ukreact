@@ -5,10 +5,6 @@
 
   export default defineConfig({
     plugins: [react()],
-    esbuild: {
-      logOverride: { 'this-is-undefined-in-esm': 'silent' },
-      drop: ['console', 'debugger'],
-    },
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -76,58 +72,30 @@
     build: {
       target: 'esnext',
       outDir: 'build',
-      sourcemap: false,
+      sourcemap: true,
       cssCodeSplit: true,
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
-          passes: 2,
-        },
-        format: {
-          comments: false,
-        },
-      },
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
-            if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-              return 'react-core';
-            }
-            if (id.includes('@measured/puck')) {
-              return 'puck-editor';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'radix-ui';
-            }
-            if (id.includes('@stripe')) {
-              return 'stripe';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('node_modules/clsx') || 
-                id.includes('class-variance-authority') ||
-                id.includes('tailwind-merge')) {
-              return 'utils';
-            }
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
+          manualChunks: {
+            // Split vendor libraries into separate chunks
+            'react-vendor': ['react', 'react-dom'],
+            'puck-editor': ['@measured/puck'],
+            'ui-vendor': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-switch',
+              '@radix-ui/react-tabs',
+            ],
+            'utils': ['clsx', 'class-variance-authority'],
           },
-          chunkFileNames: 'assets/[name]-[hash].js',
-          entryFileNames: 'assets/[name]-[hash].js',
-          assetFileNames: 'assets/[name]-[hash].[ext]',
         },
       },
       chunkSizeWarningLimit: 1000,
-      reportCompressedSize: false,
-      assetsInlineLimit: 4096,
     },
     server: {
       port: 3000,
-      open: false,
+      open: true,
     },
   });
