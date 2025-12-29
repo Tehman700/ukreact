@@ -310,7 +310,7 @@ export function SurgeryPageWithPuck({
                 alert("🚀 Page published successfully!");
               } else {
                 alert(
-                  "⚠️ Failed to publish Page. Check your internet connection."
+                  "⚠️ Failed to publish Page. Changes have been saved locally.",
                 );
               }
             }}
@@ -330,7 +330,7 @@ export function SurgeryPageWithPuck({
             onClick={toggleEditMode}
             className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
           >
-            ✏️ Edit
+            ✏️ Edit 
           </Button>
         </div>
       )}
