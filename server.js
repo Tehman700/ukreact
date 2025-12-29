@@ -219,16 +219,13 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      // Store funnel type in metadata
       metadata: {
         funnel_type: funnel_type,
         page: page
       },
-      // Redirect directly to the questions page for this funnel
-      success_url: `https://luther.health/Health-Audit.html#thank-you`,
+      success_url: "https://luther.health/Health-Audit.html#thank-you",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
-//      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
 
     // Return sessionId so frontend can save & use it
     res.json({ sessionId: session.id });
