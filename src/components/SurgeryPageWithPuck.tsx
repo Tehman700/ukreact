@@ -13,10 +13,8 @@ const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })
 
 // Dynamically load Puck styles only when needed
 const loadPuckStyles = () => {
-  if (!document.querySelector('link[href*="puck"]')) {
     import("@measured/puck/dist/index.css");
     import("../puck-basic.css");
-  }
 };
 
 /**
