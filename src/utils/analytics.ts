@@ -17,6 +17,8 @@ export const ANALYTICS_CONFIG = {
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
 };
 
+
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
