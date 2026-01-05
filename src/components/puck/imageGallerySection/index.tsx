@@ -144,11 +144,12 @@ export const ImageGallerySection: ComponentConfig<{
               <div key={i} className="overflow-hidden rounded-2xl shadow-md">
                 <ImageWithFallback
                   src={img.src}
-                  alt={img.alt}
+                  alt={img.alt ?? "Gallery Image"}
                   width={1024}
                   height={768}
-                  loading="lazy"
-                  decoding="async"
+                  fetchpriority={"high"}
+                  loading={"eager"}
+                  decoding={"async"}
                   className="object-cover w-full h-64 hover:scale-105 transition-transform duration-500"
                 />
               </div>

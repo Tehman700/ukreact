@@ -121,8 +121,8 @@ export function CookieConsent() {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-        <Card className="mx-auto max-w-4xl shadow-lg border-2">
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <Card className="shadow-lg border-2">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <Cookie className="h-6 w-6 text-primary mt-1 flex-shrink-0" />

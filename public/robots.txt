@@ -1,0 +1,10 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap location (update with actual sitemap URL when available)
+Sitemap: https://luther.health/sitemap.xml

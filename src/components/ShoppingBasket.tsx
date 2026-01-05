@@ -93,7 +93,16 @@ export function ShoppingBasket({
     });
   }, [isOpen, items.length, totalPrice, onUpgradeToBundle]);
 
-  const bundleSuggestion = getBundleSuggestion(items);
+  // Check if we're on specific surgery pages where bundle should be hidden
+  const currentHash = window.location.hash.replace('#', '');
+  const hideBundlePages = [
+    'surgery-readiness-assessment-learn-more',
+    'surgery-readiness-assessment-learn-more-b',
+    'surgery-readiness-assessment-learn-more-c'
+  ];
+  const shouldHideBundle = hideBundlePages.includes(currentHash);
+
+  const bundleSuggestion = shouldHideBundle ? null : getBundleSuggestion(items);
   const basketItemIds = items.map(item => item.assessment.id);
 
   const calculateSavings = () => {
@@ -148,7 +157,27 @@ export function ShoppingBasket({
 
 // THIS IS THE NEW PAYMENT METHOD BUTTON THAT I CREATED
 const makePayment = async (funnelType = "complication-risk") => {
-  const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  // Determine which Stripe key to use based on current page
+  const currentPage = window.location.hash.replace('#', '') || 'home-test';
+  const useSpecialStripe = [
+    'surgery-readiness-assessment-learn-more',
+    'surgery-readiness-assessment-learn-more-b',
+    'surgery-conditioning-protocol-challenge'
+  ].includes(currentPage);
+
+  
+
+  // Load the appropriate Stripe key
+  const stripePublicKey = useSpecialStripe 
+    ? import.meta.env.VITE_STRIPE_PUBLIC_KEY_SPECIAL 
+    : import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+
+  console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} Stripe key for page: ${currentPage}`);
+
+  const stripe = await loadStripe(stripePublicKey);
+  console.log("💳 Stripe initialized");
+
+  console.log("🛒 Initiating checkout with items:", items);
 
   const checkoutItems = items.map(item => ({
     item_id: item.assessment.id,
@@ -157,15 +186,20 @@ const makePayment = async (funnelType = "complication-risk") => {
     price: item.assessment.price,
     quantity: item.quantity,
   }));
+  console.log("💳 Stripe Api request payload prepared");
 
   const response = await fetch("https://luther.health/api/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       products: checkoutItems,
-      funnel_type: funnelType  // Add this parameter
+      funnel_type: funnelType,
+      page: currentPage  // Send page to backend for Stripe account selection
     }),
   });
+
+  console.log("💳 Stripe Api request sent");
+
 
   const data = await response.json();
 
@@ -179,6 +213,8 @@ const makePayment = async (funnelType = "complication-risk") => {
   sessionStorage.setItem("stripe_session_id", data.sessionId);
   // Also save which funnel was purchased for reference
   sessionStorage.setItem("purchased_funnel", funnelType);
+
+  sessionStorage.setItem("page", currentPage);
 
   // Redirect user to Stripe Checkout
   const result = await stripe?.redirectToCheckout({ sessionId: data.sessionId });

@@ -1,6 +1,5 @@
 // Google Analytics 4 Integration and Custom Analytics Utilities
 // Luther Health Analytics Tracking System
-
 declare global {
   interface Window {
     gtag: (...args: any[]) => void;

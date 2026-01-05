@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-// Core Components
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+// Core Components (keep these as they're needed immediately)
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
-import { DesignSystemApp } from './components/design-system/DesignSystemApp';
 import { ShoppingBasket } from './components/ShoppingBasket';
+import { PageLoader } from './components/PageLoader';
 
+// Critical pages (loaded immediately)
 import { HomePage } from './pages/HomePage';
+<<<<<<< HEAD
 import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { ContactPage } from './pages/ContactPage';
@@ -33,172 +35,192 @@ import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUps
 import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
 import { SurgeryPreparationChecklistPageB } from './pages/SurgeryPreparationChecklistPageB';
 import { SurgeryPreparationChecklistPageC } from './pages/SurgeryPreparationChecklistPageC';
+=======
+import { PurchaseThankYouPage } from './pages/PurchaseThankYouPage';
 
-// Assessment Pages - Surgery Readiness
-import { SurgeryReadinessUpsellPage } from './pages/SurgeryReadinessUpsellPage';
-import { SurgeryReadinessUpsellPageB } from './pages/SurgeryReadinessUpsellPageB';
-import { SurgeryReadinessUpsellPageC } from './pages/SurgeryReadinessUpsellPageC';
-import { SurgeryReadinessUpsellPageD } from './pages/SurgeryReadinessUpsellPageD';
-import { SurgeryReadinessUpsellPageE } from './pages/SurgeryReadinessUpsellPageE';
-import { SurgeryReadinessQuestionsPage } from './pages/SurgeryReadinessQuestionsPage';
-import { SurgeryReadinessInformationPage } from './pages/SurgeryReadinessInformationPage';
-import { SurgeryReadinessResultsPage } from './pages/SurgeryReadinessResultsPage';
-import { SurgeryReadinessResultsPageA } from './pages/SurgeryReadinessResultsPageA';
-import { SurgeryReadinessResultsPageB } from './pages/SurgeryReadinessResultsPageB';
-import { SurgeryReadinessResultsPageC } from './pages/SurgeryReadinessResultsPageC';
-import { SurgeryReadinessReviewPage } from './pages/SurgeryReadinessReviewPage';
-import { SurgeryReadinessReviewPageA } from './pages/SurgeryReadinessReviewPageA';
-import { SurgeryReadinessReviewPageB } from './pages/SurgeryReadinessReviewPageB';
-import { SurgeryReadinessReviewPageC } from './pages/SurgeryReadinessReviewPageC';
-import { SurgeryReadinessUpsellFinalA } from './pages/SurgeryReadinessUpsellFinalA';
-import { SurgeryReadinessUpsellFinalB } from './pages/SurgeryReadinessUpsellFinalB';
-import { SurgeryReadinessUpsellFinalC } from './pages/SurgeryReadinessUpsellFinalC';
-import { HealthConciergeInformationUser } from './pages/HealthConciergeInformationUser';
+// Lazy load ALL non-critical pages for optimal performance
+const DesignSystemApp = lazy(() => import('./components/design-system/DesignSystemApp').then(m => ({ default: m.DesignSystemApp })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const ServicesPage = lazy(() => import('./pages/ServicesPage').then(m => ({ default: m.ServicesPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const AssessmentsPage = lazy(() => import('./pages/AssessmentsPage').then(m => ({ default: m.AssessmentsPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const CookiePage = lazy(() => import('./pages/CookiePage').then(m => ({ default: m.CookiePage })));
+const ComplaintsPage = lazy(() => import('./pages/ComplaintsPage').then(m => ({ default: m.ComplaintsPage })));
+const QuizPage = lazy(() => import('./pages/QuizPage').then(m => ({ default: m.QuizPage })));
+const LoadingPage = lazy(() => import('./pages/LoadingPage').then(m => ({ default: m.LoadingPage })));
+const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(m => ({ default: m.QuizResultsPage })));
+const UpsellPage = lazy(() => import('./pages/UpsellPage').then(m => ({ default: m.UpsellPage })));
+const CQCPage = lazy(() => import('./pages/CQC').then(m => ({ default: m.CQCPage })));
+>>>>>>> 34c1ceb1cadc04b99f7cd857e2def27d39531e08
 
+// Lazy load Puck pages
+const SurgeryReadinessUpsellPageWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageWithPuck })));
+const SurgeryReadinessUpsellPageBWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageBWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageBWithPuck })));
+const SurgeryReadinessUpsellPageCWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageCWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageCWithPuck })));
+const SurgeryReadinessUpsellPageDWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageDWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageDWithPuck })));
+const SurgeryReadinessUpsellPageEWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageEWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageEWithPuck })));
+const SurgeryReadinessUpsellPageFWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageFWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageFWithPuck })));
+const SurgeryReadinessUpsellPageGWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageGWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageGWithPuck })));
+const SurgeryReadinessUpsellPageHWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageHWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageHWithPuck })));
+const SurgeryReadinessUpsellPageIWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageIWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageIWithPuck })));
+const SurgeryReadinessUpsellPageJWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageJWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageJWithPuck })));
 
+// Lazy load Surgery Readiness pages
+const SurgeryPreparationChecklistPage = lazy(() => import('./pages/SurgeryPreparationChecklistPage').then(m => ({ default: m.SurgeryPreparationChecklistPage })));
+const SurgeryPreparationChecklistPageB = lazy(() => import('./pages/SurgeryPreparationChecklistPageB').then(m => ({ default: m.SurgeryPreparationChecklistPageB })));
+const SurgeryPreparationChecklistPageC = lazy(() => import('./pages/SurgeryPreparationChecklistPageC').then(m => ({ default: m.SurgeryPreparationChecklistPageC })));
+const SurgeryReadinessUpsellPage = lazy(() => import('./pages/SurgeryReadinessUpsellPage').then(m => ({ default: m.SurgeryReadinessUpsellPage })));
+const SurgeryReadinessUpsellPageB = lazy(() => import('./pages/SurgeryReadinessUpsellPageB').then(m => ({ default: m.SurgeryReadinessUpsellPageB })));
+const SurgeryReadinessUpsellPageC = lazy(() => import('./pages/SurgeryReadinessUpsellPageC').then(m => ({ default: m.SurgeryReadinessUpsellPageC })));
+const SurgeryReadinessUpsellPageD = lazy(() => import('./pages/SurgeryReadinessUpsellPageD').then(m => ({ default: m.SurgeryReadinessUpsellPageD })));
+const SurgeryReadinessUpsellPageE = lazy(() => import('./pages/SurgeryReadinessUpsellPageE').then(m => ({ default: m.SurgeryReadinessUpsellPageE })));
+const SurgeryReadinessQuestionsPage = lazy(() => import('./pages/SurgeryReadinessQuestionsPage').then(m => ({ default: m.SurgeryReadinessQuestionsPage })));
+const SurgeryReadinessInformationPage = lazy(() => import('./pages/SurgeryReadinessInformationPage').then(m => ({ default: m.SurgeryReadinessInformationPage })));
+const SurgeryReadinessResultsPage = lazy(() => import('./pages/SurgeryReadinessResultsPage').then(m => ({ default: m.SurgeryReadinessResultsPage })));
+const SurgeryReadinessResultsPageA = lazy(() => import('./pages/SurgeryReadinessResultsPageA').then(m => ({ default: m.SurgeryReadinessResultsPageA })));
+const SurgeryReadinessResultsPageB = lazy(() => import('./pages/SurgeryReadinessResultsPageB').then(m => ({ default: m.SurgeryReadinessResultsPageB })));
+const SurgeryReadinessResultsPageC = lazy(() => import('./pages/SurgeryReadinessResultsPageC').then(m => ({ default: m.SurgeryReadinessResultsPageC })));
+const SurgeryReadinessReviewPage = lazy(() => import('./pages/SurgeryReadinessReviewPage').then(m => ({ default: m.SurgeryReadinessReviewPage })));
+const SurgeryReadinessReviewPageA = lazy(() => import('./pages/SurgeryReadinessReviewPageA').then(m => ({ default: m.SurgeryReadinessReviewPageA })));
+const SurgeryReadinessReviewPageB = lazy(() => import('./pages/SurgeryReadinessReviewPageB').then(m => ({ default: m.SurgeryReadinessReviewPageB })));
+const SurgeryReadinessReviewPageC = lazy(() => import('./pages/SurgeryReadinessReviewPageC').then(m => ({ default: m.SurgeryReadinessReviewPageC })));
+const SurgeryReadinessUpsellFinalA = lazy(() => import('./pages/SurgeryReadinessUpsellFinalA').then(m => ({ default: m.SurgeryReadinessUpsellFinalA })));
+const SurgeryReadinessUpsellFinalB = lazy(() => import('./pages/SurgeryReadinessUpsellFinalB').then(m => ({ default: m.SurgeryReadinessUpsellFinalB })));
+const SurgeryReadinessUpsellFinalC = lazy(() => import('./pages/SurgeryReadinessUpsellFinalC').then(m => ({ default: m.SurgeryReadinessUpsellFinalC })));
+const HealthConciergeInformationUser = lazy(() => import('./pages/HealthConciergeInformationUser').then(m => ({ default: m.HealthConciergeInformationUser })));
 
-import { Questions_1 } from './pages/Questions_1';
-import { Questions_2 } from './pages/Questions_2';
-import { Questions_3 } from './pages/Questions_3';
-import { Information_1 } from './pages/Information_1';
-import { Information_2 } from './pages/Information_2';
-import { Information_3 } from './pages/Information_3';
+const Questions_1 = lazy(() => import('./pages/Questions_1').then(m => ({ default: m.Questions_1 })));
+const Questions_2 = lazy(() => import('./pages/Questions_2').then(m => ({ default: m.Questions_2 })));
+const Questions_3 = lazy(() => import('./pages/Questions_3').then(m => ({ default: m.Questions_3 })));
+const Information_1 = lazy(() => import('./pages/Information_1').then(m => ({ default: m.Information_1 })));
+const Information_2 = lazy(() => import('./pages/Information_2').then(m => ({ default: m.Information_2 })));
+const Information_3 = lazy(() => import('./pages/Information_3').then(m => ({ default: m.Information_3 })));
 
-// Assessment Pages - Biological Age
-import { BiologicalAgeUpsellPage } from './pages/BiologicalAgeUpsellPage';
-import { BiologicalAgeQuestionsPage } from './pages/BiologicalAgeQuestionsPage';
-import { BiologicalAgeInformationPage } from './pages/BiologicalAgeInformationPage';
-import { BiologicalAgeResultsPage } from './pages/BiologicalAgeResultsPage';
-import { BiologicalAgeReviewPage } from './pages/BiologicalAgeReviewPage';
+// All other assessment pages - lazy loaded
+const BiologicalAgeUpsellPage = lazy(() => import('./pages/BiologicalAgeUpsellPage').then(m => ({ default: m.BiologicalAgeUpsellPage })));
+const BiologicalAgeQuestionsPage = lazy(() => import('./pages/BiologicalAgeQuestionsPage').then(m => ({ default: m.BiologicalAgeQuestionsPage })));
+const BiologicalAgeInformationPage = lazy(() => import('./pages/BiologicalAgeInformationPage').then(m => ({ default: m.BiologicalAgeInformationPage })));
+const BiologicalAgeResultsPage = lazy(() => import('./pages/BiologicalAgeResultsPage').then(m => ({ default: m.BiologicalAgeResultsPage })));
+const BiologicalAgeReviewPage = lazy(() => import('./pages/BiologicalAgeReviewPage').then(m => ({ default: m.BiologicalAgeReviewPage })));
 
-// Assessment Pages - Cardiometabolic Risk
-import { CardiometabolicRiskUpsellPage } from './pages/CardiometabolicRiskUpsellPage';
-import { CardiometabolicRiskQuestionsPage } from './pages/CardiometabolicRiskQuestionsPage';
-import { CardiometabolicRiskInformationPage } from './pages/CardiometabolicRiskInformationPage';
-import { CardiometabolicRiskResultsPage } from './pages/CardiometabolicRiskResultsPage';
-import { CardiometabolicRiskReviewPage } from './pages/CardiometabolicRiskReviewPage';
+const CardiometabolicRiskUpsellPage = lazy(() => import('./pages/CardiometabolicRiskUpsellPage').then(m => ({ default: m.CardiometabolicRiskUpsellPage })));
+const CardiometabolicRiskQuestionsPage = lazy(() => import('./pages/CardiometabolicRiskQuestionsPage').then(m => ({ default: m.CardiometabolicRiskQuestionsPage })));
+const CardiometabolicRiskInformationPage = lazy(() => import('./pages/CardiometabolicRiskInformationPage').then(m => ({ default: m.CardiometabolicRiskInformationPage })));
+const CardiometabolicRiskResultsPage = lazy(() => import('./pages/CardiometabolicRiskResultsPage').then(m => ({ default: m.CardiometabolicRiskResultsPage })));
+const CardiometabolicRiskReviewPage = lazy(() => import('./pages/CardiometabolicRiskReviewPage').then(m => ({ default: m.CardiometabolicRiskReviewPage })));
 
-// Assessment Pages - Resilience Index
-import { ResilienceIndexUpsellPage } from './pages/ResilienceIndexUpsellPage';
-import { ResilienceIndexQuestionsPage } from './pages/ResilienceIndexQuestionsPage';
-import { ResilienceIndexInformationPage } from './pages/ResilienceIndexInformationPage';
-import { ResilienceIndexResultsPage } from './pages/ResilienceIndexResultsPage';
-import { ResilienceIndexReviewPage } from './pages/ResilienceIndexReviewPage';
+const ResilienceIndexUpsellPage = lazy(() => import('./pages/ResilienceIndexUpsellPage').then(m => ({ default: m.ResilienceIndexUpsellPage })));
+const ResilienceIndexQuestionsPage = lazy(() => import('./pages/ResilienceIndexQuestionsPage').then(m => ({ default: m.ResilienceIndexQuestionsPage })));
+const ResilienceIndexInformationPage = lazy(() => import('./pages/ResilienceIndexInformationPage').then(m => ({ default: m.ResilienceIndexInformationPage })));
+const ResilienceIndexResultsPage = lazy(() => import('./pages/ResilienceIndexResultsPage').then(m => ({ default: m.ResilienceIndexResultsPage })));
+const ResilienceIndexReviewPage = lazy(() => import('./pages/ResilienceIndexReviewPage').then(m => ({ default: m.ResilienceIndexReviewPage })));
 
-// Assessment Pages - Nutrition & Body Composition
-import { NutritionBodyCompositionUpsellPage } from './pages/NutritionBodyCompositionUpsellPage';
-import { NutritionBodyCompositionQuestionsPage } from './pages/NutritionBodyCompositionQuestionsPage';
-import { NutritionBodyCompositionInformationPage } from './pages/NutritionBodyCompositionInformationPage';
-import { NutritionBodyCompositionResultsPage } from './pages/NutritionBodyCompositionResultsPage';
-import { NutritionBodyCompositionReviewPage } from './pages/NutritionBodyCompositionReviewPage';
+const NutritionBodyCompositionUpsellPage = lazy(() => import('./pages/NutritionBodyCompositionUpsellPage').then(m => ({ default: m.NutritionBodyCompositionUpsellPage })));
+const NutritionBodyCompositionQuestionsPage = lazy(() => import('./pages/NutritionBodyCompositionQuestionsPage').then(m => ({ default: m.NutritionBodyCompositionQuestionsPage })));
+const NutritionBodyCompositionInformationPage = lazy(() => import('./pages/NutritionBodyCompositionInformationPage').then(m => ({ default: m.NutritionBodyCompositionInformationPage })));
+const NutritionBodyCompositionResultsPage = lazy(() => import('./pages/NutritionBodyCompositionResultsPage').then(m => ({ default: m.NutritionBodyCompositionResultsPage })));
+const NutritionBodyCompositionReviewPage = lazy(() => import('./pages/NutritionBodyCompositionReviewPage').then(m => ({ default: m.NutritionBodyCompositionReviewPage })));
 
-// Assessment Pages - Functional Fitness Age
-import { FunctionalFitnessAgeUpsellPage } from './pages/FunctionalFitnessAgeUpsellPage';
-import { FunctionalFitnessAgeQuestionsPage } from './pages/FunctionalFitnessAgeQuestionsPage';
-import { FunctionalFitnessAgeInformationPage } from './pages/FunctionalFitnessAgeInformationPage';
-import { FunctionalFitnessAgeResultsPage } from './pages/FunctionalFitnessAgeResultsPage';
-import { FunctionalFitnessAgeReviewPage } from './pages/FunctionalFitnessAgeReviewPage';
+const FunctionalFitnessAgeUpsellPage = lazy(() => import('./pages/FunctionalFitnessAgeUpsellPage').then(m => ({ default: m.FunctionalFitnessAgeUpsellPage })));
+const FunctionalFitnessAgeQuestionsPage = lazy(() => import('./pages/FunctionalFitnessAgeQuestionsPage').then(m => ({ default: m.FunctionalFitnessAgeQuestionsPage })));
+const FunctionalFitnessAgeInformationPage = lazy(() => import('./pages/FunctionalFitnessAgeInformationPage').then(m => ({ default: m.FunctionalFitnessAgeInformationPage })));
+const FunctionalFitnessAgeResultsPage = lazy(() => import('./pages/FunctionalFitnessAgeResultsPage').then(m => ({ default: m.FunctionalFitnessAgeResultsPage })));
+const FunctionalFitnessAgeReviewPage = lazy(() => import('./pages/FunctionalFitnessAgeReviewPage').then(m => ({ default: m.FunctionalFitnessAgeReviewPage })));
 
-// Bundle Assessment Pages
-import { CompletedSurgeryPreparationUpsellPage } from './pages/CompletedSurgeryPreparationUpsellPage';
-import { CompletedSurgeryPreparationQuestionsPage } from './pages/CompletedSurgeryPreparationQuestionsPage';
-import { CompletedSurgeryPreparationInformationPage } from './pages/CompletedSurgeryPreparationInformationPage';
-import { CompletedSurgeryPreparationResultsPage } from './pages/CompletedSurgeryPreparationResultsPage';
-import { CompletedSurgeryPreparationReviewPage } from './pages/CompletedSurgeryPreparationReviewPage';
+const CompletedSurgeryPreparationUpsellPage = lazy(() => import('./pages/CompletedSurgeryPreparationUpsellPage').then(m => ({ default: m.CompletedSurgeryPreparationUpsellPage })));
+const CompletedSurgeryPreparationQuestionsPage = lazy(() => import('./pages/CompletedSurgeryPreparationQuestionsPage').then(m => ({ default: m.CompletedSurgeryPreparationQuestionsPage })));
+const CompletedSurgeryPreparationInformationPage = lazy(() => import('./pages/CompletedSurgeryPreparationInformationPage').then(m => ({ default: m.CompletedSurgeryPreparationInformationPage })));
+const CompletedSurgeryPreparationResultsPage = lazy(() => import('./pages/CompletedSurgeryPreparationResultsPage').then(m => ({ default: m.CompletedSurgeryPreparationResultsPage })));
+const CompletedSurgeryPreparationReviewPage = lazy(() => import('./pages/CompletedSurgeryPreparationReviewPage').then(m => ({ default: m.CompletedSurgeryPreparationReviewPage })));
 
-import { CompletedChronicSymptomsUpsellPage } from './pages/CompletedChronicSymptomsUpsellPage';
-import { CompletedChronicSymptomsQuestionsPage } from './pages/CompletedChronicSymptomsQuestionsPage';
-import { CompletedChronicSymptomsInformationPage } from './pages/CompletedChronicSymptomsInformationPage';
-import { CompletedChronicSymptomsResultsPage } from './pages/CompletedChronicSymptomsResultsPage';
-import { CompletedChronicSymptomsReviewPage } from './pages/CompletedChronicSymptomsReviewPage';
+const CompletedChronicSymptomsUpsellPage = lazy(() => import('./pages/CompletedChronicSymptomsUpsellPage').then(m => ({ default: m.CompletedChronicSymptomsUpsellPage })));
+const CompletedChronicSymptomsQuestionsPage = lazy(() => import('./pages/CompletedChronicSymptomsQuestionsPage').then(m => ({ default: m.CompletedChronicSymptomsQuestionsPage })));
+const CompletedChronicSymptomsInformationPage = lazy(() => import('./pages/CompletedChronicSymptomsInformationPage').then(m => ({ default: m.CompletedChronicSymptomsInformationPage })));
+const CompletedChronicSymptomsResultsPage = lazy(() => import('./pages/CompletedChronicSymptomsResultsPage').then(m => ({ default: m.CompletedChronicSymptomsResultsPage })));
+const CompletedChronicSymptomsReviewPage = lazy(() => import('./pages/CompletedChronicSymptomsReviewPage').then(m => ({ default: m.CompletedChronicSymptomsReviewPage })));
 
-import { LongevityWellnessBundleUpsellPage } from './pages/LongevityWellnessBundleUpsellPage';
-import { LongevityWellnessBundleQuestionsPage } from './pages/LongevityWellnessBundleQuestionsPage';
-import { LongevityWellnessBundleInformationPage } from './pages/LongevityWellnessBundleInformationPage';
-import { LongevityWellnessBundleResultsPage } from './pages/LongevityWellnessBundleResultsPage';
-import { LongevityWellnessBundleReviewPage } from './pages/LongevityWellnessBundleReviewPage';
+const LongevityWellnessBundleUpsellPage = lazy(() => import('./pages/LongevityWellnessBundleUpsellPage').then(m => ({ default: m.LongevityWellnessBundleUpsellPage })));
+const LongevityWellnessBundleQuestionsPage = lazy(() => import('./pages/LongevityWellnessBundleQuestionsPage').then(m => ({ default: m.LongevityWellnessBundleQuestionsPage })));
+const LongevityWellnessBundleInformationPage = lazy(() => import('./pages/LongevityWellnessBundleInformationPage').then(m => ({ default: m.LongevityWellnessBundleInformationPage })));
+const LongevityWellnessBundleResultsPage = lazy(() => import('./pages/LongevityWellnessBundleResultsPage').then(m => ({ default: m.LongevityWellnessBundleResultsPage })));
+const LongevityWellnessBundleReviewPage = lazy(() => import('./pages/LongevityWellnessBundleReviewPage').then(m => ({ default: m.LongevityWellnessBundleReviewPage })));
 
-// Additional Assessment Pages
-import { ComplicationRiskUpsellPage } from './pages/ComplicationRiskUpsellPage';
-import { ComplicationRiskQuestionsPage } from './pages/ComplicationRiskQuestionsPage';
-import { ComplicationRiskInformationPage } from './pages/ComplicationRiskInformationPage';
-import { ComplicationRiskResultsPage } from './pages/ComplicationRiskResultsPage';
-import { ComplicationRiskReviewPage } from './pages/ComplicationRiskReviewPage';
+const ComplicationRiskUpsellPage = lazy(() => import('./pages/ComplicationRiskUpsellPage').then(m => ({ default: m.ComplicationRiskUpsellPage })));
+const ComplicationRiskQuestionsPage = lazy(() => import('./pages/ComplicationRiskQuestionsPage').then(m => ({ default: m.ComplicationRiskQuestionsPage })));
+const ComplicationRiskInformationPage = lazy(() => import('./pages/ComplicationRiskInformationPage').then(m => ({ default: m.ComplicationRiskInformationPage })));
+const ComplicationRiskResultsPage = lazy(() => import('./pages/ComplicationRiskResultsPage').then(m => ({ default: m.ComplicationRiskResultsPage })));
+const ComplicationRiskReviewPage = lazy(() => import('./pages/ComplicationRiskReviewPage').then(m => ({ default: m.ComplicationRiskReviewPage })));
 
-import { RecoverySpeedUpsellPage } from './pages/RecoverySpeedUpsellPage';
-import { RecoverySpeedQuestionsPage } from './pages/RecoverySpeedQuestionsPage';
-import { RecoverySpeedInformationPage } from './pages/RecoverySpeedInformationPage';
-import { RecoverySpeedResultsPage } from './pages/RecoverySpeedResultsPage';
-import { RecoverySpeedReviewPage } from './pages/RecoverySpeedReviewPage';
+const RecoverySpeedUpsellPage = lazy(() => import('./pages/RecoverySpeedUpsellPage').then(m => ({ default: m.RecoverySpeedUpsellPage })));
+const RecoverySpeedQuestionsPage = lazy(() => import('./pages/RecoverySpeedQuestionsPage').then(m => ({ default: m.RecoverySpeedQuestionsPage })));
+const RecoverySpeedInformationPage = lazy(() => import('./pages/RecoverySpeedInformationPage').then(m => ({ default: m.RecoverySpeedInformationPage })));
+const RecoverySpeedResultsPage = lazy(() => import('./pages/RecoverySpeedResultsPage').then(m => ({ default: m.RecoverySpeedResultsPage })));
+const RecoverySpeedReviewPage = lazy(() => import('./pages/RecoverySpeedReviewPage').then(m => ({ default: m.RecoverySpeedReviewPage })));
 
-import { AnaesthesiaRiskUpsellPage } from './pages/AnaesthesiaRiskUpsellPage';
-import { AnaesthesiaRiskQuestionsPage } from './pages/AnaesthesiaRiskQuestionsPage';
-import { AnaesthesiaRiskInformationPage } from './pages/AnaesthesiaRiskInformationPage';
-import { AnaesthesiaRiskResultsPage } from './pages/AnaesthesiaRiskResultsPage';
-import { AnaesthesiaRiskReviewPage } from './pages/AnaesthesiaRiskReviewPage';
+const AnaesthesiaRiskUpsellPage = lazy(() => import('./pages/AnaesthesiaRiskUpsellPage').then(m => ({ default: m.AnaesthesiaRiskUpsellPage })));
+const AnaesthesiaRiskQuestionsPage = lazy(() => import('./pages/AnaesthesiaRiskQuestionsPage').then(m => ({ default: m.AnaesthesiaRiskQuestionsPage })));
+const AnaesthesiaRiskInformationPage = lazy(() => import('./pages/AnaesthesiaRiskInformationPage').then(m => ({ default: m.AnaesthesiaRiskInformationPage })));
+const AnaesthesiaRiskResultsPage = lazy(() => import('./pages/AnaesthesiaRiskResultsPage').then(m => ({ default: m.AnaesthesiaRiskResultsPage })));
+const AnaesthesiaRiskReviewPage = lazy(() => import('./pages/AnaesthesiaRiskReviewPage').then(m => ({ default: m.AnaesthesiaRiskReviewPage })));
 
-import { MobilityStrengthUpsellPage } from './pages/MobilityStrengthUpsellPage';
-import { MobilityStrengthQuestionsPage } from './pages/MobilityStrengthQuestionsPage';
-import { MobilityStrengthInformationPage } from './pages/MobilityStrengthInformationPage';
-import { MobilityStrengthResultsPage } from './pages/MobilityStrengthResultsPage';
-import { MobilityStrengthReviewPage } from './pages/MobilityStrengthReviewPage';
+const MobilityStrengthUpsellPage = lazy(() => import('./pages/MobilityStrengthUpsellPage').then(m => ({ default: m.MobilityStrengthUpsellPage })));
+const MobilityStrengthQuestionsPage = lazy(() => import('./pages/MobilityStrengthQuestionsPage').then(m => ({ default: m.MobilityStrengthQuestionsPage })));
+const MobilityStrengthInformationPage = lazy(() => import('./pages/MobilityStrengthInformationPage').then(m => ({ default: m.MobilityStrengthInformationPage })));
+const MobilityStrengthResultsPage = lazy(() => import('./pages/MobilityStrengthResultsPage').then(m => ({ default: m.MobilityStrengthResultsPage })));
+const MobilityStrengthReviewPage = lazy(() => import('./pages/MobilityStrengthReviewPage').then(m => ({ default: m.MobilityStrengthReviewPage })));
 
-import { SymptomSeverityUpsellPage } from './pages/SymptomSeverityUpsellPage';
-import { SymptomSeverityQuestionsPage } from './pages/SymptomSeverityQuestionsPage';
-import { SymptomSeverityInformationPage } from './pages/SymptomSeverityInformationPage';
-import { SymptomSeverityResultsPage } from './pages/SymptomSeverityResultsPage';
-import { SymptomSeverityReviewPage } from './pages/SymptomSeverityReviewPage';
+const SymptomSeverityUpsellPage = lazy(() => import('./pages/SymptomSeverityUpsellPage').then(m => ({ default: m.SymptomSeverityUpsellPage })));
+const SymptomSeverityQuestionsPage = lazy(() => import('./pages/SymptomSeverityQuestionsPage').then(m => ({ default: m.SymptomSeverityQuestionsPage })));
+const SymptomSeverityInformationPage = lazy(() => import('./pages/SymptomSeverityInformationPage').then(m => ({ default: m.SymptomSeverityInformationPage })));
+const SymptomSeverityResultsPage = lazy(() => import('./pages/SymptomSeverityResultsPage').then(m => ({ default: m.SymptomSeverityResultsPage })));
+const SymptomSeverityReviewPage = lazy(() => import('./pages/SymptomSeverityReviewPage').then(m => ({ default: m.SymptomSeverityReviewPage })));
 
-import { InflammationRiskUpsellPage } from './pages/InflammationRiskUpsellPage';
-import { InflammationRiskQuestionsPage } from './pages/InflammationRiskQuestionsPage';
-import { InflammationRiskInformationPage } from './pages/InflammationRiskInformationPage';
-import { InflammationRiskResultsPage } from './pages/InflammationRiskResultsPage';
-import { InflammationRiskReviewPage } from './pages/InflammationRiskReviewPage';
+const InflammationRiskUpsellPage = lazy(() => import('./pages/InflammationRiskUpsellPage').then(m => ({ default: m.InflammationRiskUpsellPage })));
+const InflammationRiskQuestionsPage = lazy(() => import('./pages/InflammationRiskQuestionsPage').then(m => ({ default: m.InflammationRiskQuestionsPage })));
+const InflammationRiskInformationPage = lazy(() => import('./pages/InflammationRiskInformationPage').then(m => ({ default: m.InflammationRiskInformationPage })));
+const InflammationRiskResultsPage = lazy(() => import('./pages/InflammationRiskResultsPage').then(m => ({ default: m.InflammationRiskResultsPage })));
+const InflammationRiskReviewPage = lazy(() => import('./pages/InflammationRiskReviewPage').then(m => ({ default: m.InflammationRiskReviewPage })));
 
-import { MedicationBurdenUpsellPage } from './pages/MedicationBurdenUpsellPage';
-import { MedicationBurdenQuestionsPage } from './pages/MedicationBurdenQuestionsPage';
-import { MedicationBurdenInformationPage } from './pages/MedicationBurdenInformationPage';
-import { MedicationBurdenResultsPage } from './pages/MedicationBurdenResultsPage';
-import { MedicationBurdenReviewPage } from './pages/MedicationBurdenReviewPage';
+const MedicationBurdenUpsellPage = lazy(() => import('./pages/MedicationBurdenUpsellPage').then(m => ({ default: m.MedicationBurdenUpsellPage })));
+const MedicationBurdenQuestionsPage = lazy(() => import('./pages/MedicationBurdenQuestionsPage').then(m => ({ default: m.MedicationBurdenQuestionsPage })));
+const MedicationBurdenInformationPage = lazy(() => import('./pages/MedicationBurdenInformationPage').then(m => ({ default: m.MedicationBurdenInformationPage })));
+const MedicationBurdenResultsPage = lazy(() => import('./pages/MedicationBurdenResultsPage').then(m => ({ default: m.MedicationBurdenResultsPage })));
+const MedicationBurdenReviewPage = lazy(() => import('./pages/MedicationBurdenReviewPage').then(m => ({ default: m.MedicationBurdenReviewPage })));
 
-import { DailyEnergyUpsellPage } from './pages/DailyEnergyUpsellPage';
-import { DailyEnergyQuestionsPage } from './pages/DailyEnergyQuestionsPage';
-import { DailyEnergyInformationPage } from './pages/DailyEnergyInformationPage';
-import { DailyEnergyResultsPage } from './pages/DailyEnergyResultsPage';
-import { DailyEnergyReviewPage } from './pages/DailyEnergyReviewPage';
+const DailyEnergyUpsellPage = lazy(() => import('./pages/DailyEnergyUpsellPage').then(m => ({ default: m.DailyEnergyUpsellPage })));
+const DailyEnergyQuestionsPage = lazy(() => import('./pages/DailyEnergyQuestionsPage').then(m => ({ default: m.DailyEnergyQuestionsPage })));
+const DailyEnergyInformationPage = lazy(() => import('./pages/DailyEnergyInformationPage').then(m => ({ default: m.DailyEnergyInformationPage })));
+const DailyEnergyResultsPage = lazy(() => import('./pages/DailyEnergyResultsPage').then(m => ({ default: m.DailyEnergyResultsPage })));
+const DailyEnergyReviewPage = lazy(() => import('./pages/DailyEnergyReviewPage').then(m => ({ default: m.DailyEnergyReviewPage })));
 
-import { LifestyleLimiterUpsellPage } from './pages/LifestyleLimiterUpsellPage';
-import { LifestyleLimiterQuestionsPage } from './pages/LifestyleLimiterQuestionsPage';
-import { LifestyleLimiterInformationPage } from './pages/LifestyleLimiterInformationPage';
-import { LifestyleLimiterResultsPage } from './pages/LifestyleLimiterResultsPage';
-import { LifestyleLimiterReviewPage } from './pages/LifestyleLimiterReviewPage';
+const LifestyleLimiterUpsellPage = lazy(() => import('./pages/LifestyleLimiterUpsellPage').then(m => ({ default: m.LifestyleLimiterUpsellPage })));
+const LifestyleLimiterQuestionsPage = lazy(() => import('./pages/LifestyleLimiterQuestionsPage').then(m => ({ default: m.LifestyleLimiterQuestionsPage })));
+const LifestyleLimiterInformationPage = lazy(() => import('./pages/LifestyleLimiterInformationPage').then(m => ({ default: m.LifestyleLimiterInformationPage })));
+const LifestyleLimiterResultsPage = lazy(() => import('./pages/LifestyleLimiterResultsPage').then(m => ({ default: m.LifestyleLimiterResultsPage })));
+const LifestyleLimiterReviewPage = lazy(() => import('./pages/LifestyleLimiterReviewPage').then(m => ({ default: m.LifestyleLimiterReviewPage })));
 
-// Protocol Pages
-import { ChronicSymptomProtocolPage } from './pages/ChronicSymptomProtocolPage';
-import { LongevityFocusProtocolPage } from './pages/LongevityFocusProtocolPage';
+const ChronicSymptomProtocolPage = lazy(() => import('./pages/ChronicSymptomProtocolPage').then(m => ({ default: m.ChronicSymptomProtocolPage })));
+const LongevityFocusProtocolPage = lazy(() => import('./pages/LongevityFocusProtocolPage').then(m => ({ default: m.LongevityFocusProtocolPage })));
 
-// Health Concierge Pages
-import { HealthConciergePage } from './pages/HealthConciergePage';
-import { HealthConciergeQuestionsPage } from './pages/HealthConciergeQuestionsPage';
-import { HealthConciergeResultsPage } from './pages/HealthConciergeResultsPage';
-import { HealthConciergeInformationPage } from './pages/HealthConciergeInformationPage';
+const HealthConciergePage = lazy(() => import('./pages/HealthConciergePage').then(m => ({ default: m.HealthConciergePage })));
+const HealthConciergeQuestionsPage = lazy(() => import('./pages/HealthConciergeQuestionsPage').then(m => ({ default: m.HealthConciergeQuestionsPage })));
+const HealthConciergeResultsPage = lazy(() => import('./pages/HealthConciergeResultsPage').then(m => ({ default: m.HealthConciergeResultsPage })));
+const HealthConciergeInformationPage = lazy(() => import('./pages/HealthConciergeInformationPage').then(m => ({ default: m.HealthConciergeInformationPage })));
 
+const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.default })));
+const Cancel = lazy(() => import('./pages/Cancel').then(m => ({ default: m.default })));
 
-// For Stripe Payment Pages
-import Success from './pages/Success';
-import Cancel from './pages/Cancel';
-
-
-// Blog Pages
-import { BlogPage } from './pages/BlogPage';
-import { SurgeryReadySignsPage } from './pages/blog/SurgeryReadySignsPage';
-import { RedFlagsSurgeryPage } from './pages/blog/RedFlagsSurgeryPage';
-import { HomeTweaksPage } from './pages/blog/HomeTweaksPage';
-import { MorningStiffnessPage } from './pages/blog/MorningStiffnessPage';
-import { ComplicationRiskFactorsPage } from './pages/blog/ComplicationRiskFactorsPage';
-import { RecoverySpeedSecretsPage } from './pages/blog/RecoverySpeedSecretsPage';
-import { AnaesthesiaRisksPage } from './pages/blog/AnaesthesiaRisksPage';
-import { MobilityBaselinePage } from './pages/blog/MobilityBaselinePage';
+const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
+const SurgeryReadySignsPage = lazy(() => import('./pages/blog/SurgeryReadySignsPage').then(m => ({ default: m.SurgeryReadySignsPage })));
+const RedFlagsSurgeryPage = lazy(() => import('./pages/blog/RedFlagsSurgeryPage').then(m => ({ default: m.RedFlagsSurgeryPage })));
+const HomeTweaksPage = lazy(() => import('./pages/blog/HomeTweaksPage').then(m => ({ default: m.HomeTweaksPage })));
+const MorningStiffnessPage = lazy(() => import('./pages/blog/MorningStiffnessPage').then(m => ({ default: m.MorningStiffnessPage })));
+const ComplicationRiskFactorsPage = lazy(() => import('./pages/blog/ComplicationRiskFactorsPage').then(m => ({ default: m.ComplicationRiskFactorsPage })));
+const RecoverySpeedSecretsPage = lazy(() => import('./pages/blog/RecoverySpeedSecretsPage').then(m => ({ default: m.RecoverySpeedSecretsPage })));
+const AnaesthesiaRisksPage = lazy(() => import('./pages/blog/AnaesthesiaRisksPage').then(m => ({ default: m.AnaesthesiaRisksPage })));
+const MobilityBaselinePage = lazy(() => import('./pages/blog/MobilityBaselinePage').then(m => ({ default: m.MobilityBaselinePage })));
 import { SymptomSeverityGuidePage } from './pages/blog/SymptomSeverityGuidePage';
 import { InflammationTriggerGuidePage } from './pages/blog/InflammationTriggerGuidePage';
 import { MedicationSafetyGuidePage } from './pages/blog/MedicationSafetyGuidePage';
@@ -543,7 +565,7 @@ export { globalAssessments };
 
 export default function App() {
   const [showDesignSystem, setShowDesignSystem] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('page-loading');
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<string | null>(null);
@@ -713,6 +735,19 @@ useEffect(() => {
     setIsBasketOpen(true);
   };
 
+  const updateBasketItem = useCallback((assessment: Assessment) => {
+    setBasketItems(prev => {
+      const existingItemIndex = prev.findIndex(item => item.assessment.id === assessment.id);
+      if (existingItemIndex !== -1) {
+        // Item exists in basket, update it with new data
+        const newItems = [...prev];
+        newItems[existingItemIndex] = { assessment, quantity: 1 };
+        return newItems;
+      }
+      return prev;
+    });
+  }, []);
+
   const removeFromBasket = (assessmentId: string) => {
     const removedItem = basketItems.find(item => item.assessment.id === assessmentId);
     if (removedItem) {
@@ -751,6 +786,8 @@ useEffect(() => {
           return <Cancel />;
       case 'success':
           return <Success />;
+        case 'thank-you':
+          return <PurchaseThankYouPage />;
       case 'complaints':
         return <ComplaintsPage />;
       case 'quiz':
@@ -804,51 +841,61 @@ useEffect(() => {
           return <SurgeryReadinessUpsellPageWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-b':
           return <SurgeryReadinessUpsellPageBWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-c':
           return <SurgeryReadinessUpsellPageCWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-d':
           return <SurgeryReadinessUpsellPageDWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-e':
           return <SurgeryReadinessUpsellPageEWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-f':
           return <SurgeryReadinessUpsellPageFWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-g':
           return <SurgeryReadinessUpsellPageGWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-h':
           return <SurgeryReadinessUpsellPageHWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;
       case 'surgery-readiness-assessment-learn-more-i':
           return <SurgeryReadinessUpsellPageIWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;    
       case 'surgery-readiness-assessment-learn-more-j':
           return <SurgeryReadinessUpsellPageJWithPuck
             onAddToBasket={addToBasket}
             onOpenBasket={() => setIsBasketOpen(true)}
+            onAssessmentUpdate={updateBasketItem}
           />;    
       case 'surgery-readiness-assessment-questions':
         return <SurgeryReadinessQuestionsPage />;
@@ -1204,6 +1251,8 @@ useEffect(() => {
         return <AdminDashboardPage />;
       case 'analytics-test':
         return <AnalyticsTestPage />;
+      case 'page-loading':
+         return <PageLoader />;     
       default:
         return <HomePage onRequestQuote={handleRequestQuote} />;
     }
@@ -1217,6 +1266,11 @@ useEffect(() => {
       'surgery-readiness-assessment-learn-more-c',
       'surgery-readiness-assessment-learn-more-d',
       'surgery-readiness-assessment-learn-more-e',
+      'surgery-readiness-assessment-learn-more-f',
+      'surgery-readiness-assessment-learn-more-g',
+      'surgery-readiness-assessment-learn-more-h',
+      'surgery-readiness-assessment-learn-more-i',
+      'surgery-readiness-assessment-learn-more-j',
       'surgery-readiness-assessment-questions',
       'surgery-checklist',
       'surgery-readiness-assessment-information',
@@ -1332,7 +1386,9 @@ useEffect(() => {
         onDesignSystemClick={() => setShowDesignSystem(true)}
       />
       <main>
-        {renderCurrentPage()}
+        <Suspense fallback={<PageLoader />}>
+          {renderCurrentPage()}
+        </Suspense>
       </main>
       {!isQuizPage() && <Footer />}
       <CookieConsent />

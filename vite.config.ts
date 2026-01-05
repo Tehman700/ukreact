@@ -8,6 +8,8 @@
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
+        'react': path.resolve(__dirname, './node_modules/react'),
+        'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
         'vaul@1.1.2': 'vaul',
         'sonner@2.0.3': 'sonner',
         'recharts@2.15.2': 'recharts',
@@ -33,7 +35,7 @@
         'figma:asset/579ff64bca03156d9d1350ac1431855034562fdb.png': path.resolve(__dirname, './src/assets/579ff64bca03156d9d1350ac1431855034562fdb.png'),
         'figma:asset/4cabb8a4e6274a78708d8b568484f39d32dc28b7.png': path.resolve(__dirname, './src/assets/4cabb8a4e6274a78708d8b568484f39d32dc28b7.png'),
         'figma:asset/33e2bc5ac0e628d4cd978f233c2b6c1f6d83054a.png': path.resolve(__dirname, './src/assets/33e2bc5ac0e628d4cd978f233c2b6c1f6d83054a.png'),
-        'figma:asset/31b7fd69d3019f0b108fe61e9645c1e3d7f9f3af.png': path.resolve(__dirname, './src/assets/31b7fd69d3019f0b108fe61e9645c1e3d7f9f3af.png'),
+        'figma:asset/31b7fd69d3019f0b108fe61e9645c1e3d7f9f3af.png': path.resolve(__dirname, './src/assets/31b7fd69d3019f0b108fe61e9645c1e3d7f9f3af.jpg'),
         'figma:asset/31a0d62591eaf7b51f56d60f63824150a1786f8d.png': path.resolve(__dirname, './src/assets/31a0d62591eaf7b51f56d60f63824150a1786f8d.png'),
         'figma:asset/1d3650155b960261d923b43759d5822627f2ff7f.png': path.resolve(__dirname, './src/assets/1d3650155b960261d923b43759d5822627f2ff7f.png'),
         'figma:asset/01c579a5598743915ff434681ec8bb1f394d7816.png': path.resolve(__dirname, './src/assets/01c579a5598743915ff434681ec8bb1f394d7816.png'),
@@ -72,6 +74,27 @@
     build: {
       target: 'esnext',
       outDir: 'build',
+      sourcemap: true,
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split vendor libraries into separate chunks
+            'react-vendor': ['react', 'react-dom'],
+            'puck-editor': ['@measured/puck'],
+            'ui-vendor': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-switch',
+              '@radix-ui/react-tabs',
+            ],
+            'utils': ['clsx', 'class-variance-authority'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
     },
     server: {
       port: 3000,

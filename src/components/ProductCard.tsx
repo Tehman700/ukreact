@@ -155,12 +155,12 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
     {
       question: "How long does the program last?",
       answer: product.isTrialOffer 
-        ? "This program lasts 14 days and is crafted to meet your specific needs and goals."
+        ? "This program lasts 21 days and is crafted to meet your specific needs and goals."
         : `This program offers flexible durations: ${product.sizes.join(', ')} to meet your specific needs and goals.`
     },
     product.isTrialOffer ? {
-      question: "Is the 14-day trial really free?",
-      answer: "Yes — if you follow the plan.\n\nWe ask for a £200 fully refundable deposit to secure your spot and make sure you're committed.\n\nComplete the program as outlined, and we'll refund every penny at the end of the 14 days.\n\nWe've found that when patients commit, they get better results — and that's what we care about."
+      question: "Is the 21-day trial really free?",
+      answer: "Yes — if you follow the plan.\n\nWe ask for a £200 fully refundable deposit to secure your spot and make sure you're committed.\n\nComplete the program as outlined, and we'll refund every penny at the end of the 21 days.\n\nWe've found that when patients commit, they get better results — and that's what we care about."
     } : {
       question: "What service levels are available?",
       answer: `We offer different service tiers: ${product.colors.join(', ')} to provide the right level of care for your situation.`
@@ -168,7 +168,7 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
     {
       question: "How do I get started?",
       answer: product.isTrialOffer 
-        ? "Click 'Let's prepare together' to schedule a consultation with one of our doctors who will assess your needs and create your 14 day personalized treatment plan."
+        ? "Click 'Let's prepare together' to schedule a consultation with one of our doctors who will assess your needs and create your 21 day personalized treatment plan."
         : "Click 'Request Quote' to schedule a consultation with one of our specialists who will assess your needs and create a personalized treatment plan."
     }
   ];
@@ -185,13 +185,16 @@ export function ProductCard({ product, onRequestQuote, onAddToCart }: ProductCar
           src={product.name.toLowerCase().includes('surgery') ? surgeonImage : product.image}
           alt={product.name.toLowerCase().includes('surgery') ? "Professional surgeon in operating room" : product.name}
           className="w-full h-full object-cover transition-transform group-hover:scale-105"
+          fetchpriority={"high"}
+          loading={"eager"}
+          decoding={"async"} 
         />
 
-        {/* FREE 14 day trial badge */}
+        {/* FREE 21 day trial badge */}
         {product.isTrialOffer && (
           <div className="absolute top-4 left-4">
             <Badge className="bg-primary text-primary-foreground font-medium px-3 py-1">
-              FREE 14 day trial
+              FREE 21 day trial
             </Badge>
           </div>
         )}

@@ -22,7 +22,7 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
           <div className="flex items-center">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="Open navigation menu">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
@@ -36,7 +36,7 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
                 <ScrollArea className="h-[70vh] mt-4">
                   <nav className="flex flex-col space-y-4 px-[20px] py-[0px] pr-4">
                     <h4 className="font-medium text-primary">Main Navigation</h4>
-                    <a href="#" onClick={() => window.location.hash = ''} className="text-sm hover:text-primary transition-colors pl-2">Home</a>
+                    <a href="#" onClick={() => window.location.hash = 'home'} className="text-sm hover:text-primary transition-colors pl-2">Home</a>
                     <a href="#about" onClick={() => window.location.hash = 'about'} className="text-sm hover:text-primary transition-colors pl-2">About</a>
                     <a href="#services" onClick={() => window.location.hash = 'services'} className="text-sm hover:text-primary transition-colors pl-2">Services</a>
                     <a href="#assessments" onClick={() => window.location.hash = 'assessments'} className="text-sm hover:text-primary transition-colors pl-2">Assessments</a>
@@ -61,6 +61,7 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
                 src={lutherHealthLogo}
                 alt="Luther Health"
                 className="h-8 w-auto"
+                fetchpriority="high"
               />
             </a>
           </div>

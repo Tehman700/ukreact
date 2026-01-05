@@ -1,10 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { Render, Puck, Data } from "@measured/puck";
+import React, { useEffect, useState, lazy, Suspense } from "react";
+import { Render, Data } from "@measured/puck";
 import { Button } from "./ui/button";
 import { puckConfig } from "./puck/SurgeryPageComponents";
 import { testSupabaseConnection } from "../lib/supabase";
 import { PuckDatabase } from "../lib/puck-database";
 import { Assessment } from "../App";
+import { useSearchAnalytics, useAnalytics } from '../hooks/useAnalytics';
+import { PageLoader } from '../components/PageLoader';
+
+// Lazy load Puck editor for better performance
+const Puck = lazy(() => import("@measured/puck").then(m => ({ default: m.Puck })));
+
+// Dynamically load Puck styles only when needed
+const loadPuckStyles = () => {
+    import("@measured/puck/dist/index.css");
+    import("../puck-basic.css");
+};
 
 /**
  * Common Surgery Page with Puck Editor Integration
@@ -35,6 +46,7 @@ interface SurgeryPageWithPuckProps {
   assessment?: Assessment; // Make optional since we'll use Puck data
   onAddToBasket: (assessment: Assessment) => void;
   onOpenBasket: () => void;
+  onAssessmentUpdate?: (assessment: Assessment) => void; // Notify when assessment data changes
 }
 
 export function SurgeryPageWithPuck({
@@ -44,6 +56,7 @@ export function SurgeryPageWithPuck({
   assessment: fallbackAssessment,
   onAddToBasket,
   onOpenBasket,
+  onAssessmentUpdate,
 }: SurgeryPageWithPuckProps) {
   const [data, setData] = useState<Data>(defaultData);
   const [isEditing, setIsEditing] = useState(false);
@@ -89,15 +102,10 @@ export function SurgeryPageWithPuck({
     };
   }, []);
 
-  // Create assessment object from Puck data or use fallback
   const assessment: Assessment = React.useMemo(() => {
-    // Clear any old assessment data from button components
    
     const rootProps = data?.root?.props || {};
-
-    console.log("🔍 Puck root props:", rootProps);
     
-    // Build assessment with Puck data taking priority
     const finalAssessment: Assessment = {
       id: fallbackAssessment?.id || "1",
       name: (rootProps.assessmentName as string) || fallbackAssessment?.name || "Surgery Readiness Score",
@@ -109,12 +117,18 @@ export function SurgeryPageWithPuck({
       hidden: fallbackAssessment?.hidden,
     };
     
-    console.log("✅ Final assessment for basket:", finalAssessment);
     return finalAssessment;
   }, [data, fallbackAssessment]);
 
-  const handleStartAssessmentModal = () => {
-    // Track ContentSquare event
+   const { trackAssessmentStart, trackAddToBasket } = useAnalytics();
+
+  useEffect(() => {
+    if (onAssessmentUpdate && assessment) {
+      onAssessmentUpdate(assessment);
+    }
+  }, [assessment, onAssessmentUpdate]);
+
+  const handleStartAssessmentModal = React.useCallback(() => {
     if (window._uxa && typeof window._uxa.push === "function") {
       window._uxa.push([
         "trackDynamicVariable",
@@ -123,21 +137,14 @@ export function SurgeryPageWithPuck({
           value: "reduce_surgical_risk_button",
         },
       ]);
-      console.log("✅ ContentSquare event tracked: CTA button clicked");
     }
-
-    console.log("🎯 Navigating to quiz questions:", {
-      name: assessment.name,
-      price: assessment.price,
-      description: assessment.description,
-    });
-
-    // Navigate directly to quiz questions page
+    console.log("Starting assessment:", assessment);
+     trackAssessmentStart(assessment.id, assessment.name, assessment.price);
+     trackAddToBasket(assessment.id, assessment.name, assessment.price);
     onAddToBasket(assessment);
     onOpenBasket();
-  };
+  }, [assessment, trackAssessmentStart, trackAddToBasket, onAddToBasket, onOpenBasket]);
 
-  // Save data to Supabase
   const saveToSupabase = async (pageData: Data, isPublished = false) => {
     setIsSaving(true);
     try {
@@ -158,7 +165,6 @@ export function SurgeryPageWithPuck({
     }
   };
 
-  // Load data from Supabase
   const loadFromSupabase = async () => {
     try {
       setIsLoading(true);
@@ -201,7 +207,6 @@ export function SurgeryPageWithPuck({
     }
   };
 
-  // Enhanced config with button functionality
   const enhancedConfig = {
     ...puckConfig,
     components: {
@@ -230,12 +235,10 @@ export function SurgeryPageWithPuck({
     },
   };
 
-  // Load saved data from Supabase on component mount
   useEffect(() => {
     loadFromSupabase();
   }, []);
 
-  // Check for edit mode - only allow if user has permission
   useEffect(() => {
     if (!hasEditPermission) {
       setIsEditing(false);
@@ -246,13 +249,16 @@ export function SurgeryPageWithPuck({
     const editMode =
       urlParams.get("edit") === "true" ||
       localStorage.getItem("puck-edit-mode") === "true";
+    
+    if (editMode) {
+      loadPuckStyles();
+    }
+    
     setIsEditing(editMode);
   }, [hasEditPermission]);
 
   const toggleEditMode = () => {
-    // Check permission before allowing edit mode toggle
     if (!hasEditPermission) {
-      console.warn("❌ Edit mode denied - adminAuthenticated not found");
       alert("Access denied. You need to be logged in to edit pages.");
       return;
     }
@@ -261,7 +267,10 @@ export function SurgeryPageWithPuck({
     setIsEditing(newEditMode);
     localStorage.setItem("puck-edit-mode", newEditMode.toString());
 
-    // Update URL
+    if (newEditMode) {
+      loadPuckStyles();
+    }
+
     const url = new URL(window.location.href);
     if (newEditMode) {
       url.searchParams.set("edit", "true");
@@ -271,32 +280,8 @@ export function SurgeryPageWithPuck({
     window.history.pushState({}, "", url.toString());
   };
 
-  // Show loading state while fetching from Supabase
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        <div
-          style={{
-            width: "50px",
-            height: "50px",
-            border: "3px solid #f3f3f3",
-            borderTop: "3px solid #3498db",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <p style={{ fontSize: "18px", color: "#666" }}>Loading page...</p>
-      </div>
-    );
+    return ( <PageLoader />);
   }
 
   if (isEditing) {
@@ -312,28 +297,29 @@ export function SurgeryPageWithPuck({
               👁️ Preview Page
             </Button>
           </div>
-        <Puck
-          config={enhancedConfig}
-          data={data}
-          onPublish={async (newData) => {
-            setData(newData);
-            const success = await saveToSupabase(newData, true);
-            if (success) {
-              alert("🚀 Page published successfully!");
-            } else {
-              alert(
-                "⚠️ Failed to publish Page. Check your internet connection."
-              );
-            }
-            console.log("📤 Published Page data:", newData);
-          }}
-        />
+        <Suspense fallback={<PageLoader />}>
+          <Puck
+            config={enhancedConfig}
+            data={data}
+            onPublish={async (newData) => {
+              setData(newData);
+              const success = await saveToSupabase(newData, true);
+              if (success) {
+                alert("🚀 Page published successfully!");
+              } else {
+                alert(
+                  "⚠️ Failed to publish Page. Changes have been saved locally.",
+                );
+              }
+            }}
+          />
+        </Suspense>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {hasEditPermission && (
         <div className="fixed top-4 right-4 z-50">
           <Button
@@ -342,7 +328,7 @@ export function SurgeryPageWithPuck({
             onClick={toggleEditMode}
             className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
           >
-            ✏️ Edit Page
+            ✏️ Edit 
           </Button>
         </div>
       )}

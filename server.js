@@ -70,6 +70,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
+
+const stripeSpecial = new Stripe(process.env.STRIPE_SECRET_KEY_SPECIAL, {
+  apiVersion: "2022-11-15",
+});  
+
 // ----------------------------
 // POSTGRES
 // ----------------------------
@@ -152,12 +157,16 @@ app.post("/api/assessments", async (req, res) => {
 // 3. Stripe Checkout
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
+   console.log("💳 Creating Stripe checkout session...");
   try {
-    const { products, funnel_type = "complication-risk" } = req.body; // Add funnel_type parameter
+    const { products, funnel_type = "complication-risk", page = "home-test" } = req.body; // Add funnel_type and page parameters
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
+
+    console.log("💳 Products for checkout:", products);
+    console.log("💳 Page for checkout:", page);
 
     const line_items = products.map((item) => ({
       price_data: {
@@ -197,19 +206,26 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
 
-    const session = await stripe.checkout.sessions.create({
+    // Choose Stripe instance based on page
+    const stripeInstance = [
+      'surgery-readiness-assessment-learn-more',
+      'surgery-readiness-assessment-learn-more-b',
+      'surgery-conditioning-protocol-challenge'
+    ].includes(page) ? stripeSpecial : stripe;
+
+    console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
+
+    const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      // Store funnel type in metadata
       metadata: {
-        funnel_type: funnel_type
+        funnel_type: funnel_type,
+        page: page
       },
-      // Redirect directly to the questions page for this funnel
-      success_url: `https://luther.health/Health-Audit.html#${questionRoute}`,
+      success_url: "https://luther.health/Health-Audit.html#thank-you",
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
-//      success_url: `https://luther.health/Health-Audit.html#${questionRoute}?session_id={CHECKOUT_SESSION_ID}`,
 
     // Return sessionId so frontend can save & use it
     res.json({ sessionId: session.id });
@@ -222,18 +238,38 @@ app.post("/api/create-checkout-session", async (req, res) => {
 // Update your existing webhook to store funnel_type
 app.post("/api/webhook", async (req, res) => {
   let event = req.body;
+  const signature = req.headers['stripe-signature'];
 
-  // Verify webhook signature if endpoint secret is provided
-  if (process.env.STRIPE_WEBHOOK_SECRET) {
-    const signature = req.headers['stripe-signature'];
+  // First, try to parse the event to get metadata and determine which webhook secret to use
+  let parsedEvent;
+  try {
+    parsedEvent = JSON.parse(req.body.toString());
+  } catch (e) {
+    parsedEvent = req.body;
+  }
 
+  // Check if this is from the special Stripe account based on session metadata
+  const sessionPage = parsedEvent?.data?.object?.metadata?.page || '';
+  const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b','surgery-conditioning-protocol-challenge'].includes(sessionPage);
+  
+  console.log(`🔔 Webhook received for page: ${sessionPage}`);
+  console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} webhook secret`);
+
+  // Verify webhook signature with appropriate secret
+  const webhookSecret = useSpecialStripe 
+    ? process.env.STRIPE_WEBHOOK_SECRET_SPECIAL 
+    : process.env.STRIPE_WEBHOOK_SECRET;
+  
+  const stripeInstance = useSpecialStripe ? stripeSpecial : stripe;
+
+  if (webhookSecret) {
     try {
-      event = stripe.webhooks.constructEvent(
+      event = stripeInstance.webhooks.constructEvent(
         req.body,
         signature,
-        process.env.STRIPE_WEBHOOK_SECRET
+        webhookSecret
       );
-      console.log("✅ Webhook signature verified");
+      console.log("✅ Webhook signature verified with " + (useSpecialStripe ? "SPECIAL" : "DEFAULT") + " secret");
     } catch (err) {
       console.log(`⚠️ Webhook signature verification failed:`, err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -262,8 +298,8 @@ app.post("/api/webhook", async (req, res) => {
         )
       `);
 
-      // Get line items from Stripe session
-      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      // Get line items from Stripe session using the correct Stripe instance
+      const lineItems = await stripeInstance.checkout.sessions.listLineItems(session.id);
       const productName = lineItems.data.map(item => item.description).join(', ');
 
       // Get funnel type from session metadata

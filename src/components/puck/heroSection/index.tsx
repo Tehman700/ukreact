@@ -106,7 +106,7 @@ export const HeroSection: ComponentConfig<{
     title: "The £37 Pre-Op check that could save you weeks of recovery",
     subtitle: "If you've got a surgery date, your biggest risk isn't the operation. It's showing up under-prepared.",
     image: "/assets/surgery-hero.webp",
-    imageAlt: "Smiling male patient in hospital gown representing the Surgery Readiness Score",
+    imageAlt: "Image",
     paddingTop: 96,
     paddingBottom: 96,
     paddingLeft: 0,
@@ -144,15 +144,15 @@ export const HeroSection: ComponentConfig<{
           flexDirection: 'column',
           gap: '32px'
         }}>
-          <h1 style={{
+          <div style={{
             fontSize: `clamp(${fontSize * 1.25}px, 5vw, ${fontSize * 2.34}px)`,
-            fontWeight: 'bold',
+            fontWeight: '700',
             lineHeight: '1.1',
             color: fontColor,
             margin: 0
           }}>
             {title}
-          </h1>
+          </div>
           <p style={{
             fontSize: `${fontSize * 0.875}px`,
             maxWidth: '768px',
@@ -180,6 +180,9 @@ export const HeroSection: ComponentConfig<{
                 borderRadius: '16px',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
               }}
+              fetchpriority={"high"}
+              loading={"eager"}
+              decoding={"async"}
             />
           </div>
         </div>
