@@ -8,9 +8,6 @@ declare global {
   }
 }
 
-
-
-
 // Analytics configuration
 export const ANALYTICS_CONFIG = {
   GA4_MEASUREMENT_ID: import.meta.env.VITE_GA4_MEASUREMENT_ID || 'G-XXXXXXXXXX',
