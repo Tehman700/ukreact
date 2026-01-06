@@ -28,15 +28,6 @@ const supabase = createClient(
 
 
 
-
-
-
-
-
-
-
-
-
 // Initialize Google Analytics 4
 export const initializeGA4 = () => {
   if (typeof window === 'undefined') return;

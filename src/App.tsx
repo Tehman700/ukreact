@@ -8,7 +8,7 @@ import { PageLoader } from './components/PageLoader';
 
 // Critical pages (loaded immediately)
 import { HomePage } from './pages/HomePage';
-<<<<<<< HEAD
+// <<<<<<< HEAD
 import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { ContactPage } from './pages/ContactPage';
@@ -35,7 +35,7 @@ import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUps
 import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
 import { SurgeryPreparationChecklistPageB } from './pages/SurgeryPreparationChecklistPageB';
 import { SurgeryPreparationChecklistPageC } from './pages/SurgeryPreparationChecklistPageC';
-=======
+// =======
 import { PurchaseThankYouPage } from './pages/PurchaseThankYouPage';
 
 // Lazy load ALL non-critical pages for optimal performance
@@ -53,7 +53,7 @@ const LoadingPage = lazy(() => import('./pages/LoadingPage').then(m => ({ defaul
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(m => ({ default: m.QuizResultsPage })));
 const UpsellPage = lazy(() => import('./pages/UpsellPage').then(m => ({ default: m.UpsellPage })));
 const CQCPage = lazy(() => import('./pages/CQC').then(m => ({ default: m.CQCPage })));
->>>>>>> 34c1ceb1cadc04b99f7cd857e2def27d39531e08
+// >>>>>>> 34c1ceb1cadc04b99f7cd857e2def27d39531e08
 
 // Lazy load Puck pages
 const SurgeryReadinessUpsellPageWithPuck = lazy(() => import('./pages/SurgeryReadinessUpsellPageWithPuck').then(m => ({ default: m.SurgeryReadinessUpsellPageWithPuck })));
