@@ -6821,20 +6821,33 @@ html {
 /* Payment method badge (Apple Pay, Stripe, Visa) */
 .payment-badge {
   box-sizing: border-box;
-  width: 50px;
-  height: 31px;
+  width: 61px;
+  height: 30px;
   border: 0.5px solid #D1D5DB;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FFFFFF;
+  box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
 }
 
 /* Payment badge icon image */
-.payment-badge-icon {
-  width: 100%;
-  height: auto;
+.payment-badge-icon-visa {
+  width: 90%;
+  height: 26px;
+  object-fit: cover;
+}
+
+.payment-badge-icon-stripe {
+  width: 90%;
+  height: 26px;
+  object-fit: cover;
+}
+
+.payment-badge-icon-apple {
+  width: 90%;
+  height: 17px;
   object-fit: cover;
 }
 
@@ -6846,11 +6859,7 @@ html {
 }
 
 /* Mobile responsive adjustments for smaller screens */
-@media (max-width: 400px) {
-  .payment-badge {
-    width: 42px;
-    height: 26px;
-  }
+@media (max-width: 462px) {
   
   .guarantee-badge {
     width: 50px;

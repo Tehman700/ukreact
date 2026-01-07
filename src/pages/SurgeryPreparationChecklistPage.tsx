@@ -538,7 +538,7 @@ export function SurgeryPreparationChecklistPage({
           </div>
 
           {/* Unlock card - separate from results card */}
-          <div className="bg-white rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0">
+          <div className="bg-white rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0 mb-6">
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
               Unlock your personalised plan
             </h2>
@@ -574,13 +574,13 @@ export function SurgeryPreparationChecklistPage({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
-                  <img src="/assests/appleicon.svg" alt="Apple Pay" className="payment-badge-icon" />
+                  <img src="/assests/appleicon.svg" alt="Apple Pay" className="payment-badge-icon-apple" />
                 </div>
                 <div className="payment-badge">
-                  <img src="/assests/stripeicon.svg" alt="Stripe" className="payment-badge-icon" />
+                  <img src="/assests/stripeicon.svg" alt="Stripe" className="payment-badge-icon-stripe" />
                 </div>
                 <div className="payment-badge">
-                  <img src="/assests/visaicon.svg" alt="Visa" className="payment-badge-icon" />
+                  <img src="/assests/visaicon.svg" alt="Visa" className="payment-badge-icon-visa" />
                 </div>
               </div>
               <div className="flex-shrink-0">
