@@ -461,7 +461,7 @@ export function SurgeryPreparationChecklistPage({
 
   return (
     <div className="h-[100vh] h-[100dvh] flex flex-col items-center justify-center  overflow-hidden">
-      <div className="w-full max-w-md h-full flex flex-col">
+      <div className="w-full gap-4 max-w-md h-full flex flex-col">
         {/* White card for results */}
         <div className="bg-white m-4 flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="p-4 sm:p-6 flex-shrink-0">
@@ -540,7 +540,7 @@ export function SurgeryPreparationChecklistPage({
        
         </div>
                {/* Unlock card - separate from results card */}
-          <div className="bg-white rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0 mb-6">
+          <div className="bg-white bottom-0 rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0 mb-6">
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
               Unlock your personalised plan
             </h2>
