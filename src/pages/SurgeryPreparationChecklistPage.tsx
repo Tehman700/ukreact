@@ -460,10 +460,10 @@ export function SurgeryPreparationChecklistPage({
   };
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-md h-full max-h-[100dvh] flex flex-col">
+    <div className="h-[100vh] h-[100dvh] flex flex-col items-center justify-center  overflow-hidden">
+      <div className="w-full max-w-md h-full flex flex-col">
         {/* White card for results */}
-        <div className="bg-white rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden">
+        <div className="bg-white m-4 flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="p-4 sm:p-6 flex-shrink-0">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
               Your free results
@@ -537,7 +537,9 @@ export function SurgeryPreparationChecklistPage({
             </div>
           </div>
 
-          {/* Unlock card - separate from results card */}
+       
+        </div>
+               {/* Unlock card - separate from results card */}
           <div className="bg-white rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0 mb-6">
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
               Unlock your personalised plan
@@ -597,8 +599,8 @@ export function SurgeryPreparationChecklistPage({
               Unlock My Full Plan (£37)
             </Button>
           </div>
-        </div>
       </div>
+  
 
       {/* Shopping Basket - Only render if using local state */}
       {!externalAddToBasket && (
