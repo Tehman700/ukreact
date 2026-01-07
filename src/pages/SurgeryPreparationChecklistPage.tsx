@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -48,7 +48,7 @@ const surgeryReadinessAssessment: Assessment = {
   name: "Surgery Readiness Score",
   description:
     "Comprehensive pre-surgical evaluation to optimize your readiness and minimize risks for upcoming procedures.",
-  price: 39.0,
+  price: 37.0,
   image: surgeryReadinessImage,
   icon: <Shield className="w-6 h-6" />,
   category: "Pre-Surgery",
@@ -92,7 +92,41 @@ export function SurgeryPreparationChecklistPage({
   const [isBasketOpen, setIsBasketOpen] = useState(false);
 
   // Dynamic score (1-100) - can be passed as prop or fetched
-  const score = 56;
+  const targetScore = 49;
+  
+  // Animated score state - starts at 0 and animates to targetScore
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  // Animation effect - animate from 0 to targetScore on mount
+  useEffect(() => {
+    const duration = 2500; // Animation duration in ms (slower)
+    const startTime = Date.now();
+    const startValue = 0;
+    const endValue = targetScore;
+
+    // Easing function for ultra smooth animation (ease-in-out sine)
+    const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+
+    const animateScore = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeInOutSine(progress);
+      const currentValue = Math.round(startValue + (endValue - startValue) * easedProgress);
+      
+      setAnimatedScore(currentValue);
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScore);
+      }
+    };
+
+    // Start animation after a small delay
+    const timeoutId = setTimeout(() => {
+      requestAnimationFrame(animateScore);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [targetScore]);
 
   // Calculate gauge indicator position based on score (1-100)
   const getGaugeIndicatorPosition = (scoreValue: number) => {
@@ -101,12 +135,12 @@ export function SurgeryPreparationChecklistPage({
     
     // Arc parameters (based on SVG viewBox 0 0 204 110)
     const centerX = 102;
-    const centerY = 107;
+    const centerY = 104;
     const radius = 96;
     
     // Convert score to angle (π to 0, left to right)
     // Score 0 = 180° (left), Score 100 = 0° (right)
-    const angle = Math.PI * (1 - clampedScore / 100);
+    const angle = Math.PI * (1 - clampedScore / 120);
     
     // Calculate position on arc
     const cx = centerX + radius * Math.cos(angle);
@@ -117,14 +151,14 @@ export function SurgeryPreparationChecklistPage({
 
   // Get indicator color based on score
   const getIndicatorColor = (scoreValue: number) => {
-    if (scoreValue < 25) return "#EA916E"; // Red/orange
-    if (scoreValue < 50) return "#F5BC3A"; // Yellow
+    if (scoreValue < 20) return "#EA916E"; // Red/orange
+    if (scoreValue < 60) return "#F5BC3A"; // Yellow
     if (scoreValue < 75) return "#9FE377"; // Light green
     return "#2ECE7E"; // Green
   };
 
-  const indicatorPos = getGaugeIndicatorPosition(score);
-  const indicatorColor = getIndicatorColor(score);
+  const indicatorPos = getGaugeIndicatorPosition(animatedScore);
+  const indicatorColor = getIndicatorColor(animatedScore);
 
   const addToBasket = (assessment: Assessment) => {
     console.log("🛒 addToBasket called with:", assessment.name);
@@ -459,7 +493,7 @@ export function SurgeryPreparationChecklistPage({
               </div>
               <div className="text-center absolute mt-2 bottom-0">
                 <p className="text-4xl  font-bold text-gray-900">
-                  {score}
+                  {animatedScore}
                   <span className="text-xl font-normal text-gray-400">
                     /100
                   </span>
