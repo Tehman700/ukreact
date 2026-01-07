@@ -6804,3 +6804,45 @@ html {
     opacity: 0;
   }
 }
+
+/* Surgery Checklist Page Styles */
+
+/* Risk driver locked item box */
+.risk-driver-item {
+  box-shadow: -4px 3px 10.7px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+/* Unlock plan section container */
+.unlock-plan-section {
+  box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
+}
+
+/* Payment method badge (Apple Pay, Stripe, Visa) */
+.payment-badge {
+  box-sizing: border-box;
+  width: 50px;
+  height: 31px;
+  border: 0.5px solid #D1D5DB;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+}
+
+/* Payment badge icon image */
+.payment-badge-icon {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* 30 day money back guarantee badge */
+.guarantee-badge {
+  width: 64px;
+  height: 50px;
+  object-fit: cover;
+}
+
+
