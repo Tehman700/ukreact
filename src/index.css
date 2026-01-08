@@ -6816,6 +6816,11 @@ html {
 /* Unlock plan section container */
 .unlock-plan-section {
   box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
+  padding:24px 30px 30px 30px;
+  border-bottom-left-radius:20px;
+  border-bottom-right-radius:20px;
+  border-top-left-radius:40px;
+  border-top-right-radius:40px;
 }
 
 /* Payment method badge (Apple Pay, Stripe, Visa) */
@@ -6864,6 +6869,13 @@ html {
   .guarantee-badge {
     width: 50px;
     height: 40px;
+  }
+}
+
+@media (max-width: 462px) {
+  
+  .h-24{
+    height: calc(var(--spacing) * 48)  !important;
   }
 }
 

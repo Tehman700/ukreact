@@ -507,7 +507,7 @@ export function SurgeryPreparationChecklistPage({
               <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
                 Top 3 risk drivers
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {[1, 2, 3].map((id) => (
                   <div
                     key={id}
@@ -540,7 +540,7 @@ export function SurgeryPreparationChecklistPage({
        
         </div>
                {/* Unlock card - separate from results card */}
-          <div className="bg-white bottom-0 rounded-2xl unlock-plan-section p-4 sm:p-6 flex-shrink-0 mb-6">
+          <div className="bg-white bottom-0 unlock-plan-section sm:p-6 flex-shrink-0 mb-6">
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
               Unlock your personalised plan
             </h2>
