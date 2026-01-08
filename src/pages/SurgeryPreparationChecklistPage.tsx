@@ -471,7 +471,7 @@ export function SurgeryPreparationChecklistPage({
 
             {/* Semi-circular Progress Gauge */}
             <div className="flex relative flex-col items-center mb-4">
-              <div className="w-40 sm:w-48 h-24 sm:h-28">
+              <div className="w-40 sm:w-48 h-25 sm:h-28">
           
 
                 <svg className="w-full h-full" viewBox="0 0 204 110" fill="none" xmlns="http://www.w3.org/2000/svg">

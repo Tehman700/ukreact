@@ -6863,6 +6863,9 @@ html {
   object-fit: cover;
 }
 
+.h-25{
+  height: calc(var(--spacing) * 24)  !important;
+}
 /* Mobile responsive adjustments for smaller screens */
 @media (max-width: 462px) {
   
@@ -6874,7 +6877,7 @@ html {
 
 @media (max-width: 462px) {
   
-  .h-24{
+  .h-25{
     height: calc(var(--spacing) * 48)  !important;
   }
 }
