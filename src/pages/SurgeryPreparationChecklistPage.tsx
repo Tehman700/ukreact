@@ -460,10 +460,10 @@ export function SurgeryPreparationChecklistPage({
   };
 
   return (
-    <div className="risk-driver-container bg-gray-100 h-[100vh] h-[100dvh] flex flex-col items-center justify-center  overflow-hidden">
-      <div className="w-full bg-white max-w-md h-full flex flex-col">
+    <div className="risk-driver-container bg-gray-100 h-screen flex flex-col items-center overflow-hidden">
+      <div className="w-full bg-white max-w-md h-screen flex flex-col overflow-hidden">
         {/* White card for results */}
-        <div className="bg-white m-4 flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="bg-white m-4 flex-1 flex flex-col overflow-y-auto min-h-0">
           <div className="risk-driver-main sm:p-6 flex-shrink-0">
             <h1 className="risk-driver-title font-bold text-gray-900 mb-4">
               Your free results
