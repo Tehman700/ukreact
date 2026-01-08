@@ -6806,7 +6806,15 @@ html {
 }
 
 /* Surgery Checklist Page Styles */
-
+.risk-driver-main{
+  padding: calc(var(--spacing) * 8);
+}
+.risk-driver-title{
+  font-size: 24px;
+  line-height: 32px;
+  color: var(--foreground);
+  margin-bottom: calc(var(--spacing) * 4);
+}
 /* Risk driver locked item box */
 .risk-driver-item {
   box-shadow: -4px 3px 10.7px rgba(0, 0, 0, 0.1);
@@ -6874,12 +6882,30 @@ html {
     width: 50px;
     height: 40px;
   }
-}
-
-@media (max-width: 462px) {
-  
+  .risk-driver-container{
+    background-color: #ffffff !important;
+  }
   .h-25{
     height: calc(var(--spacing) * 48)  !important;
+  }
+}
+
+@media (max-width: 390px) {
+  
+  .h-25{
+    height: calc(var(--spacing) * 36)  !important;
+  }
+  .risk-driver-item {
+    height: 30px !important;
+  }
+}
+
+@media (min-height: 800px) {
+  .h-25{
+    height: calc(var(--spacing) * 50)  !important;
+  }
+  .risk-driver-item {
+    height: 55px !important;
   }
 }
 

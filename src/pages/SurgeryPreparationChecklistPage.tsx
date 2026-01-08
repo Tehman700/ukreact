@@ -460,12 +460,12 @@ export function SurgeryPreparationChecklistPage({
   };
 
   return (
-    <div className="h-[100vh] h-[100dvh] flex flex-col items-center justify-center  overflow-hidden">
-      <div className="w-full gap-4 max-w-md h-full flex flex-col">
+    <div className="risk-driver-container bg-gray-100 h-[100vh] h-[100dvh] flex flex-col items-center justify-center  overflow-hidden">
+      <div className="w-full bg-white max-w-md h-full flex flex-col">
         {/* White card for results */}
         <div className="bg-white m-4 flex-1 flex flex-col overflow-hidden min-h-0">
-          <div className="p-4 sm:p-6 flex-shrink-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+          <div className="risk-driver-main sm:p-6 flex-shrink-0">
+            <h1 className="risk-driver-title font-bold text-gray-900 mb-4">
               Your free results
             </h1>
 
@@ -503,8 +503,8 @@ export function SurgeryPreparationChecklistPage({
             </div>
 
             {/* Top 3 risk drivers */}
-            <div className="mt-6">
-              <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
+            <div className="mt-4">
+              <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-4">
                 Top 3 risk drivers
               </h2>
               <div className="space-y-4">
