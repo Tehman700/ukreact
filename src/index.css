@@ -6811,6 +6811,7 @@ html {
 .risk-driver-item {
   box-shadow: -4px 3px 10.7px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
+  height: 45px !important;
 }
 
 /* Unlock plan section container */

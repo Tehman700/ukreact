@@ -503,7 +503,7 @@ export function SurgeryPreparationChecklistPage({
             </div>
 
             {/* Top 3 risk drivers */}
-            <div className="mt-2">
+            <div className="mt-6">
               <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
                 Top 3 risk drivers
               </h2>
@@ -520,14 +520,14 @@ export function SurgeryPreparationChecklistPage({
                         </svg>
                       </div>
                       <div
-                        className="text-gray-600 text-sm sm:text-base font-bold select-none"
+                        className="text-gray-600 text-lg lg:text-base font-bold select-none"
                         style={{
                           filter: "blur(4px)",
                           WebkitFilter: "blur(4px)",
                           userSelect: "none",
                         }}
                       >
-                        Risk factor hidden
+                        RiskfactorhiddenRiskfactorabcd
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300" />
