@@ -6830,9 +6830,7 @@ html {
   border-bottom-right-radius:20px;
   border-top-left-radius:40px;
   border-top-right-radius:40px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;  
+
 }
 
 /* Payment method badge (Apple Pay, Stripe, Visa) */
@@ -6915,7 +6913,11 @@ justify-content: center;
       justify-content: flex-start;
       height: 80vh !important;
 }
-
+.unlock-plan-section {
+        position: absolute;
+  bottom: 0;
+  width: 100%;  
+}
 }
 @media (min-height: 800px) {
   .h-25{
