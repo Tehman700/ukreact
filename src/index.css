@@ -6877,7 +6877,7 @@ html {
 }
 
 .risk-driver-container {
-  height: calc(100vh - 57px);
+  min-height: calc(100vh - 57px);
 display: flex;
 flex-direction: column;
 align-items: center;
