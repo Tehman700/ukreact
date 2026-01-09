@@ -6910,7 +6910,9 @@ justify-content: center;
 @media (max-width: 768px) {
 .risk-driver-container {
       justify-content: flex-start;
+      height: 92vh !important;
 }
+
 }
 @media (min-height: 800px) {
   .h-25{
@@ -6919,6 +6921,7 @@ justify-content: center;
   .risk-driver-item {
     height: 55px !important;
   }
+
 }
 
 /* Fix mobile scrolling issues */
