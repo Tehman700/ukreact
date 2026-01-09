@@ -540,7 +540,7 @@ export function SurgeryPreparationChecklistPage({
        
         </div>
                {/* Unlock card - separate from results card */}
-          <div className="bg-white bottom-0 unlock-plan-section sm:p-6 flex-shrink-0 mb-6">
+          <div className="bg-white bottom-0 unlock-plan-section sm:p-6 flex-shrink-0">
             <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
               Unlock your personalised plan
             </h2>
