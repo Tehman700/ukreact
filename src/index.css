@@ -6875,6 +6875,14 @@ html {
 .h-25{
   height: calc(var(--spacing) * 24)  !important;
 }
+
+.risk-driver-container {
+  height: calc(100vh - 57px);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
 /* Mobile responsive adjustments for smaller screens */
 @media (max-width: 462px) {
   
@@ -6899,7 +6907,11 @@ html {
     height: 30px !important;
   }
 }
-
+@media (max-width: 768px) {
+.risk-driver-container {
+      justify-content: flex-start;
+}
+}
 @media (min-height: 800px) {
   .h-25{
     height: calc(var(--spacing) * 50)  !important;
@@ -6910,3 +6922,4 @@ html {
 }
 
 
+ 
