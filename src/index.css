@@ -6921,5 +6921,38 @@ justify-content: center;
   }
 }
 
+/* Fix mobile scrolling issues */
+html,
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
 
+body {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#root {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Ensure touch scrolling works on iOS */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent body scroll lock on mobile */
+@media (max-width: 768px) {
+  html,
+  body {
+    height: auto;
+    overflow-y: auto !important;
+    position: relative !important;
+  }
+}
  
