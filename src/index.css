@@ -6857,7 +6857,7 @@ html {
   width: 90%;
   height: 26px;
   object-fit: cover;
-}
+} 
 
 .payment-badge-icon-apple {
   width: 90%;
@@ -6877,7 +6877,7 @@ html {
 }
 
 .risk-driver-container {
-  min-height: calc(100vh - 57px);
+  height: calc(100vh - 57px);
 display: flex;
 flex-direction: column;
 align-items: center;
