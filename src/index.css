@@ -6911,12 +6911,12 @@ justify-content: center;
 @media (max-width: 768px) {
 .risk-driver-container {
       justify-content: flex-start;
-      height: 80vh !important;
+      height: 80vh !important;    
 }
 .unlock-plan-section {
-        position: absolute;
+        /* position: absolute;
   bottom: 0;
-  width: 100%;  
+  width: 100%;   */
 }
 }
 @media (min-height: 800px) {
