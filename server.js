@@ -201,7 +201,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
       "chronic": "completed-chronic-symptoms-bundle-questions",
       "longevity": "longevity-wellness-bundle-questions",
       "chronic-symptom-protocol": "chronic-symptom-protocol-challenge",
-      "longevity-focus-protocol": "longevity-focus-protocol-challenge"
+      "longevity-focus-protocol": "longevity-focus-protocol-challenge",
+
     };
 
     const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
@@ -213,6 +214,12 @@ app.post("/api/create-checkout-session", async (req, res) => {
       'surgery-checklist',
       'surgery-conditioning-protocol-challenge'
     ].includes(page) ? stripeSpecial : stripe;
+    let successUrl = "https://luther.health/Health-Audit.html#thank-you";
+
+    if(page == 'surgery-checklist'){
+        successUrl = "https://luther.health/Health-Audit.html#surgery-readiness-assessment-results";
+
+    }
 
     console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
 
@@ -224,7 +231,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         funnel_type: funnel_type,
         page: page
       },
-      success_url: "https://luther.health/Health-Audit.html#thank-you",
+      success_url: successUrl,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
     });
 
