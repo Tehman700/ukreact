@@ -128,6 +128,15 @@ export function SurgeryPreparationChecklistPage({
     return () => clearTimeout(timeoutId);
   }, [targetScore]);
 
+  // Apply page-scoped body classes while this page is mounted
+  useEffect(() => {
+    const classes = ["md:overflow-auto", "overflow-hidden", "h-screen"];
+    classes.forEach((c) => document.body.classList.add(c));
+    return () => {
+      classes.forEach((c) => document.body.classList.remove(c));
+    };
+  }, []);
+
   // Calculate gauge indicator position based on score (1-100)
   const getGaugeIndicatorPosition = (scoreValue: number) => {
     // Clamp score between 0 and 100
