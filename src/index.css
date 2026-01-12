@@ -6841,9 +6841,9 @@ min-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-   background-color: #FFFFFF !important;
+   /* background-color: #FFFFFF !important;
       border: 1px solid #D1D5DB;
-      box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1); */
 
 }
 .payment-badge img {
@@ -6851,6 +6851,8 @@ min-height: 22px;
     transform: translateZ(0);
   image-rendering: -webkit-optimize-contrast;
   max-width: 40px;
+        border: 1px solid #D1D5DB;
+      box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
 }
 /* Payment badge icon image */
 .payment-badge-icon-visa {
