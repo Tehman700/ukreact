@@ -98,7 +98,8 @@ export function ShoppingBasket({
   const hideBundlePages = [
     'surgery-readiness-assessment-learn-more',
     'surgery-readiness-assessment-learn-more-b',
-    'surgery-readiness-assessment-learn-more-c'
+    'surgery-readiness-assessment-learn-more-c',
+    'surgery-checklist'
   ];
   const shouldHideBundle = hideBundlePages.includes(currentHash);
 
@@ -162,7 +163,8 @@ const makePayment = async (funnelType = "complication-risk") => {
   const useSpecialStripe = [
     'surgery-readiness-assessment-learn-more',
     'surgery-readiness-assessment-learn-more-b',
-    'surgery-conditioning-protocol-challenge'
+    'surgery-conditioning-protocol-challenge',
+    'surgery-checklist'
   ].includes(currentPage);
 
   
