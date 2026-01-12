@@ -582,7 +582,7 @@ export function SurgeryPreparationChecklistPage({
             </div>
 
             {/* Payment icons and guarantee badge */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-end justify-between mb-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
                   <img src="/assests/apple-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
@@ -595,7 +595,7 @@ export function SurgeryPreparationChecklistPage({
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <img src="/assests/30days.svg" alt="30 Day Money Back Guarantee" className="guarantee-badge" />
+                <img src="/assests/lg-img.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
               </div>
             </div>
 

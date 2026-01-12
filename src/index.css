@@ -7472,6 +7472,13 @@ html {
   justify-content: center;
 }
 
+.guarantee-badge-lg {
+  width: 60px !important;
+    height: unset !important;
+  border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+}
 @media (min-height: 800px) {
   .risk-driver-item {
     height: 55px !important;
