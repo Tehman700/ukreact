@@ -6902,7 +6902,7 @@ justify-content: center;
 @media (max-width: 390px) {
   
   .h-25{
-    height: calc(var(--spacing) * 36)  !important;
+    height: calc(var(--spacing) * 32)  !important;
   }
   .risk-driver-item {
     height: 30px !important;
@@ -6921,7 +6921,7 @@ justify-content: center;
 }
 @media (min-height: 800px) {
   .h-25{
-    height: calc(var(--spacing) * 50)  !important;
+    height: calc(var(--spacing) * 40)  !important;
   }
   .risk-driver-item {
     height: 55px !important;
