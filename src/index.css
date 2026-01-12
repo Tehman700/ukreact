@@ -6836,8 +6836,6 @@ html {
 /* Payment method badge (Apple Pay, Stripe, Visa) */
 .payment-badge {
   box-sizing: border-box;
-  width: 42px;
-  height: 22px;
  
   display: flex;
   align-items: center;
@@ -6850,11 +6848,11 @@ html {
 .payment-badge-icon-visa {
   width: 40px;
   height: 20px;
-  object-position: center;
+  /* object-position: center; */
     /* border: 0.5px solid #D1D5DB; */
-      box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
+      /* box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1); */
   border-radius: 4px;
-  object-fit: contain;
+  /* object-fit: contain; */
 }
 
 .payment-badge-icon-stripe {
@@ -6862,19 +6860,19 @@ html {
   height: 20px;
     object-position: center;
       /* border: 0.5px solid #D1D5DB; */
-        box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
- object-fit: contain;
+        /* box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1); */
+  /* border-radius: 4px; */
+ /* object-fit: contain; */
   /* object-fit: cover; */
 } 
 
 .payment-badge-icon-apple {
   width: 40px;
   height: 20px;
-    object-position: center;
-  border: 0.5px solid #D1D5DB;
-    box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+    /* object-position: center; */
+  /* border: 0.5px solid #D1D5DB; */
+    /* box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1); */
+  /* border-radius: 4px; */
   /* object-fit: cover; */
 }
 
