@@ -6837,7 +6837,7 @@ html {
 .payment-badge {
   box-sizing: border-box;
   
- min-height: 20px;
+/* height: 20px; */
   /* display: flex; */
   align-items: center;
   justify-content: center;
@@ -6846,7 +6846,9 @@ html {
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
 
 }
-
+.payment-badge img {
+  height: 20px;
+}
 /* Payment badge icon image */
 .payment-badge-icon-visa {
   /* width: 40px; */
