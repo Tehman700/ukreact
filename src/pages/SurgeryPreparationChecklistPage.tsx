@@ -585,7 +585,7 @@ export function SurgeryPreparationChecklistPage({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
-                  <img src="/assests/applepay-icn.svg" alt="Apple Pay" className="payment-badge-icon-apple" />
+                  <img src="/assests/applepay-icn-2.png" alt="Apple Pay" className="payment-badge-icon-apple" />
                 </div>
                 <div className="payment-badge">
                   <img src="/assests/strp-svg.svg" alt="Stripe" className="payment-badge-icon-stripe" />
