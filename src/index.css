@@ -6850,6 +6850,7 @@ min-height: 22px;
   max-height: 20px;
     transform: translateZ(0);
   image-rendering: -webkit-optimize-contrast;
+  max-width: 40px;
 }
 /* Payment badge icon image */
 .payment-badge-icon-visa {
