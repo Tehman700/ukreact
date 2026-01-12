@@ -596,7 +596,7 @@ export function SurgeryPreparationChecklistPage({
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <img src="/assests/lg-img.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
+                <img src="/assests/lg-imgt.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
               </div>
             </div>
 
@@ -614,7 +614,7 @@ export function SurgeryPreparationChecklistPage({
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <img src="/assests/lg-img.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
+                <img src="/assests/lg-imgt.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
               </div>
             </div>
 
