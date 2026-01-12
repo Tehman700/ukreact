@@ -6919,6 +6919,12 @@ justify-content: center;
   width: 100%;   */
 }
 }
+@media (min-height: 700px) {
+  .h-25{
+    height: calc(var(--spacing) * 30)  !important;
+  }
+}
+
 @media (min-height: 800px) {
   .h-25{
     height: calc(var(--spacing) * 40)  !important;
