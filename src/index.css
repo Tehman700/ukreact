@@ -6866,7 +6866,7 @@ width: 100%;
     position: relative;
     z-index: 2;
     transform: translateZ(0);
-        padding: 0px 6px;
+        /* padding: 0px 6px; */
   image-rendering: -webkit-optimize-contrast;
     border: 1px solid #D1D5DB;
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
