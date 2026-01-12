@@ -6856,9 +6856,10 @@ min-height: 22px;
   left: 0;
   top: 0;
   background-image: url("/assests/bg-layer.png");
-  width: 100%;
-  height: 100%;
-  z-index: -1;
+    width: 40px;
+    height: 20px;
+    z-index: -1;
+    background-repeat: no-repeat;
 }
 .payment-badge img {
 width: 100%;
