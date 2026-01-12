@@ -582,10 +582,29 @@ export function SurgeryPreparationChecklistPage({
             </div>
 
             {/* Payment icons and guarantee badge */}
-            <div className="flex items-end justify-between mb-4">
+            {/* Payment icons and guarantee badge for desktop */}
+            <div className="hidden sm:flex items-end justify-between mb-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
                   <img src="/assests/apple-p-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
+                </div>
+                <div className="payment-badge">
+                  <img src="/assests/stripe-icn.png" alt="Stripe" className="payment-badge-icon-stripe" />
+                </div>
+                <div className="payment-badge">
+                  <img src="/assests/v-icn.png" alt="Visa" className="payment-badge-icon-visa" />
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <img src="/assests/lg-img.png" alt="30 Day Money Back Guarantee" className="guarantee-badge guarantee-badge-lg" />
+              </div>
+            </div>
+
+            {/* Payment icons and guarantee badge for mobile */}
+            <div className="flex sm:hidden items-end justify-between mb-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="payment-badge">
+                  <img src="/assests/apple-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
                 </div>
                 <div className="payment-badge">
                   <img src="/assests/stripe-icn.png" alt="Stripe" className="payment-badge-icon-stripe" />
