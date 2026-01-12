@@ -588,7 +588,7 @@ export function SurgeryPreparationChecklistPage({
                   <img src="/assests/appleicon.svg" alt="Apple Pay" className="payment-badge-icon-apple" />
                 </div>
                 <div className="payment-badge">
-                  <img src="/assests/str-svgimg.svg" alt="Stripe" className="payment-badge-icon-stripe" />
+                  <img src="/assests/stripeicon.svg" alt="Stripe" className="payment-badge-icon-stripe" />
                 </div>
                 <div className="payment-badge">
                   <img src="/assests/visaicon.svg" alt="Visa" className="payment-badge-icon-visa" />
