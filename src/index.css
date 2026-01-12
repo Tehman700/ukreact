@@ -6836,7 +6836,7 @@ html {
 /* Payment method badge (Apple Pay, Stripe, Visa) */
 .payment-badge {
   box-sizing: border-box;
-  
+    border-radius: 4px; 
 min-height: 21px;
   display: flex;
   align-items: center;
