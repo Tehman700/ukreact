@@ -6871,7 +6871,7 @@ width: 100%;
     border: 1px solid #D1D5DB;
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
   height: 20px;
-  object-fit: contain;
+  /* object-fit: contain; */
         /* border: 1px solid #D1D5DB;
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1); */
 }
