@@ -281,6 +281,44 @@ app.post("/api/webhook", async (req, res) => {
     const session = event.data.object;
     console.log("✅ Payment success:", session);
 
+
+          // Your existing Meta Conversion API code remains the same...
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+
+      console.log("🎯 Preparing to send Meta Conversion API event...");
+      console.log("📧 Customer email:", session.customer_email);
+      console.log("💰 Purchase amount:", session.amount_total / 100);
+      console.log("💱 Currency:", session.currency.toUpperCase());
+
+      const userData = (new UserData())
+        .setEmails([session.customer_email]);
+
+      const customData = (new CustomData())
+        .setValue(session.amount_total / 100)
+        .setCurrency(session.currency.toUpperCase());
+
+      const serverEvent = (new ServerEvent())
+        .setEventName("Purchase")
+        .setEventTime(currentTimestamp)
+        .setUserData(userData)
+        .setCustomData(customData)
+        .setActionSource("website")
+        .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
+
+      const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
+        .setEvents([serverEvent]);
+
+      const response = await eventRequest.execute();
+      console.log("✅ Meta Conversion API SUCCESS!");
+      console.log("📡 Full response:", JSON.stringify(response, null, 2));
+
+      if (response && response.events_received) {
+        console.log("🎉 Events received by Meta:", response.events_received);
+      }
+      if (response && response.messages) {
+        console.log("📝 Meta response messages:", response.messages);
+      } 
+
     try {
       // Create stripe_payments table if it doesn't exist (with funnel_type column)
       await pool.query(`
@@ -337,44 +375,10 @@ app.post("/api/webhook", async (req, res) => {
 
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
 
-      // Your existing Meta Conversion API code remains the same...
-      const currentTimestamp = Math.floor(Date.now() / 1000);
 
-      console.log("🎯 Preparing to send Meta Conversion API event...");
-      console.log("📧 Customer email:", session.customer_email);
-      console.log("💰 Purchase amount:", session.amount_total / 100);
-      console.log("💱 Currency:", session.currency.toUpperCase());
-
-      const userData = (new UserData())
-        .setEmails([session.customer_email]);
-
-      const customData = (new CustomData())
-        .setValue(session.amount_total / 100)
-        .setCurrency(session.currency.toUpperCase());
-
-      const serverEvent = (new ServerEvent())
-        .setEventName("Purchase")
-        .setEventTime(currentTimestamp)
-        .setUserData(userData)
-        .setCustomData(customData)
-        .setActionSource("website")
-        .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
-
-      const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
-        .setEvents([serverEvent]);
-
-      const response = await eventRequest.execute();
-      console.log("✅ Meta Conversion API SUCCESS!");
-      console.log("📡 Full response:", JSON.stringify(response, null, 2));
-
-      if (response && response.events_received) {
-        console.log("🎉 Events received by Meta:", response.events_received);
-      }
-      if (response && response.messages) {
-        console.log("📝 Meta response messages:", response.messages);
-      }
 
     } catch (err) {
+       res.json({ received: true,message:err.message });
       console.error("❌ Database/Meta API ERROR:", err.message);
       console.error("🔍 Full error details:", err);
     }
