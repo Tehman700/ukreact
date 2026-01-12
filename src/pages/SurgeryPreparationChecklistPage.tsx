@@ -583,7 +583,7 @@ export function SurgeryPreparationChecklistPage({
 
             {/* Payment icons and guarantee badge */}
             {/* Payment icons and guarantee badge for desktop */}
-            <div className="hidden sm:flex items-end justify-between mb-4">
+            <div className="hidden sm:flex items-end justify-between mb-4 relative">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
                   <img src="/assests/apple-p-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
@@ -601,7 +601,7 @@ export function SurgeryPreparationChecklistPage({
             </div>
 
             {/* Payment icons and guarantee badge for mobile */}
-            <div className="flex sm:hidden items-end justify-between mb-4">
+            <div className="flex sm:hidden items-end justify-between mb-4 relative">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="payment-badge">
                   <img src="/assests/apple-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
