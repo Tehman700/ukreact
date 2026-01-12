@@ -6841,7 +6841,7 @@ min-height: 21px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FFFFFF;
+   background-color: #FFFFFF !important;
       border: 0.5px solid #D1D5DB;
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
 
@@ -6866,7 +6866,7 @@ min-height: 21px;
 
   border-radius: 4px;
  object-fit: contain;
-   background: #FFFFFF;
+
   /* object-fit: cover; */
 } 
 
