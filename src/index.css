@@ -7484,6 +7484,14 @@ html {
     height: 55px !important;
   }
 }
+@media (max-width: 991px) { 
+.guarantee-badge-lg {
+      position: absolute;
+    right: 9%;
+    bottom: 53px;
+        width: 40px !important;
+}
+}
 /* Mobile responsive adjustments for smaller screens */
 @media (max-width: 462px) {
   .guarantee-badge {
