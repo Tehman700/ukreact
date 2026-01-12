@@ -6886,9 +6886,7 @@ justify-content: center;
 }
 
 @media (min-height: 800px) {
-  .h-25{
-    height: calc(var(--spacing) * 40)  !important;
-  }
+
   .risk-driver-item {
     height: 55px !important;
   }
@@ -6926,6 +6924,11 @@ justify-content: center;
   bottom: 0;
   width: 100%;   */
 }
+}
+@media (max-height: 800px) {
+  .h-25{
+    height: calc(var(--spacing) * 35)  !important;
+  }
 }
 @media (max-height: 700px) {
   .h-25{
