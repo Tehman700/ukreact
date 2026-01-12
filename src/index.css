@@ -6848,21 +6848,24 @@ min-height: 22px;
 
       max-height: 20px;
         max-width: 40px;
+        overflow: hidden;
 }
 .payment-badge::after {
   content: '';
   display: block; 
   position: absolute;
-  left: 0;
-  top: 0;
+left: -1px;
+    top: 0px;
   background-image: url("/assests/bg-layer.png");
     width: 40px;
     height: 20px;
-    z-index: -1;
+    z-index: 1;
     background-repeat: no-repeat;
 }
 .payment-badge img {
 width: 100%;
+    position: relative;
+    z-index: 2;
     transform: translateZ(0);
         padding: 0px 6px;
   image-rendering: -webkit-optimize-contrast;
