@@ -589,10 +589,10 @@ export function SurgeryPreparationChecklistPage({
                   <img src="/assests/apple-p-icn.png" alt="Apple Pay" className="payment-badge-icon-apple" />
                 </div>
                 <div className="payment-badge">
-                  <img src="/assests/stripe-icn.png" alt="Stripe" className="payment-badge-icon-stripe" />
+                  <img src="/assests/s-p-icn.png" alt="Stripe" className="payment-badge-icon-stripe" />
                 </div>
                 <div className="payment-badge">
-                  <img src="/assests/v-icn.png" alt="Visa" className="payment-badge-icon-visa" />
+                  <img src="/assests/v-p-icn.png" alt="Visa" className="payment-badge-icon-visa" />
                 </div>
               </div>
               <div className="flex-shrink-0">
