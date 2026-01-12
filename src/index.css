@@ -6837,46 +6837,42 @@ html {
 .payment-badge {
   box-sizing: border-box;
     border-radius: 4px; 
-min-height: 21px;
+min-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
    background-color: #FFFFFF !important;
-      border: 0.5px solid #D1D5DB;
+      border: 1px solid #D1D5DB;
       box-shadow: 0px -7px 10.7px rgba(0, 0, 0, 0.1);
 
 }
 .payment-badge img {
   max-height: 20px;
+    transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast;
 }
 /* Payment badge icon image */
 .payment-badge-icon-visa {
-  /* width: 40px; */
-  /* height: 20px; */
+
   object-position: center;
 
   border-radius: 4px;
-  object-fit: contain;
+  /* object-fit: contain; */
 }
 
 .payment-badge-icon-stripe {
-  /* width: 33px; */
-  /* height: 20px; */
+
     object-position: center;
 
   border-radius: 4px;
- object-fit: contain;
+ /* object-fit: contain; */
 
-  /* object-fit: cover; */
+
 } 
 
 .payment-badge-icon-apple {
-  /* width: 31px; */
-  /* height: 20px; */
-    /* object-position: center; */
-
   border-radius: 4px;
-  /* object-fit: cover; */
+
 }
 
 /* 30 day money back guarantee badge */
