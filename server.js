@@ -218,7 +218,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     if(page == 'surgery-checklist'){
         successUrl = "https://luther.health/Health-Audit.html#surgery-readiness-assessment-results";
-
     }
 
     console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
@@ -789,6 +788,82 @@ app.get("/api/check-payment", async (req, res) => {
   } catch (error) {
     console.error("Check payment error:", error);
     res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+app.post('/api/verify-payment', async (req, res) => {
+  try {
+    const { sessionId, assessmentType } = req.body;
+    
+    if (!sessionId) {
+      return res.status(400).json({ success: false, error: "sessionId is required" });
+    }
+
+    console.log('🔍 Verifying payment for session:', sessionId);
+
+    // First, check payment status in Stripe
+    let stripeSession;
+    try {
+      // Try default Stripe instance first
+      stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
+    } catch (err) {
+      // If not found, try special Stripe instance
+      try {
+        stripeSession = await stripeSpecial.checkout.sessions.retrieve(sessionId);
+        console.log('✅ Found session in special Stripe account');
+      } catch (err2) {
+        console.error('❌ Session not found in either Stripe account:', err2.message);
+        return res.status(404).json({ 
+          success: false, 
+          error: "Payment session not found",
+          paymentStatus: 'not_found'
+        });
+      }
+    }
+
+    console.log('💳 Stripe session status:', stripeSession.payment_status);
+    console.log('💰 Amount:', stripeSession.amount_total / 100, stripeSession.currency);
+
+    // Check if payment is completed in Stripe
+    if (stripeSession.payment_status === 'paid') {
+      return res.json({ 
+        success: true, 
+        paymentStatus: 'paid',
+        amount: stripeSession.amount_total / 100,
+        currency: stripeSession.currency,
+        customerEmail: stripeSession.customer_email
+      });
+    }
+
+    // Payment is confirmed in Stripe, now check database
+    const payment = await pool.query(
+      `SELECT * FROM stripe_payments WHERE stripe_session_id = $1 AND status = 'paid' LIMIT 1`,
+      [sessionId]
+    );
+
+    if (payment.rows.length > 0) {
+      console.log('✅ Payment verified in both Stripe and database');
+      res.json({ 
+        success: true, 
+        paymentStatus: 'paid',
+        amount: stripeSession.amount_total / 100,
+        currency: stripeSession.currency,
+        customerEmail: stripeSession.customer_email
+      });
+    } else {
+      console.log('⚠️ Payment found in Stripe but not in database yet');
+      res.json({ 
+        success: true, 
+        paymentStatus: 'paid',
+        amount: stripeSession.amount_total / 100,
+        currency: stripeSession.currency,
+        customerEmail: stripeSession.customer_email
+      });
+    }
+
+  } catch (error) {
+    console.error("❌ Verify payment error:", error);
+    res.status(500).json({ success: false, error: "Server error", details: error.message });
   }
 });
 

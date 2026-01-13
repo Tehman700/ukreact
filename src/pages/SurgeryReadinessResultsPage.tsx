@@ -37,12 +37,70 @@ export function SurgeryReadinessResultsPage() {
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(true);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const completionDate = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
+
+  // Verify payment status
+  useEffect(() => {
+    const verifyPayment = async () => {
+      try {
+        setPaymentLoading(true);
+        
+        // Get stripe_session_id from URL parameters
+        const sessionId = sessionStorage.getItem('stripe_session_id');
+        
+        if (!sessionId) {
+          setPaymentError('No payment session found. Please complete payment first.');
+          setPaymentLoading(false);
+          return;
+        }
+
+        console.log('Verifying payment for session:', sessionId);
+
+        // Call backend to verify payment
+        const response = await fetch('https://luther.health/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sessionId: sessionId,
+            assessmentType: 'Surgery Readiness'
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Payment verification failed');
+        }
+
+        console.log('Payment verification response:', data);
+
+        if (data.paymentStatus === 'paid') {
+          setPaymentVerified(true);
+          console.log('✅ Payment verified successfully in Stripe');
+        } else {
+          setPaymentError(`Payment status: ${data.paymentStatus || 'unknown'}. Please complete your payment.`);
+        }
+
+      } catch (err) {
+        console.error('Error verifying payment:', err);
+        setPaymentError(err instanceof Error ? err.message : 'Unable to verify payment');
+      } finally {
+        setPaymentLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, []);
 
   useEffect(() => {
     const loadReport = () => {
@@ -199,6 +257,42 @@ export function SurgeryReadinessResultsPage() {
   };
 
   const allTabsViewed = viewedTabs.size === 3;
+
+  // Show payment verification loading
+  if (paymentLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Verifying payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show payment error
+  if (paymentError || !paymentVerified) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              <span>Payment Required</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              {paymentError || 'Please complete payment to access your results.'}
+            </p>
+            <Button onClick={() => window.location.hash = 'assessments'}>
+              Return to Assessments
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
