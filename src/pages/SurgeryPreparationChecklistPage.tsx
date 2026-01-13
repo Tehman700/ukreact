@@ -1,46 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../components/ui/accordion";
-import Slider from "react-slick";
 import { ShoppingBasket } from "../components/ShoppingBasket";
 import { Assessment, BasketItem } from "./AssessmentsPage";
-import { SurgeryAdditionalCarousels } from "../components/SurgeryAdditionalCarousels";
-import biologicalAgeImage from "/assests/completed02.webp";
 import surgeryReadinessImage from "figma:asset/cdb0a3c5cfea26d8c71d21bafe6097790d5f4c09.png";
 
 import {
-  ArrowLeft,
-  Activity,
-  Apple,
-  Pill,
-  Cigarette,
-  Bed,
-  FileText,
-  Home,
-  Users,
-  ShoppingBag,
-  Calendar,
-  TrendingUp,
-  X,
   Shield,
-  Mail,
-  Lock,
   ChevronRight,
-  CheckCircle,
 } from "lucide-react";
 
 const surgeryReadinessAssessment: Assessment = {
@@ -58,13 +24,6 @@ const surgeryReadinessAssessment: Assessment = {
     "Recovery timeline planning",
   ],
 };
-
-
-
-interface SurgeryReadinessUpsellPageProps {
-  onAddToBasket: (assessment: Assessment) => void;
-  onOpenBasket: () => void;
-}
 
 export function SurgeryPreparationChecklistPage({
   onAddToBasket: externalAddToBasket,
@@ -85,10 +44,6 @@ export function SurgeryPreparationChecklistPage({
   const [aiReport, setAiReport] = useState<any>(null);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [targetScore, setTargetScore] = useState(49);
-
-  // Dynamic score (1-100) - can be passed as prop or fetched
-  
-  // Animated score state - starts at 0 and animates to targetScore
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -99,24 +54,15 @@ export function SurgeryPreparationChecklistPage({
         const storedReport = sessionStorage.getItem('assessmentReport');
         const storedAssessmentType = sessionStorage.getItem('assessmentType');
 
-        console.log('Loading stored report:', storedReport ? 'Found' : 'Not found');
-
         if (!storedReport) {
           throw new Error('No assessment report found. Please complete the assessment first.');
         }
-
-        console.log(storedReport);
 
         const report = JSON.parse(storedReport);
 
         if (storedAssessmentType !== 'Surgery Readiness') {
           console.warn('Assessment type mismatch:', storedAssessmentType);
         }
-
-        console.log('Report loaded successfully:', {
-          overallScore: report.overallScore,
-          categoriesCount: report.results?.length || 0
-        });
 
         setAiReport(report);
 
@@ -133,14 +79,12 @@ export function SurgeryPreparationChecklistPage({
     loadReport();
   }, []);
 
-  // Animation effect - animate from 0 to targetScore on mount
   useEffect(() => {
-    const duration = 2500; // Animation duration in ms (slower)
+    const duration = 2500;
     const startTime = Date.now();
     const startValue = 0;
     const endValue = targetScore;
 
-    // Easing function for ultra smooth animation (ease-in-out sine)
     const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
     const animateScore = () => {
@@ -164,7 +108,6 @@ export function SurgeryPreparationChecklistPage({
     return () => clearTimeout(timeoutId);
   }, [targetScore]);
 
-  // Apply page-scoped body classes while this page is mounted
   useEffect(() => {
     const classes = ["md:overflow-auto", "overflow-hidden", "h-screen"];
     classes.forEach((c) => document.body.classList.add(c));
@@ -173,33 +116,24 @@ export function SurgeryPreparationChecklistPage({
     };
   }, []);
 
-  // Calculate gauge indicator position based on score (1-100)
   const getGaugeIndicatorPosition = (scoreValue: number) => {
-    // Clamp score between 0 and 100
+
     const clampedScore = Math.max(0, Math.min(100, scoreValue));
-    
-    // Arc parameters (based on SVG viewBox 0 0 204 110)
     const centerX = 102;
     const centerY = 104;
     const radius = 96;
-    
-    // Convert score to angle (π to 0, left to right)
-    // Score 0 = 180° (left), Score 100 = 0° (right)
     const angle = Math.PI * (1 - clampedScore / 120);
-    
-    // Calculate position on arc
     const cx = centerX + radius * Math.cos(angle);
     const cy = centerY - radius * Math.sin(angle);
     
     return { cx, cy };
   };
 
-  // Get indicator color based on score
   const getIndicatorColor = (scoreValue: number) => {
-    if (scoreValue < 20) return "#EA916E"; // Red/orange
-    if (scoreValue < 60) return "#F5BC3A"; // Yellow
-    if (scoreValue < 75) return "#9FE377"; // Light green
-    return "#2ECE7E"; // Green
+    if (scoreValue < 26) return "#EA916E"; 
+    if (scoreValue < 50) return "#F5BC3A";
+    if (scoreValue < 75) return "#9FE377"; 
+    return "#2ECE7E"; 
   };
 
   const indicatorPos = getGaugeIndicatorPosition(animatedScore);
@@ -207,8 +141,6 @@ export function SurgeryPreparationChecklistPage({
 
   const addToBasket = (assessment: Assessment) => {
     console.log("🛒 addToBasket called with:", assessment.name);
-
-    // Use external basket function if provided, otherwise use local state
     if (externalAddToBasket) {
       console.log("📤 Using EXTERNAL addToBasket function");
       externalAddToBasket(assessment);
@@ -271,10 +203,6 @@ export function SurgeryPreparationChecklistPage({
     }
   };
 
-
-
-
-  // Show error state if report not found
   if (error || !aiReport) {
     return (
       <div className="risk-driver-container bg-gray-100 h-screen flex flex-col items-center justify-center overflow-hidden">
