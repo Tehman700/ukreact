@@ -185,7 +185,8 @@ export function SurgeryReadinessResultsPage() {
           report: aiReport,
           reportId: Date.now(),
           pageUrl: currentPageUrl,
-          activeTab: activeTab
+          activeTab: activeTab,
+          stripeSessionId: sessionStorage.getItem('stripe_session_id') || null
         })
       })
         .then(response => response.json())
