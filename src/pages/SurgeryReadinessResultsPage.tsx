@@ -381,19 +381,6 @@ export function SurgeryReadinessResultsPage() {
         </div>
       )}
 
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" onClick={handleBackToAssessments}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="font-medium">Back</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card className="mb-8">
           <CardHeader className="text-center">
@@ -767,7 +754,7 @@ export function SurgeryReadinessResultsPage() {
         </div>
 
         {allTabsViewed && (
-          <div className="flex justify-center">
+          <div className="flex justify-center hidden">
             <Button onClick={() => window.location.hash = 'surgery-readiness-assessment-feedback'} size="lg" className="px-8">
               Next
             </Button>

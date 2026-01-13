@@ -122,7 +122,7 @@ export function SurgeryPreparationChecklistPage({
     const centerX = 102;
     const centerY = 104;
     const radius = 96;
-    const angle = Math.PI * (1 - clampedScore / 120);
+    const angle = Math.PI * (1 - clampedScore / 100);
     const cx = centerX + radius * Math.cos(angle);
     const cy = centerY - radius * Math.sin(angle);
     
