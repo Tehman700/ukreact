@@ -171,7 +171,7 @@ export function SurgeryPreparationChecklistPage({
     return () => {
       classes.forEach((c) => document.body.classList.remove(c));
     };
-  });
+  }, []);
 
   // Calculate gauge indicator position based on score (1-100)
   const getGaugeIndicatorPosition = (scoreValue: number) => {
