@@ -53,7 +53,6 @@ export function SurgeryReadinessResultsPage() {
       try {
         setPaymentLoading(true);
         
-        // Get stripe_session_id from URL parameters
         const sessionId = sessionStorage.getItem('stripe_session_id');
         
         if (!sessionId) {
@@ -285,7 +284,7 @@ export function SurgeryReadinessResultsPage() {
             <p className="text-muted-foreground mb-4">
               {paymentError || 'Please complete payment to access your results.'}
             </p>
-            <Button onClick={() => window.location.hash = 'assessments'}>
+            <Button onClick={() => window.location.hash = 'surgery-readiness-assessment-questions'}>
               Return to Assessments
             </Button>
           </CardContent>
