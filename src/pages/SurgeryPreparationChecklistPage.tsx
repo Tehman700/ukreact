@@ -59,17 +59,7 @@ const surgeryReadinessAssessment: Assessment = {
   ],
 };
 
-interface ChecklistStep {
-  id: number;
-  title: string;
-  timeline: string;
-  icon: React.ReactNode;
-  description: string;
-  actionItems: string[];
-  whyItMatters: string;
-  clinicalGuidance: string;
-  completed: boolean;
-}
+
 
 interface SurgeryReadinessUpsellPageProps {
   onAddToBasket: (assessment: Assessment) => void;
@@ -90,12 +80,58 @@ export function SurgeryPreparationChecklistPage({
   const [emailFormVisible, setEmailFormVisible] = useState(false);
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [isBasketOpen, setIsBasketOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiReport, setAiReport] = useState<any>(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [targetScore, setTargetScore] = useState(49);
 
   // Dynamic score (1-100) - can be passed as prop or fetched
-  const targetScore = 49;
   
   // Animated score state - starts at 0 and animates to targetScore
   const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    const loadReport = () => {
+      try {
+        setLoading(true);
+
+        const storedReport = sessionStorage.getItem('assessmentReport');
+        const storedAssessmentType = sessionStorage.getItem('assessmentType');
+
+        console.log('Loading stored report:', storedReport ? 'Found' : 'Not found');
+
+        if (!storedReport) {
+          throw new Error('No assessment report found. Please complete the assessment first.');
+        }
+
+        console.log(storedReport);
+
+        const report = JSON.parse(storedReport);
+
+        if (storedAssessmentType !== 'Surgery Readiness') {
+          console.warn('Assessment type mismatch:', storedAssessmentType);
+        }
+
+        console.log('Report loaded successfully:', {
+          overallScore: report.overallScore,
+          categoriesCount: report.results?.length || 0
+        });
+
+        setAiReport(report);
+
+        setTargetScore(report.overallScore || 49);
+
+      } catch (err) {
+        console.error('Error loading report:', err);
+        setError(err instanceof Error ? err.message : 'Unable to load report');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReport();
+  }, []);
 
   // Animation effect - animate from 0 to targetScore on mount
   useEffect(() => {
@@ -213,9 +249,6 @@ export function SurgeryPreparationChecklistPage({
     );
   };
 
-  const handleBackToAssessments = () => {
-    window.history.back();
-  };
 
   const handleStartAssessment = () => {
     console.log("🎯 handleStartAssessment called");
@@ -238,235 +271,35 @@ export function SurgeryPreparationChecklistPage({
     }
   };
 
-  const steps: ChecklistStep[] = [
-    {
-      id: 1,
-      title: "Schedule Pre-Operative Assessment",
-      timeline: "6-8 weeks before surgery",
-      icon: <Calendar className="h-5 w-5" />,
-      description:
-        "Book your comprehensive pre-operative medical assessment to evaluate your fitness for surgery.",
-      actionItems: [
-        "Contact your surgical team or GP to arrange assessment",
-        "Request blood tests, ECG, and any required imaging",
-        "Compile your complete medical history and current medications",
-        "Note any allergies or previous adverse reactions to medications",
-        "Prepare questions about the procedure and recovery",
-      ],
-      whyItMatters:
-        "Pre-operative assessment identifies potential risks and allows time to optimize your health before surgery. Studies show proper preoperative evaluation reduces complications by up to 30%.",
-      clinicalGuidance:
-        "NICE guidelines recommend thorough preoperative assessment for all elective procedures. This typically includes cardiovascular assessment, respiratory function, and metabolic screening to ensure you're in optimal condition for surgery.",
-      completed: false,
-    },
-    {
-      id: 2,
-      title: "Optimize Your Physical Fitness",
-      timeline: "6-8 weeks before surgery",
-      icon: <Activity className="h-5 w-5" />,
-      description:
-        "Implement a structured exercise program to improve your cardiovascular fitness and muscular strength.",
-      actionItems: [
-        "Aim for 150 minutes of moderate aerobic exercise weekly",
-        "Include resistance training 2-3 times per week",
-        "Focus on core strengthening and mobility exercises",
-        "Gradually increase intensity under professional guidance",
-        "Consider working with a physiotherapist for surgery-specific preparation",
-      ],
-      whyItMatters:
-        "Enhanced Recovery After Surgery (ERAS) protocols demonstrate that preoperative physical conditioning can reduce hospital stay by 2-3 days and lower complication rates significantly.",
-      clinicalGuidance:
-        "Research shows that 'prehabilitation' programs improve surgical outcomes. The Royal College of Surgeons emphasizes that physically fitter patients experience better recovery trajectories and reduced postoperative complications.",
-      completed: false,
-    },
-    {
-      id: 3,
-      title: "Optimize Nutrition & Body Composition",
-      timeline: "6-8 weeks before surgery",
-      icon: <Apple className="h-5 w-5" />,
-      description:
-        "Adjust your diet to support healing, optimize body composition, and prepare your metabolic system.",
-      actionItems: [
-        "Increase protein intake to 1.2-1.5g per kg body weight",
-        "Ensure adequate vitamin D, vitamin C, and zinc levels",
-        "Minimize processed foods and refined sugars",
-        "Stay well-hydrated (2-3 litres of water daily)",
-        "Consider consultation with a nutritionist for personalized guidance",
-        "If overweight, work toward modest weight reduction (5-10%)",
-      ],
-      whyItMatters:
-        "Optimal nutrition supports wound healing, immune function, and metabolic stability. Adequate protein intake is particularly crucial for tissue repair and recovery.",
-      clinicalGuidance:
-        "ESPEN (European Society for Clinical Nutrition) guidelines recommend nutritional optimization before major surgery. Poor nutritional status is associated with increased infection risk and delayed wound healing.",
-      completed: false,
-    },
-    {
-      id: 4,
-      title: "Review and Optimize Medications",
-      timeline: "4-6 weeks before surgery",
-      icon: <Pill className="h-5 w-5" />,
-      description:
-        "Conduct a comprehensive medication review with your healthcare provider to ensure optimal perioperative management.",
-      actionItems: [
-        "List all prescription medications with doses and frequencies",
-        "Include all over-the-counter medications and supplements",
-        "Discuss any anticoagulants or antiplatelet medications",
-        "Identify medications that may need to be stopped or adjusted",
-        "Ensure optimal control of chronic conditions (diabetes, hypertension)",
-        "Plan for medication management during recovery period",
-      ],
-      whyItMatters:
-        "Certain medications can increase surgical risks or interact with anesthesia. Proper medication management is essential for safety and optimal outcomes.",
-      clinicalGuidance:
-        "NICE perioperative guidelines emphasize comprehensive medication review. Anticoagulants, antiplatelet agents, and some supplements may need to be discontinued at specific intervals before surgery.",
-      completed: false,
-    },
-    {
-      id: 5,
-      title: "Eliminate Smoking and Limit Alcohol",
-      timeline: "Minimum 4 weeks before surgery",
-      icon: <Cigarette className="h-5 w-5" />,
-      description:
-        "Completely cease smoking and significantly reduce or eliminate alcohol consumption.",
-      actionItems: [
-        "Stop smoking completely at least 4 weeks before surgery",
-        "Consider nicotine replacement therapy or cessation programs",
-        "Reduce alcohol to no more than 2 units per day",
-        "Plan to remain abstinent for at least 2 weeks post-surgery",
-        "Seek support from smoking cessation services if needed",
-        "Inform your surgical team of your smoking/alcohol history",
-      ],
-      whyItMatters:
-        "Smoking increases surgical complications by 3-6 fold, including wound infections, respiratory complications, and impaired healing. Alcohol can interfere with anesthesia and medication metabolism.",
-      clinicalGuidance:
-        "Royal College of Anaesthetists and NICE strongly recommend smoking cessation at minimum 4 weeks (ideally 8 weeks) before surgery. Even short-term cessation significantly reduces complication rates.",
-      completed: false,
-    },
-    {
-      id: 6,
-      title: "Optimize Sleep and Stress Management",
-      timeline: "4-6 weeks before surgery",
-      icon: <Bed className="h-5 w-5" />,
-      description:
-        "Establish healthy sleep patterns and implement stress reduction techniques to support your body's healing capacity.",
-      actionItems: [
-        "Aim for 7-9 hours of quality sleep per night",
-        "Maintain consistent sleep and wake times",
-        "Practice relaxation techniques (meditation, deep breathing)",
-        "Consider mindfulness or cognitive behavioral therapy",
-        "Limit screen time before bed",
-        "Address any sleep disorders with your healthcare provider",
-      ],
-      whyItMatters:
-        "Adequate sleep supports immune function, wound healing, and metabolic health. Chronic sleep deprivation is associated with increased surgical complications and slower recovery.",
-      clinicalGuidance:
-        "Research demonstrates that perioperative sleep quality impacts immune function and inflammatory responses. Stress management techniques are associated with reduced anxiety and improved surgical experiences.",
-      completed: false,
-    },
-    {
-      id: 7,
-      title: "Complete Required Documentation",
-      timeline: "3-4 weeks before surgery",
-      icon: <FileText className="h-5 w-5" />,
-      description:
-        "Ensure all administrative, legal, and insurance documentation is properly completed and filed.",
-      actionItems: [
-        "Review and sign surgical consent forms",
-        "Understand the procedure, risks, and expected outcomes",
-        "Verify insurance coverage and pre-authorization",
-        "Complete advance directive or living will if desired",
-        "Arrange time off work and notify employer",
-        "Document any specific preferences or concerns",
-        "Obtain copies of all medical records and test results",
-      ],
-      whyItMatters:
-        "Proper documentation ensures legal protection, financial clarity, and that your preferences are respected throughout your surgical journey.",
-      clinicalGuidance:
-        "Informed consent is both a legal and ethical requirement. Take time to understand all aspects of your procedure and don't hesitate to ask questions before signing consent forms.",
-      completed: false,
-    },
-    {
-      id: 8,
-      title: "Prepare Your Home for Recovery",
-      timeline: "2-3 weeks before surgery",
-      icon: <Home className="h-5 w-5" />,
-      description:
-        "Modify your living space to facilitate safe and comfortable recovery after surgery.",
-      actionItems: [
-        "Set up a recovery area on the ground floor if possible",
-        "Remove trip hazards (loose rugs, clutter, cords)",
-        "Install grab bars in bathroom if needed",
-        "Prepare comfortable seating with good back support",
-        "Stock up on easy-to-prepare, nutritious meals",
-        "Place frequently used items within easy reach",
-        "Ensure adequate lighting throughout your home",
-        "Consider renting or purchasing mobility aids if needed",
-      ],
-      whyItMatters:
-        "A properly prepared home environment reduces fall risk, promotes independence, and supports a smoother recovery process.",
-      clinicalGuidance:
-        "Occupational therapy guidelines emphasize environmental preparation for post-surgical patients. Fall prevention is particularly important during the recovery period when mobility may be compromised.",
-      completed: false,
-    },
-    {
-      id: 9,
-      title: "Arrange Support Network and Transportation",
-      timeline: "2-3 weeks before surgery",
-      icon: <Users className="h-5 w-5" />,
-      description:
-        "Organize a reliable support system for surgery day and the initial recovery period.",
-      actionItems: [
-        "Arrange transportation to and from the hospital",
-        "Confirm someone will stay with you for the first 24-48 hours",
-        "Identify friends or family who can help with daily tasks",
-        "Plan for assistance with meals, household chores, and errands",
-        "Share your recovery plan with your support network",
-        "Provide emergency contacts to your support team",
-        "Consider professional home care if family support is limited",
-      ],
-      whyItMatters:
-        "Adequate support during recovery is associated with better outcomes, fewer complications, and reduced hospital readmissions. You shouldn't navigate recovery alone.",
-      clinicalGuidance:
-        "NHS guidance emphasizes the importance of post-discharge support. Many procedures require mandatory supervision for 24-48 hours post-anesthesia, and ongoing assistance significantly improves recovery quality.",
-      completed: false,
-    },
-    {
-      id: 10,
-      title: "Prepare Your Surgery Day Kit",
-      timeline: "1 week before surgery",
-      icon: <ShoppingBag className="h-5 w-5" />,
-      description:
-        "Pack all necessary items for your hospital stay and immediate recovery period.",
-      actionItems: [
-        "Pack comfortable, loose-fitting clothing",
-        "Bring slip-on shoes or slippers with non-slip soles",
-        "Include toiletries and personal hygiene items",
-        "Bring your ID, insurance cards, and medical documents",
-        "Pack current medications in original containers",
-        "Include phone charger and essential contact numbers",
-        "Bring reading material or entertainment for recovery",
-        "Consider bringing small pillow for comfort during transport",
-        "Leave valuables at home",
-      ],
-      whyItMatters:
-        "Being properly prepared reduces stress on surgery day and ensures you have everything needed for a comfortable hospital stay and initial recovery.",
-      clinicalGuidance:
-        "Hospital guidelines recommend arriving prepared but minimizing valuables. Comfortable clothing facilitates medical care and reduces friction on surgical sites.",
-      completed: false,
-    },
-  ];
 
-  const handleToggleStep = (stepId: number) => {
-    setCompletedSteps((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(stepId)) {
-        newSet.delete(stepId);
-      } else {
-        newSet.add(stepId);
-      }
-      return newSet;
-    });
-  };
+
+
+  // Show error state if report not found
+  if (error || !aiReport) {
+    return (
+      <div className="risk-driver-container bg-gray-100 h-screen flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full bg-white max-w-md mx-4 p-6 rounded-lg shadow-lg">
+          <div className="text-center">
+            <div className="mb-4">
+              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Report Not Found</h2>
+            <p className="text-gray-600 mb-6">
+              {error || 'No assessment report found. Please complete the assessment first.'}
+            </p>
+            <Button 
+              onClick={() => window.location.hash = 'surgery-readiness-assessment-questions'}
+              className="w-full"
+            >
+              Back to Assessment
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="risk-driver-container bg-gray-100 h-screen flex flex-col items-center overflow-hidden">
