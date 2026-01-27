@@ -23,4 +23,5 @@ export function HomePageWithPuck({
       onAssessmentUpdate={onAssessmentUpdate}
     />
   );
+
 }

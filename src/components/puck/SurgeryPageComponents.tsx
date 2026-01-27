@@ -23,7 +23,11 @@ import { Columns } from "./columns";
 import { VerticalSpace } from "./verticalSpace";
 import { Section } from "./Section";
 import { Flex } from "./flex";
-
+import { VideoList } from "./videoList";
+import { PuckFeatures } from "./puckFeatures";
+import { PuckCTA } from "./puckCta";
+import { HomeCTA } from "./homeCta";
+import { SimpleCTA } from "./simpleCta";
 // Default Components - Flex
 
 // Export the component config for Puck (after all components are defined)
@@ -38,6 +42,7 @@ export const puckConfig = {
   },
   components: {
     HeroSection,
+    HomeCTA,
     TextSection,
     TestimonialSection,
     FAQSection,
@@ -59,5 +64,10 @@ export const puckConfig = {
     Button: ButtonComponent,
     Spacer,
     Stats,
+    VideoList,
+    SideTextWithImage: PuckFeatures,
+    Blog: PuckCTA,
+    SimpleCTA,
+
   },
 };
