@@ -7,34 +7,10 @@ import { ShoppingBasket } from './components/ShoppingBasket';
 import { PageLoader } from './components/PageLoader';
 
 // Critical pages (loaded immediately)
+import { HomePageWithPuck } from './pages/HomePageWithPuck';
 import { HomePage } from './pages/HomePage';
-// <<<<<<< HEAD
-import { AboutPage } from './pages/AboutPage';
-import { ServicesPage } from './pages/ServicesPage';
-import { ContactPage } from './pages/ContactPage';
-import { AssessmentsPage } from './pages/AssessmentsPage';
-import { TermsPage } from './pages/TermsPage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { CookiePage } from './pages/CookiePage';
-import { ComplaintsPage } from './pages/ComplaintsPage';
-import { QuizPage } from './pages/QuizPage';
-import { LoadingPage } from './pages/LoadingPage';
-import { QuizResultsPage } from './pages/QuizResultsPage';
-import { UpsellPage } from './pages/UpsellPage';
-import { CQCPage } from './pages/CQC';
-import { SurgeryReadinessUpsellPageWithPuck } from './pages/SurgeryReadinessUpsellPageWithPuck';
-import { SurgeryReadinessUpsellPageBWithPuck } from './pages/SurgeryReadinessUpsellPageBWithPuck';
-import { SurgeryReadinessUpsellPageCWithPuck } from './pages/SurgeryReadinessUpsellPageCWithPuck';
-import { SurgeryReadinessUpsellPageDWithPuck } from './pages/SurgeryReadinessUpsellPageDWithPuck';
-import { SurgeryReadinessUpsellPageEWithPuck } from './pages/SurgeryReadinessUpsellPageEWithPuck';
-import { SurgeryReadinessUpsellPageFWithPuck } from './pages/SurgeryReadinessUpsellPageFWithPuck';
-import { SurgeryReadinessUpsellPageGWithPuck } from './pages/SurgeryReadinessUpsellPageGWithPuck';
-import { SurgeryReadinessUpsellPageHWithPuck } from './pages/SurgeryReadinessUpsellPageHWithPuck';
-import { SurgeryReadinessUpsellPageIWithPuck } from './pages/SurgeryReadinessUpsellPageIWithPuck';
-import { SurgeryReadinessUpsellPageJWithPuck } from './pages/SurgeryReadinessUpsellPageJWithPuck';
-import { SurgeryPreparationChecklistPage } from './pages/SurgeryPreparationChecklistPage';
-import { SurgeryPreparationChecklistPageB } from './pages/SurgeryPreparationChecklistPageB';
-import { SurgeryPreparationChecklistPageC } from './pages/SurgeryPreparationChecklistPageC';
+
+
 // =======
 import { PurchaseThankYouPage } from './pages/PurchaseThankYouPage';
 
@@ -1252,9 +1228,19 @@ useEffect(() => {
       case 'analytics-test':
         return <AnalyticsTestPage />;
       case 'page-loading':
-         return <PageLoader />;     
+         return <PageLoader />;
+      case 'old-home':
+         return <HomePage />;   
+      case 'home':
+        return <HomePageWithPuck 
+          onAddToBasket={addToBasket}
+          onOpenBasket={() => setIsBasketOpen(true)}
+        />;
       default:
-        return <HomePage onRequestQuote={handleRequestQuote} />;
+        return <HomePageWithPuck 
+          onAddToBasket={addToBasket}
+          onOpenBasket={() => setIsBasketOpen(true)}
+        />;
     }
   };
 
