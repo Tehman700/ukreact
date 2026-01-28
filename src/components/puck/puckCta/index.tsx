@@ -193,7 +193,7 @@ export const PuckCTA: ComponentConfig<{
                   <div 
                     key={index} 
                     className="flex flex-col border border-gray-200 rounded-lg flex-shrink-0" 
-                    style={{ width: 'calc(100vw - 28px)', maxWidth: '400px' }}
+                    style={{ width: 'calc(100vw - 28px)', maxWidth: '320px' }}
                   >
                     {/* Card Image */}
                     <div className="aspect-[4/3] w-full bg-gray-20 overflow-hidden shadow-sm" >

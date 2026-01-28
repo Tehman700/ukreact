@@ -170,16 +170,16 @@ export const VideoList: ComponentConfig<{
       return (
         <div
           className="flex-shrink-0"
-          style={{ 
-            width: slideWidth === 'auto' ? 'auto' : `min(${slideWidth}px, calc(100vw - 3rem))` 
-          }}
+ 
         >
           <div
             className="block relative rounded-lg overflow-hidden group cursor-pointer"
             style={{ 
               width: slideWidth === 'auto' ? 'auto' : `min(${slideWidth}px, calc(100vw - 3rem))`,
               height: slideHeight === 'auto' ? 'auto' : `min(${slideHeight}px, calc((100vw - 3rem) * ${typeof slideHeight === 'number' && typeof slideWidth === 'number' ? slideHeight / slideWidth : 0.5625}))`,
-              backgroundColor: '#d1d5db'
+              backgroundColor: '#d1d5db',
+              maxWidth: '320px'
+              
             }}
             onClick={handlePlayPause}
           >
