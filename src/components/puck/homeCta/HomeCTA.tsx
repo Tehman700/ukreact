@@ -253,7 +253,7 @@ export const HomeCTA: ComponentConfig<{
           marginRight: `${marginRight}px`,
         }}
       >
-        <div className="container py-8 sm:py-12 md:py-16 lg:py-24 mx-auto">
+        <div className="container py-4 sm:py-6 md:py-8 lg:py-12 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight" style={{ color: mainTitleColor }}>

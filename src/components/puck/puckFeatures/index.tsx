@@ -162,43 +162,46 @@ export const PuckFeatures: ComponentConfig<{
   }) => {
     return (
       <section
+        className="px-[10px] sm:px-0 puck-features-section"
         style={{
           backgroundColor: backgroundColor || "#ffffff",
           color: fontColor || "#111827",
           paddingTop: `${paddingTop}px`,
           paddingBottom: `${paddingBottom}px`,
-          paddingLeft: `${paddingLeft}px`,
-          paddingRight: `${paddingRight}px`,
           marginTop: `${marginTop}px`,
           marginBottom: `${marginBottom}px`,
           marginLeft: `${marginLeft}px`,
           marginRight: `${marginRight}px`,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (min-width: 640px) {
+            .puck-features-section {
+              padding-left: ${paddingLeft}px !important;
+              padding-right: ${paddingRight}px !important;
+            }
+          }
+        `}} />
+        <div className="max-w-7xl mx-auto px-8 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
             {/* Left side - Card with button */}
-            <div className="flex justify-center lg:justify-start">
-              <div className="bg-gray-50 rounded-2xl p-8 sm:p-12 w-full max-w-md shadow-sm">
+            <div className="rounded-2xl w-full max-w-md shadow-sm flex justify-center" style={{ padding: '100px', backgroundColor: '#f6f7f9' }}>
                 {cardTitle && (
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-900">
                     {cardTitle}
                   </h3>
                 )}
                 {cardDescription && (
-                  <p className="text-gray-600 mb-8">{cardDescription}</p>
+                  <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">{cardDescription}</p>
                 )}
                 <a
                   href={buttonLink}
-                  className="inline-block w-full text-center bg-black text-white font-semibold py-4 px-8 rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  {buttonText}
-                </a>
-              </div>
+                  className="inline-block w-full text-center bg-black text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg hover:bg-gray-800 transition-colors text-sm sm:text-base"
+                >{buttonText}</a>
             </div>
 
             {/* Right side - Content */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                 {heading}
               </h2>

@@ -145,49 +145,78 @@ export const PuckCTA: ComponentConfig<{
   }) => {
     return (
       <section
+        className="px-[10px] sm:px-0 puckcta-list-section"
         style={{
           background: backgroundColor || "#ffffff",
           color: fontColor || "#111827",
-          paddingTop: `${paddingTop}px`,
-          paddingBottom: `${paddingBottom}px`,
-          paddingLeft: `${paddingLeft}px`,
-          paddingRight: `${paddingRight}px`,
+          paddingTop: `10px`,
+          paddingBottom: `10px`,
           marginTop: `${marginTop}px`,
           marginBottom: `${marginBottom}px`,
           marginLeft: `${marginLeft}px`,
           marginRight: `${marginRight}px`,
         }}
       >
+              <style dangerouslySetInnerHTML={{ __html: `
+          @media (min-width: 640px) {
+            .puckcta-list-section {
+              padding-left: ${paddingLeft}px !important;
+              padding-right: ${paddingRight}px !important;
+              padding-top: ${paddingTop}px !important;
+              padding-bottom: ${paddingBottom}px !important;
+            }
+          }
+        `}} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-semibold">{sectionTitle}</h2>
+          <div className="text-center mb-8 sm:mb-12 px-4 sm:px-0">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold">{sectionTitle}</h2>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {cards.map((card, index) => (
-              <div key={index} className="flex flex-col border border-gray-200 rounded-lg ">
-                {/* Card Image */}
-                <div className="aspect-[4/3] w-full bg-gray-20 overflow-hidden shadow-sm" >
-                  <img
-                    src={card.imageUrl}
-                    alt={card.title}
-                    className="w-full h-full object-cover"
-                    style={{ borderRadius: '6px 6px 0 0' }}
-                  />
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                {/* Card Title */}
-                <h3 className="text-base font-semibold mb-3">{card.title}</h3>
-                
-                {/* Card Description */}
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {card.description}
-                </p>
-                </div>
+          {/* Horizontal Scroll for All Devices */}
+          <div className="relative">
+            <div 
+              className="overflow-x-auto -mx-[10px] sm:-mx-0 px-[10px] sm:px-0"
+              style={{ 
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              <style dangerouslySetInnerHTML={{ __html: `
+                .overflow-x-auto::-webkit-scrollbar {
+                  display: none;
+                }
+              `}} />
+              <div className="flex gap-4 sm:gap-6 md:gap-8 pb-4" style={{ minWidth: 'min-content' }}>
+                {cards.map((card, index) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col border border-gray-200 rounded-lg flex-shrink-0" 
+                    style={{ width: 'calc(100vw - 28px)', maxWidth: '400px' }}
+                  >
+                    {/* Card Image */}
+                    <div className="aspect-[4/3] w-full bg-gray-20 overflow-hidden shadow-sm" >
+                      <img
+                        src={card.imageUrl}
+                        alt={card.title}
+                        className="w-full h-full object-cover"
+                        style={{ borderRadius: '6px 6px 0 0' }}
+                      />
+                    </div>
+                    <div className="p-4 sm:p-6 flex-1 flex flex-col">
+                    {/* Card Title */}
+                    <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">{card.title}</h3>
+                    
+                    {/* Card Description */}
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                      {card.description}
+                    </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>

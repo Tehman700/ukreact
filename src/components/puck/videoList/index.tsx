@@ -170,13 +170,15 @@ export const VideoList: ComponentConfig<{
       return (
         <div
           className="flex-shrink-0"
-          style={{ width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px` }}
+          style={{ 
+            width: slideWidth === 'auto' ? 'auto' : `min(${slideWidth}px, calc(100vw - 3rem))` 
+          }}
         >
           <div
             className="block relative rounded-lg overflow-hidden group cursor-pointer"
             style={{ 
-              width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px`,
-              height: slideHeight === 'auto' ? 'auto' : `${slideHeight}px`,
+              width: slideWidth === 'auto' ? 'auto' : `min(${slideWidth}px, calc(100vw - 3rem))`,
+              height: slideHeight === 'auto' ? 'auto' : `min(${slideHeight}px, calc((100vw - 3rem) * ${typeof slideHeight === 'number' && typeof slideWidth === 'number' ? slideHeight / slideWidth : 0.5625}))`,
               backgroundColor: '#d1d5db'
             }}
             onClick={handlePlayPause}
@@ -208,27 +210,36 @@ export const VideoList: ComponentConfig<{
 
     return (
       <section
+        className="px-[10px] sm:px-0 video-list-section"
         style={{
           background: backgroundColor || "#ffffff",
           color: fontColor || "#111827",
-          paddingTop: `${paddingTop}px`,
-          paddingBottom: `${paddingBottom}px`,
-          paddingLeft: `${paddingLeft}px`,
-          paddingRight: `${paddingRight}px`,
+          paddingTop: `10px`,
+          paddingBottom: `10px`,
           marginTop: `${marginTop}px`,
           marginBottom: `${marginBottom}px`,
           marginLeft: `${marginLeft}px`,
           marginRight: `${marginRight}px`,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (min-width: 640px) {
+            .video-list-section {
+              padding-left: ${paddingLeft}px !important;
+              padding-right: ${paddingRight}px !important;
+              padding-top: ${paddingTop}px !important;
+              padding-bottom: ${paddingBottom}px !important;
+            }
+          }
+        `}} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 video-list-section">
           {/* Title */}
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-semibold">{title}</h2>
+          <div className="text-center mb-8 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold px-4">{title}</h2>
           </div>
 
           {/* Horizontal Scroll Container */}
-          <div className="relative">
+          <div className="relative p-4">
             <div 
               className="overflow-x-auto -mx-4 px-4"
               style={{ 
@@ -242,7 +253,7 @@ export const VideoList: ComponentConfig<{
                   display: none;
                 }
               `}} />
-              <div className="flex gap-6 pb-4" style={{ minWidth: 'min-content' }}>
+              <div className="flex gap-3 sm:gap-4 md:gap-6 pb-4" style={{ minWidth: 'min-content' }}>
                 {slides.map((slide, index) => (
                   <VideoSlide key={index} slide={slide} index={index} />
                 ))}
@@ -252,7 +263,7 @@ export const VideoList: ComponentConfig<{
             {/* Right Fade Overlay - indicates more content */}
             {slides.length > 2 && (
               <div 
-                className="absolute right-0 top-0 bottom-4 w-24 sm:w-32 pointer-events-none z-10"
+                className="hidden sm:block absolute right-0 top-0 bottom-4 w-24 md:w-32 pointer-events-none z-10"
                 style={{ 
                   background: backgroundColor?.includes('gradient') 
                     ? 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0) 100%)'
