@@ -151,6 +151,61 @@ export const VideoList: ComponentConfig<{
     backgroundColor,
     fontColor,
   }) => {
+    const VideoSlide = ({ slide, index }: { slide: any; index: number }) => {
+      const [isPlaying, setIsPlaying] = React.useState(false);
+      const videoRef = React.useRef<HTMLVideoElement>(null);
+
+      const handlePlayPause = () => {
+        if (videoRef.current) {
+          if (isPlaying) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+          } else {
+            videoRef.current.play();
+            setIsPlaying(true);
+          }
+        }
+      };
+
+      return (
+        <div
+          className="flex-shrink-0"
+          style={{ width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px` }}
+        >
+          <div
+            className="block relative rounded-lg overflow-hidden group cursor-pointer"
+            style={{ 
+              width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px`,
+              height: slideHeight === 'auto' ? 'auto' : `${slideHeight}px`,
+              backgroundColor: '#d1d5db'
+            }}
+            onClick={handlePlayPause}
+          >
+            {/* Video Element */}
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              poster={slide.thumbnailUrl}
+              preload="metadata"
+              onEnded={() => setIsPlaying(false)}
+            >
+              <source src={slide.videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            
+            {/* Play Button Overlay */}
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity">
+                <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                  <Play className="w-8 h-8 text-gray-800 fill-gray-800 ml-1" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
     return (
       <section
         style={{
@@ -173,36 +228,38 @@ export const VideoList: ComponentConfig<{
           </div>
 
           {/* Horizontal Scroll Container */}
-          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <div className="flex gap-6 pb-4" style={{ minWidth: 'min-content' }}>
-              {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className="flex-shrink-0"
-                  style={{ width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px` }}
-                >
-                  <a
-                    href={slide.videoUrl}
-                    className="block relative rounded-lg overflow-hidden group"
-                    style={{ 
-                      width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px`,
-                      height: slideHeight === 'auto' ? 'auto' : `${slideHeight}px`,
-                      backgroundColor: '#d1d5db'
-                    }}
-                  >
-                    {/* Thumbnail - using gradient as placeholder */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-blue-300"></div>
-                    
-                    {/* Play Button */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white transition-colors">
-                        <Play className="w-8 h-8 text-gray-800 fill-gray-800 ml-1" />
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              ))}
+          <div className="relative">
+            <div 
+              className="overflow-x-auto -mx-4 px-4"
+              style={{ 
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              <style dangerouslySetInnerHTML={{ __html: `
+                .overflow-x-auto::-webkit-scrollbar {
+                  display: none;
+                }
+              `}} />
+              <div className="flex gap-6 pb-4" style={{ minWidth: 'min-content' }}>
+                {slides.map((slide, index) => (
+                  <VideoSlide key={index} slide={slide} index={index} />
+                ))}
+              </div>
             </div>
+            
+            {/* Right Fade Overlay - indicates more content */}
+            {slides.length > 2 && (
+              <div 
+                className="absolute right-0 top-0 bottom-4 w-24 sm:w-32 pointer-events-none z-10"
+                style={{ 
+                  background: backgroundColor?.includes('gradient') 
+                    ? 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0) 100%)'
+                    : `linear-gradient(to left, ${backgroundColor || '#ffffff'} 0%, ${backgroundColor || '#ffffff'}dd 40%, transparent 100%)` 
+                }}
+              ></div>
+            )}
           </div>
         </div>
       </section>
