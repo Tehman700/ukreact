@@ -10,6 +10,16 @@ export const HomeCTA: ComponentConfig<{
   features: Array<{ label: string; color: string }>;
   imageUrl: string;
   imageAlt: string;
+  overlayTitle: string;
+  overlaySubtitle: string;
+  mainTitleColor: string;
+  titleHighlightColor: string;
+  subtitleColor: string;
+  buttonTextColor: string;
+  buttonBgColor: string;
+  featuresTextColor: string;
+  overlayTitleColor: string;
+  overlaySubtitleColor: string;
   paddingTop: number;
   paddingBottom: number;
   paddingLeft: number;
@@ -49,7 +59,7 @@ export const HomeCTA: ComponentConfig<{
       label: 'Features',
       getItemSummary: (item) => item.label || 'Feature',
       arrayFields: {
-        label: { type: 'text', label: 'Feature Label' },
+        label: { type: 'text', label: 'Feature Label', contentEditable: true },
         color: { 
           type: 'select',
           label: 'Dot Color',
@@ -70,6 +80,48 @@ export const HomeCTA: ComponentConfig<{
     imageAlt: {
       type: 'text',
       label: 'Image Alt Text',
+    },
+    overlayTitle: {
+      type: 'text',
+      label: 'Overlay Title',
+      contentEditable: true,
+    },
+    overlaySubtitle: {
+      type: 'text',
+      label: 'Overlay Subtitle',
+      contentEditable: true,
+    },
+    mainTitleColor: {
+      type: 'text',
+      label: 'Main Title Color',
+    },
+    titleHighlightColor: {
+      type: 'text',
+      label: 'Title Highlight Color',
+    },
+    subtitleColor: {
+      type: 'text',
+      label: 'Subtitle Color',
+    },
+    buttonTextColor: {
+      type: 'text',
+      label: 'Button Text Color',
+    },
+    buttonBgColor: {
+      type: 'text',
+      label: 'Button Background Color',
+    },
+    featuresTextColor: {
+      type: 'text',
+      label: 'Features Text Color',
+    },
+    overlayTitleColor: {
+      type: 'text',
+      label: 'Overlay Title Color',
+    },
+    overlaySubtitleColor: {
+      type: 'text',
+      label: 'Overlay Subtitle Color',
     },
     paddingTop: {
       type: 'number',
@@ -125,10 +177,10 @@ export const HomeCTA: ComponentConfig<{
     },
   },
   defaultProps: {
-    mainTitle: 'Performance Healthcare',
-    titleHighlight: 'For Men',
-    subtitle: 'Expert-led, data-driven, and designed exclusively for men\'s health.',
-    buttonText: 'Discover',
+    mainTitle: 'Surgery Preparation for',
+    titleHighlight: 'Men',
+    subtitle: 'Reduce surgical risks and improve recovery times.',
+    buttonText: 'Start Assessment',
     buttonLink: 'https://luther.health/#contact',
     features: [
       { label: 'Regulated', color: 'bg-blue-600' },
@@ -137,6 +189,16 @@ export const HomeCTA: ComponentConfig<{
     ],
     imageUrl: '/src/assets/hi.png',
     imageAlt: 'Successful professional enjoying an active lifestyle',
+    overlayTitle: 'Dr Matthew Lawrence',
+    overlaySubtitle: 'Over 1000 health consultations',
+    mainTitleColor: '#000000',
+    titleHighlightColor: '#000000',
+    subtitleColor: '#6b7280',
+    buttonTextColor: '#ffffff',
+    buttonBgColor: '#111827',
+    featuresTextColor: '#6b7280',
+    overlayTitleColor: '#ffffff',
+    overlaySubtitleColor: '#ffffff',
     paddingTop: 32,
     paddingBottom: 32,
     paddingLeft: 16,
@@ -156,6 +218,16 @@ export const HomeCTA: ComponentConfig<{
     features,
     imageUrl,
     imageAlt,
+    overlayTitle,
+    overlaySubtitle,
+    mainTitleColor,
+    titleHighlightColor,
+    subtitleColor,
+    buttonTextColor,
+    buttonBgColor,
+    featuresTextColor,
+    overlayTitleColor,
+    overlaySubtitleColor,
     paddingTop,
     paddingBottom,
     paddingLeft,
@@ -184,22 +256,23 @@ export const HomeCTA: ComponentConfig<{
         <div className="container py-8 sm:py-12 md:py-16 lg:py-24 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight" style={{ color: mainTitleColor }}>
                 {mainTitle}
-                <span className="block text-primary">{titleHighlight}</span>
+                <span className="block" style={{ color: titleHighlightColor }}>{titleHighlight}</span>
               </h1>
-              <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto lg:mx-0">
+              <p className="text-base sm:text-lg max-w-md mx-auto lg:mx-0" style={{ color: subtitleColor }}>
                 {subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors w-full sm:w-auto"
+                  className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg transition-colors w-full sm:w-auto"
+                  style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
                   onClick={() => (window.location.href = buttonLink)}
                 >
                   {buttonText}
                 </button>
               </div>
-              <div className="flex items-center justify-center lg:justify-start flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center lg:justify-start flex-wrap gap-4 sm:gap-6 text-sm" style={{ color: featuresTextColor }}>
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <span className={`w-2 h-2 ${feature.color} rounded-full`}></span>
@@ -216,6 +289,12 @@ export const HomeCTA: ComponentConfig<{
                   alt={imageAlt}
                   className="w-full h-full object-cover object-center"
                 />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: overlayTitleColor }}>{overlayTitle}</p>
+                    <p className="text-xs opacity-90" style={{ color: overlaySubtitleColor }}>{overlaySubtitle}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
