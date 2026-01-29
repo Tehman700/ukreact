@@ -69,31 +69,7 @@ export const VideoList: ComponentConfig<{
       label: "Padding Right (px)",
       min: 0,
       max: 200,
-    },
-    marginTop: {
-      type: "number",
-      label: "Margin Top (px)",
-      min: 0,
-      max: 200,
-    },
-    marginBottom: {
-      type: "number",
-      label: "Margin Bottom (px)",
-      min: 0,
-      max: 200,
-    },
-    marginLeft: {
-      type: "number",
-      label: "Margin Left (px)",
-      min: 0,
-      max: 200,
-    },
-    marginRight: {
-      type: "number",
-      label: "Margin Right (px)",
-      min: 0,
-      max: 200,
-    },
+    },  
     backgroundColor: {
       type: "text",
       label: "Background Color (CSS gradient or color)",
@@ -128,10 +104,6 @@ export const VideoList: ComponentConfig<{
     paddingBottom: 96,
     paddingLeft: 16,
     paddingRight: 16,
-    marginTop: 0,
-    marginBottom: 0,
-    marginLeft: 0,
-    marginRight: 0,
     backgroundColor: "#ffffff",
     fontColor: "#111827",
   },
@@ -144,15 +116,30 @@ export const VideoList: ComponentConfig<{
     paddingBottom,
     paddingLeft,
     paddingRight,
-    marginTop,
-    marginBottom,
-    marginLeft,
-    marginRight,
     backgroundColor,
     fontColor,
   }) => {
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Keyboard navigation for carousel
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (!scrollContainerRef.current) return;
+      
+      const container = scrollContainerRef.current;
+      const scrollAmount = container.offsetWidth * 0.8; // Scroll by ~80% of container width
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    };
+
     const VideoSlide = ({ slide, index }: { slide: any; index: number }) => {
       const [isPlaying, setIsPlaying] = React.useState(false);
+      const [isHovered, setIsHovered] = React.useState(false);
       const videoRef = React.useRef<HTMLVideoElement>(null);
 
       const handlePlayPause = () => {
@@ -169,24 +156,25 @@ export const VideoList: ComponentConfig<{
 
       return (
         <div
-          className="flex-shrink-0"
- 
+          className="flex-shrink-0 p-2"
+          style={{ scrollSnapAlign: 'start' }}
+          role="listitem"
         >
           <div
-            className="block relative rounded-lg overflow-hidden group cursor-pointer"
+            className="block relative rounded-lg overflow-hidden group cursor-pointer h-full transition-shadow hover:shadow-lg"
             style={{ 
-              width: slideWidth === 'auto' ? 'auto' : `min(${slideWidth}px, calc(100vw - 3rem))`,
-              height: slideHeight === 'auto' ? 'auto' : `min(${slideHeight}px, calc((100vw - 3rem) * ${typeof slideHeight === 'number' && typeof slideWidth === 'number' ? slideHeight / slideWidth : 0.5625}))`,
               backgroundColor: '#d1d5db',
-              maxWidth: '320px'
-              
+              width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px`,
+              height: slideHeight === 'auto' ? 'auto' : `${slideHeight}px`,
             }}
             onClick={handlePlayPause}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             {/* Video Element */}
             <video
               ref={videoRef}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
               poster={slide.thumbnailUrl}
               preload="metadata"
               onEnded={() => setIsPlaying(false)}
@@ -194,6 +182,9 @@ export const VideoList: ComponentConfig<{
               <source src={slide.videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
+            
+            {/* Hover Overlay */}
+            <div className={`absolute inset-0 bg-black/20 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
             
             {/* Play Button Overlay */}
             {!isPlaying && (
@@ -210,16 +201,13 @@ export const VideoList: ComponentConfig<{
 
     return (
       <section
-        className="px-[10px] sm:px-0 video-list-section"
+        className="container mx-auto px-4 sm:px-0 video-list-section"
         style={{
           background: backgroundColor || "#ffffff",
           color: fontColor || "#111827",
           paddingTop: `10px`,
           paddingBottom: `10px`,
-          marginTop: `${marginTop}px`,
-          marginBottom: `${marginBottom}px`,
-          marginLeft: `${marginLeft}px`,
-          marginRight: `${marginRight}px`,
+         
         }}
       >
         <style dangerouslySetInnerHTML={{ __html: `
@@ -232,47 +220,44 @@ export const VideoList: ComponentConfig<{
             }
           }
         `}} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 video-list-section">
           {/* Title */}
-          <div className="text-center mb-8 sm:mb-4">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold px-4">{title}</h2>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-semibold">{title}</h2>
           </div>
 
           {/* Horizontal Scroll Container */}
-          <div className="relative p-4">
+          <div className="relative">
             <div 
-              className="overflow-x-auto -mx-4 px-4"
+              ref={scrollContainerRef}
+              className="overflow-x-auto overscroll-x-contain scrollbar-hide focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                scrollSnapType: 'x mandatory'
               }}
+              tabIndex={0}
+              role="region"
+              aria-label="Video carousel. Use arrow keys to scroll."
+              onKeyDown={handleKeyDown}
             >
               <style dangerouslySetInnerHTML={{ __html: `
-                .overflow-x-auto::-webkit-scrollbar {
+                .scrollbar-hide::-webkit-scrollbar {
                   display: none;
                 }
               `}} />
-              <div className="flex gap-3 sm:gap-4 md:gap-6 pb-4" style={{ minWidth: 'min-content' }}>
+              <div 
+                className="flex gap-[2px] pb-4 pl-4 pr-16" 
+                role="list"
+                aria-label="Video carousel"
+              >
                 {slides.map((slide, index) => (
                   <VideoSlide key={index} slide={slide} index={index} />
                 ))}
               </div>
             </div>
-            
-            {/* Right Fade Overlay - indicates more content */}
-            {slides.length > 2 && (
-              <div 
-                className="hidden sm:block absolute right-0 top-0 bottom-4 w-24 md:w-32 pointer-events-none z-10"
-                style={{ 
-                  background: backgroundColor?.includes('gradient') 
-                    ? 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0) 100%)'
-                    : `linear-gradient(to left, ${backgroundColor || '#ffffff'} 0%, ${backgroundColor || '#ffffff'}dd 40%, transparent 100%)` 
-                }}
-              ></div>
-            )}
           </div>
-        </div>
+    
       </section>
     );
   },

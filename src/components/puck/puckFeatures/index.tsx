@@ -182,10 +182,11 @@ export const PuckFeatures: ComponentConfig<{
             }
           }
         `}} />
-        <div className="max-w-7xl mx-auto px-8 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
-            {/* Left side - Card with button */}
-            <div className="rounded-2xl w-full max-w-md shadow-sm flex justify-center" style={{ padding: '100px', backgroundColor: '#f6f7f9' }}>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16 items-center">
+            {/* Card with button - Left on desktop, bottom on mobile */}
+            <div className="rounded-2xl w-full max-w-md shadow-sm flex justify-center order-2 lg:order-1" style={{ padding: '100px', backgroundColor: '#f6f7f9' }}>
+              <div className="w-full">
                 {cardTitle && (
                   <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-900">
                     {cardTitle}
@@ -198,10 +199,11 @@ export const PuckFeatures: ComponentConfig<{
                   href={buttonLink}
                   className="inline-block w-full text-center bg-black text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg hover:bg-gray-800 transition-colors text-sm sm:text-base"
                 >{buttonText}</a>
+              </div>
             </div>
 
-            {/* Right side - Content */}
-            <div className="space-y-4 sm:space-y-6">
+            {/* Content - Right on desktop, top on mobile */}
+            <div className="space-y-4 sm:space-y-6 flex-1 w-full order-1 lg:order-2">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                 {heading}
               </h2>

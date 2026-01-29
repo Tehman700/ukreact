@@ -63,30 +63,6 @@ export const PuckCTA: ComponentConfig<{
       min: 0,
       max: 200,
     },
-    marginTop: {
-      type: "number",
-      label: "Margin Top (px)",
-      min: 0,
-      max: 200,
-    },
-    marginBottom: {
-      type: "number",
-      label: "Margin Bottom (px)",
-      min: 0,
-      max: 200,
-    },
-    marginLeft: {
-      type: "number",
-      label: "Margin Left (px)",
-      min: 0,
-      max: 200,
-    },
-    marginRight: {
-      type: "number",
-      label: "Margin Right (px)",
-      min: 0,
-      max: 200,
-    },
     backgroundColor: {
       type: "text",
       label: "Background Color (CSS gradient or color)",
@@ -122,10 +98,6 @@ export const PuckCTA: ComponentConfig<{
     paddingBottom: 96,
     paddingLeft: 16,
     paddingRight: 16,
-    marginTop: 0,
-    marginBottom: 0,
-    marginLeft: 0,
-    marginRight: 0,
     backgroundColor: "#ffffff",
     fontColor: "#111827",
   },
@@ -136,25 +108,17 @@ export const PuckCTA: ComponentConfig<{
     paddingBottom,
     paddingLeft,
     paddingRight,
-    marginTop,
-    marginBottom,
-    marginLeft,
-    marginRight,
     backgroundColor,
     fontColor,
   }) => {
     return (
       <section
-        className="px-[10px] sm:px-0 puckcta-list-section"
+        className="container mx-auto px-4 px-[10px] sm:px-0 puckcta-list-section"
         style={{
           background: backgroundColor || "#ffffff",
           color: fontColor || "#111827",
           paddingTop: `10px`,
-          paddingBottom: `10px`,
-          marginTop: `${marginTop}px`,
-          marginBottom: `${marginBottom}px`,
-          marginLeft: `${marginLeft}px`,
-          marginRight: `${marginRight}px`,
+          paddingBottom: `10px`
         }}
       >
               <style dangerouslySetInnerHTML={{ __html: `
@@ -167,14 +131,13 @@ export const PuckCTA: ComponentConfig<{
             }
           }
         `}} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
-          <div className="text-center mb-8 sm:mb-12 px-4 sm:px-0">
+          <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold">{sectionTitle}</h2>
           </div>
 
           {/* Horizontal Scroll for All Devices */}
-          <div className="relative">
+          <div className="relative " style={{display:'flex', justifyContent: 'center'}}>
             <div 
               className="overflow-x-auto -mx-[10px] sm:-mx-0 px-[10px] sm:px-0"
               style={{ 
@@ -192,8 +155,7 @@ export const PuckCTA: ComponentConfig<{
                 {cards.map((card, index) => (
                   <div 
                     key={index} 
-                    className="flex flex-col border border-gray-200 rounded-lg flex-shrink-0" 
-                    style={{ width: 'calc(100vw - 28px)', maxWidth: '320px' }}
+                    className="flex flex-col border border-gray-200 rounded-lg flex-shrink-0 w-[280px] sm:w-[414px] md:w-[414px] lg:w-[414px]" 
                   >
                     {/* Card Image */}
                     <div className="aspect-[4/3] w-full bg-gray-20 overflow-hidden shadow-sm" >
@@ -218,7 +180,6 @@ export const PuckCTA: ComponentConfig<{
               </div>
             </div>
           </div>
-        </div>
       </section>
     );
   },

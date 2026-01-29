@@ -152,7 +152,7 @@ export const FAQSection: ComponentConfig<{
     accordionFontColor: "#374151",
   },
   render: ({ title, faqs, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor, backgroundColor, accordionItemBackgroundColor, accordionItemBorderRadius, accordionItemPadding, accordionItemBorder, accordionFontColor }) => (
-    <section style={{ 
+    <section  style={{ 
       backgroundColor: backgroundColor || '#ffffff', 
       paddingTop: `${paddingTop}px`,
       paddingBottom: `${paddingBottom}px`,
