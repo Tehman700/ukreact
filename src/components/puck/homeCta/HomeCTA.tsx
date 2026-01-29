@@ -1,6 +1,26 @@
 import React from 'react';
 import { ComponentConfig } from '@measured/puck';
+import niceLogoSrc from 'figma:asset/75274da7c43eea09dc54e8c89b9b1024bd53bf72.png';
+import gmcLogoSrc from 'figma:asset/31a0d62591eaf7b51f56d60f63824150a1786f8d.png';
+import cqcLogoSrc from 'figma:asset/1d3650155b960261d923b43759d5822627f2ff7f.png';
 
+const logos = [
+  {
+    id: 1,
+    name: 'NICE - National Institute for Health and Care Excellence',
+    image: niceLogoSrc
+  },
+  {
+    id: 2,
+    name: 'General Medical Council',
+    image: gmcLogoSrc
+  },
+  {
+    id: 3,
+    name: 'Care Quality Commission',
+    image: cqcLogoSrc
+  }
+];
 export const HomeCTA: ComponentConfig<{
   mainTitle: string;
   titleHighlight: string;
@@ -20,25 +40,12 @@ export const HomeCTA: ComponentConfig<{
   featuresTextColor: string;
   overlayTitleColor: string;
   overlaySubtitleColor: string;
-  paddingTop: number;
-  paddingBottom: number;
-  paddingLeft: number;
-  paddingRight: number;
-  marginTop: number;
-  marginBottom: number;
-  marginLeft: number;
-  marginRight: number;
   backgroundColor: string;
 }> = {
   fields: {
     mainTitle: {
       type: 'text',
       label: 'Main Title',
-      contentEditable: true,
-    },
-    titleHighlight: {
-      type: 'text',
-      label: 'Title Highlight (Second Line)',
       contentEditable: true,
     },
     subtitle: {
@@ -87,10 +94,11 @@ export const HomeCTA: ComponentConfig<{
       contentEditable: true,
     },
     overlaySubtitle: {
-      type: 'text',
+      type: 'textarea',
       label: 'Overlay Subtitle',
       contentEditable: true,
     },
+
     mainTitleColor: {
       type: 'text',
       label: 'Main Title Color',
@@ -123,54 +131,6 @@ export const HomeCTA: ComponentConfig<{
       type: 'text',
       label: 'Overlay Subtitle Color',
     },
-    paddingTop: {
-      type: 'number',
-      label: 'Padding Top (px)',
-      min: 0,
-      max: 200,
-    },
-    paddingBottom: {
-      type: 'number',
-      label: 'Padding Bottom (px)',
-      min: 0,
-      max: 200,
-    },
-    paddingLeft: {
-      type: 'number',
-      label: 'Padding Left (px)',
-      min: 0,
-      max: 200,
-    },
-    paddingRight: {
-      type: 'number',
-      label: 'Padding Right (px)',
-      min: 0,
-      max: 200,
-    },
-    marginTop: {
-      type: 'number',
-      label: 'Margin Top (px)',
-      min: 0,
-      max: 200,
-    },
-    marginBottom: {
-      type: 'number',
-      label: 'Margin Bottom (px)',
-      min: 0,
-      max: 200,
-    },
-    marginLeft: {
-      type: 'number',
-      label: 'Margin Left (px)',
-      min: 0,
-      max: 200,
-    },
-    marginRight: {
-      type: 'number',
-      label: 'Margin Right (px)',
-      min: 0,
-      max: 200,
-    },
     backgroundColor: {
       type: 'text',
       label: 'Background Color (CSS)',
@@ -178,7 +138,6 @@ export const HomeCTA: ComponentConfig<{
   },
   defaultProps: {
     mainTitle: 'Surgery Preparation for',
-    titleHighlight: 'Men',
     subtitle: 'Reduce surgical risks and improve recovery times.',
     buttonText: 'Start Assessment',
     buttonLink: 'https://luther.health/#contact',
@@ -199,19 +158,11 @@ export const HomeCTA: ComponentConfig<{
     featuresTextColor: '#6b7280',
     overlayTitleColor: '#ffffff',
     overlaySubtitleColor: '#ffffff',
-    paddingTop: 32,
-    paddingBottom: 32,
-    paddingLeft: 16,
-    paddingRight: 16,
-    marginTop: 0,
-    marginBottom: 0,
-    marginLeft: 0,
-    marginRight: 0,
     backgroundColor: 'linear-gradient(to right, rgb(249 250 251), rgb(243 244 246))',
   },
+  
   render: ({
     mainTitle,
-    titleHighlight,
     subtitle,
     buttonText,
     buttonLink,
@@ -221,84 +172,103 @@ export const HomeCTA: ComponentConfig<{
     overlayTitle,
     overlaySubtitle,
     mainTitleColor,
-    titleHighlightColor,
     subtitleColor,
     buttonTextColor,
     buttonBgColor,
     featuresTextColor,
     overlayTitleColor,
     overlaySubtitleColor,
-    paddingTop,
-    paddingBottom,
-    paddingLeft,
-    paddingRight,
-    marginTop,
-    marginBottom,
-    marginLeft,
-    marginRight,
     backgroundColor,
   }) => {
     return (
       <section
-        className="relative"
+        className="relative main-banner-section"
         style={{
           background: backgroundColor,
-          paddingTop: `${paddingTop}px`,
-          paddingBottom: `${paddingBottom}px`,
-          paddingLeft: `${paddingLeft}px`,
-          paddingRight: `${paddingRight}px`,
-          marginTop: `${marginTop}px`,
-          marginBottom: `${marginBottom}px`,
-          marginLeft: `${marginLeft}px`,
-          marginRight: `${marginRight}px`,
+ 
         }}
       >
-        <div className="container py-4 sm:py-6 md:py-8 lg:py-12 mx-auto">
+        <div className="container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
+            <div className="space-y-+ sm:space-y-6 text-center lg:text-left banner-start-col">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight" style={{ color: mainTitleColor }}>
                 {mainTitle}
-                <span className="block" style={{ color: titleHighlightColor }}>{titleHighlight}</span>
               </h1>
               <p className="text-base sm:text-lg max-w-md mx-auto lg:mx-0" style={{ color: subtitleColor }}>
                 {subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg transition-colors w-full sm:w-auto"
+                  className="banner-btn dark-btn inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg transition-colors w-full sm:w-auto"
                   style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
                   onClick={() => (window.location.href = buttonLink)}
                 >
                   {buttonText}
                 </button>
               </div>
-              <div className="flex items-center justify-center lg:justify-start flex-wrap gap-4 sm:gap-6 text-sm" style={{ color: featuresTextColor }}>
+              <div className="colored-list flex items-center justify-center lg:justify-start flex-wrap gap-4 sm:gap-6 text-sm" style={{ color: featuresTextColor }}>
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <span className={`w-2 h-2 ${feature.color} rounded-full`}></span>
-                    <span>{feature.label}</span>
+                    <span className='colored-label'>{feature.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="relative mt-8 lg:mt-0">
+            <div className="relative mt-8 lg:mt-0 banner-end-col">
               <div className="aspect-square relative overflow-hidden rounded-2xl max-w-md mx-auto lg:max-w-none">
                 <img
                   src={imageUrl}
                   alt={imageAlt}
                   className="w-full h-full object-cover object-center"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                <div className="banner-img-content absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: overlayTitleColor }}>{overlayTitle}</p>
-                    <p className="text-xs opacity-90" style={{ color: overlaySubtitleColor }}>{overlaySubtitle}</p>
+                    <h6 className="text-sm font-semibold" style={{ color: overlayTitleColor }}>{overlayTitle}</h6>
+                    <p
+                      className="opacity-90"
+                      style={{ color: overlaySubtitleColor }}
+                      dangerouslySetInnerHTML={{
+                        __html: (() => {
+                          if (typeof overlaySubtitle === 'string') return overlaySubtitle.replace(/\n/g, '<br />');
+                          if (overlaySubtitle && typeof overlaySubtitle === 'object') {
+                            if ('value' in overlaySubtitle && typeof overlaySubtitle.value === 'string') return overlaySubtitle.value.replace(/\n/g, '<br />');
+                            if ('props' in overlaySubtitle && overlaySubtitle.props && typeof overlaySubtitle.props.value === 'string') return overlaySubtitle.props.value.replace(/\n/g, '<br />');
+                          }
+                          return '';
+                        })()
+                      }}
+                    />
+
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
+          <div className="">
+      <div className=" mx-auto banner-logo-content">
+        <div className="text-center mb-8">
+          <p className="text-muted-foreground">Regulated and accredited by UK healthcare authorities</p>
+        </div>
+        
+        <div className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8">
+          {logos.map((logo) => (
+            <div key={logo.id} className="flex items-center justify-center">
+              <div className="relative w-24 h-12 md:w-28 md:h-14 lg:w-32 lg:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                <img
+                  src={logo.image}
+                  alt={logo.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
       </section>
     );
   },

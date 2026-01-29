@@ -8,16 +8,6 @@ export const PuckCTA: ComponentConfig<{
     title: string;
     description: string;
   }>;
-  paddingTop: number;
-  paddingBottom: number;
-  paddingLeft: number;
-  paddingRight: number;
-  marginTop: number;
-  marginBottom: number;
-  marginLeft: number;
-  marginRight: number;
-  backgroundColor?: string;
-  fontColor?: string;
 }> = {
   fields: {
     sectionTitle: {
@@ -38,38 +28,6 @@ export const PuckCTA: ComponentConfig<{
           contentEditable: true,
         },
       },
-    },
-    paddingTop: {
-      type: "number",
-      label: "Padding Top (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingBottom: {
-      type: "number",
-      label: "Padding Bottom (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingLeft: {
-      type: "number",
-      label: "Padding Left (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingRight: {
-      type: "number",
-      label: "Padding Right (px)",
-      min: 0,
-      max: 200,
-    },
-    backgroundColor: {
-      type: "text",
-      label: "Background Color (CSS gradient or color)",
-    },
-    fontColor: {
-      type: "text",
-      label: "Font Color",
     },
   },
   defaultProps: {
@@ -94,52 +52,27 @@ export const PuckCTA: ComponentConfig<{
           "From scheduling appointments with your doctor to purchasing your supplements, to tracking your program and reviewing any adjustments as you progress, you can manage everything online. We manage everything else, like arranging comprehensive tests, and coordinating with your care provider, so you can focus on the most important thing: implementing your plan.",
       },
     ],
-    paddingTop: 96,
-    paddingBottom: 96,
-    paddingLeft: 16,
-    paddingRight: 16,
-    backgroundColor: "#ffffff",
-    fontColor: "#111827",
+
   },
   render: ({
     sectionTitle,
-    cards,
-    paddingTop,
-    paddingBottom,
-    paddingLeft,
-    paddingRight,
-    backgroundColor,
-    fontColor,
+    cards
   }) => {
     return (
       <section
         className="container mx-auto px-4 px-[10px] sm:px-0 puckcta-list-section"
-        style={{
-          background: backgroundColor || "#ffffff",
-          color: fontColor || "#111827",
-          paddingTop: `10px`,
-          paddingBottom: `10px`
-        }}
+
       >
-              <style dangerouslySetInnerHTML={{ __html: `
-          @media (min-width: 640px) {
-            .puckcta-list-section {
-              padding-left: ${paddingLeft}px !important;
-              padding-right: ${paddingRight}px !important;
-              padding-top: ${paddingTop}px !important;
-              padding-bottom: ${paddingBottom}px !important;
-            }
-          }
-        `}} />
+
           {/* Section Title */}
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold">{sectionTitle}</h2>
           </div>
 
           {/* Horizontal Scroll for All Devices */}
           <div className="relative " style={{display:'flex', justifyContent: 'center'}}>
             <div 
-              className="overflow-x-auto -mx-[10px] sm:-mx-0 px-[10px] sm:px-0"
+              className="overflow-x-auto w-full"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -151,14 +84,17 @@ export const PuckCTA: ComponentConfig<{
                   display: none;
                 }
               `}} />
-              <div className="flex gap-4 sm:gap-6 md:gap-8 pb-4" style={{ minWidth: 'min-content' }}>
+              <div className="flex card-slide-wrap " style={{ minWidth: 'min-content' }}>
                 {cards.map((card, index) => (
                   <div 
                     key={index} 
-                    className="flex flex-col border border-gray-200 rounded-lg flex-shrink-0 w-[280px] sm:w-[414px] md:w-[414px] lg:w-[414px]" 
+                   className="
+        card-slidebox
+        flex-shrink-0
+      "
                   >
                     {/* Card Image */}
-                    <div className="aspect-[4/3] w-full bg-gray-20 overflow-hidden shadow-sm" >
+                    <div className="card-slideimg" >
                       <img
                         src={card.imageUrl}
                         alt={card.title}
@@ -166,18 +102,22 @@ export const PuckCTA: ComponentConfig<{
                         style={{ borderRadius: '6px 6px 0 0' }}
                       />
                     </div>
-                    <div className="p-4 sm:p-6 flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col slide-card-content">
                     {/* Card Title */}
-                    <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">{card.title}</h3>
+                    <h3 className="card-title m-0">{card.title}</h3>
                     
                     {/* Card Description */}
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    <p className="card-para m-0 leading-relaxed">
                       {card.description}
                     </p>
                     </div>
                   </div>
                 ))}
+                 <div className="w-10 flex-shrink-0" />
               </div>
+
+          <div className="light-overlay absolute top-0 right-0 bottom-4 w-8 bg-gradient-to-l from-background/80 to-transparent pointer-events-none" />
+
             </div>
           </div>
       </section>

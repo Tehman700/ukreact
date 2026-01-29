@@ -152,7 +152,7 @@ export const FAQSection: ComponentConfig<{
     accordionFontColor: "#374151",
   },
   render: ({ title, faqs, paddingTop, paddingBottom, paddingLeft, paddingRight, marginTop, marginBottom, marginLeft, marginRight, fontSize, fontColor, backgroundColor, accordionItemBackgroundColor, accordionItemBorderRadius, accordionItemPadding, accordionItemBorder, accordionFontColor }) => (
-    <section  style={{ 
+    <section className="custom-faq-section"  style={{ 
       backgroundColor: backgroundColor || '#ffffff', 
       paddingTop: `${paddingTop}px`,
       paddingBottom: `${paddingBottom}px`,
@@ -163,7 +163,7 @@ export const FAQSection: ComponentConfig<{
       marginLeft: `${marginLeft}px`,
       marginRight: `${marginRight}px`
     }}>
-      <div style={{
+      <div className="container" style={{
         maxWidth: '1024px',
         margin: '0 auto',
         padding: '0 24px'
@@ -171,13 +171,13 @@ export const FAQSection: ComponentConfig<{
         <h2 style={{
           fontSize: `clamp(${fontSize * 1.17}px, 4vw, ${fontSize * 1.4}px)`,
           fontWeight: 'bold',
-          color: fontColor || '#111827',
+          color: '#111827',
           marginBottom: '48px',
           textAlign: 'center'
         }}>
           {title}
         </h2>
-        <Accordion type="single" collapsible style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Accordion className="home-accordian" type="single" collapsible style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {faqs.map((faq, index) => (
             <AccordionItem 
               key={index} 
@@ -197,12 +197,12 @@ export const FAQSection: ComponentConfig<{
               }}>
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent style={{
+              <AccordionContent  style={{
                 color: accordionFontColor || '#374151',
                 paddingTop: '8px',
                 fontSize: `${fontSize * 0.875}px`
               }}>
-                <div style={{ whiteSpace: 'pre-line' }}>{faq.answer}</div>
+                <div className="home-accordian-item" style={{ whiteSpace: 'pre-line' }}>{faq.answer}</div>
                 {faq.badges && faq.badges.length > 0 && (
                   <div style={{ 
                     display: 'flex', 

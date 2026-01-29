@@ -106,6 +106,7 @@ export function AssessmentsSection() {
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
               scrollSnapType: 'x mandatory'
             }}
             tabIndex={0}

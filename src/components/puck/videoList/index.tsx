@@ -9,18 +9,7 @@ export const VideoList: ComponentConfig<{
     thumbnailUrl: string;
     title: string;
   }>;
-  slideWidth: number | string;
-  slideHeight: number | string;
-  paddingTop: number;
-  paddingBottom: number;
-  paddingLeft: number;
-  paddingRight: number;
-  marginTop: number;
-  marginBottom: number;
-  marginLeft: number;
-  marginRight: number;
-  backgroundColor?: string;
-  fontColor?: string;
+
 }> = {
   fields: {
     title: {
@@ -37,46 +26,6 @@ export const VideoList: ComponentConfig<{
         thumbnailUrl: { type: "text", label: "Thumbnail URL" },
         title: { type: "text", label: "Slide Title", contentEditable: true },
       },
-    },
-    slideWidth: {
-      type: "text",
-      label: "Slide Width (px or 'auto')",
-    },
-    slideHeight: {
-      type: "text",
-      label: "Slide Height (px or 'auto')",
-    },
-    paddingTop: {
-      type: "number",
-      label: "Padding Top (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingBottom: {
-      type: "number",
-      label: "Padding Bottom (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingLeft: {
-      type: "number",
-      label: "Padding Left (px)",
-      min: 0,
-      max: 200,
-    },
-    paddingRight: {
-      type: "number",
-      label: "Padding Right (px)",
-      min: 0,
-      max: 200,
-    },  
-    backgroundColor: {
-      type: "text",
-      label: "Background Color (CSS gradient or color)",
-    },
-    fontColor: {
-      type: "text",
-      label: "Font Color",
     },
   },
   defaultProps: {
@@ -98,26 +47,12 @@ export const VideoList: ComponentConfig<{
         title: "Recovery Tips",
       },
     ],
-    slideWidth: 450,
-    slideHeight: 253,
-    paddingTop: 96,
-    paddingBottom: 96,
-    paddingLeft: 16,
-    paddingRight: 16,
     backgroundColor: "#ffffff",
     fontColor: "#111827",
   },
   render: ({
     title,
-    slides,
-    slideWidth,
-    slideHeight,
-    paddingTop,
-    paddingBottom,
-    paddingLeft,
-    paddingRight,
-    backgroundColor,
-    fontColor,
+    slides
   }) => {
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -156,17 +91,13 @@ export const VideoList: ComponentConfig<{
 
       return (
         <div
-          className="flex-shrink-0 p-2"
+          className="flex-shrink-0 slide_itm"
           style={{ scrollSnapAlign: 'start' }}
           role="listitem"
         >
           <div
             className="block relative rounded-lg overflow-hidden group cursor-pointer h-full transition-shadow hover:shadow-lg"
-            style={{ 
-              backgroundColor: '#d1d5db',
-              width: slideWidth === 'auto' ? 'auto' : `${slideWidth}px`,
-              height: slideHeight === 'auto' ? 'auto' : `${slideHeight}px`,
-            }}
+           
             onClick={handlePlayPause}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -201,27 +132,12 @@ export const VideoList: ComponentConfig<{
 
     return (
       <section
-        className="container mx-auto px-4 sm:px-0 video-list-section"
-        style={{
-          background: backgroundColor || "#ffffff",
-          color: fontColor || "#111827",
-          paddingTop: `10px`,
-          paddingBottom: `10px`,
-         
-        }}
+        className="container mx-auto video-list-section"
+      
       >
-        <style dangerouslySetInnerHTML={{ __html: `
-          @media (min-width: 640px) {
-            .video-list-section {
-              padding-left: ${paddingLeft}px !important;
-              padding-right: ${paddingRight}px !important;
-              padding-top: ${paddingTop}px !important;
-              padding-bottom: ${paddingBottom}px !important;
-            }
-          }
-        `}} />
+        
           {/* Title */}
-          <div className="text-center mb-8">
+          <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-semibold">{title}</h2>
           </div>
 
@@ -229,7 +145,7 @@ export const VideoList: ComponentConfig<{
           <div className="relative">
             <div 
               ref={scrollContainerRef}
-              className="overflow-x-auto overscroll-x-contain scrollbar-hide focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
+              className="slide-inner-wrapper overflow-x-auto overscroll-x-contain scrollbar-hide focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -241,21 +157,19 @@ export const VideoList: ComponentConfig<{
               aria-label="Video carousel. Use arrow keys to scroll."
               onKeyDown={handleKeyDown}
             >
-              <style dangerouslySetInnerHTML={{ __html: `
-                .scrollbar-hide::-webkit-scrollbar {
-                  display: none;
-                }
-              `}} />
               <div 
-                className="flex gap-[2px] pb-4 pl-4 pr-16" 
+                className="flex slide-wrapper" 
                 role="list"
                 aria-label="Video carousel"
               >
                 {slides.map((slide, index) => (
                   <VideoSlide key={index} slide={slide} index={index} />
                 ))}
+                <div className="w-10 flex-shrink-0" />
               </div>
             </div>
+          <div className="light-overlay absolute top-0 right-0 bottom-4 w-8 bg-gradient-to-l from-background/80 to-transparent pointer-events-none" />
+
           </div>
     
       </section>

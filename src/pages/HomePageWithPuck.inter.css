@@ -1,0 +1,467 @@
+/* Inter font-face for HomePageWithPuck only */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+@media (width >= 96rem) {
+  .container {
+    max-width: 1317px !important;
+  }
+}
+.homepage-with-puck-inter {
+  font-family: "Inter", sans-serif;
+}
+
+.banner-start-col h1 {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 49.2px;
+  line-height: 107%;
+  letter-spacing: -1.312px;
+  color: #0a0a0a;
+}
+
+.banner-start-col p {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 14.4px;
+  line-height: 170%;
+  color: #717182;
+}
+
+.dark-btn {
+  border-radius: 6.75px;
+  font-family: "Inter";
+  font-weight: 600;
+  font-size: 11.5px;
+  padding: 9px 40px;
+  min-width: 238px;
+  text-align: center;
+  background: #030213;
+  border-radius: 6.75px;
+  color: #ffffff;
+  display: inline-block;
+}
+
+.colored-list .colored-label {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 11.5px;
+  color: #717182;
+}
+
+.bg-purple-600 {
+  background-color: #9810fa !important;
+}
+
+.bg-green-600 {
+  background-color: #00a63e !important;
+}
+
+.bg-blue-600 {
+  background-color: #155dfc !important;
+}
+
+.banner-end-col img {
+  max-width: 637px;
+  max-height: 637px;
+  border-radius: 14px;
+
+  object-fit: cover;
+  margin-left: auto;
+}
+
+.banner-img-content h6 {
+  font-family: "Inter";
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 21px;
+  color: #ffffff;
+}
+
+.banner-img-content p {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 21px;
+}
+
+.main-banner-section {
+  padding: 84px 0 45px 0 !important;
+  background: linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%) !important;
+  display: flex;
+  flex-direction: column;
+  gap: 130px;
+}
+
+.banner-logo-content p {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 162%;
+  color: #717182;
+}
+.middle-cta-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+.middle-cta-section {
+  padding: 115px 0;
+  background: linear-gradient(92.08deg, #f9fbfc 24.38%, #f3f4f6 98.83%);
+}
+.video-list-section h2,
+.puckcta-list-section h2,
+.middle-cta-wrap h2 {
+  font-family: "Inter" !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+  line-height: 140%;
+  color: #0a0a0a;
+  margin-bottom: 0 !important;
+}
+.puckcta-list-section {
+  padding: 155px 0 100px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.slide-wrapper {
+  gap: 25px;
+}
+.video-list-section {
+  padding: 172px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 33px;
+}
+.slide_itm {
+  /* width: 421px; */
+  width: 33%;
+  height: 758px;
+  border: 1px solid #e6e6e6;
+  border-radius: 11px;
+}
+
+/* .slide-inner-wrapper {
+    position: relative;
+
+}
+.slide-inner-wrapper::after  {
+content: "";
+    position: absolute;
+width: 420px;
+height: 759px;
+right: 0;
+top: 0;
+background: linear-gradient(91.17deg, rgba(255, 255, 255, 0) 78.47%, #FFFFFF 98.96%);
+
+} */
+
+.risk-col-start,
+.risk-col-end {
+  width: 50%;
+}
+
+.risk-col-start {
+  width: 438px;
+  height: 438px;
+  background: linear-gradient(127.1deg, #f9fafb 4.23%, #f3f4f6 100.97%);
+  border: 1px solid #e6e6e6;
+  border-radius: 12.7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.risk-col-end {
+  max-width: 415px;
+  margin-left: auto;
+}
+
+.puck-features-section .container {
+  max-width: 1024px !important;
+}
+.puck-features-section {
+  padding: 160px 0 0 0;
+}
+
+.puck-features-section h2 {
+  font-family: "Inter";
+  font-weight: 400 !important;
+  font-size: 19.7px;
+  color: #0a0a0a;
+  margin-bottom: 0 !important;
+}
+
+.puck-features-section p {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 162%;
+  color: #717182;
+  margin-bottom: 0 !important;
+}
+
+.feature-end-para {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+  padding: 23px 0 0 0;
+}
+
+.card-slideimg img {
+  height: 309px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.card-slide-wrap {
+  gap: 24px;
+}
+
+.blur-overlay {
+  background: linear-gradient(
+    91.17deg,
+    rgba(255, 255, 255, 0) 78.47%,
+    #ffffff 98.96%
+  );
+  height: 100%;
+  width: 420px;
+  position: absolute;
+  right: 0;
+  z-index: 2;
+  top: 0;
+}
+
+.card-slidebox {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12.75px;
+  max-width: 33%;
+  width: 100%;
+}
+
+.card-slidebox h3 {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 13.3px;
+  color: #0a0a0a;
+}
+
+.card-slidebox p {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 11.3px;
+  line-height: 155%;
+  color: #717182;
+  max-width: 376px;
+  width: 100%;
+}
+.card-slidebox:last-child p {
+  max-width: 331px;
+}
+
+.slide-card-content {
+  padding: 45px 10px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.custom-faq-section .container {
+  max-width: 604px !important;
+}
+
+.custom-faq-section h3 button {
+  font-family: "Inter" !important;
+  font-weight: 400 !important;
+  font-size: 11.5px !important;
+  line-height: 152% !important;
+  color: #0a0a0a !important;
+  padding: 6px 0 15px !important;
+}
+
+.home-accordian-item {
+  font-family: "Inter" !important;
+  font-weight: 400 !important;
+  font-size: 11.5px !important;
+  line-height: 152% !important;
+  color: #0a0a0a !important;
+}
+
+.home-accordian {
+  gap: 7px !important;
+}
+.light-overlay {
+  height: 100%;
+  right: -1px;
+}
+
+.banner-start-col {
+  max-width: 96%;
+}
+@media (max-width: 1300px) {
+  .banner-start-col h1 {
+    font-size: 39px;
+  }
+  .risk-col-end {
+    margin-left: 60px;
+  }
+  .puck-features-section {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+}
+@media (max-width: 1200px) {
+  .slide_itm {
+    width: 44%;
+    height: 600px;
+  }
+  .card-slidebox {
+    max-width: 45%;
+  }
+  .card-slideimg img {
+    height: 245px;
+  }
+  .risk-col-end {
+    margin-left: 50px;
+  }
+}
+@media (max-width: 1024px) {
+  .risk-col-end {
+    margin: unset !important;
+  }
+  .banner-start-col h1 {
+    font-size: 35px;
+  }
+  .main-banner-section {
+    gap: 90px;
+  }
+  .video-list-section {
+    padding: 120px 0 0 0;
+  }
+  .puck-features-section {
+    padding: 120px 0 0 0;
+  }
+  .puckcta-list-section {
+    padding: 120px 0 80px 0;
+  }
+  .middle-cta-section {
+    padding: 90px 0 80px;
+  }
+}
+
+@media (max-width: 991px) {
+  .banner-start-col h1 {
+    font-size: 28px;
+    padding-bottom: 5px;
+  }
+  .main-banner-section {
+    padding: 30px 0 45px 0 !important;
+  }
+  section,
+  .main-banner-section {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  .banner-start-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 100%;
+  }
+
+  .banner-img-content {
+    padding: 10px !important;
+  }
+  .main-banner-section {
+    gap: 56px;
+  }
+  .video-list-section {
+    padding: 48px 0 0 0;
+  }
+
+  .slide-wrapper {
+    gap: 16px;
+  }
+  .blur-overlay {
+    width: 70%;
+    user-select: none !important;
+  }
+  .puck-features-section .flex.flex-col {
+    flex-direction: column-reverse;
+  }
+  .risk-col-end {
+    max-width: 100%;
+    margin-left: unset;
+    width: 100%;
+    padding: 0 7px;
+  }
+  .puck-features-section {
+    padding: 50px 0 0 0;
+  }
+  .risk-col-start {
+    width: 325px;
+    height: 325px;
+    margin: 0 auto;
+  }
+
+  .middle-cta-section {
+    padding: 70px 0 65px;
+  }
+  .custom-faq-section .container {
+    padding: 0 14px !important;
+  }
+  .custom-faq-section h3 button {
+    padding: 5px 0 11px !important;
+  }
+  .card-slide-wrap {
+    gap: 18px;
+  }
+  .card-slideimg img {
+    height: 190px;
+  }
+  .slide-card-content {
+    padding: 31px 7px 5px 12px;
+    gap: 13px;
+  }
+  .puckcta-list-section {
+    padding: 120px 0 80px 0px !important;
+  }
+  .overflow-x-auto.w-full {
+    padding-left: 22px;
+  }
+}
+@media (max-width: 768px) {
+  .card-slidebox {
+    max-width: 100% !important;
+    width: 82% !important;
+  }
+  .slide_itm {
+    width: 83%;
+    height: 535px;
+  }
+}
+
+@media (max-width: 576px) {
+  .risk-col-start {
+    width: 290px;
+    height: 290px;
+  }
+  .banner-start-col h1 {
+    max-width: 68%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .banner-start-col h1 {
+    max-width: 85%;
+  }
+}
+
+@media (max-width: 350px) {
+  .banner-start-col h1 {
+    max-width: 97%;
+  }
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import "./HomePageWithPuck.inter.css";
 import { SurgeryPageWithPuck } from "../components/SurgeryPageWithPuck";
 import { surgeryReadinessDefaultData } from "../data/surgeryReadinessDefaultData";
 
@@ -14,6 +14,7 @@ export function HomePageWithPuck({
   onAssessmentUpdate,
 }: HomePageWithPuckProps) {
   return (
+    <div className="homepage-with-puck-inter">
     <SurgeryPageWithPuck
       pageName="home"
       pageTitle="Home Page"
@@ -22,6 +23,7 @@ export function HomePageWithPuck({
       onOpenBasket={onOpenBasket || (() => {})}
       onAssessmentUpdate={onAssessmentUpdate}
     />
+    </div>
   );
 
 }

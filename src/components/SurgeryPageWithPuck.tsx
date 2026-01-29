@@ -294,7 +294,7 @@ export function SurgeryPageWithPuck({
               onClick={toggleEditMode}
               className="bg-white/90 backdrop-blur-sm shadow-lg border hover:bg-gray-50"
             >
-              👁️ Preview Page
+              👁️ Preview
             </Button>
           </div>
         <Suspense fallback={<PageLoader />}>
