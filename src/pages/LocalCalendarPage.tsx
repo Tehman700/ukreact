@@ -10,7 +10,6 @@ import {
 import { Button } from '../components/ui/button';
 import { supabase } from '../lib/supabase';
 import { CalendarHeader } from '../components/CalendarHeader';
-import { TimeSlotGrid } from '../components/TimeSlotGrid';
 import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
 import { MonthGrid } from '../components/MonthGrid';
 import { EventsPanel } from '../components/EventsPanel';

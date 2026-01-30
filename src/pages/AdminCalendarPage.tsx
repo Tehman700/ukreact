@@ -10,7 +10,6 @@ import {
 import { Button } from '../components/ui/button';
 import { supabase } from '../lib/supabase';
 import { CalendarHeader } from '../components/CalendarHeader';
-import { TimeSlotGrid } from '../components/TimeSlotGrid';
 import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
 import { MonthGrid } from '../components/MonthGrid';
 import { EventsPanel } from '../components/EventsPanel';
@@ -320,12 +319,6 @@ export const AdminCalendarPage: React.FC = () => {
     return local.toISOString().slice(0, 16);
   };
 
-  const toGoogleUtcDateTime = (date: Date) =>
-    date
-      .toISOString()
-      .replace(/[-:]/g, '')
-      .replace(/\.\d{3}Z$/, 'Z');
-
   const formatAllDayRange = (event: CalendarEvent) => {
     const startDate = event.start?.date ? new Date(event.start.date + 'T00:00:00') : null;
     const endDateExclusive = event.end?.date ? new Date(event.end.date + 'T00:00:00') : null;
@@ -618,44 +611,6 @@ export const AdminCalendarPage: React.FC = () => {
     } finally {
       setCreateSubmitting(false);
     }
-  };
-
-  const buildGoogleCalendarCreateUrl = () => {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const params = new URLSearchParams();
-    params.set('action', 'TEMPLATE');
-    if (createTitle.trim()) params.set('text', createTitle.trim());
-    if (createLocation.trim()) params.set('location', createLocation.trim());
-    if (createDescription.trim()) params.set('details', createDescription.trim());
-    if (tz) params.set('ctz', tz);
-
-    if (calendarId) {
-      // Without Google auth, this does not guarantee saving into this calendar.
-      params.set('src', calendarId);
-    }
-
-    if (createAllDay) {
-      const start = createStartDate || toLocalDateInput(new Date());
-      const endInclusive = createEndDate || start;
-
-      // Google all-day end date is exclusive.
-      const endExclusive = new Date(endInclusive + 'T00:00:00');
-      endExclusive.setDate(endExclusive.getDate() + 1);
-
-      const startStr = start.replace(/-/g, '');
-      const endStr = toLocalDateInput(endExclusive).replace(/-/g, '');
-      params.set('dates', `${startStr}/${endStr}`);
-    } else {
-      const start = createStartDateTime ? new Date(createStartDateTime) : new Date();
-      const end = createEndDateTime
-        ? new Date(createEndDateTime)
-        : new Date(start.getTime() + 60 * 60_000);
-
-      params.set('dates', `${toGoogleUtcDateTime(start)}/${toGoogleUtcDateTime(end)}`);
-    }
-
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
   /* ---------------------------------- CALENDAR GRID ---------------------------------- */
