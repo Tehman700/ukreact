@@ -113,19 +113,9 @@ export const AdminCalendarPage: React.FC = () => {
   const [localSelectedTimeSlot, setLocalSelectedTimeSlot] = useState<string | null>(null);
 
   const tokenClientRef = React.useRef<any>(null);
-  const [hasEditPermission, setHasEditPermission] = useState(false);
+  const slotDefaultDuration = 30;
 
-  // Helper function to check user edit permissions
-  const checkEditPermission = () => {
-    const adminAuthenticated = sessionStorage.getItem("adminAuthenticated");
-    return adminAuthenticated !== null && adminAuthenticated === "true";
-  };
 
-  // Check for edit permissions on component mount
-  useEffect(() => {
-    const hasPermission = checkEditPermission();
-    setHasEditPermission(hasPermission);
-  }, []);
   /* ---------------------------------- AUTH (GOOGLE OAUTH) ---------------------------------- */
   useEffect(() => {
     setAuthError(null);
@@ -378,7 +368,7 @@ export const AdminCalendarPage: React.FC = () => {
       const hours = baseDate.getHours().toString().padStart(2, '0');
       const minutes = baseDate.getMinutes().toString().padStart(2, '0');
       slots.push(`${hours}:${minutes}`);
-      baseDate.setMinutes(baseDate.getMinutes() + 30);
+      baseDate.setMinutes(baseDate.getMinutes() + slotDefaultDuration);
     }
 
     return slots;
@@ -390,7 +380,7 @@ export const AdminCalendarPage: React.FC = () => {
     const slotStart = new Date(date);
     slotStart.setHours(hours, minutes, 0, 0);
     const slotEnd = new Date(slotStart);
-    slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+    slotEnd.setMinutes(slotEnd.getMinutes() + slotDefaultDuration);
 
     return events.some((event) => {
       const startIso = event.start?.dateTime;
@@ -466,7 +456,7 @@ export const AdminCalendarPage: React.FC = () => {
     startDate.setHours(hours, minutes, 0, 0);
 
     const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 30);
+    endDate.setMinutes(endDate.getMinutes() + slotDefaultDuration);
 
     setLocalCreateStartDateTime(toLocalDateTimeInput(startDate));
     setLocalCreateEndDateTime(toLocalDateTimeInput(endDate));
@@ -835,7 +825,7 @@ export const AdminCalendarPage: React.FC = () => {
             onCancel={() => setLocalCreateDialogOpen(false)}
           />
 
-          {hasEditPermission && ( <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Create Google Calendar event</DialogTitle>
@@ -983,7 +973,7 @@ export const AdminCalendarPage: React.FC = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          )}
+          
 
           {/* HEADER */}
           <CalendarHeader
@@ -1000,8 +990,7 @@ export const AdminCalendarPage: React.FC = () => {
                   Create appointment
                 </button>
 
-                {hasEditPermission && (
-                  <>
+       
                     <button className="today-button" onClick={openCreateEvent}>Create Google Calendar event</button>
                     {accessToken ? (
                       <button className="today-button" onClick={signOut}>Sign out</button>
@@ -1017,8 +1006,7 @@ export const AdminCalendarPage: React.FC = () => {
                     )}
                   </>
                 )}
-              </>
-            )}
+     
           />
 
           {/* CONFIG ERROR */}

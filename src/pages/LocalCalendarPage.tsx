@@ -75,6 +75,7 @@ export const LocalCalendarPage: React.FC = () => {
   const [selectedDateForCreate, setSelectedDateForCreate] = useState<Date | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
+  const slotDefaultDuration = 30;
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -252,7 +253,7 @@ export const LocalCalendarPage: React.FC = () => {
       const hours = baseDate.getHours().toString().padStart(2, '0');
       const minutes = baseDate.getMinutes().toString().padStart(2, '0');
       slots.push(`${hours}:${minutes}`);
-      baseDate.setMinutes(baseDate.getMinutes() + 30);
+      baseDate.setMinutes(baseDate.getMinutes() + slotDefaultDuration);
     }
     
     return slots;
@@ -264,7 +265,7 @@ export const LocalCalendarPage: React.FC = () => {
     const slotStart = new Date(date);
     slotStart.setHours(hours, minutes, 0, 0);
     const slotEnd = new Date(slotStart);
-    slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+    slotEnd.setMinutes(slotEnd.getMinutes() + slotDefaultDuration);
 
     // Check if any event overlaps with this slot
     return events.some((event) => {
@@ -307,7 +308,7 @@ export const LocalCalendarPage: React.FC = () => {
     startDate.setHours(hours, minutes, 0, 0);
     
     const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 30); // Add 30 minutes
+    endDate.setMinutes(endDate.getMinutes() + slotDefaultDuration); // Add 30 minutes
     
     setCreateStartDateTime(toLocalDateTimeInput(startDate));
     setCreateEndDateTime(toLocalDateTimeInput(endDate));
