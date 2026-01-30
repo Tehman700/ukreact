@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,11 @@ import {
 } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
 import { supabase } from '../lib/supabase';
+import { CalendarHeader } from '../components/CalendarHeader';
+import { TimeSlotGrid } from '../components/TimeSlotGrid';
+import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
+import { MonthGrid } from '../components/MonthGrid';
+import { EventsPanel } from '../components/EventsPanel';
 import './CalendarPage.theme.css';
 
 type LocalCalendarEvent = {
@@ -415,251 +419,145 @@ export const LocalCalendarPage: React.FC = () => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Book an appointment</DialogTitle>
-                <DialogDescription></DialogDescription>
-              </DialogHeader>
+          <CreateAppointmentDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
+            title="Book an appointment"
+            description=""
+            error={createError}
+            name={createName}
+            email={createEmail}
+            onNameChange={setCreateName}
+            onEmailChange={setCreateEmail}
+            dateForCreate={selectedDateForCreate}
+            generateTimeSlots={generateTimeSlots}
+            isSlotBooked={isSlotBooked}
+            selectedSlot={selectedTimeSlot}
+            onSelectSlot={handleTimeSlotSelect}
+            onCreate={createLocalEvent}
+            onCancel={() => setCreateDialogOpen(false)}
+          />
 
-              <div className="grid gap-4">
-                {createError && (
-                  <div className="rounded-md border p-3 text-sm">Create error: {createError}</div>
-                )}
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Name</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createName}
-                    onChange={(e) => setCreateName(e.target.value)}
-                    placeholder="Full name"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Email</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createEmail}
-                    onChange={(e) => setCreateEmail(e.target.value)}
-                    placeholder="Email address"
-                  />
-                </div>
-
-                {selectedDateForCreate && (
-                  <div className="grid gap-2">
-                    <div className="text-sm font-medium">
-                      Date: {selectedDateForCreate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </div>
-                    <div className="text-sm font-medium">Select Time Slot (30 minutes)</div>
-                    <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto border rounded-md p-3">
-                      {generateTimeSlots(selectedDateForCreate).map((slot) => {
-                        const isBooked = isSlotBooked(selectedDateForCreate, slot);
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            disabled={isBooked}
-                            className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                              isBooked
-                                ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                                : selectedTimeSlot === slot
-                                  ? 'bg-primary text-primary-foreground border-primary'
-                                  : 'bg-background hover:bg-accent'
-                            }`}
-                            onClick={() => !isBooked && handleTimeSlotSelect(slot)}
-                            title={isBooked ? 'This time slot is already booked' : `Select ${slot}`}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {selectedTimeSlot && (
-                      <div className="text-xs text-muted-foreground mt-2">
-                        Selected: {selectedTimeSlot} - {(() => {
-                          const [hours, minutes] = selectedTimeSlot.split(':').map(Number);
-                          const endTime = new Date(selectedDateForCreate);
-                          endTime.setHours(hours, minutes + 30, 0, 0);
-                          const endHours = endTime.getHours().toString().padStart(2, '0');
-                          const endMinutes = endTime.getMinutes().toString().padStart(2, '0');
-                          return `${endHours}:${endMinutes}`;
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter className="sm:justify-between">
-                <Button type="button" onClick={createLocalEvent}>
-                  Create
-                </Button>
-                <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <div className="calendar-header">
-            <div className="header-content">
-              <div className="header-left">
-                <CalendarIcon className="header-icon" />
-                <div>
-                  <h1 className="header-title">Calendar</h1>
-                  <p className="header-subtitle">Click on the date to add an appointment.</p>
-                </div>
-              </div>
-              <div className="header-right flex gap-2">
+          <CalendarHeader
+            subtitle="Click on the date to add an appointment."
+            rightContent={(
+              <>
                 <button className="today-button" onClick={goToday}>Today</button>
                 <button className="today-button" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</button>
-              </div>
-            </div>
-          </div>
+              </>
+            )}
+          />
 
           <div className="calendar-content">
             <div className="calendar-grid">
-              <div className="calendar-section">
-                <div className="month-navigation">
-                  <button onClick={goPrevMonth}><ChevronLeft /></button>
-                  <h2>{formatMonthYear(currentDate)}</h2>
-                  <button onClick={goNextMonth}><ChevronRight /></button>
-                </div>
+              <MonthGrid
+                currentDate={currentDate}
+                formatMonthYear={formatMonthYear}
+                days={calendarDays}
+                isToday={isToday}
+                isSelected={isSelected}
+                onPrevMonth={goPrevMonth}
+                onNextMonth={goNextMonth}
+                onDayClick={(date) => {
+                  setSelectedDate(date);
+                  setEventsPanelMode('day');
+                  openCreateEvent(date);
+                }}
+                renderDayEvents={(dayEvents, date) =>
+                  dayEvents.length > 0 ? (
+                    <div className="day-events">
+                      {dayEvents.slice(0, 3).map((event) => {
+                        let miniTime = '';
+                        if (event.start?.dateTime) {
+                          miniTime = formatTime(event.start.dateTime);
+                        }
 
-                <div className="weekday-headers">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                    <div key={d}>{d}</div>
-                  ))}
-                </div>
+                        const miniTitleBase = event.name || 'Event';
+                        const miniLabel = miniTime ? `${miniTime} — ${miniTitleBase}` : miniTitleBase;
 
-                <div className="days-grid">
-                  {calendarDays.map((cell, i) =>
-                    cell.date ? (
-                      <button
-                        key={i}
-                        className={`day-cell ${isToday(cell.date) ? 'today' : ''} ${isSelected(cell.date) ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedDate(cell.date);
-                          setEventsPanelMode('day');
-                          openCreateEvent(cell.date);
-                        }}
-                      >
-                        <span className="day-number">{cell.date.getDate()}</span>
-                        {cell.events.length > 0 && (
-                          <div className="day-events">
-                            {cell.events.slice(0, 3).map((event) => {
-                              let miniTime = '';
-                              if (event.start?.dateTime) {
-                                miniTime = formatTime(event.start.dateTime);
-                              }
-
-                              const miniTitleBase = event.name || 'Event';
-                              const miniLabel = miniTime ? `${miniTime} — ${miniTitleBase}` : miniTitleBase;
-
-                              return (
-                                <div
-                                  key={event.id}
-                                  className="mini-event mini-event-inquiry"
-                                  title={miniLabel}
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={(ev) => {
-                                    // prevent the parent day-cell click (which opens create dialog)
-                                    ev.preventDefault();
-                                    ev.stopPropagation();
-                                    setSelectedEvent(event);
-                                    const d = normalizeDate(event);
-                                    if (d) setSelectedDate(d);
-                                    setEventsPanelMode('day');
-                                  }}
-                                  onKeyDown={(ev) => {
-                                    if (ev.key !== 'Enter' && ev.key !== ' ') return;
-                                    ev.preventDefault();
-                                    ev.stopPropagation();
-                                    setSelectedEvent(event);
-                                    const d = normalizeDate(event);
-                                    if (d) setSelectedDate(d);
-                                    setEventsPanelMode('day');
-                                  }}
-                                >
-                                  {miniLabel}
-                                </div>
-                              );
-                            })}
-                            {cell.events.length > 3 && (
-                              <div className="mini-event more">+{cell.events.length - 3} more</div>
-                            )}
+                        return (
+                          <div
+                            key={event.id}
+                            className="mini-event mini-event-inquiry"
+                            title={miniLabel}
+                            role="button"
+                            tabIndex={0}
+                            onClick={(ev) => {
+                              ev.preventDefault();
+                              ev.stopPropagation();
+                              setSelectedEvent(event);
+                              const d = normalizeDate(event);
+                              if (d) setSelectedDate(d);
+                              setEventsPanelMode('day');
+                            }}
+                            onKeyDown={(ev) => {
+                              if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                              ev.preventDefault();
+                              ev.stopPropagation();
+                              setSelectedEvent(event);
+                              const d = normalizeDate(event);
+                              if (d) setSelectedDate(d);
+                              setEventsPanelMode('day');
+                            }}
+                          >
+                            {miniLabel}
                           </div>
-                        )}
-                      </button>
-                    ) : (
-                      <div key={i} />
-                    )
-                  )}
-                </div>
-              </div>
+                        );
+                      })}
+                      {dayEvents.length > 3 && (
+                        <div className="mini-event more">+{dayEvents.length - 3} more</div>
+                      )}
+                    </div>
+                  ) : null
+                }
+              />
+              <EventsPanel
+                mode={eventsPanelMode}
+                onModeChange={setEventsPanelMode}
+                selectedDate={selectedDate}
+                dayEvents={selectedDayEvents}
+                upcomingEvents={upcomingEvents}
+                formatSelectedDate={(date) =>
+                  date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                }
+                dayEmptyMessage="No events on this day"
+                upcomingEmptyMessage="No upcoming events"
+                renderEvent={(e, mode) => {
+                  const isAllDay = !!e.start?.date;
+                  const whenLabel = isAllDay
+                    ? formatAllDayRange(e)
+                    : e.start?.dateTime && e.end?.dateTime
+                      ? `${formatDateTime(e.start.dateTime)} – ${formatDateTime(e.end.dateTime)}`
+                      : '—';
 
-              <div className="events-panel">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="m-0">
-                    {eventsPanelMode === 'upcoming'
-                      ? 'Upcoming events'
-                      : selectedDate
-                        ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-                        : 'Select a date'}
-                  </h3>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant={eventsPanelMode === 'day' ? 'default' : 'outline'}
-                      onClick={() => setEventsPanelMode('day')}
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      className="event-card event-inquiry"
+                      onClick={() => {
+                        setSelectedEvent(e);
+                        const d = normalizeDate(e);
+                        if (d) setSelectedDate(d);
+                      }}
                     >
-                      Day
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={eventsPanelMode === 'upcoming' ? 'default' : 'outline'}
-                      onClick={() => setEventsPanelMode('upcoming')}
-                    >
-                      Upcoming
-                    </Button>
-                  </div>
-                </div>
-
-                {eventsPanelMode === 'day' && selectedDate && selectedDayEvents.length === 0 && <p>No events on this day</p>}
-                {eventsPanelMode === 'upcoming' && upcomingEvents.length === 0 && <p>No upcoming events</p>}
-
-                <div className="events-list">
-                  {(eventsPanelMode === 'upcoming' ? upcomingEvents : selectedDayEvents).map((e) => {
-                    const isAllDay = !!e.start?.date;
-                    const whenLabel = isAllDay
-                      ? formatAllDayRange(e)
-                      : e.start?.dateTime && e.end?.dateTime
-                        ? `${formatDateTime(e.start.dateTime)} – ${formatDateTime(e.end.dateTime)}`
-                        : '—';
-
-                    return (
-                      <button
-                        key={e.id}
-                        type="button"
-                        className="event-card event-inquiry"
-                        onClick={() => {
-                          setSelectedEvent(e);
-                          const d = normalizeDate(e);
-                          if (d) setSelectedDate(d);
-                        }}
-                      >
-                        <h4 className="event-title">{e.name || '(No name)'}</h4>
-                        <p>{eventsPanelMode === 'upcoming' ? whenLabel : (isAllDay ? 'All day' : `${formatTime(e.start!.dateTime!)} – ${formatTime(e.end!.dateTime!)}`)}</p>
-                        {e.email && <p className="event-description">{e.email}</p>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                      <h4 className="event-title">{e.name || '(No name)'}</h4>
+                      <p>
+                        {mode === 'upcoming'
+                          ? whenLabel
+                          : isAllDay
+                            ? 'All day'
+                            : `${formatTime(e.start!.dateTime!)} – ${formatTime(e.end!.dateTime!)}`}
+                      </p>
+                      {e.email && <p className="event-description">{e.email}</p>}
+                    </button>
+                  );
+                }}
+              />
             </div>
           </div>
         </div>

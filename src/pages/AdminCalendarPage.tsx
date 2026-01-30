@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,11 @@ import {
 } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
 import { supabase } from '../lib/supabase';
+import { CalendarHeader } from '../components/CalendarHeader';
+import { TimeSlotGrid } from '../components/TimeSlotGrid';
+import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
+import { MonthGrid } from '../components/MonthGrid';
+import { EventsPanel } from '../components/EventsPanel';
 import './CalendarPage.theme.css';
 
 interface CalendarEvent {
@@ -812,103 +816,24 @@ export const AdminCalendarPage: React.FC = () => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={localCreateDialogOpen} onOpenChange={setLocalCreateDialogOpen}>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create appointment (internal)</DialogTitle>
-                <DialogDescription>
-                  Creates an appointment in the local inquiry calendar.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid gap-4">
-                {localCreateError && (
-                  <div className="rounded-md border p-3 text-sm">
-                    Create error: {localCreateError}
-                  </div>
-                )}
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Name</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={localCreateName}
-                    onChange={(e) => setLocalCreateName(e.target.value)}
-                    placeholder="Full name"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Email</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={localCreateEmail}
-                    onChange={(e) => setLocalCreateEmail(e.target.value)}
-                    placeholder="Email address"
-                  />
-                </div>
-
-                {localSelectedDateForCreate && (
-                  <div className="grid gap-2">
-                    <div className="text-sm font-medium">
-                      Date:{' '}
-                      {localSelectedDateForCreate.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </div>
-                    <div className="text-sm font-medium">Select Time Slot (30 minutes)</div>
-                    <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto border rounded-md p-3">
-                      {generateTimeSlots(localSelectedDateForCreate).map((slot) => {
-                        const booked = isSlotBooked(localSelectedDateForCreate, slot);
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            disabled={booked}
-                            className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                              booked
-                                ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                                : localSelectedTimeSlot === slot
-                                  ? 'bg-primary text-primary-foreground border-primary'
-                                  : 'bg-background hover:bg-accent'
-                            }`}
-                            onClick={() => !booked && handleLocalTimeSlotSelect(slot)}
-                            title={booked ? 'This time slot is already booked' : `Select ${slot}`}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {localSelectedTimeSlot && (
-                      <div className="text-xs text-muted-foreground mt-2">
-                        Selected: {localSelectedTimeSlot} - {(() => {
-                          const [hours, minutes] = localSelectedTimeSlot.split(':').map(Number);
-                          const endTime = new Date(localSelectedDateForCreate);
-                          endTime.setHours(hours, minutes + 30, 0, 0);
-                          const endHours = endTime.getHours().toString().padStart(2, '0');
-                          const endMinutes = endTime.getMinutes().toString().padStart(2, '0');
-                          return `${endHours}:${endMinutes}`;
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter className="sm:justify-between">
-                <Button type="button" onClick={createLocalAppointment}>
-                  Create
-                </Button>
-                <Button variant="outline" onClick={() => setLocalCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <CreateAppointmentDialog
+            open={localCreateDialogOpen}
+            onOpenChange={setLocalCreateDialogOpen}
+            title="Create appointment (internal)"
+            description="Creates an appointment in the local inquiry calendar."
+            error={localCreateError}
+            name={localCreateName}
+            email={localCreateEmail}
+            onNameChange={setLocalCreateName}
+            onEmailChange={setLocalCreateEmail}
+            dateForCreate={localSelectedDateForCreate}
+            generateTimeSlots={generateTimeSlots}
+            isSlotBooked={isSlotBooked}
+            selectedSlot={localSelectedTimeSlot}
+            onSelectSlot={handleLocalTimeSlotSelect}
+            onCreate={createLocalAppointment}
+            onCancel={() => setLocalCreateDialogOpen(false)}
+          />
 
           {hasEditPermission && ( <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogContent className="sm:max-w-lg">
@@ -1061,16 +986,10 @@ export const AdminCalendarPage: React.FC = () => {
           )}
 
           {/* HEADER */}
-          <div className="calendar-header">
-            <div className="header-content">
-              <div className="header-left">
-                <CalendarIcon className="header-icon" />
-                <div>
-                  <h1 className="header-title">Calendar</h1>
-                  <p className="header-subtitle">Click on the date to add an appointment.</p>
-                </div>
-              </div>
-              <div className="header-right flex gap-2">
+          <CalendarHeader
+            subtitle="Click on the date to add an appointment."
+            rightContent={(
+              <>
                 <button className="today-button" onClick={goToday}>Today</button>
                 <button className="today-button" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</button>
                 <button
@@ -1098,9 +1017,9 @@ export const AdminCalendarPage: React.FC = () => {
                     )}
                   </>
                 )}
-              </div>
-            </div>
-          </div>
+              </>
+            )}
+          />
 
           {/* CONFIG ERROR */}
           {(!calendarId || (!apiKey && !accessToken && !oauthClientId)) && (
@@ -1149,176 +1068,129 @@ export const AdminCalendarPage: React.FC = () => {
             <div className="calendar-grid">
 
               {/* CALENDAR */}
-              <div className="calendar-section">
-                <div className="month-navigation">
-                  <button onClick={goPrevMonth}><ChevronLeft /></button>
-                  <h2>{formatMonthYear(currentDate)}</h2>
-                  <button onClick={goNextMonth}><ChevronRight /></button>
-                </div>
+              <MonthGrid
+                currentDate={currentDate}
+                formatMonthYear={formatMonthYear}
+                days={calendarDays}
+                isToday={isToday}
+                isSelected={isSelected}
+                onPrevMonth={goPrevMonth}
+                onNextMonth={goNextMonth}
+                onDayClick={(date) => {
+                  setSelectedDate(date);
+                  setEventsPanelMode('day');
+                  openLocalCreateEvent(date);
+                }}
+                renderDayEvents={(dayEvents, date) =>
+                  dayEvents.length > 0 ? (
+                    <div className="day-events">
+                      {dayEvents.slice(0, 3).map((event) => {
+                        const isInquiry = isInquiryEvent(event);
 
-                <div className="weekday-headers">
-                  {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((d) => (
-                    <div key={d}>{d}</div>
-                  ))}
-                </div>
+                        let miniTime = '';
+                        if (event.start?.dateTime && event.end?.dateTime) {
+                          miniTime = formatTime(event.start.dateTime);
+                        } else if (event.start?.date) {
+                          miniTime = 'All day';
+                        }
 
-                <div className="days-grid">
-                  {calendarDays.map((cell, i) =>
-                    cell.date ? (
-                      <button
-                        key={i}
-                        className={`day-cell ${isToday(cell.date) ? 'today' : ''} ${isSelected(cell.date) ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedDate(cell.date);
-                          setEventsPanelMode('day');
-                          openLocalCreateEvent(cell.date);
-                        }}
-                      >
-                        <span className="day-number">{cell.date.getDate()}</span>
-                        {cell.events.length > 0 && (
-                          <div className="day-events">
-                            {cell.events.slice(0, 3).map((event, idx) => {
-                              const isInquiry = isInquiryEvent(event);
+                        const miniTitleBase = event.summary || 'Event';
+                        const miniLabel = miniTime ? `${miniTime} — ${miniTitleBase}` : miniTitleBase;
 
-                              let miniTime = '';
-                              if (event.start?.dateTime && event.end?.dateTime) {
-                                miniTime = formatTime(event.start.dateTime);
-                              } else if (event.start?.date) {
-                                miniTime = 'All day';
-                              }
-
-                              const miniTitleBase = event.summary || 'Event';
-                              const miniLabel = miniTime ? `${miniTime} — ${miniTitleBase}` : miniTitleBase;
-
-                              return (
-                                <div
-                                  key={event.id}
-                                  className={`mini-event ${isInquiry ? 'mini-event-inquiry' : 'mini-event-google'}`}
-                                  title={miniLabel}
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={(ev) => {
-                                    // prevent the parent day-cell click (selects day)
-                                    ev.preventDefault();
-                                    ev.stopPropagation();
-                                    setSelectedEvent(event);
-                                    const d = normalizeDate(event);
-                                    if (d) setSelectedDate(d);
-                                    setEventsPanelMode('day');
-                                  }}
-                                  onKeyDown={(ev) => {
-                                    if (ev.key !== 'Enter' && ev.key !== ' ') return;
-                                    ev.preventDefault();
-                                    ev.stopPropagation();
-                                    setSelectedEvent(event);
-                                    const d = normalizeDate(event);
-                                    if (d) setSelectedDate(d);
-                                    setEventsPanelMode('day');
-                                  }}
-                                >
-                                  {miniLabel}
-                                </div>
-                              );
-                            })}
-                            {cell.events.length > 3 && (
-                              <div className="mini-event more">+{cell.events.length - 3} more</div>
-                            )}
+                        return (
+                          <div
+                            key={event.id}
+                            className={`mini-event ${isInquiry ? 'mini-event-inquiry' : 'mini-event-google'}`}
+                            title={miniLabel}
+                            role="button"
+                            tabIndex={0}
+                            onClick={(ev) => {
+                              ev.preventDefault();
+                              ev.stopPropagation();
+                              setSelectedEvent(event);
+                              const d = normalizeDate(event);
+                              if (d) setSelectedDate(d);
+                              setEventsPanelMode('day');
+                            }}
+                            onKeyDown={(ev) => {
+                              if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                              ev.preventDefault();
+                              ev.stopPropagation();
+                              setSelectedEvent(event);
+                              const d = normalizeDate(event);
+                              if (d) setSelectedDate(d);
+                              setEventsPanelMode('day');
+                            }}
+                          >
+                            {miniLabel}
                           </div>
-                        )}
-                      </button>
-                    ) : (
-                      <div key={i} />
-                    )
-                  )}
-                </div>
-              </div>
-
+                        );
+                      })}
+                      {dayEvents.length > 3 && (
+                        <div className="mini-event more">+{dayEvents.length - 3} more</div>
+                      )}
+                    </div>
+                  ) : null
+                }
+              />
               {/* EVENTS */}
-              <div className="events-panel">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="m-0">
-                    {eventsPanelMode === 'upcoming'
-                      ? 'Upcoming events'
-                      : selectedDate
-                        ? selectedDate.toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric',
-                          })
-                        : 'Select a date'}
-                  </h3>
+              <EventsPanel
+                mode={eventsPanelMode}
+                onModeChange={setEventsPanelMode}
+                selectedDate={selectedDate}
+                isLoading={loading}
+                dayEvents={selectedDayEvents}
+                upcomingEvents={upcomingEvents}
+                formatSelectedDate={(date) =>
+                  date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                }
+                dayEmptyMessage="No events on this day"
+                upcomingEmptyMessage="No upcoming events"
+                renderEvent={(e, mode) => {
+                  const isAllDay = !!e.start?.date;
+                  const whenLabel = isAllDay
+                    ? formatAllDayRange(e)
+                    : e.start?.dateTime && e.end?.dateTime
+                      ? `${formatDateTime(e.start.dateTime)} – ${formatDateTime(e.end.dateTime)}`
+                      : '—';
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant={eventsPanelMode === 'day' ? 'default' : 'outline'}
-                      onClick={() => setEventsPanelMode('day')}
+                  const isInquiry = isInquiryEvent(e);
+
+                  const baseTitle = e.summary || '(No title)';
+                  const timePrefix =
+                    mode === 'upcoming'
+                      ? whenLabel
+                      : isAllDay
+                        ? 'All day'
+                        : e.start?.dateTime && e.end?.dateTime
+                          ? `${formatTime(e.start.dateTime)} – ${formatTime(e.end.dateTime)}`
+                          : '';
+                  const titleWithTime = timePrefix ? `${baseTitle} - ${timePrefix} ` : baseTitle;
+
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      className={`event-card ${isInquiry ? 'event-inquiry' : 'event-google'}`}
+                      onClick={() => {
+                        setSelectedEvent(e);
+                        const d = normalizeDate(e);
+                        if (d) setSelectedDate(d);
+                      }}
+                      aria-label={`Open event details: ${titleWithTime}`}
                     >
-                      Day
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={eventsPanelMode === 'upcoming' ? 'default' : 'outline'}
-                      onClick={() => setEventsPanelMode('upcoming')}
-                    >
-                      Upcoming
-                    </Button>
-                  </div>
-                </div>
-
-                {loading && <p>Loading events…</p>}
-
-                {!loading && eventsPanelMode === 'day' && selectedDate && selectedDayEvents.length === 0 && (
-                  <p>No events on this day</p>
-                )}
-
-                {!loading && eventsPanelMode === 'upcoming' && upcomingEvents.length === 0 && (
-                  <p>No upcoming events</p>
-                )}
-
-                <div className="events-list">
-                  {(eventsPanelMode === 'upcoming' ? upcomingEvents : selectedDayEvents).map((e) => {
-                    const isAllDay = !!e.start?.date;
-                    const whenLabel = isAllDay
-                      ? formatAllDayRange(e)
-                      : e.start?.dateTime && e.end?.dateTime
-                        ? `${formatDateTime(e.start.dateTime)} – ${formatDateTime(e.end.dateTime)}`
-                        : '—';
-
-                    const isInquiry = isInquiryEvent(e);
-
-                    const baseTitle = e.summary || '(No title)';
-                    const timePrefix =
-                      eventsPanelMode === 'upcoming'
-                        ? whenLabel
-                        : isAllDay
-                          ? 'All day'
-                          : e.start?.dateTime && e.end?.dateTime
-                            ? `${formatTime(e.start.dateTime)} – ${formatTime(e.end.dateTime)}`
-                            : '';
-                    const titleWithTime = timePrefix ? `${baseTitle} - ${timePrefix} `: baseTitle;
-
-                    return (
-                      <button
-                        key={e.id}
-                        type="button"
-                        className={`event-card ${isInquiry ? 'event-inquiry' : 'event-google'}`}
-                        onClick={() => {
-                          setSelectedEvent(e);
-                          const d = normalizeDate(e);
-                          if (d) setSelectedDate(d);
-                        }}
-                        aria-label={`Open event details: ${titleWithTime}`}
-                      >
-                        <h4 className="event-title">{baseTitle}</h4>
-                        {timePrefix && <p>{timePrefix}</p>}
-                        {e.location && <p>{e.location}</p>}
-                        {e.description && <p className="event-description">{e.description}</p>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                      <h4 className="event-title">{baseTitle}</h4>
+                      {timePrefix && <p>{timePrefix}</p>}
+                      {e.location && <p>{e.location}</p>}
+                      {e.description && <p className="event-description">{e.description}</p>}
+                    </button>
+                  );
+                }}
+              />
 
             </div>
           </div>
