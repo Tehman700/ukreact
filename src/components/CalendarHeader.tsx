@@ -1,6 +1,5 @@
 import React from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
-
 type CalendarHeaderProps = {
   title?: string;
   subtitle?: string;

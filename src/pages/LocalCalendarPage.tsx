@@ -442,8 +442,8 @@ export const LocalCalendarPage: React.FC = () => {
             subtitle="Click on the date to add an appointment."
             rightContent={(
               <>
-                <button className="today-button" onClick={goToday}>Today</button>
-                <button className="today-button" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</button>
+                <Button variant="default" size="lg" onClick={goToday}>Today</Button>
+                <Button variant="default" size="lg" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</Button>
               </>
             )}
           />

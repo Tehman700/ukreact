@@ -935,32 +935,18 @@ export const AdminCalendarPage: React.FC = () => {
             subtitle="Click on the date to add an appointment."
             rightContent={(
               <>
-                <button className="today-button" onClick={goToday}>Today</button>
-                <button className="today-button" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</button>
-                <button
-                  className="today-button"
-                  onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}
-                  title="Create local (inquiry) appointment"
-                >
-                  Create appointment
-                </button>
-
-       
-                    <button className="today-button" onClick={openCreateEvent}>Create Google Calendar event</button>
-                    {accessToken ? (
-                      <button className="today-button" onClick={signOut}>Sign out</button>
-                    ) : (
-                      <button
-                        className="today-button"
-                        onClick={() => void requestAccessToken('consent')}
-                        disabled={!oauthClientId || !authReady}
-                        title={!oauthClientId ? 'Missing VITE_GOOGLE_OAUTH_CLIENT_ID' : undefined}
-                      >
-                        Sign in
-                      </button>
-                    )}
-                  </>
+                <Button variant="default" size="lg" onClick={goToday}>Today</Button>
+                <Button variant="default" size="lg" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</Button>
+                <Button variant="default" size="lg" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create local (inquiry) appointment</Button>
+                <Button variant="default" size="lg" onClick={openCreateEvent}>Create Google Calendar event</Button>   
+                {accessToken ? (
+                  <Button variant="default" size="lg" onClick={signOut}>Sign out</Button>
+                ) : (
+                  <Button variant="default" size="lg" onClick={() => void requestAccessToken('consent')}>Sign in</Button>
                 )}
+       
+              </>
+            )}
      
           />
 
