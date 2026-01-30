@@ -189,6 +189,8 @@ const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.def
 const Cancel = lazy(() => import('./pages/Cancel').then(m => ({ default: m.default })));
 
 const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
+const AdminCalendarPage = lazy(() => import('./pages/AdminCalendarPage').then(m => ({ default: m.AdminCalendarPage })));
+const LocalCalendarPage = lazy(() => import('./pages/LocalCalendarPage').then(m => ({ default: m.LocalCalendarPage })));
 const SurgeryReadySignsPage = lazy(() => import('./pages/blog/SurgeryReadySignsPage').then(m => ({ default: m.SurgeryReadySignsPage })));
 const RedFlagsSurgeryPage = lazy(() => import('./pages/blog/RedFlagsSurgeryPage').then(m => ({ default: m.RedFlagsSurgeryPage })));
 const HomeTweaksPage = lazy(() => import('./pages/blog/HomeTweaksPage').then(m => ({ default: m.HomeTweaksPage })));
@@ -750,6 +752,10 @@ useEffect(() => {
           />;
       case 'contact':
         return <ContactPage />;
+      case 'admin-calendar':
+        return <AdminCalendarPage />;
+      case 'calendar':
+        return <LocalCalendarPage />;
       case 'health-concierge':
         return <HealthConciergePage />;
       case 'terms':
