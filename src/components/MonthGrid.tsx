@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type MonthDayCell<TEvent> = {
+  showPanel?: boolean;
   date: Date | null;
   events: TEvent[];
 };
@@ -16,6 +17,7 @@ type MonthGridProps<TEvent> = {
   onNextMonth: () => void;
   onDayClick: (date: Date) => void;
   renderDayEvents: (events: TEvent[], date: Date) => React.ReactNode;
+  showPanel?: boolean;
 };
 
 export const MonthGrid = <TEvent,>({
@@ -28,9 +30,10 @@ export const MonthGrid = <TEvent,>({
   onNextMonth,
   onDayClick,
   renderDayEvents,
+  showPanel = true,
 }: MonthGridProps<TEvent>) => {
   return (
-    <div className="calendar-section">
+    <div className={`calendar-section ${!showPanel ? 'calendar-section-full' : ''}`}>
       <div className="month-navigation">
         <button onClick={onPrevMonth}>
           <ChevronLeft />

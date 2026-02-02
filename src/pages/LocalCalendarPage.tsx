@@ -19,6 +19,7 @@ type LocalCalendarEvent = {
   id: string;
   name?: string;
   email?: string;
+  phone?: string;
   start: { dateTime?: string; date?: string };
   end: { dateTime?: string; date?: string };
 };
@@ -28,6 +29,7 @@ type InquiryRow = {
   created_at?: string;
   name?: string | null;
   email?: string | null;
+  phone?: string | null;
   start?: string | null;
   end?: string | null;
 };
@@ -51,6 +53,7 @@ function toLocalEvent(row: InquiryRow): LocalCalendarEvent | null {
     id: row.id,
     name: typeof row.name === 'string' ? row.name : undefined,
     email: typeof row.email === 'string' ? row.email : undefined,
+    phone: typeof row.phone === 'string' ? row.phone : undefined,
     start: { dateTime: startIso ?? undefined },
     end: { dateTime: endIso ?? undefined },
   };
@@ -63,11 +66,13 @@ export const LocalCalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<LocalCalendarEvent | null>(null);
-  const [eventsPanelMode, setEventsPanelMode] = useState<'day' | 'upcoming'>('upcoming');
+  const [eventsPanelMode, setEventsPanelMode] = useState<'day' | 'upcoming'>('day');
+  const [showEventsPanel, setShowEventsPanel] = useState(false);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createName, setCreateName] = useState('');
   const [createEmail, setCreateEmail] = useState('');
+  const [createPhone, setCreatePhone] = useState('');
   const [createStartDateTime, setCreateStartDateTime] = useState('');
   const [createEndDateTime, setCreateEndDateTime] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
@@ -75,38 +80,39 @@ export const LocalCalendarPage: React.FC = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   const slotDefaultDuration = 30;
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      setLoading(true);
-      setError(null);
+  // Don't load existing events - only show events created in current session
+  // useEffect(() => {
+  //   let cancelled = false;
+  //   const run = async () => {
+  //     setLoading(true);
+  //     setError(null);
 
-      const { data, error } = await supabase
-        .from('inquiry')
-        .select('id, created_at, name, email, start, status, end')
-        .order('created_at', { ascending: false })
-        .limit(500);
+  //     const { data, error } = await supabase
+  //       .from('inquiry')
+  //       .select('id, created_at, name, email, phone, start, status, end')
+  //       .order('created_at', { ascending: false })
+  //       .limit(500);
 
-      if (cancelled) return;
+  //     if (cancelled) return;
 
-      if (error) {
-        setError(error.message || String(error));
-        setEvents([]);
-        setLoading(false);
-        return;
-      }
+  //     if (error) {
+  //       setError(error.message || String(error));
+  //       setEvents([]);
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
-      const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
-      setEvents(mapped);
-      setLoading(false);
-    };
+  //     const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
+  //     const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
+  //     setEvents(mapped);
+  //     setLoading(false);
+  //   };
 
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  //   void run();
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, []);
 
   const normalizeDate = (event: LocalCalendarEvent) => {
     if (event.start?.date) return new Date(event.start.date + 'T00:00:00');
@@ -285,9 +291,17 @@ export const LocalCalendarPage: React.FC = () => {
     const base = date ? new Date(date) : selectedDate ? new Date(selectedDate) : new Date();
     base.setHours(0, 0, 0, 0); // Reset to midnight for date selection
     
+    // Prevent creating appointments on past dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (base < today) {
+      return; // Don't open dialog for past dates
+    }
+    
     setCreateError(null);
     setCreateName('');
     setCreateEmail('');
+    setCreatePhone('');
     setCreateStartDateTime('');
     setCreateEndDateTime('');
     setSelectedDateForCreate(base);
@@ -319,6 +333,7 @@ export const LocalCalendarPage: React.FC = () => {
     try {
       const name = createName.trim();
       const email = createEmail.trim();
+      const phone = createPhone.trim();
       if (!name) throw new Error('Name is required');
       if (!email) throw new Error('Email is required');
       if (!selectedTimeSlot) throw new Error('Please select a time slot');
@@ -333,6 +348,7 @@ export const LocalCalendarPage: React.FC = () => {
         id: safeUuid(),
         name,
         email,
+        phone: phone || undefined,
         start: { dateTime: s.toISOString() },
         end: { dateTime: e.toISOString() },
       };
@@ -343,10 +359,11 @@ export const LocalCalendarPage: React.FC = () => {
           id: newEvent.id,
           name: newEvent.name,
           email: newEvent.email,
+          phone: newEvent.phone,
           start: newEvent.start.dateTime,
           end: newEvent.end.dateTime,
         })
-        .select('id, created_at, name, email, start, end')
+        .select('id, created_at, name, email, phone, start, end')
         .single();
 
       if (error) throw new Error(error.message || String(error));
@@ -366,12 +383,12 @@ export const LocalCalendarPage: React.FC = () => {
   };
 
   return (
-    <div className="calendar-container">
+    <div className="container mx-auto px-4 py-12">
       <div className="calendar-wrapper">
         <div className="calendar-card">
           <Dialog
             open={!!selectedEvent}
-            onOpenChange={(open) => {
+            onOpenChange={(open: boolean) => {
               if (!open) setSelectedEvent(null);
             }}
           >
@@ -407,6 +424,13 @@ export const LocalCalendarPage: React.FC = () => {
                       <div className="text-muted-foreground">{selectedEvent.email}</div>
                     </div>
                   )}
+
+                  {selectedEvent.phone && (
+                    <div className="text-sm">
+                      <div className="font-medium">Phone</div>
+                      <div className="text-muted-foreground">{selectedEvent.phone}</div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -427,8 +451,10 @@ export const LocalCalendarPage: React.FC = () => {
             error={createError}
             name={createName}
             email={createEmail}
+            phone={createPhone}
             onNameChange={setCreateName}
             onEmailChange={setCreateEmail}
+            onPhoneChange={setCreatePhone}
             dateForCreate={selectedDateForCreate}
             generateTimeSlots={generateTimeSlots}
             isSlotBooked={isSlotBooked}
@@ -442,8 +468,6 @@ export const LocalCalendarPage: React.FC = () => {
             subtitle="Click on the date to add an appointment."
             rightContent={(
               <>
-                <Button variant="default" size="lg" onClick={goToday}>Today</Button>
-                <Button variant="default" size="lg" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</Button>
               </>
             )}
           />
@@ -451,6 +475,7 @@ export const LocalCalendarPage: React.FC = () => {
           <div className="calendar-content">
             <div className="calendar-grid">
               <MonthGrid
+                showPanel={showEventsPanel}
                 currentDate={currentDate}
                 formatMonthYear={formatMonthYear}
                 days={calendarDays}
@@ -459,6 +484,14 @@ export const LocalCalendarPage: React.FC = () => {
                 onPrevMonth={goPrevMonth}
                 onNextMonth={goNextMonth}
                 onDayClick={(date) => {
+                  // Prevent clicking past dates
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const clickedDate = new Date(date);
+                  clickedDate.setHours(0, 0, 0, 0);
+                  if (clickedDate < today) {
+                    return; // Don't allow past date selection
+                  }
                   setSelectedDate(date);
                   setEventsPanelMode('day');
                   openCreateEvent(date);
@@ -510,53 +543,6 @@ export const LocalCalendarPage: React.FC = () => {
                     </div>
                   ) : null
                 }
-              />
-              <EventsPanel
-                mode={eventsPanelMode}
-                onModeChange={setEventsPanelMode}
-                selectedDate={selectedDate}
-                dayEvents={selectedDayEvents}
-                upcomingEvents={upcomingEvents}
-                formatSelectedDate={(date) =>
-                  date.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                  })
-                }
-                dayEmptyMessage="No events on this day"
-                upcomingEmptyMessage="No upcoming events"
-                renderEvent={(e, mode) => {
-                  const isAllDay = !!e.start?.date;
-                  const whenLabel = isAllDay
-                    ? formatAllDayRange(e)
-                    : e.start?.dateTime && e.end?.dateTime
-                      ? `${formatDateTime(e.start.dateTime)} – ${formatDateTime(e.end.dateTime)}`
-                      : '—';
-
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      className="event-card event-inquiry"
-                      onClick={() => {
-                        setSelectedEvent(e);
-                        const d = normalizeDate(e);
-                        if (d) setSelectedDate(d);
-                      }}
-                    >
-                      <h4 className="event-title">{e.name || '(No name)'}</h4>
-                      <p>
-                        {mode === 'upcoming'
-                          ? whenLabel
-                          : isAllDay
-                            ? 'All day'
-                            : `${formatTime(e.start!.dateTime!)} – ${formatTime(e.end!.dateTime!)}`}
-                      </p>
-                      {e.email && <p className="event-description">{e.email}</p>}
-                    </button>
-                  );
-                }}
               />
             </div>
           </div>

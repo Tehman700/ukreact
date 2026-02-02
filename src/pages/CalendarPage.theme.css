@@ -175,6 +175,10 @@
   .calendar-section {
     grid-column: span 2 / span 2;
   }
+
+  .calendar-section-full {
+    grid-column: span 3 / span 3;
+  }
 }
 
 /* Calendar Section */

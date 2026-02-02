@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 export type EventsPanelMode = 'day' | 'upcoming';
 
 type EventsPanelProps<TEvent> = {
+  hidden?: boolean;
   mode: EventsPanelMode;
   onModeChange: (mode: EventsPanelMode) => void;
   selectedDate: Date | null;
@@ -17,6 +18,7 @@ type EventsPanelProps<TEvent> = {
 };
 
 export const EventsPanel = <TEvent,>({
+  hidden = false,
   mode,
   onModeChange,
   selectedDate,
@@ -47,6 +49,7 @@ export const EventsPanel = <TEvent,>({
             size="sm"
             variant={mode === 'day' ? 'default' : 'outline'}
             onClick={() => onModeChange('day')}
+            className={hidden ? 'hidden' : ''}
           >
             Day
           </Button>
@@ -54,6 +57,7 @@ export const EventsPanel = <TEvent,>({
             size="sm"
             variant={mode === 'upcoming' ? 'default' : 'outline'}
             onClick={() => onModeChange('upcoming')}
+            className={hidden ? 'hidden' : ''}
           >
             Upcoming
           </Button>

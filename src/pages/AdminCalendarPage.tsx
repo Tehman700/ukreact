@@ -36,6 +36,7 @@ type InquiryRow = {
   created_at?: string;
   name?: string | null;
   email?: string | null;
+  phone?: string | null;
   start?: string | null;
   end?: string | null;
 };
@@ -58,7 +59,10 @@ function inquiryToCalendarEvent(row: InquiryRow): CalendarEvent | null {
 
   const name = typeof row.name === 'string' ? row.name : 'Appointment';
   const email = typeof row.email === 'string' ? row.email : '';
-  const description = email ? `Name: ${name}\n Email: ${email}` : '';
+  const phone = typeof row.phone === 'string' ? row.phone : '';
+  let description = `Name: ${name}`;
+  if (email) description += `\nEmail: ${email}`;
+  if (phone) description += `\nPhone: ${phone}`;
 
   return {
     id: `inquiry_${row.id}`,
@@ -83,6 +87,7 @@ export const AdminCalendarPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [eventsPanelMode, setEventsPanelMode] = useState<'day' | 'upcoming'>('upcoming');
+  const [showEventsPanel, setShowEventsPanel] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -105,6 +110,7 @@ export const AdminCalendarPage: React.FC = () => {
   const [localCreateDialogOpen, setLocalCreateDialogOpen] = useState(false);
   const [localCreateName, setLocalCreateName] = useState('');
   const [localCreateEmail, setLocalCreateEmail] = useState('');
+  const [localCreatePhone, setLocalCreatePhone] = useState('');
   const [localCreateStartDateTime, setLocalCreateStartDateTime] = useState('');
   const [localCreateEndDateTime, setLocalCreateEndDateTime] = useState('');
   const [localCreateError, setLocalCreateError] = useState<string | null>(null);
@@ -244,7 +250,7 @@ export const AdminCalendarPage: React.FC = () => {
     const run = async () => {
       const { data, error } = await supabase
         .from('inquiry')
-        .select('id, created_at, name, email, start, end')
+        .select('id, created_at, name, email, phone, start, end')
         .order('created_at', { ascending: false })
         .limit(500);
 
@@ -430,6 +436,7 @@ export const AdminCalendarPage: React.FC = () => {
     setLocalCreateError(null);
     setLocalCreateName('');
     setLocalCreateEmail('');
+    setLocalCreatePhone('');
     setLocalCreateStartDateTime('');
     setLocalCreateEndDateTime('');
     setLocalSelectedDateForCreate(base);
@@ -461,6 +468,7 @@ export const AdminCalendarPage: React.FC = () => {
     try {
       const name = localCreateName.trim();
       const email = localCreateEmail.trim();
+      const phone = localCreatePhone.trim();
       if (!name) throw new Error('Name is required');
       if (!email) throw new Error('Email is required');
       if (!localSelectedTimeSlot) throw new Error('Please select a time slot');
@@ -481,10 +489,11 @@ export const AdminCalendarPage: React.FC = () => {
           id: newId,
           name,
           email,
+          phone: phone || null,
           start: startIso,
           end: endIso,
         })
-        .select('id, created_at, name, email, start, end')
+        .select('id, created_at, name, email, phone, start, end')
         .single();
 
       if (error) throw new Error(error.message || String(error));
@@ -694,7 +703,7 @@ export const AdminCalendarPage: React.FC = () => {
 
   /* ---------------------------------- RENDER ---------------------------------- */
   return (
-    <div className="calendar-container">
+    <div className="container mx-auto px-4 py-12">
       <div className="calendar-wrapper">
         <div className="calendar-card">
           <Dialog
@@ -769,8 +778,10 @@ export const AdminCalendarPage: React.FC = () => {
             error={localCreateError}
             name={localCreateName}
             email={localCreateEmail}
+            phone={localCreatePhone}
             onNameChange={setLocalCreateName}
             onEmailChange={setLocalCreateEmail}
+            onPhoneChange={setLocalCreatePhone}
             dateForCreate={localSelectedDateForCreate}
             generateTimeSlots={generateTimeSlots}
             isSlotBooked={isSlotBooked}
@@ -901,11 +912,11 @@ export const AdminCalendarPage: React.FC = () => {
                       disabled={!authReady || !oauthClientId}
                       onClick={() => void requestAccessToken('consent')}
                     >
-                      Sign in
+                      Connect Calendar
                     </Button>
                   ) : (
                     <Button type="button" variant="outline" onClick={signOut}>
-                      Sign out
+                      Disconnect Calendar
                     </Button>
                   )}
 
@@ -936,14 +947,20 @@ export const AdminCalendarPage: React.FC = () => {
             rightContent={(
               <>
                 <Button variant="default" size="lg" onClick={goToday}>Today</Button>
-                <Button variant="default" size="lg" onClick={() => setEventsPanelMode('upcoming')}>Upcoming</Button>
-                <Button variant="default" size="lg" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create local (inquiry) appointment</Button>
+                <Button variant="default" size="lg" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create appointment</Button>
                 <Button variant="default" size="lg" onClick={openCreateEvent}>Create Google Calendar event</Button>   
                 {accessToken ? (
-                  <Button variant="default" size="lg" onClick={signOut}>Sign out</Button>
+                  <Button variant="default" size="lg" onClick={signOut}>Disconnect Calendar</Button>
                 ) : (
-                  <Button variant="default" size="lg" onClick={() => void requestAccessToken('consent')}>Sign in</Button>
+                  <Button variant="default" size="lg" onClick={() => void requestAccessToken('consent')}>Connect Calendar</Button>
                 )}
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => setShowEventsPanel(!showEventsPanel)}
+                >
+                  {showEventsPanel ? 'Hide Panel' : 'Show Panel'}
+                </Button>
        
               </>
             )}
@@ -998,6 +1015,7 @@ export const AdminCalendarPage: React.FC = () => {
 
               {/* CALENDAR */}
               <MonthGrid
+                showPanel={showEventsPanel}
                 currentDate={currentDate}
                 formatMonthYear={formatMonthYear}
                 days={calendarDays}
@@ -1063,7 +1081,9 @@ export const AdminCalendarPage: React.FC = () => {
                 }
               />
               {/* EVENTS */}
-              <EventsPanel
+              {showEventsPanel && (
+                <EventsPanel
+                hidden={false}
                 mode={eventsPanelMode}
                 onModeChange={setEventsPanelMode}
                 selectedDate={selectedDate}
@@ -1120,7 +1140,7 @@ export const AdminCalendarPage: React.FC = () => {
                   );
                 }}
               />
-
+              )}
             </div>
           </div>
         </div>

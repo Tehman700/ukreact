@@ -18,8 +18,10 @@ type CreateAppointmentDialogProps = {
   error: string | null;
   name: string;
   email: string;
+  phone: string;
   onNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
   dateForCreate: Date | null;
   generateTimeSlots: (date: Date) => string[];
   isSlotBooked: (date: Date, timeSlot: string) => boolean;
@@ -38,8 +40,10 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
   error,
   name,
   email,
+  phone,
   onNameChange,
   onEmailChange,
+  onPhoneChange,
   dateForCreate,
   generateTimeSlots,
   isSlotBooked,
@@ -81,6 +85,16 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="Email address"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <div className="text-sm font-medium">Phone</div>
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={phone}
+              onChange={(e) => onPhoneChange(e.target.value)}
+              placeholder="Phone number"
             />
           </div>
 
