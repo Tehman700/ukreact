@@ -7,8 +7,10 @@ import OpenAI from 'openai';
 import nodemailer from 'nodemailer';
 import bizSdk from "facebook-nodejs-business-sdk";
 import PDFDocument from 'pdfkit';
-import { Buffer } from 'buffer';
+import { Buffer} from 'buffer';
 import puppeteer from "puppeteer";
+import twilio from 'twilio';
+import { createClient } from '@supabase/supabase-js';
 
 
 
@@ -41,6 +43,40 @@ transporter.verify((error, success) => {
     console.log('✅ Email server ready');
   }
 });
+
+// ----------------------------
+// TWILIO CONFIGURATION
+// ----------------------------
+let twilioClient = null;
+
+// Only initialize Twilio if credentials are properly configured
+const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+
+if (twilioSid && twilioToken && 
+    twilioSid.startsWith('AC') && 
+    twilioSid !== 'your_twilio_account_sid_here' &&
+    twilioToken !== 'your_twilio_auth_token_here') {
+  try {
+    twilioClient = twilio(twilioSid, twilioToken);
+    console.log('✅ Twilio SMS service ready');
+  } catch (error) {
+    console.error('❌ Twilio initialization error:', error.message);
+    console.warn('⚠️  SMS reminders disabled');
+  }
+} else {
+  console.warn('⚠️  Twilio not configured - SMS reminders disabled');
+  console.log('   💡 To enable SMS: Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env');
+}
+
+// ----------------------------
+// SUPABASE CLIENT
+// ----------------------------
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_ANON_KEY
+);
+console.log('✅ Supabase client initialized');
 
 
 
@@ -6919,9 +6955,502 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
 }
 
 // ----------------------------
-const server = app.listen(process.env.PORT, () =>
-  console.log(`🚀 Server running on port ${process.env.PORT}`)
-);
+// REMINDER SYSTEM FOR INQUIRIES
+// ----------------------------
+
+// Store active reminder timeouts (inquiry_id -> timeoutId)
+const activeReminders = new Map();
+
+// Environment variable for reminder timing (default 30 minutes)
+const REMINDER_MINUTES_BEFORE = process.env.REMINDER_MINUTES_BEFORE 
+  ? parseInt(process.env.REMINDER_MINUTES_BEFORE) 
+  : 60;
+
+// Helper function to format date/time for display
+function formatDateTime(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+// Helper function to send email reminder
+async function sendEmailReminder(name, email, startTime, inquiryId) {
+  try {
+    const formattedTime = formatDateTime(startTime);
+    
+    const mailOptions = {
+      from: `"Luther Health Reminders" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `🔔 Reminder: Your Appointment in ${REMINDER_MINUTES_BEFORE} Minutes`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Appointment Reminder</h1>
+          </div>
+          
+          <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+              Hello <strong>${name}</strong>,
+            </p>
+            
+            <div style="background: #f0f4ff; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin: 20px 0;">
+              <p style="font-size: 18px; color: #667eea; margin: 0; font-weight: bold;">
+                ⏰ Your appointment is starting in <span style="color: #764ba2;">${REMINDER_MINUTES_BEFORE} minutes</span>
+              </p>
+            </div>
+            
+            <div style="margin: 25px 0;">
+              <p style="font-size: 15px; color: #555; margin: 5px 0;">
+                <strong>📅 Date & Time:</strong> ${formattedTime}
+              </p>
+              <p style="font-size: 15px; color: #555; margin: 5px 0;">
+                <strong>🆔 Reference ID:</strong> ${inquiryId.substring(0, 8)}
+              </p>
+            </div>
+            
+            <div style="background: #fff8e1; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="font-size: 14px; color: #856404; margin: 0;">
+                <strong>💡 Tip:</strong> Please ensure you're ready a few minutes early. If you need to reschedule or have any questions, please contact us immediately.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <p style="font-size: 13px; color: #999;">
+                We look forward to seeing you soon!<br>
+                <strong style="color: #667eea;">Luther Health Team</strong>
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; font-size: 12px; color: #999;">
+            <p>This is an automated reminder. Please do not reply to this email.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email reminder sent to ${email} for appointment ${inquiryId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending email reminder to ${email}:`, error);
+    return false;
+  }
+}
+
+// Helper function to send SMS reminder via Twilio
+async function sendSMSReminder(name, phone, startTime, inquiryId) {
+  if (!twilioClient) {
+    console.warn('⚠️  Twilio not configured - skipping SMS');
+    return false;
+  }
+
+  if (!phone || phone === '') {
+    console.log(`ℹ️  No phone number provided for ${name} - skipping SMS`);
+    return false;
+  }
+
+  try {
+    // Format phone number for Twilio (ensure it has country code)
+    let formattedPhone = phone.trim();
+    if (!formattedPhone.startsWith('+')) {
+      // Assume UK if no country code
+      formattedPhone = '+44' + formattedPhone.replace(/^0/, '');
+    }
+
+    const formattedTime = formatDateTime(startTime);
+    const message = `🔔 Luther Health Reminder
+
+Hello ${name},
+
+Your appointment is starting in 30 minutes!
+
+📅 ${formattedTime}
+🆔 Ref: ${inquiryId.substring(0, 8)}
+
+Please ensure you're ready. If you need to reschedule, contact us immediately.
+
+- Luther Health Team`;
+
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: formattedPhone
+    });
+
+    console.log(`✅ SMS reminder sent to ${formattedPhone} for appointment ${inquiryId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending SMS reminder to ${phone}:`, error.message);
+    return false;
+  }
+}
+
+// Save reminder to Supabase database
+async function saveReminderToDatabase(inquiryId, name, email, phone, appointmentTime, reminderTime) {
+  try {
+    const { data, error } = await supabase
+      .from('reminders')
+      .insert({
+        inquiry_id: inquiryId,
+        name,
+        email,
+        phone,
+        appointment_time: appointmentTime,
+        reminder_time: reminderTime,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error(`❌ Error saving reminder to database:`, error);
+    throw error;
+  }
+}
+
+// Update reminder status in database
+async function updateReminderStatus(inquiryId, status, emailSent = false, smsSent = false, errorMessage = null) {
+  try {
+    const updateData = {
+      status,
+      email_sent: emailSent,
+      sms_sent: smsSent,
+      last_attempt_at: new Date().toISOString()
+    };
+
+    if (errorMessage) {
+      updateData.error_message = errorMessage;
+    }
+
+    const { error } = await supabase
+      .from('reminders')
+      .update(updateData)
+      .eq('inquiry_id', inquiryId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error(`❌ Error updating reminder status:`, error);
+  }
+}
+
+// Execute reminder: send email and SMS
+async function executeReminder(inquiryId, name, email, phone, appointmentTime) {
+  console.log(`⏰ Executing reminders for appointment ${inquiryId}...`);
+  
+  let emailSent = false;
+  let smsSent = false;
+  let errorMessage = null;
+
+  try {
+    // Send both email and SMS
+    emailSent = await sendEmailReminder(name, email, appointmentTime, inquiryId);
+    smsSent = await sendSMSReminder(name, phone, appointmentTime, inquiryId);
+
+    // Update database with results
+    const status = (emailSent || smsSent) ? 'sent' : 'failed';
+    await updateReminderStatus(inquiryId, status, emailSent, smsSent);
+
+    // Remove from active reminders
+    activeReminders.delete(inquiryId);
+
+    console.log(`📊 Reminder results for ${inquiryId}: Email=${emailSent}, SMS=${smsSent}`);
+  } catch (error) {
+    errorMessage = error.message;
+    console.error(`❌ Error executing reminder:`, error);
+    await updateReminderStatus(inquiryId, 'failed', emailSent, smsSent, errorMessage);
+  }
+}
+
+// Schedule a reminder for an inquiry (save to DB and set timeout)
+async function scheduleInquiryReminder(inquiryId, name, email, phone, startTime) {
+  try {
+    const appointmentTime = new Date(startTime);
+    const reminderTime = new Date(appointmentTime.getTime() - REMINDER_MINUTES_BEFORE * 60 * 1000);
+    const now = new Date();
+
+    // Check if reminder time is in the past
+    if (reminderTime <= now) {
+      console.log(`⏭️  Appointment ${inquiryId} is too soon for reminder (starts at ${appointmentTime.toISOString()})`);
+      return { scheduled: false, reason: 'too_soon' };
+    }
+
+    // Save to database
+    await saveReminderToDatabase(
+      inquiryId,
+      name,
+      email,
+      phone,
+      appointmentTime.toISOString(),
+      reminderTime.toISOString()
+    );
+
+    // Schedule the timeout
+    const delayMs = reminderTime.getTime() - now.getTime();
+    const timeoutId = setTimeout(
+      () => executeReminder(inquiryId, name, email, phone, appointmentTime.toISOString()),
+      delayMs
+    );
+
+    // Store timeout ID for cancellation
+    activeReminders.set(inquiryId, timeoutId);
+
+    console.log(`✅ Reminder scheduled for ${inquiryId} at ${reminderTime.toISOString()} (in ${Math.round(delayMs / 1000 / 60)} minutes)`);
+    
+    return {
+      scheduled: true,
+      reminderTime: reminderTime.toISOString(),
+      appointmentTime: appointmentTime.toISOString()
+    };
+  } catch (error) {
+    console.error(`❌ Error scheduling reminder for ${inquiryId}:`, error);
+    return { scheduled: false, error: error.message };
+  }
+}
+
+// Cancel a scheduled reminder
+async function cancelInquiryReminder(inquiryId) {
+  try {
+    // Clear the timeout if it exists
+    const timeoutId = activeReminders.get(inquiryId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      activeReminders.delete(inquiryId);
+    }
+
+    // Update database status to cancelled
+    const { error } = await supabase
+      .from('reminders')
+      .update({ status: 'cancelled' })
+      .eq('inquiry_id', inquiryId);
+
+    if (error) throw error;
+
+    console.log(`🚫 Cancelled reminder for inquiry ${inquiryId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error cancelling reminder:`, error);
+    return false;
+  }
+}
+
+// API endpoint to schedule a reminder
+app.post('/api/schedule-reminder', async (req, res) => {
+  try {
+    const { inquiryId, name, email, phone, startTime } = req.body;
+
+    if (!inquiryId || !name || !email || !startTime) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: inquiryId, name, email, startTime'
+      });
+    }
+
+    const result = await scheduleInquiryReminder(inquiryId, name, email, phone, startTime);
+    
+    res.json({
+      success: result.scheduled,
+      ...result
+    });
+  } catch (error) {
+    console.error('Error in schedule-reminder endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// API endpoint to cancel a reminder
+app.delete('/api/cancel-reminder/:inquiryId', async (req, res) => {
+  try {
+    const { inquiryId } = req.params;
+    const cancelled = await cancelInquiryReminder(inquiryId);
+    
+    res.json({
+      success: true,
+      cancelled
+    });
+  } catch (error) {
+    console.error('Error in cancel-reminder endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// API endpoint to get scheduled reminders status
+app.get('/api/reminders/status', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('reminders')
+      .select('*')
+      .eq('status', 'pending')
+      .order('reminder_time', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      count: data.length,
+      active: activeReminders.size,
+      reminders: data.map(r => ({
+        inquiryId: r.inquiry_id,
+        name: r.name,
+        email: r.email,
+        phone: r.phone,
+        reminderTime: r.reminder_time,
+        appointmentTime: r.appointment_time,
+        status: r.status,
+        emailSent: r.email_sent,
+        smsSent: r.sms_sent
+      }))
+    });
+  } catch (error) {
+    console.error('Error in reminders status endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Check and process pending reminders (called by cron or on startup)
+async function checkPendingReminders() {
+  try {
+    const now = new Date();
+    const checkWindowMinutes = 10; // Check reminders due in next 10 minutes
+    const checkWindowTime = new Date(now.getTime() + checkWindowMinutes * 60 * 1000);
+
+    // Query pending reminders that are due soon
+    const { data, error } = await supabase
+      .from('reminders')
+      .select('*')
+      .eq('status', 'pending')
+      .lte('reminder_time', checkWindowTime.toISOString())
+      .order('reminder_time', { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return { checked: 0, scheduled: 0 };
+    }
+
+    let scheduled = 0;
+    for (const reminder of data) {
+      // Skip if already in activeReminders
+      if (activeReminders.has(reminder.inquiry_id)) {
+        continue;
+      }
+
+      const reminderTime = new Date(reminder.reminder_time);
+      const appointmentTime = new Date(reminder.appointment_time);
+
+      // If reminder time has passed, send immediately
+      if (reminderTime <= now) {
+        await executeReminder(
+          reminder.inquiry_id,
+          reminder.name,
+          reminder.email,
+          reminder.phone,
+          reminder.appointment_time
+        );
+        scheduled++;
+      } else {
+        // Schedule for future
+        const delayMs = reminderTime.getTime() - now.getTime();
+        const timeoutId = setTimeout(
+          () => executeReminder(
+            reminder.inquiry_id,
+            reminder.name,
+            reminder.email,
+            reminder.phone,
+            reminder.appointment_time
+          ),
+          delayMs
+        );
+        activeReminders.set(reminder.inquiry_id, timeoutId);
+        scheduled++;
+      }
+    }
+
+    return { checked: data.length, scheduled };
+  } catch (error) {
+    console.error('❌ Error checking pending reminders:', error);
+    return { checked: 0, scheduled: 0, error: error.message };
+  }
+}
+
+// On server startup, load pending reminders from database
+async function initializeReminders() {
+  try {
+    console.log('🔄 Initializing reminder system from database...');
+    
+    const result = await checkPendingReminders();
+    
+    if (result.scheduled > 0) {
+      console.log(`✅ Loaded and scheduled ${result.scheduled} pending reminders`);
+    } else {
+      console.log('ℹ️  No pending reminders found');
+    }
+  } catch (error) {
+    console.error('❌ Error initializing reminders:', error);
+  }
+}
+
+// Cron endpoint to check and process pending reminders
+// Call this endpoint every 5-10 minutes from an external cron service
+// (e.g., GitHub Actions, Vercel Cron, or cron-job.org)
+app.get('/api/cron/check-reminders', async (req, res) => {
+  try {
+    // Optional: Add authentication
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && req.query.secret !== cronSecret) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    console.log('🔄 Cron: Checking pending reminders...');
+    const result = await checkPendingReminders();
+    
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      ...result
+    });
+  } catch (error) {
+    console.error('Error in cron check-reminders endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ----------------------------
+const server = app.listen(process.env.PORT, () => {
+  console.log(`🚀 Server running on port ${process.env.PORT}`);
+  
+  // Initialize reminders on server start
+  if (process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
+    initializeReminders();
+  }
+  
+  // Optional: Run reminder check every 5 minutes internally
+  setInterval(() => {
+    checkPendingReminders().catch(err => 
+      console.error('Error in scheduled reminder check:', err)
+    );
+  }, 5 * 60 * 1000); // 5 minutes
+});
 
 // Set timeouts to prevent 504 errors
 server.timeout = 300000; // 5 minutes

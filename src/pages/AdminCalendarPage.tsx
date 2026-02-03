@@ -502,6 +502,25 @@ export const AdminCalendarPage: React.FC = () => {
       const mapped = inquiryToCalendarEvent(insertedRow);
       if (mapped) {
         setInquiryEvents((prev) => [mapped, ...prev]);
+        
+        // Schedule automated reminder (30 minutes before appointment)
+        try {
+          await fetch('http://localhost:3003/api/schedule-reminder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              inquiryId: newId,
+              name,
+              email,
+              phone: phone || '',
+              startTime: startIso
+            })
+          });
+          console.log('✅ Reminder scheduled for inquiry:', newId);
+        } catch (reminderError) {
+          console.warn('⚠️  Failed to schedule reminder:', reminderError);
+          // Don't fail the inquiry creation if reminder scheduling fails
+        }
       }
 
       const d = normalizeDate(mapped ?? { start: { dateTime: startIso } } as CalendarEvent);

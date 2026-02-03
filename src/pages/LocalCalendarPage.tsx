@@ -376,6 +376,24 @@ export const LocalCalendarPage: React.FC = () => {
       setEvents((prev) => [inserted, ...prev]);
       setBookEvents((prev) => [inserted, ...prev]);
 
+      // Schedule automated reminder (30 minutes before appointment)
+      try {
+        await fetch('http://localhost:3003/api/schedule-reminder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            inquiryId: newEvent.id,
+            name: newEvent.name,
+            email: newEvent.email,
+            phone: newEvent.phone,
+            startTime: newEvent.start.dateTime
+          })
+        });
+        console.log('✅ Reminder scheduled for inquiry:', newEvent.id);
+      } catch (reminderError) {
+        console.warn('⚠️  Failed to schedule reminder:', reminderError);
+        // Don't fail the inquiry creation if reminder scheduling fails
+      }
 
       const d = normalizeDate(inserted);
       if (d) setSelectedDate(d);
