@@ -61,6 +61,8 @@ function toLocalEvent(row: InquiryRow): LocalCalendarEvent | null {
 
 export const LocalCalendarPage: React.FC = () => {
   const [events, setEvents] = useState<LocalCalendarEvent[]>([]);
+  const [bookEvents, setBookEvents] = useState<LocalCalendarEvent[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -81,38 +83,39 @@ export const LocalCalendarPage: React.FC = () => {
 
   const slotDefaultDuration = 30;
   // Don't load existing events - only show events created in current session
-  // useEffect(() => {
-  //   let cancelled = false;
-  //   const run = async () => {
-  //     setLoading(true);
-  //     setError(null);
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      const today = new Date().toISOString(); 
+      const { data, error } = await supabase
+        .from('inquiry')
+        .select('id, created_at, name, email, phone, start, status, end')
+        .gte('start', today)
+        .order('start', { ascending: true })
+        .limit(500);
 
-  //     const { data, error } = await supabase
-  //       .from('inquiry')
-  //       .select('id, created_at, name, email, phone, start, status, end')
-  //       .order('created_at', { ascending: false })
-  //       .limit(500);
+      if (cancelled) return;
 
-  //     if (cancelled) return;
+      if (error) {
+        setError(error.message || String(error));
+        setBookEvents([]);
+        setLoading(false);
+        return;
+      }
 
-  //     if (error) {
-  //       setError(error.message || String(error));
-  //       setEvents([]);
-  //       setLoading(false);
-  //       return;
-  //     }
+      const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
+      const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
+      setBookEvents(mapped);
+      setLoading(false);
+    };
 
-  //     const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
-  //     const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
-  //     setEvents(mapped);
-  //     setLoading(false);
-  //   };
-
-  //   void run();
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, []);
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const normalizeDate = (event: LocalCalendarEvent) => {
     if (event.start?.date) return new Date(event.start.date + 'T00:00:00');
@@ -273,7 +276,7 @@ export const LocalCalendarPage: React.FC = () => {
     slotEnd.setMinutes(slotEnd.getMinutes() + slotDefaultDuration);
 
     // Check if any event overlaps with this slot
-    return events.some((event) => {
+    return bookEvents.some((event) => {
       if (!event.start?.dateTime || !event.end?.dateTime) return false;
       
       const eventStart = new Date(event.start.dateTime);
@@ -371,6 +374,8 @@ export const LocalCalendarPage: React.FC = () => {
 
       const inserted = toLocalEvent(data as InquiryRow) ?? newEvent;
       setEvents((prev) => [inserted, ...prev]);
+      setBookEvents((prev) => [inserted, ...prev]);
+
 
       const d = normalizeDate(inserted);
       if (d) setSelectedDate(d);
@@ -437,7 +442,7 @@ export const LocalCalendarPage: React.FC = () => {
 
               <DialogFooter className="sm:justify-between">
                 <div className="text-xs text-muted-foreground">Event ID: {selectedEvent?.id}</div>
-                <Button variant="outline" onClick={() => setSelectedEvent(null)}>
+                <Button variant="outline" onClick={() => setSelectedEvent(null)} className="cursor-pointer">
                   Close
                 </Button>
               </DialogFooter>

@@ -763,7 +763,7 @@ export const AdminCalendarPage: React.FC = () => {
                     </Button>
                   )}
                 </div>
-                <Button variant="outline" onClick={() => setSelectedEvent(null)}>
+                <Button variant="outline" className="cursor-pointer" onClick={() => setSelectedEvent(null)}>
                   Close
                 </Button>
               </DialogFooter>
@@ -911,11 +911,12 @@ export const AdminCalendarPage: React.FC = () => {
                       variant="outline"
                       disabled={!authReady || !oauthClientId}
                       onClick={() => void requestAccessToken('consent')}
+                      className="cursor-pointer"
                     >
                       Connect Calendar
                     </Button>
                   ) : (
-                    <Button type="button" variant="outline" onClick={signOut}>
+                    <Button type="button" variant="outline" className="cursor-pointer" onClick={signOut}>
                       Disconnect Calendar
                     </Button>
                   )}
@@ -929,11 +930,12 @@ export const AdminCalendarPage: React.FC = () => {
                       (!accessToken && !authReady)
                     }
                     onClick={() => void createEventInCalendar()}
+                    className="cursor-pointer"
                   >
                     {createSubmitting ? 'Creating…' : 'Create'}
                   </Button>
                 </div>
-                <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                <Button variant="outline" className="cursor-pointer" onClick={() => setCreateDialogOpen(false)}>
                   Cancel
                 </Button>
               </DialogFooter>
@@ -946,18 +948,19 @@ export const AdminCalendarPage: React.FC = () => {
             subtitle="Click on the date to add an appointment."
             rightContent={(
               <>
-                <Button variant="default" size="lg" onClick={goToday}>Today</Button>
-                <Button variant="default" size="lg" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create appointment</Button>
-                <Button variant="default" size="lg" onClick={openCreateEvent}>Create Google Calendar event</Button>   
+                <Button variant="default" size="lg" className="cursor-pointer" onClick={goToday}>Today</Button>
+                <Button variant="default" size="lg" className="cursor-pointer" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create appointment</Button>
+                <Button variant="default" size="lg" className="cursor-pointer" onClick={openCreateEvent}>Create Google Calendar event</Button>   
                 {accessToken ? (
-                  <Button variant="default" size="lg" onClick={signOut}>Disconnect Calendar</Button>
+                  <Button variant="default" size="lg" className="cursor-pointer" onClick={signOut}>Disconnect Calendar</Button>
                 ) : (
-                  <Button variant="default" size="lg" onClick={() => void requestAccessToken('consent')}>Connect Calendar</Button>
+                  <Button variant="default" size="lg" className="cursor-pointer" onClick={() => void requestAccessToken('consent')}>Connect Calendar</Button>
                 )}
                 <Button 
                   variant="outline" 
                   size="lg" 
                   onClick={() => setShowEventsPanel(!showEventsPanel)}
+                  className="cursor-pointer"
                 >
                   {showEventsPanel ? 'Hide Panel' : 'Show Panel'}
                 </Button>
@@ -1001,7 +1004,7 @@ export const AdminCalendarPage: React.FC = () => {
           {error && (
             <div className="error-box">
               <div className="error-content">
-                <div className="error-icon">❌</div>
+                <div className="error-icon cursor-pointer">❌</div>
                 <div>
                   <div className="error-title">Error Loading Events</div>
                   <div className="error-message">{error}</div>
@@ -1124,7 +1127,7 @@ export const AdminCalendarPage: React.FC = () => {
                     <button
                       key={e.id}
                       type="button"
-                      className={`event-card ${isInquiry ? 'event-inquiry' : 'event-google'}`}
+                      className={`event-card cursor-pointer ${isInquiry ? 'event-inquiry' : 'event-google'}`}
                       onClick={() => {
                         setSelectedEvent(e);
                         const d = normalizeDate(e);

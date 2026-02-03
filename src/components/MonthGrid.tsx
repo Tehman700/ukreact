@@ -34,12 +34,12 @@ export const MonthGrid = <TEvent,>({
 }: MonthGridProps<TEvent>) => {
   return (
     <div className={`calendar-section ${!showPanel ? 'calendar-section-full' : ''}`}>
-      <div className="month-navigation">
-        <button onClick={onPrevMonth}>
+       <div className="month-navigation">
+        <button onClick={onPrevMonth} className="cursor-pointer">
           <ChevronLeft />
         </button>
         <h2>{formatMonthYear(currentDate)}</h2>
-        <button onClick={onNextMonth}>
+        <button onClick={onNextMonth} className="cursor-pointer">
           <ChevronRight />
         </button>
       </div>

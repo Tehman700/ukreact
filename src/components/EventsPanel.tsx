@@ -49,7 +49,7 @@ export const EventsPanel = <TEvent,>({
             size="sm"
             variant={mode === 'day' ? 'default' : 'outline'}
             onClick={() => onModeChange('day')}
-            className={hidden ? 'hidden' : ''}
+            className={hidden ? 'hidden' : 'cursor-pointer'}
           >
             Day
           </Button>
@@ -57,7 +57,7 @@ export const EventsPanel = <TEvent,>({
             size="sm"
             variant={mode === 'upcoming' ? 'default' : 'outline'}
             onClick={() => onModeChange('upcoming')}
-            className={hidden ? 'hidden' : ''}
+            className={hidden ? 'hidden' : 'cursor-pointer'}
           >
             Upcoming
           </Button>
