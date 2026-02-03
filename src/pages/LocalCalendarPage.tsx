@@ -378,7 +378,7 @@ export const LocalCalendarPage: React.FC = () => {
 
       // Schedule automated reminder (30 minutes before appointment)
       try {
-        await fetch('http://localhost:3003/api/schedule-reminder', {
+        await fetch('https://luther.health/api/schedule-reminder', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

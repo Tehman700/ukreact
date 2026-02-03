@@ -1,18 +1,16 @@
-import 'dotenv/config';
+import "dotenv/config";
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
 import pkg from "pg";
-import OpenAI from 'openai';
-import nodemailer from 'nodemailer';
+import OpenAI from "openai";
+import nodemailer from "nodemailer";
 import bizSdk from "facebook-nodejs-business-sdk";
-import PDFDocument from 'pdfkit';
-import { Buffer} from 'buffer';
+import PDFDocument from "pdfkit";
+import { Buffer } from "buffer";
 import puppeteer from "puppeteer";
-import twilio from 'twilio';
-import { createClient } from '@supabase/supabase-js';
-
-
+import twilio from "twilio";
+import { createClient } from "@supabase/supabase-js";
 
 const { Pool } = pkg;
 const app = express();
@@ -29,7 +27,7 @@ const openai = new OpenAI({
 // EMAIL CONFIGURATION
 // ----------------------------
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
@@ -38,9 +36,9 @@ const transporter = nodemailer.createTransport({
 
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ Email configuration error:', error);
+    console.error("❌ Email configuration error:", error);
   } else {
-    console.log('✅ Email server ready');
+    console.log("✅ Email server ready");
   }
 });
 
@@ -53,20 +51,25 @@ let twilioClient = null;
 const twilioSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioToken = process.env.TWILIO_AUTH_TOKEN;
 
-if (twilioSid && twilioToken && 
-    twilioSid.startsWith('AC') && 
-    twilioSid !== 'your_twilio_account_sid_here' &&
-    twilioToken !== 'your_twilio_auth_token_here') {
+if (
+  twilioSid &&
+  twilioToken &&
+  twilioSid.startsWith("AC") &&
+  twilioSid !== "your_twilio_account_sid_here" &&
+  twilioToken !== "your_twilio_auth_token_here"
+) {
   try {
     twilioClient = twilio(twilioSid, twilioToken);
-    console.log('✅ Twilio SMS service ready');
+    console.log("✅ Twilio SMS service ready");
   } catch (error) {
-    console.error('❌ Twilio initialization error:', error.message);
-    console.warn('⚠️  SMS reminders disabled');
+    console.error("❌ Twilio initialization error:", error.message);
+    console.warn("⚠️  SMS reminders disabled");
   }
 } else {
-  console.warn('⚠️  Twilio not configured - SMS reminders disabled');
-  console.log('   💡 To enable SMS: Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env');
+  console.warn("⚠️  Twilio not configured - SMS reminders disabled");
+  console.log(
+    "   💡 To enable SMS: Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env",
+  );
 }
 
 // ----------------------------
@@ -74,17 +77,12 @@ if (twilioSid && twilioToken &&
 // ----------------------------
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_ANON_KEY
+  process.env.VITE_SUPABASE_ANON_KEY,
 );
-console.log('✅ Supabase client initialized');
-
-
-
-
-
+console.log("✅ Supabase client initialized");
 
 // Important: Raw body parsing for webhook BEFORE express.json()
-app.use('/api/webhook', express.raw({ type: 'application/json' }));
+app.use("/api/webhook", express.raw({ type: "application/json" }));
 
 // JSON parsing for other routes
 app.use(express.json());
@@ -106,10 +104,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
-
 const stripeSpecial = new Stripe(process.env.STRIPE_SECRET_KEY_SPECIAL, {
   apiVersion: "2022-11-15",
-});  
+});
 
 // ----------------------------
 // POSTGRES
@@ -122,7 +119,8 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-pool.connect()
+pool
+  .connect()
   .then(() => console.log("✅ Connected to PostgreSQL"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
@@ -142,7 +140,7 @@ app.post("/api/users", async (req, res) => {
          phone = EXCLUDED.phone,
          age_range = EXCLUDED.age_range
        RETURNING *`,
-      [first_name, last_name, email, phone, age_range]
+      [first_name, last_name, email, phone, age_range],
     );
 
     res.json(result.rows[0]);
@@ -165,7 +163,7 @@ app.post("/api/assessments", async (req, res) => {
     const assessmentResult = await client.query(
       `INSERT INTO assessments (user_id, assessment_type)
        VALUES ($1, $2) RETURNING *`,
-      [user_id, assessment_type]
+      [user_id, assessment_type],
     );
 
     const assessment = assessmentResult.rows[0];
@@ -174,7 +172,7 @@ app.post("/api/assessments", async (req, res) => {
       await client.query(
         `INSERT INTO answers (assessment_id, question_text, answer)
          VALUES ($1, $2, $3)`,
-        [assessment.id, ans.question, ans.answer]
+        [assessment.id, ans.question, ans.answer],
       );
     }
 
@@ -193,9 +191,13 @@ app.post("/api/assessments", async (req, res) => {
 // 3. Stripe Checkout
 // ----------------------------
 app.post("/api/create-checkout-session", async (req, res) => {
-   console.log("💳 Creating Stripe checkout session...");
+  console.log("💳 Creating Stripe checkout session...");
   try {
-    const { products, funnel_type = "complication-risk", page = "home-test" } = req.body; // Add funnel_type and page parameters
+    const {
+      products,
+      funnel_type = "complication-risk",
+      page = "home-test",
+    } = req.body; // Add funnel_type and page parameters
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
@@ -217,46 +219,51 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const funnelRouteMap = {
       "complication-risk": "complication-risk-checker-questions",
       "recovery-speed": "recovery-speed-predictor-questions",
-      "surgery-readiness": "surgery-readiness-assessment-questions",  // Changed
-      "surgery-readiness-a": "surgery-readiness-assessment-results-a",  // Variant A
-      "surgery-readiness-b": "surgery-readiness-assessment-results-b",  // Variant B
-      "surgery-readiness-c": "surgery-readiness-assessment-results-c",  // Variant C
-      "anesthesia": "anaesthesia-risk-screener-questions",
-      "mobility": "mobility-strength-score-questions",
-      "symptom": "symptom-severity-index-questions",
-      "inflammation": "inflammation-risk-score-questions",
-      "medication": "medication-burden-calculator-questions",
-      "energy": "daily-energy-audit-questions",
-      "lifestyle": "lifestyle-limiter-score-questions",
-      "bio": "biological-age-calculator-questions",
-      "card": "cardiometabolic-risk-score-questions",
-      "res": "resilience-index-questions",
-      "nutrition": "nutrition-body-composition-score-questions",
-      "functional": "functional-fitness-age-test-questions",
-      "surgery": "completed-surgery-preparation-bundle-questions",
-      "chronic": "completed-chronic-symptoms-bundle-questions",
-      "longevity": "longevity-wellness-bundle-questions",
+      "surgery-readiness": "surgery-readiness-assessment-questions", // Changed
+      "surgery-readiness-a": "surgery-readiness-assessment-results-a", // Variant A
+      "surgery-readiness-b": "surgery-readiness-assessment-results-b", // Variant B
+      "surgery-readiness-c": "surgery-readiness-assessment-results-c", // Variant C
+      anesthesia: "anaesthesia-risk-screener-questions",
+      mobility: "mobility-strength-score-questions",
+      symptom: "symptom-severity-index-questions",
+      inflammation: "inflammation-risk-score-questions",
+      medication: "medication-burden-calculator-questions",
+      energy: "daily-energy-audit-questions",
+      lifestyle: "lifestyle-limiter-score-questions",
+      bio: "biological-age-calculator-questions",
+      card: "cardiometabolic-risk-score-questions",
+      res: "resilience-index-questions",
+      nutrition: "nutrition-body-composition-score-questions",
+      functional: "functional-fitness-age-test-questions",
+      surgery: "completed-surgery-preparation-bundle-questions",
+      chronic: "completed-chronic-symptoms-bundle-questions",
+      longevity: "longevity-wellness-bundle-questions",
       "chronic-symptom-protocol": "chronic-symptom-protocol-challenge",
       "longevity-focus-protocol": "longevity-focus-protocol-challenge",
-
     };
 
-    const questionRoute = funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
+    const questionRoute =
+      funnelRouteMap[funnel_type] || "complication-risk-checker-questions";
 
     // Choose Stripe instance based on page
     const stripeInstance = [
-      'surgery-readiness-assessment-learn-more',
-      'surgery-readiness-assessment-learn-more-b',
-      'surgery-checklist',
-      'surgery-conditioning-protocol-challenge'
-    ].includes(page) ? stripeSpecial : stripe;
+      "surgery-readiness-assessment-learn-more",
+      "surgery-readiness-assessment-learn-more-b",
+      "surgery-checklist",
+      "surgery-conditioning-protocol-challenge",
+    ].includes(page)
+      ? stripeSpecial
+      : stripe;
     let successUrl = "https://luther.health/Health-Audit.html#thank-you";
 
-    if(page == 'surgery-checklist'){
-        successUrl = "https://luther.health/Health-Audit.html#surgery-readiness-assessment-results";
+    if (page == "surgery-checklist") {
+      successUrl =
+        "https://luther.health/Health-Audit.html#surgery-readiness-assessment-results";
     }
 
-    console.log(`💳 Using ${stripeInstance === stripeSpecial ? 'SPECIAL' : 'DEFAULT'} Stripe instance for page: ${page}`);
+    console.log(
+      `💳 Using ${stripeInstance === stripeSpecial ? "SPECIAL" : "DEFAULT"} Stripe instance for page: ${page}`,
+    );
 
     const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -264,7 +271,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       mode: "payment",
       metadata: {
         funnel_type: funnel_type,
-        page: page
+        page: page,
       },
       success_url: successUrl,
       cancel_url: "https://luther.health/Health-Audit.html#cancel",
@@ -281,7 +288,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 // Update your existing webhook to store funnel_type
 app.post("/api/webhook", async (req, res) => {
   let event = req.body;
-  const signature = req.headers['stripe-signature'];
+  const signature = req.headers["stripe-signature"];
 
   // First, try to parse the event to get metadata and determine which webhook secret to use
   let parsedEvent;
@@ -292,17 +299,24 @@ app.post("/api/webhook", async (req, res) => {
   }
 
   // Check if this is from the special Stripe account based on session metadata
-  const sessionPage = parsedEvent?.data?.object?.metadata?.page || '';
-  const useSpecialStripe = ['surgery-readiness-assessment-learn-more', 'surgery-readiness-assessment-learn-more-b','surgery-conditioning-protocol-challenge','surgery-checklist'].includes(sessionPage);
-  
+  const sessionPage = parsedEvent?.data?.object?.metadata?.page || "";
+  const useSpecialStripe = [
+    "surgery-readiness-assessment-learn-more",
+    "surgery-readiness-assessment-learn-more-b",
+    "surgery-conditioning-protocol-challenge",
+    "surgery-checklist",
+  ].includes(sessionPage);
+
   console.log(`🔔 Webhook received for page: ${sessionPage}`);
-  console.log(`💳 Using ${useSpecialStripe ? 'SPECIAL' : 'DEFAULT'} webhook secret`);
+  console.log(
+    `💳 Using ${useSpecialStripe ? "SPECIAL" : "DEFAULT"} webhook secret`,
+  );
 
   // Verify webhook signature with appropriate secret
-  const webhookSecret = useSpecialStripe 
-    ? process.env.STRIPE_WEBHOOK_SECRET_SPECIAL 
+  const webhookSecret = useSpecialStripe
+    ? process.env.STRIPE_WEBHOOK_SECRET_SPECIAL
     : process.env.STRIPE_WEBHOOK_SECRET;
-  
+
   const stripeInstance = useSpecialStripe ? stripeSpecial : stripe;
 
   if (webhookSecret) {
@@ -310,9 +324,13 @@ app.post("/api/webhook", async (req, res) => {
       event = stripeInstance.webhooks.constructEvent(
         req.body,
         signature,
-        webhookSecret
+        webhookSecret,
       );
-      console.log("✅ Webhook signature verified with " + (useSpecialStripe ? "SPECIAL" : "DEFAULT") + " secret");
+      console.log(
+        "✅ Webhook signature verified with " +
+          (useSpecialStripe ? "SPECIAL" : "DEFAULT") +
+          " secret",
+      );
     } catch (err) {
       console.log(`⚠️ Webhook signature verification failed:`, err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -341,14 +359,19 @@ app.post("/api/webhook", async (req, res) => {
       `);
 
       // Get line items from Stripe session using the correct Stripe instance
-      const lineItems = await stripeInstance.checkout.sessions.listLineItems(session.id);
-      const productName = lineItems.data.map(item => item.description).join(', ');
+      const lineItems = await stripeInstance.checkout.sessions.listLineItems(
+        session.id,
+      );
+      const productName = lineItems.data
+        .map((item) => item.description)
+        .join(", ");
 
       // Get funnel type from session metadata
-      const funnelType = session.metadata?.funnel_type || 'complication-risk';
+      const funnelType = session.metadata?.funnel_type || "complication-risk";
 
       // Store payment in database
-      const paymentResult = await pool.query(`
+      const paymentResult = await pool.query(
+        `
         INSERT INTO stripe_payments (
           stripe_session_id,
           customer_email,
@@ -365,20 +388,22 @@ app.post("/api/webhook", async (req, res) => {
           funnel_type = EXCLUDED.funnel_type,
           updated = CURRENT_TIMESTAMP
         RETURNING *
-      `, [
-        session.id,
-        session.customer_email,
-        session.amount_total,
-        session.currency,
-        'paid', // Use 'paid' status for successful payments
-        productName,
-        JSON.stringify(lineItems.data),
-        funnelType
-      ]);
+      `,
+        [
+          session.id,
+          session.customer_email,
+          session.amount_total,
+          session.currency,
+          "paid", // Use 'paid' status for successful payments
+          productName,
+          JSON.stringify(lineItems.data),
+          funnelType,
+        ],
+      );
 
       console.log("💾 Payment stored in database:", paymentResult.rows[0]);
 
-          // Your existing Meta Conversion API code remains the same...
+      // Your existing Meta Conversion API code remains the same...
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
       console.log("🎯 Preparing to send Meta Conversion API event...");
@@ -386,14 +411,13 @@ app.post("/api/webhook", async (req, res) => {
       console.log("💰 Purchase amount:", session.amount_total / 100);
       console.log("💱 Currency:", session.currency.toUpperCase());
 
-      const userData = (new UserData())
-        .setEmails([session.customer_email]);
+      const userData = new UserData().setEmails([session.customer_email]);
 
-      const customData = (new CustomData())
+      const customData = new CustomData()
         .setValue(session.amount_total / 100)
         .setCurrency(session.currency.toUpperCase());
 
-      const serverEvent = (new ServerEvent())
+      const serverEvent = new ServerEvent()
         .setEventName("Purchase")
         .setEventTime(currentTimestamp)
         .setUserData(userData)
@@ -401,8 +425,10 @@ app.post("/api/webhook", async (req, res) => {
         .setActionSource("website")
         .setEventSourceUrl("https://luther.health/Health-Audit.html#success");
 
-      const eventRequest = (new EventRequest(process.env.META_ACCESS_TOKEN, process.env.META_PIXEL_ID))
-        .setEvents([serverEvent]);
+      const eventRequest = new EventRequest(
+        process.env.META_ACCESS_TOKEN,
+        process.env.META_PIXEL_ID,
+      ).setEvents([serverEvent]);
 
       const response = await eventRequest.execute();
       console.log("✅ Meta Conversion API SUCCESS!");
@@ -413,12 +439,9 @@ app.post("/api/webhook", async (req, res) => {
       }
       if (response && response.messages) {
         console.log("📝 Meta response messages:", response.messages);
-      } 
-
-
-
+      }
     } catch (err) {
-       res.json({ received: true,message:err.message });
+      res.json({ received: true, message: err.message });
       console.error("❌ Database/Meta API ERROR:", err.message);
       console.error("🔍 Full error details:", err);
     }
@@ -426,7 +449,6 @@ app.post("/api/webhook", async (req, res) => {
 
   res.json({ received: true });
 });
-
 
 // ----------------------------
 // ANALYTICS ENDPOINTS
@@ -436,7 +458,9 @@ app.post("/api/webhook", async (req, res) => {
 app.get("/api/analytics/dashboard", async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const start =
+      startDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const end = endDate || new Date().toISOString();
 
     // Get user registrations
@@ -481,24 +505,42 @@ app.get("/api/analytics/dashboard", async (req, res) => {
     const [usersResult, assessmentsResult, paymentsResult] = await Promise.all([
       pool.query(usersQuery, [start, end]),
       pool.query(assessmentsQuery, [start, end]),
-      pool.query(paymentsQuery, [start, end])
+      pool.query(paymentsQuery, [start, end]),
     ]);
 
     // Calculate metrics
-    const totalUsers = usersResult.rows.reduce((sum, row) => sum + parseInt(row.total_users), 0);
-    const totalAssessments = assessmentsResult.rows.reduce((sum, row) => sum + parseInt(row.total_assessments), 0);
-    const totalPurchases = paymentsResult.rows.reduce((sum, row) => sum + parseInt(row.total_purchases), 0);
-    const totalRevenue = paymentsResult.rows.reduce((sum, row) => sum + parseFloat(row.total_revenue || 0), 0);
+    const totalUsers = usersResult.rows.reduce(
+      (sum, row) => sum + parseInt(row.total_users),
+      0,
+    );
+    const totalAssessments = assessmentsResult.rows.reduce(
+      (sum, row) => sum + parseInt(row.total_assessments),
+      0,
+    );
+    const totalPurchases = paymentsResult.rows.reduce(
+      (sum, row) => sum + parseInt(row.total_purchases),
+      0,
+    );
+    const totalRevenue = paymentsResult.rows.reduce(
+      (sum, row) => sum + parseFloat(row.total_revenue || 0),
+      0,
+    );
 
-    const conversionRate = totalUsers > 0 ? (totalPurchases / totalUsers * 100) : 0;
-    const avgOrderValue = totalPurchases > 0 ? (totalRevenue / totalPurchases) : 0;
+    const conversionRate =
+      totalUsers > 0 ? (totalPurchases / totalUsers) * 100 : 0;
+    const avgOrderValue =
+      totalPurchases > 0 ? totalRevenue / totalPurchases : 0;
 
     // Process daily data
     const dailyMetrics = {};
 
     // Combine all daily data
-    [...usersResult.rows, ...assessmentsResult.rows, ...paymentsResult.rows].forEach(row => {
-      const dateKey = row.date?.toISOString().split('T')[0];
+    [
+      ...usersResult.rows,
+      ...assessmentsResult.rows,
+      ...paymentsResult.rows,
+    ].forEach((row) => {
+      const dateKey = row.date?.toISOString().split("T")[0];
       if (!dateKey) return;
 
       if (!dailyMetrics[dateKey]) {
@@ -507,32 +549,38 @@ app.get("/api/analytics/dashboard", async (req, res) => {
           users: 0,
           assessments: 0,
           purchases: 0,
-          revenue: 0
+          revenue: 0,
         };
       }
 
-      if (row.total_users) dailyMetrics[dateKey].users += parseInt(row.total_users);
-      if (row.total_assessments) dailyMetrics[dateKey].assessments += parseInt(row.total_assessments);
-      if (row.total_purchases) dailyMetrics[dateKey].purchases += parseInt(row.total_purchases);
-      if (row.total_revenue) dailyMetrics[dateKey].revenue += parseFloat(row.total_revenue);
+      if (row.total_users)
+        dailyMetrics[dateKey].users += parseInt(row.total_users);
+      if (row.total_assessments)
+        dailyMetrics[dateKey].assessments += parseInt(row.total_assessments);
+      if (row.total_purchases)
+        dailyMetrics[dateKey].purchases += parseInt(row.total_purchases);
+      if (row.total_revenue)
+        dailyMetrics[dateKey].revenue += parseFloat(row.total_revenue);
     });
 
-    const dailyData = Object.values(dailyMetrics).sort((a, b) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+    const dailyData = Object.values(dailyMetrics).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
     // Assessment performance
     const assessmentPerformance = {};
-    assessmentsResult.rows.forEach(row => {
+    assessmentsResult.rows.forEach((row) => {
       const type = row.assessment_type;
       if (!assessmentPerformance[type]) {
         assessmentPerformance[type] = {
           name: type,
           total_starts: 0,
-          unique_users: 0
+          unique_users: 0,
         };
       }
-      assessmentPerformance[type].total_starts += parseInt(row.total_assessments);
+      assessmentPerformance[type].total_starts += parseInt(
+        row.total_assessments,
+      );
       assessmentPerformance[type].unique_users += parseInt(row.unique_users);
     });
 
@@ -546,18 +594,17 @@ app.get("/api/analytics/dashboard", async (req, res) => {
           totalRevenue: Math.round(totalRevenue * 100) / 100,
           conversionRate: Math.round(conversionRate * 100) / 100,
           avgOrderValue: Math.round(avgOrderValue * 100) / 100,
-          avgSessionDuration: 245 // This would need page view tracking
+          avgSessionDuration: 245, // This would need page view tracking
         },
         dailyMetrics: dailyData,
         assessmentPerformance: Object.values(assessmentPerformance),
         revenueMetrics: {
           totalRevenue: Math.round(totalRevenue * 100) / 100,
           averageOrderValue: Math.round(avgOrderValue * 100) / 100,
-          conversionRate: Math.round(conversionRate * 100) / 100
-        }
-      }
+          conversionRate: Math.round(conversionRate * 100) / 100,
+        },
+      },
     });
-
   } catch (error) {
     console.error("Analytics dashboard error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -568,7 +615,9 @@ app.get("/api/analytics/dashboard", async (req, res) => {
 app.get("/api/analytics/payments", async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const start =
+      startDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const end = endDate || new Date().toISOString();
 
     const paymentsQuery = `
@@ -591,17 +640,17 @@ app.get("/api/analytics/payments", async (req, res) => {
     const revenueByProduct = {};
     const paymentsByStatus = {};
 
-    result.rows.forEach(payment => {
+    result.rows.forEach((payment) => {
       // This assumes you store line items or product info
-      const productName = payment.product_name || 'Unknown Product';
-      const status = payment.status || 'unknown';
+      const productName = payment.product_name || "Unknown Product";
+      const status = payment.status || "unknown";
       const amount = parseFloat(payment.amount_total) / 100;
 
       if (!revenueByProduct[productName]) {
         revenueByProduct[productName] = {
           name: productName,
           revenue: 0,
-          count: 0
+          count: 0,
         };
       }
       revenueByProduct[productName].revenue += amount;
@@ -616,10 +665,9 @@ app.get("/api/analytics/payments", async (req, res) => {
         payments: result.rows,
         revenueByProduct: Object.values(revenueByProduct),
         paymentsByStatus,
-        totalPayments: result.rows.length
-      }
+        totalPayments: result.rows.length,
+      },
     });
-
   } catch (error) {
     console.error("Payments analytics error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -630,7 +678,9 @@ app.get("/api/analytics/payments", async (req, res) => {
 app.get("/api/analytics/funnel", async (req, res) => {
   try {
     const { startDate, endDate, assessmentType } = req.query;
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const start =
+      startDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const end = endDate || new Date().toISOString();
 
     let whereClause = "WHERE a.created_at BETWEEN $1 AND $2";
@@ -661,7 +711,7 @@ app.get("/api/analytics/funnel", async (req, res) => {
 
     const result = await pool.query(funnelQuery, queryParams);
 
-    const funnelData = result.rows.map(row => {
+    const funnelData = result.rows.map((row) => {
       const started = parseInt(row.started);
       const completed = parseInt(row.completed);
       const purchased = parseInt(row.purchased);
@@ -671,16 +721,19 @@ app.get("/api/analytics/funnel", async (req, res) => {
         started,
         completed,
         purchased,
-        completionRate: started > 0 ? Math.round((completed / started) * 100 * 100) / 100 : 0,
-        conversionRate: completed > 0 ? Math.round((purchased / completed) * 100 * 100) / 100 : 0
+        completionRate:
+          started > 0 ? Math.round((completed / started) * 100 * 100) / 100 : 0,
+        conversionRate:
+          completed > 0
+            ? Math.round((purchased / completed) * 100 * 100) / 100
+            : 0,
       };
     });
 
     res.json({
       success: true,
-      data: funnelData
+      data: funnelData,
     });
-
   } catch (error) {
     console.error("Funnel analytics error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -691,7 +744,9 @@ app.get("/api/analytics/funnel", async (req, res) => {
 app.get("/api/analytics/users", async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const start =
+      startDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const end = endDate || new Date().toISOString();
 
     // Age range distribution
@@ -729,20 +784,19 @@ app.get("/api/analytics/users", async (req, res) => {
 
     const [ageRangeResult, activityResult] = await Promise.all([
       pool.query(ageRangeQuery, [start, end]),
-      pool.query(activityQuery, [start, end])
+      pool.query(activityQuery, [start, end]),
     ]);
 
     res.json({
       success: true,
       data: {
         ageRangeDistribution: ageRangeResult.rows,
-        topUsers: activityResult.rows.map(user => ({
+        topUsers: activityResult.rows.map((user) => ({
           ...user,
-          total_spent: parseFloat(user.total_spent || 0)
-        }))
-      }
+          total_spent: parseFloat(user.total_spent || 0),
+        })),
+      },
     });
-
   } catch (error) {
     console.error("User analytics error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -770,14 +824,13 @@ app.post("/api/analytics/pageview", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO page_views (page, user_id, session_id, referrer, user_agent)
        VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-      [page, user_id, session_id, referrer, user_agent]
+      [page, user_id, session_id, referrer, user_agent],
     );
 
     res.json({
       success: true,
-      eventId: result.rows[0].id
+      eventId: result.rows[0].id,
     });
-
   } catch (error) {
     console.error("Page view tracking error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -791,11 +844,15 @@ app.get("/api/check-payment", async (req, res) => {
     const { session_id, funnel_type } = req.query;
 
     if (!session_id) {
-      return res.status(400).json({ success: false, error: "session_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "session_id is required" });
     }
 
     if (!funnel_type) {
-      return res.status(400).json({ success: false, error: "funnel_type is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "funnel_type is required" });
     }
 
     const result = await pool.query(
@@ -804,7 +861,7 @@ app.get("/api/check-payment", async (req, res) => {
          AND status = 'paid'
          AND funnel_type = $2
        LIMIT 1`,
-      [session_id, funnel_type]
+      [session_id, funnel_type],
     );
 
     if (result.rows.length > 0) {
@@ -815,8 +872,8 @@ app.get("/api/check-payment", async (req, res) => {
         payment_info: {
           amount: result.rows[0].amount_total / 100,
           currency: result.rows[0].currency,
-          created: result.rows[0].created
-        }
+          created: result.rows[0].created,
+        },
       });
     } else {
       return res.json({ success: true, paid: false });
@@ -827,15 +884,17 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-app.post('/api/verify-payment', async (req, res) => {
+app.post("/api/verify-payment", async (req, res) => {
   try {
     const { sessionId, assessmentType } = req.body;
-    
+
     if (!sessionId) {
-      return res.status(400).json({ success: false, error: "sessionId is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "sessionId is required" });
     }
 
-    console.log('🔍 Verifying payment for session:', sessionId);
+    console.log("🔍 Verifying payment for session:", sessionId);
 
     // First, check payment status in Stripe
     let stripeSession;
@@ -845,103 +904,95 @@ app.post('/api/verify-payment', async (req, res) => {
     } catch (err) {
       // If not found, try special Stripe instance
       try {
-        stripeSession = await stripeSpecial.checkout.sessions.retrieve(sessionId);
-        console.log('✅ Found session in special Stripe account');
+        stripeSession =
+          await stripeSpecial.checkout.sessions.retrieve(sessionId);
+        console.log("✅ Found session in special Stripe account");
       } catch (err2) {
-        console.error('❌ Session not found in either Stripe account:', err2.message);
-        return res.status(404).json({ 
-          success: false, 
+        console.error(
+          "❌ Session not found in either Stripe account:",
+          err2.message,
+        );
+        return res.status(404).json({
+          success: false,
           error: "Payment session not found",
-          paymentStatus: 'not_found'
+          paymentStatus: "not_found",
         });
       }
     }
 
-    console.log('💳 Stripe session status:', stripeSession.payment_status);
-    console.log('💰 Amount:', stripeSession.amount_total / 100, stripeSession.currency);
+    console.log("💳 Stripe session status:", stripeSession.payment_status);
+    console.log(
+      "💰 Amount:",
+      stripeSession.amount_total / 100,
+      stripeSession.currency,
+    );
 
     // Check if payment is completed in Stripe
-    if (stripeSession.payment_status === 'paid') {
-      return res.json({ 
-        success: true, 
-        paymentStatus: 'paid',
+    if (stripeSession.payment_status === "paid") {
+      return res.json({
+        success: true,
+        paymentStatus: "paid",
         amount: stripeSession.amount_total / 100,
         currency: stripeSession.currency,
-        customerEmail: stripeSession.customer_email
+        customerEmail: stripeSession.customer_email,
       });
     }
 
     // Payment is confirmed in Stripe, now check database
     const payment = await pool.query(
       `SELECT * FROM stripe_payments WHERE stripe_session_id = $1 AND status = 'paid' LIMIT 1`,
-      [sessionId]
+      [sessionId],
     );
 
     if (payment.rows.length > 0) {
-      console.log('✅ Payment verified in both Stripe and database');
-      res.json({ 
-        success: true, 
-        paymentStatus: 'paid',
+      console.log("✅ Payment verified in both Stripe and database");
+      res.json({
+        success: true,
+        paymentStatus: "paid",
         amount: stripeSession.amount_total / 100,
         currency: stripeSession.currency,
-        customerEmail: stripeSession.customer_email
+        customerEmail: stripeSession.customer_email,
       });
     } else {
-      console.log('⚠️ Payment found in Stripe but not in database yet');
-      res.json({ 
-        success: true, 
-        paymentStatus: 'paid',
+      console.log("⚠️ Payment found in Stripe but not in database yet");
+      res.json({
+        success: true,
+        paymentStatus: "paid",
         amount: stripeSession.amount_total / 100,
         currency: stripeSession.currency,
-        customerEmail: stripeSession.customer_email
+        customerEmail: stripeSession.customer_email,
       });
     }
-
   } catch (error) {
     console.error("❌ Verify payment error:", error);
-    res.status(500).json({ success: false, error: "Server error", details: error.message });
+    res
+      .status(500)
+      .json({ success: false, error: "Server error", details: error.message });
   }
 });
 
-app.post('/api/process-surgery-assessment', async (req, res) => {
-    try {
-      const { funnelName, userInfo, questions } = req.body;
+app.post("/api/process-surgery-assessment", async (req, res) => {
+  try {
+    const { funnelName, userInfo, questions } = req.body;
 
-      const n8n = await fetch('https://tehman600.app.n8n.cloud/webhook-test/0168cf8f-2289-4927-aa8e-320ecf41c160', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    const n8n = await fetch(
+      "https://tehman600.app.n8n.cloud/webhook-test/0168cf8f-2289-4927-aa8e-320ecf41c160",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           funnelName,
           userInfo,
-          questions
-        })
-      });
+          questions,
+        }),
+      },
+    );
 
-      const aliData = await n8n.json();
-
-
-
-    } catch (error) {
-      console.error('sgdfhsdfhsgfhfsghsfghj');
-    }
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    const aliData = await n8n.json();
+  } catch (error) {
+    console.error("sgdfhsdfhsgfhfsghsfghj");
+  }
+});
 
 // ----------------------------
 // Generate AI Assessment Report
@@ -950,9 +1001,9 @@ app.post("/api/generate-assessment-report", async (req, res) => {
   try {
     const { assessmentType, answers, userInfo } = req.body;
 
-    const questionsAndAnswers = answers.map(qa =>
-      `Q: ${qa.question}\nA: ${qa.answer}`
-    ).join('\n\n');
+    const questionsAndAnswers = answers
+      .map((qa) => `Q: ${qa.question}\nA: ${qa.answer}`)
+      .join("\n\n");
 
     // Get the correct system prompt
     let systemPrompt;
@@ -995,7 +1046,8 @@ app.post("/api/generate-assessment-report", async (req, res) => {
     } else if (assessmentType === "Longevity Wellness Bundle") {
       systemPrompt = longevityWellnessBundlePrompt(assessmentType);
     } else {
-      systemPrompt = "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
+      systemPrompt =
+        "You are a health assessment AI. Analyze the responses and provide structured recommendations.";
     }
     const userPrompt = `
 User Information:
@@ -1012,7 +1064,7 @@ Please provide a comprehensive analysis following the exact format specified in 
       model: "gpt-4",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { role: "user", content: userPrompt },
       ],
       temperature: 0.7,
       max_tokens: 3000,
@@ -1025,66 +1077,128 @@ Please provide a comprehensive analysis following the exact format specified in 
     if (assessmentType === "Surgery Readiness") {
       structuredReport = surgeryParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Complication Risk") {
-      structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = complicationParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Recovery Speed") {
-      structuredReport = recoverySpeedParseAIResponse(aiAnalysis, assessmentType);
-    }else if (assessmentType === "Anaesthesia Risk") {
-      structuredReport = anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType);
-    }else if (assessmentType === "Mobility Strength") {
-      structuredReport = mobilityStrengthParseAIResponse(aiAnalysis, assessmentType);
-    }else if (assessmentType === "Symptom Severity") {
-      structuredReport = symptomSeverityParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = recoverySpeedParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
+    } else if (assessmentType === "Anaesthesia Risk") {
+      structuredReport = anaesthesiaRiskParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
+    } else if (assessmentType === "Mobility Strength") {
+      structuredReport = mobilityStrengthParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
+    } else if (assessmentType === "Symptom Severity") {
+      structuredReport = symptomSeverityParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Inflammation Risk") {
-      structuredReport =  inflammationRiskParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = inflammationRiskParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Medication Burden") {
-      structuredReport = medicationBurdenParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = medicationBurdenParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Health Concierge") {
-      structuredReport = healthConciergeParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = healthConciergeParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Daily Energy") {
       structuredReport = dailyEnergyParseAIResponse(aiAnalysis, assessmentType);
     } else if (assessmentType === "Lifestyle Limiter") {
-      structuredReport = lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = lifestyleLimiterParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Biological Age") {
-      structuredReport = biologicalAgeParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = biologicalAgeParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Cardiometabolic Risk") {
-      structuredReport = cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = cardiometabolicRiskParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Resilience Index") {
-      structuredReport = resilienceIndexParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = resilienceIndexParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Nutrition Composition") {
-      structuredReport = nutritionCompositionParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = nutritionCompositionParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Functional Fitness") {
-      structuredReport = functionalFitnessParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = functionalFitnessParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Surgery Preparation Bundle") {
-      structuredReport = surgeryPreparationBundleParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = surgeryPreparationBundleParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Chronic Symptoms Bundle") {
-      structuredReport = chronicSymptomsParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = chronicSymptomsParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else if (assessmentType === "Longevity Wellness Bundle") {
-      structuredReport = longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = longevityWellnessBundleParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     } else {
-      structuredReport = complicationParseAIResponse(aiAnalysis, assessmentType);
+      structuredReport = complicationParseAIResponse(
+        aiAnalysis,
+        assessmentType,
+      );
     }
-    console.log("Structured report created:", JSON.stringify(structuredReport, null, 2));
+    console.log(
+      "Structured report created:",
+      JSON.stringify(structuredReport, null, 2),
+    );
 
     // Store the AI-generated report in database
     const reportResult = await pool.query(
       `INSERT INTO ai_reports (user_id, assessment_type, ai_analysis, structured_report, report_text)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [userInfo.id, assessmentType, aiAnalysis, JSON.stringify(structuredReport), aiAnalysis]
+      [
+        userInfo.id,
+        assessmentType,
+        aiAnalysis,
+        JSON.stringify(structuredReport),
+        aiAnalysis,
+      ],
     );
 
     res.json({
       success: true,
       report: structuredReport,
-      reportId: reportResult.rows[0].id
+      reportId: reportResult.rows[0].id,
     });
-
   } catch (error) {
     console.error("AI report generation error:", error);
     console.error("Error stack:", error.stack); // More detailed error logging
     res.status(500).json({
       success: false,
       error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
@@ -1140,7 +1254,8 @@ SCORING GUIDELINES:
 
 Focus on integrated, evidence-based longevity optimization that is personalized to the patient's actual 60-question comprehensive assessment responses. Emphasize synergistic interventions that optimize multiple domains simultaneously and provide realistic expectations for biological age improvement and healthspan extension.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1197,7 +1312,8 @@ SCORING GUIDELINES:
 
 Focus on actionable, evidence-based, comprehensive recommendations that address the interconnected nature of chronic symptoms. Emphasize modifiable factors across all five assessment domains and provide realistic expectations for improvement timelines.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1266,7 +1382,8 @@ SCORING GUIDELINES:
 
 Provide comprehensive, evidence-based, actionable recommendations that are highly personalized to the patient's actual responses across all 8 assessment categories. Emphasize integration across domains and prioritize interventions by potential impact on surgical outcomes.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1327,7 +1444,8 @@ Consider: movement quality, strength levels, power output, balance capacity, car
 
 Focus on validated functional fitness markers and provide evidence-based exercise recommendations personalized to their responses. Emphasize modifiable factors that can reverse functional aging and restore youthful movement capacity.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1385,7 +1503,8 @@ Consider: dietary quality, protein intake adequacy, micronutrient density, hydra
 
 Focus on validated nutritional science and provide evidence-based dietary recommendations personalized to their responses. Emphasize sustainable nutrition changes that improve body composition and metabolic health.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1443,7 +1562,8 @@ Consider: stress management strategies, recovery practices, change adaptation hi
 
 Focus on validated resilience factors and provide evidence-based recommendations personalized to their responses. Emphasize trainable skills and progressive challenge protocols for building mental toughness and adaptive capacity.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1524,7 +1644,8 @@ RISK COMMUNICATION:
 
 Focus on evidence-based prevention strategies with specific percentage risk reductions from interventions. Emphasize modifiable risk factors and realistic lifestyle changes. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use prevention-focused, empowering language that motivates healthy behavior change while being honest about risk levels.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1611,7 +1732,8 @@ SCORING GUIDELINES:
 
 Focus on actionable, evidence-based longevity recommendations personalized to the patient's actual responses. Emphasize modifiable factors and realistic optimization strategies. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use scientifically accurate but accessible language that motivates positive change while being honest about aging realities.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1675,7 +1797,8 @@ SCORING GUIDELINES:
 
 Focus on empowering, validating, evidence-based recommendations personalized to the patient's actual responses. Acknowledge limitations while emphasizing adaptive strategies and maintained functioning. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use compassionate language that validates impact while promoting active adaptation and quality of life optimization.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1738,7 +1861,8 @@ SCORING GUIDELINES:
 
 Focus on empowering, evidence-based, practical recommendations personalized to the patient's actual responses. Emphasize that energy levels are highly modifiable through sleep, circadian, stress, and nutritional optimization. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use motivating language that promotes sustainable energy management practices.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1802,7 +1926,8 @@ SCORING GUIDELINES:
 
 Focus on patient safety, evidence-based pharmaceutical care, and practical recommendations personalized to the patient's actual responses. Emphasize that medication burden is modifiable through professional review and optimization. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use empowering language while stressing the importance of professional pharmaceutical involvement in any medication changes.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1881,7 +2006,8 @@ SCORING GUIDELINES:
 
 Focus on compassionate, empowering, evidence-based recommendations personalized to the patient's actual responses. Balance acknowledgment of symptom burden with realistic hope for improvement. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use language that validates their experience while promoting active symptom self-management.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -1961,12 +2087,12 @@ PERSONALIZATION BASED ON RESPONSES:
 
 Focus on creating a premium, personalized experience that makes them feel truly understood. Use sophisticated language that respects their intelligence while remaining accessible. Emphasize evidence-based approaches combined with personalized attention. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Make them excited about their health optimization journey with realistic optimism.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
-
 
 function mobilityStrengthPrompt(assessmentType) {
   const prompts = {
@@ -2044,12 +2170,12 @@ RECOVERY TIMELINE PREDICTIONS:
 
 Focus on actionable, evidence-based training recommendations personalized to the patient's actual responses. Emphasize modifiable factors and realistic conditioning strategies. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use empowering language that motivates pre-operative preparation while being realistic about recovery expectations.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
-
 
 function anaesthesiaRiskPrompt(assessmentType) {
   const prompts = {
@@ -2116,14 +2242,14 @@ SCORING GUIDELINES:
 
 Focus on actionable, evidence-based safety recommendations personalized to the patient's actual responses. Emphasize modifiable risk factors and realistic safety measures. ALWAYS provide specific, unique strengths - never leave blank or say "none provided".`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
 
-
-function complicationRiskPrompt(assessmentType){
+function complicationRiskPrompt(assessmentType) {
   const prompts = {
     "Complication Risk": `You are a medical risk assessment AI specializing in surgical complication analysis. Analyze the patient's responses and provide a comprehensive, evidence-based risk assessment.
 
@@ -2173,16 +2299,15 @@ SCORING GUIDELINES:
 
 Be specific, evidence-based, and provide actionable recommendations that are personalized to the patient's actual responses.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
 
-
-function surgeryReadinessPrompt(assessmentType){
-    const prompts = {
-
+function surgeryReadinessPrompt(assessmentType) {
+  const prompts = {
     "Surgery Readiness": `You are a surgical preparation specialist AI with expertise in preoperative optimization and perioperative medicine. Analyze the patient's responses to assess their readiness for surgical procedures.
 
 IMPORTANT: Structure your response EXACTLY as follows:
@@ -2231,12 +2356,12 @@ SCORING GUIDELINES:
 
 Focus on actionable, evidence-based recommendations that are personalized to the patient's actual responses. Emphasize modifiable factors and realistic timelines for optimization.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
-
 
 function inflammationRiskPrompt(assessmentType) {
   const prompts = {
@@ -2306,12 +2431,12 @@ SCORING GUIDELINES:
 
 Focus on empowering, evidence-based, practical recommendations personalized to the patient's actual responses. Emphasize that inflammation is highly modifiable through lifestyle changes. ALWAYS provide specific, unique strengths - never leave blank or say "none provided". Use motivating language that promotes sustainable anti-inflammatory lifestyle changes.`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
 }
-
 
 function recoverySpeedPrompt(assessmentType) {
   const prompts = {
@@ -2375,7 +2500,8 @@ SCORING GUIDELINES:
 
 Focus on actionable, evidence-based recommendations that are personalized to the patient's actual responses. Emphasize modifiable factors that can accelerate recovery and provide realistic timeline predictions. ALWAYS provide specific, unique strengths - never leave strengths blank or say "none provided".`,
 
-    "default": "You are a health assessment AI. Analyze the responses and provide structured recommendations."
+    default:
+      "You are a health assessment AI. Analyze the responses and provide structured recommendations.",
   };
 
   return prompts[assessmentType] || prompts["default"];
@@ -2387,36 +2513,53 @@ function longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Well Optimized";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Well Optimized";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first - Longevity Bundle specific categories
     if (detailedSection) {
       const categories = [
-        'Biological Age Analysis',
-        'Cardiometabolic Health Assessment',
-        'Resilience Index',
-        'Nutrition & Body Composition',
-        'Functional Fitness Age'
+        "Biological Age Analysis",
+        "Cardiometabolic Health Assessment",
+        "Resilience Index",
+        "Nutrition & Body Composition",
+        "Functional Fitness Age",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -2425,42 +2568,50 @@ function longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Biological Age Analysis',
-        'Cardiometabolic Health Assessment',
-        'Resilience Index',
-        'Nutrition & Body Composition',
-        'Functional Fitness Age'
+        "Biological Age Analysis",
+        "Cardiometabolic Health Assessment",
+        "Resilience Index",
+        "Nutrition & Body Composition",
+        "Functional Fitness Age",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for longevity optimization.`,
-              strengths: ['Baseline assessment completed', 'Areas identified for optimization'],
-              riskFactors: ['Consult healthcare provider for personalized longevity planning'],
-              timeline: 'Discuss optimization timeline with your healthcare team.'
+              strengths: [
+                "Baseline assessment completed",
+                "Areas identified for optimization",
+              ],
+              riskFactors: [
+                "Consult healthcare provider for personalized longevity planning",
+              ],
+              timeline:
+                "Discuss optimization timeline with your healthcare team.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -2473,106 +2624,112 @@ function longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Biological Age Analysis',
-          desc: 'Your biological markers indicate your aging process and cellular health status.',
-          context: 'Biological age assessment reveals how your cells are aging compared to your chronological age, with cellular health, energy, and recovery as key indicators.',
+          name: "Biological Age Analysis",
+          desc: "Your biological markers indicate your aging process and cellular health status.",
+          context:
+            "Biological age assessment reveals how your cells are aging compared to your chronological age, with cellular health, energy, and recovery as key indicators.",
           strengths: [
-            'Good baseline cellular function',
-            'Adequate energy levels for daily activities',
-            'Reasonable recovery patterns',
-            'Awareness of aging optimization importance'
+            "Good baseline cellular function",
+            "Adequate energy levels for daily activities",
+            "Reasonable recovery patterns",
+            "Awareness of aging optimization importance",
           ],
           risks: [
-            'Could optimize cellular health markers',
-            'Room for improved recovery capacity',
-            'Telomere health may benefit from intervention'
-          ]
+            "Could optimize cellular health markers",
+            "Room for improved recovery capacity",
+            "Telomere health may benefit from intervention",
+          ],
         },
         {
-          name: 'Cardiometabolic Health Assessment',
-          desc: 'Your cardiovascular and metabolic health indicators show your disease risk profile.',
-          context: 'Cardiometabolic health is fundamental to longevity, with cardiovascular fitness, blood pressure, cholesterol, and metabolic function as critical longevity determinants.',
+          name: "Cardiometabolic Health Assessment",
+          desc: "Your cardiovascular and metabolic health indicators show your disease risk profile.",
+          context:
+            "Cardiometabolic health is fundamental to longevity, with cardiovascular fitness, blood pressure, cholesterol, and metabolic function as critical longevity determinants.",
           strengths: [
-            'Baseline cardiovascular function maintained',
-            'No major metabolic dysfunction identified',
-            'Awareness of heart health importance',
-            'Some healthy lifestyle practices in place'
+            "Baseline cardiovascular function maintained",
+            "No major metabolic dysfunction identified",
+            "Awareness of heart health importance",
+            "Some healthy lifestyle practices in place",
           ],
           risks: [
-            'Could optimize lipid profile',
-            'Blood pressure management opportunity',
-            'Metabolic flexibility could be enhanced'
-          ]
+            "Could optimize lipid profile",
+            "Blood pressure management opportunity",
+            "Metabolic flexibility could be enhanced",
+          ],
         },
         {
-          name: 'Resilience Index',
-          desc: 'Your mental resilience and stress adaptation capabilities influence longevity.',
-          context: 'Psychological resilience, stress management, and social connections are proven longevity factors, with chronic stress accelerating biological aging.',
+          name: "Resilience Index",
+          desc: "Your mental resilience and stress adaptation capabilities influence longevity.",
+          context:
+            "Psychological resilience, stress management, and social connections are proven longevity factors, with chronic stress accelerating biological aging.",
           strengths: [
-            'Some stress management awareness',
-            'Basic social connections maintained',
-            'Reasonable emotional regulation',
-            'Openness to resilience building'
+            "Some stress management awareness",
+            "Basic social connections maintained",
+            "Reasonable emotional regulation",
+            "Openness to resilience building",
           ],
           risks: [
-            'Chronic stress patterns identified',
-            'Social network could be strengthened',
-            'Mindfulness practices would benefit aging'
-          ]
+            "Chronic stress patterns identified",
+            "Social network could be strengthened",
+            "Mindfulness practices would benefit aging",
+          ],
         },
         {
-          name: 'Nutrition & Body Composition',
-          desc: 'Your nutritional patterns and body composition affect longevity potential.',
-          context: 'Optimal nutrition and healthy body composition are cornerstone longevity factors, with diet quality and body composition strongly predicting healthspan.',
+          name: "Nutrition & Body Composition",
+          desc: "Your nutritional patterns and body composition affect longevity potential.",
+          context:
+            "Optimal nutrition and healthy body composition are cornerstone longevity factors, with diet quality and body composition strongly predicting healthspan.",
           strengths: [
-            'Basic nutritional awareness present',
-            'Some healthy food choices made',
-            'Hydration habits established',
-            'Interest in nutritional optimization'
+            "Basic nutritional awareness present",
+            "Some healthy food choices made",
+            "Hydration habits established",
+            "Interest in nutritional optimization",
           ],
           risks: [
-            'Protein intake could be optimized',
-            'Body composition would benefit from adjustment',
-            'Micronutrient profile needs enhancement'
-          ]
+            "Protein intake could be optimized",
+            "Body composition would benefit from adjustment",
+            "Micronutrient profile needs enhancement",
+          ],
         },
         {
-          name: 'Functional Fitness Age',
-          desc: 'Your physical capacity and functional fitness predict your healthspan trajectory.',
-          context: 'Functional fitness strongly predicts longevity, with strength, endurance, flexibility, and balance as key indicators of biological age and future health.',
+          name: "Functional Fitness Age",
+          desc: "Your physical capacity and functional fitness predict your healthspan trajectory.",
+          context:
+            "Functional fitness strongly predicts longevity, with strength, endurance, flexibility, and balance as key indicators of biological age and future health.",
           strengths: [
-            'Some baseline physical activity maintained',
-            'Basic mobility preserved',
-            'Awareness of fitness importance',
-            'Willingness to improve capacity'
+            "Some baseline physical activity maintained",
+            "Basic mobility preserved",
+            "Awareness of fitness importance",
+            "Willingness to improve capacity",
           ],
           risks: [
-            'Strength levels below optimal for age',
-            'Cardiovascular fitness needs improvement',
-            'Flexibility and balance would benefit from training'
-          ]
-        }
+            "Strength levels below optimal for age",
+            "Cardiovascular fitness needs improvement",
+            "Flexibility and balance would benefit from training",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 15) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with longevity medicine specialist for personalized optimization',
-            'Implement evidence-based anti-aging interventions in this domain',
-            'Monitor biomarkers regularly to track improvement',
-            'Coordinate with healthcare team for comprehensive longevity planning'
+            "Consult with longevity medicine specialist for personalized optimization",
+            "Implement evidence-based anti-aging interventions in this domain",
+            "Monitor biomarkers regularly to track improvement",
+            "Coordinate with healthcare team for comprehensive longevity planning",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin optimization immediately for maximum longevity benefit. Most interventions show measurable improvements within 8-16 weeks.'
-          }
+            timeline:
+              "Begin optimization immediately for maximum longevity benefit. Most interventions show measurable improvements within 8-16 weeks.",
+          },
         });
       });
     }
@@ -2586,36 +2743,47 @@ function longevityWellnessBundleParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
-    console.error("Error parsing Longevity Wellness Bundle AI response:", error);
+    console.error(
+      "Error parsing Longevity Wellness Bundle AI response:",
+      error,
+    );
 
     return {
       overallScore: 75,
       overallRating: "Well Optimized",
-      results: [{
-        category: "Overall Longevity Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your comprehensive longevity optimization assessment has been completed. This evaluation across 5 key longevity domains provides insights into your healthspan potential.",
-        recommendations: [
-          "Discuss your comprehensive longevity assessment with a longevity medicine specialist",
-          "Implement evidence-based anti-aging interventions across all domains",
-          "Monitor biological age markers to track optimization progress",
-          "Consider advanced longevity testing for deeper insights into aging trajectory"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Comprehensive assessment completed', 'Longevity awareness demonstrated'],
-          riskFactors: ['Requires medical consultation for personalized longevity plan'],
-          timeline: 'Begin integrated longevity optimization immediately for maximum healthspan benefit.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Longevity Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your comprehensive longevity optimization assessment has been completed. This evaluation across 5 key longevity domains provides insights into your healthspan potential.",
+          recommendations: [
+            "Discuss your comprehensive longevity assessment with a longevity medicine specialist",
+            "Implement evidence-based anti-aging interventions across all domains",
+            "Monitor biological age markers to track optimization progress",
+            "Consider advanced longevity testing for deeper insights into aging trajectory",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Comprehensive assessment completed",
+              "Longevity awareness demonstrated",
+            ],
+            riskFactors: [
+              "Requires medical consultation for personalized longevity plan",
+            ],
+            timeline:
+              "Begin integrated longevity optimization immediately for maximum healthspan benefit.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -2625,33 +2793,50 @@ function chronicSymptomsParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 65;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Management";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Moderate Management";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Symptom Severity Index',
-        'Inflammation Risk Assessment',
-        'Medication Burden Analysis',
-        'Daily Energy Profile',
-        'Lifestyle Impact Assessment'
+        "Symptom Severity Index",
+        "Inflammation Risk Assessment",
+        "Medication Burden Analysis",
+        "Daily Energy Profile",
+        "Lifestyle Impact Assessment",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -2659,41 +2844,50 @@ function chronicSymptomsParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Symptom Severity Index',
-        'Inflammation Risk Assessment',
-        'Medication Burden Analysis',
-        'Daily Energy Profile',
-        'Lifestyle Impact Assessment'
+        "Symptom Severity Index",
+        "Inflammation Risk Assessment",
+        "Medication Burden Analysis",
+        "Daily Energy Profile",
+        "Lifestyle Impact Assessment",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 65;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} reveals important factors for chronic symptom management.`,
-              strengths: ['Baseline assessment completed', 'Engaged with comprehensive evaluation'],
-              riskFactors: ['Requires optimization', 'Consult healthcare provider'],
-              timeline: 'Discuss optimization strategies with your medical team.'
+              strengths: [
+                "Baseline assessment completed",
+                "Engaged with comprehensive evaluation",
+              ],
+              riskFactors: [
+                "Requires optimization",
+                "Consult healthcare provider",
+              ],
+              timeline:
+                "Discuss optimization strategies with your medical team.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -2705,61 +2899,108 @@ function chronicSymptomsParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Symptom Severity Index',
-          desc: 'Moderate symptom burden with regular daily impact and manageable but persistent pain and fatigue patterns.',
-          context: 'Chronic pain assessment reveals moderate symptom burden affecting daily function. Evidence-based symptom tracking and management strategies are essential.',
-          strengths: ['Awareness of symptom patterns', 'Engaged with assessment', 'Seeking management strategies'],
-          risks: ['Daily symptom impact', 'Pain intensity requires management', 'Flare pattern optimization needed']
+          name: "Symptom Severity Index",
+          desc: "Moderate symptom burden with regular daily impact and manageable but persistent pain and fatigue patterns.",
+          context:
+            "Chronic pain assessment reveals moderate symptom burden affecting daily function. Evidence-based symptom tracking and management strategies are essential.",
+          strengths: [
+            "Awareness of symptom patterns",
+            "Engaged with assessment",
+            "Seeking management strategies",
+          ],
+          risks: [
+            "Daily symptom impact",
+            "Pain intensity requires management",
+            "Flare pattern optimization needed",
+          ],
         },
         {
-          name: 'Inflammation Risk Assessment',
-          desc: 'Moderate inflammation risk with several modifiable lifestyle factors that could reduce inflammatory burden.',
-          context: 'Inflammation assessment shows modifiable risk factors. Research demonstrates significant symptom improvement with anti-inflammatory interventions.',
-          strengths: ['Some healthy habits present', 'Aware of inflammation connection', 'Open to dietary changes'],
-          risks: ['Diet quality needs improvement', 'Stress levels elevated', 'Sleep quality affecting inflammation']
+          name: "Inflammation Risk Assessment",
+          desc: "Moderate inflammation risk with several modifiable lifestyle factors that could reduce inflammatory burden.",
+          context:
+            "Inflammation assessment shows modifiable risk factors. Research demonstrates significant symptom improvement with anti-inflammatory interventions.",
+          strengths: [
+            "Some healthy habits present",
+            "Aware of inflammation connection",
+            "Open to dietary changes",
+          ],
+          risks: [
+            "Diet quality needs improvement",
+            "Stress levels elevated",
+            "Sleep quality affecting inflammation",
+          ],
         },
         {
-          name: 'Medication Burden Analysis',
-          desc: 'Well-managed medication regimen with good adherence and minimal side effects.',
-          context: 'Medication management shows good adherence patterns. Regular medication reviews optimize effectiveness and minimize side effects.',
-          strengths: ['Good medication adherence', 'Minimal side effects', 'Regular healthcare monitoring'],
-          risks: ['Polypharmacy complexity', 'Potential for optimization', 'Side effect monitoring needed']
+          name: "Medication Burden Analysis",
+          desc: "Well-managed medication regimen with good adherence and minimal side effects.",
+          context:
+            "Medication management shows good adherence patterns. Regular medication reviews optimize effectiveness and minimize side effects.",
+          strengths: [
+            "Good medication adherence",
+            "Minimal side effects",
+            "Regular healthcare monitoring",
+          ],
+          risks: [
+            "Polypharmacy complexity",
+            "Potential for optimization",
+            "Side effect monitoring needed",
+          ],
         },
         {
-          name: 'Daily Energy Profile',
-          desc: 'Significant energy challenges with pronounced fatigue patterns affecting daily function.',
-          context: 'Energy assessment reveals significant fatigue burden. Multiple factors contribute to energy depletion requiring comprehensive intervention.',
-          strengths: ['Awareness of energy patterns', 'Motivated for improvement', 'Some adaptive strategies in place'],
-          risks: ['Sleep duration insufficient', 'Morning energy very low', 'Afternoon crashes frequent', 'Recovery capacity limited']
+          name: "Daily Energy Profile",
+          desc: "Significant energy challenges with pronounced fatigue patterns affecting daily function.",
+          context:
+            "Energy assessment reveals significant fatigue burden. Multiple factors contribute to energy depletion requiring comprehensive intervention.",
+          strengths: [
+            "Awareness of energy patterns",
+            "Motivated for improvement",
+            "Some adaptive strategies in place",
+          ],
+          risks: [
+            "Sleep duration insufficient",
+            "Morning energy very low",
+            "Afternoon crashes frequent",
+            "Recovery capacity limited",
+          ],
         },
         {
-          name: 'Lifestyle Impact Assessment',
-          desc: 'Moderate lifestyle limitations with notable impact on work, social, and physical activities.',
-          context: 'Lifestyle assessment shows moderate functional limitations. Adaptive strategies can significantly improve quality of life.',
-          strengths: ['Good support system', 'Employed or engaged', 'Some adaptive strategies'],
-          risks: ['Work limitations present', 'Social activities restricted', 'Physical activity limited']
-        }
+          name: "Lifestyle Impact Assessment",
+          desc: "Moderate lifestyle limitations with notable impact on work, social, and physical activities.",
+          context:
+            "Lifestyle assessment shows moderate functional limitations. Adaptive strategies can significantly improve quality of life.",
+          strengths: [
+            "Good support system",
+            "Employed or engaged",
+            "Some adaptive strategies",
+          ],
+          risks: [
+            "Work limitations present",
+            "Social activities restricted",
+            "Physical activity limited",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 25) + 55,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with your healthcare provider for personalized symptom management',
-            'Implement evidence-based strategies for your specific symptom pattern',
-            'Track symptoms to identify triggers and effective interventions',
-            'Consider multidisciplinary approach to chronic symptom management'
+            "Consult with your healthcare provider for personalized symptom management",
+            "Implement evidence-based strategies for your specific symptom pattern",
+            "Track symptoms to identify triggers and effective interventions",
+            "Consider multidisciplinary approach to chronic symptom management",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin comprehensive optimization 4-6 weeks before major interventions for best results.'
-          }
+            timeline:
+              "Begin comprehensive optimization 4-6 weeks before major interventions for best results.",
+          },
         });
       });
     }
@@ -2772,36 +3013,41 @@ function chronicSymptomsParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Chronic Symptoms Bundle AI response:", error);
 
     return {
       overallScore: 65,
       overallRating: "Moderate Management",
-      results: [{
-        category: "Overall Assessment",
-        score: 65,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your comprehensive chronic symptom assessment has been completed.",
-        recommendations: [
-          "Discuss results with your healthcare team",
-          "Implement evidence-based symptom management strategies",
-          "Focus on modifiable factors for symptom reduction",
-          "Consider comprehensive chronic disease management program"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Comprehensive assessment completed'],
-          riskFactors: ['Requires medical consultation for personalized plan'],
-          timeline: 'Consult with healthcare team to develop symptom optimization strategy.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 65,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your comprehensive chronic symptom assessment has been completed.",
+          recommendations: [
+            "Discuss results with your healthcare team",
+            "Implement evidence-based symptom management strategies",
+            "Focus on modifiable factors for symptom reduction",
+            "Consider comprehensive chronic disease management program",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Comprehensive assessment completed"],
+            riskFactors: [
+              "Requires medical consultation for personalized plan",
+            ],
+            timeline:
+              "Consult with healthcare team to develop symptom optimization strategy.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -2815,36 +3061,51 @@ function surgeryPreparationBundleParseAIResponse(aiAnalysis, assessmentType) {
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Well Prepared";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first - Surgery Preparation Bundle categories
     if (detailedSection) {
       const categories = [
-        'Surgery Readiness Score',
-        'Complication Risk Assessment',
-        'Recovery Speed Prediction',
-        'Anaesthesia Risk Profile',
-        'Mobility & Strength Baseline',
-        'Nutritional Optimization',
-        'Psychological Readiness',
-        'Support System Adequacy'
+        "Surgery Readiness Score",
+        "Complication Risk Assessment",
+        "Recovery Speed Prediction",
+        "Anaesthesia Risk Profile",
+        "Mobility & Strength Baseline",
+        "Nutritional Optimization",
+        "Psychological Readiness",
+        "Support System Adequacy",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -2853,45 +3114,55 @@ function surgeryPreparationBundleParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Surgery Readiness Score',
-        'Complication Risk Assessment',
-        'Recovery Speed Prediction',
-        'Anaesthesia Risk Profile',
-        'Mobility & Strength Baseline',
-        'Nutritional Optimization',
-        'Psychological Readiness',
-        'Support System Adequacy'
+        "Surgery Readiness Score",
+        "Complication Risk Assessment",
+        "Recovery Speed Prediction",
+        "Anaesthesia Risk Profile",
+        "Mobility & Strength Baseline",
+        "Nutritional Optimization",
+        "Psychological Readiness",
+        "Support System Adequacy",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important preparation factors.`,
-              strengths: ['Baseline assessment completed', 'Areas identified for optimization', 'Engaged with preparation process'],
-              riskFactors: ['Consult healthcare provider for personalized guidance', 'Follow evidence-based preparation protocols'],
-              timeline: 'Discuss optimization timeline with your surgical team.'
+              strengths: [
+                "Baseline assessment completed",
+                "Areas identified for optimization",
+                "Engaged with preparation process",
+              ],
+              riskFactors: [
+                "Consult healthcare provider for personalized guidance",
+                "Follow evidence-based preparation protocols",
+              ],
+              timeline:
+                "Discuss optimization timeline with your surgical team.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -2904,148 +3175,155 @@ function surgeryPreparationBundleParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Surgery Readiness Score',
-          desc: 'Comprehensive preparation with strong foundational health and appropriate understanding of your surgical procedure.',
-          context: 'Overall surgical readiness encompasses procedure understanding, timing, pre-operative education, and anxiety management.',
+          name: "Surgery Readiness Score",
+          desc: "Comprehensive preparation with strong foundational health and appropriate understanding of your surgical procedure.",
+          context:
+            "Overall surgical readiness encompasses procedure understanding, timing, pre-operative education, and anxiety management.",
           strengths: [
-            'Good baseline health status',
-            'Comprehensive pre-operative understanding',
-            'Appropriate anxiety management',
-            'Elective procedure timing allows optimal preparation'
+            "Good baseline health status",
+            "Comprehensive pre-operative understanding",
+            "Appropriate anxiety management",
+            "Elective procedure timing allows optimal preparation",
           ],
           risks: [
-            'Continue maintaining healthy lifestyle practices',
-            'Complete any remaining pre-operative clearances'
-          ]
+            "Continue maintaining healthy lifestyle practices",
+            "Complete any remaining pre-operative clearances",
+          ],
         },
         {
-          name: 'Complication Risk Assessment',
-          desc: 'Moderate complication risk profile with manageable factors that can be optimized with targeted interventions.',
-          context: 'Medical history and lifestyle factors present manageable risks requiring attention and optimization.',
+          name: "Complication Risk Assessment",
+          desc: "Moderate complication risk profile with manageable factors that can be optimized with targeted interventions.",
+          context:
+            "Medical history and lifestyle factors present manageable risks requiring attention and optimization.",
           strengths: [
-            'No major cardiac complications',
-            'Good medication compliance',
-            'Regular health monitoring',
-            'Manageable chronic conditions'
+            "No major cardiac complications",
+            "Good medication compliance",
+            "Regular health monitoring",
+            "Manageable chronic conditions",
           ],
           risks: [
-            'Optimize management of existing medical conditions',
-            'Address modifiable risk factors',
-            'Review medications with anaesthesia team',
-            'Implement infection prevention strategies'
-          ]
+            "Optimize management of existing medical conditions",
+            "Address modifiable risk factors",
+            "Review medications with anaesthesia team",
+            "Implement infection prevention strategies",
+          ],
         },
         {
-          name: 'Recovery Speed Prediction',
-          desc: 'Excellent recovery potential supported by strong nutritional status, robust support systems, and optimal home environment.',
-          context: 'Your nutrition, support network, home setup, and mental health status strongly favor rapid healing.',
+          name: "Recovery Speed Prediction",
+          desc: "Excellent recovery potential supported by strong nutritional status, robust support systems, and optimal home environment.",
+          context:
+            "Your nutrition, support network, home setup, and mental health status strongly favor rapid healing.",
           strengths: [
-            'Strong nutritional foundation',
-            'Robust support systems',
-            'Optimal home environment',
-            'Good mental health status'
+            "Strong nutritional foundation",
+            "Robust support systems",
+            "Optimal home environment",
+            "Good mental health status",
           ],
           risks: [
-            'Maintain high protein intake for healing',
-            'Ensure adequate hydration'
-          ]
+            "Maintain high protein intake for healing",
+            "Ensure adequate hydration",
+          ],
         },
         {
-          name: 'Anaesthesia Risk Profile',
-          desc: 'Generally favorable anaesthesia risk profile with some areas requiring attention for optimal safety.',
-          context: 'Sleep quality and respiratory function assessments suggest manageable anaesthesia risk factors.',
+          name: "Anaesthesia Risk Profile",
+          desc: "Generally favorable anaesthesia risk profile with some areas requiring attention for optimal safety.",
+          context:
+            "Sleep quality and respiratory function assessments suggest manageable anaesthesia risk factors.",
           strengths: [
-            'Good previous anaesthesia tolerance',
-            'No major respiratory issues',
-            'Stable cardiovascular function',
-            'Complete substance disclosure'
+            "Good previous anaesthesia tolerance",
+            "No major respiratory issues",
+            "Stable cardiovascular function",
+            "Complete substance disclosure",
           ],
           risks: [
-            'Address any sleep apnea symptoms',
-            'Optimize sleep hygiene before surgery',
-            'Continue respiratory health optimization'
-          ]
+            "Address any sleep apnea symptoms",
+            "Optimize sleep hygiene before surgery",
+            "Continue respiratory health optimization",
+          ],
         },
         {
-          name: 'Mobility & Strength Baseline',
-          desc: 'Good baseline physical function with adequate strength and mobility supporting successful post-operative rehabilitation.',
-          context: 'Minor limitations present but overall physical capacity supports good surgical outcomes.',
+          name: "Mobility & Strength Baseline",
+          desc: "Good baseline physical function with adequate strength and mobility supporting successful post-operative rehabilitation.",
+          context:
+            "Minor limitations present but overall physical capacity supports good surgical outcomes.",
           strengths: [
-            'Good baseline fitness',
-            'Adequate muscle strength',
-            'Good mobility range',
-            'Low fall risk'
+            "Good baseline fitness",
+            "Adequate muscle strength",
+            "Good mobility range",
+            "Low fall risk",
           ],
           risks: [
-            'Continue current activity level',
-            'Practice pre-operative conditioning exercises'
-          ]
+            "Continue current activity level",
+            "Practice pre-operative conditioning exercises",
+          ],
         },
         {
-          name: 'Nutritional Optimization',
-          desc: 'Strong nutritional foundation with excellent protein intake and comprehensive supplementation supporting healing.',
-          context: 'Current nutrition status strongly supports healing and recovery processes.',
+          name: "Nutritional Optimization",
+          desc: "Strong nutritional foundation with excellent protein intake and comprehensive supplementation supporting healing.",
+          context:
+            "Current nutrition status strongly supports healing and recovery processes.",
           strengths: [
-            'High-quality protein intake',
-            'Comprehensive supplementation',
-            'Good hydration habits',
-            'Balanced micronutrient profile'
+            "High-quality protein intake",
+            "Comprehensive supplementation",
+            "Good hydration habits",
+            "Balanced micronutrient profile",
           ],
           risks: [
-            'Consider adding specific healing nutrients',
-            'Maintain optimal hydration'
-          ]
+            "Consider adding specific healing nutrients",
+            "Maintain optimal hydration",
+          ],
         },
         {
-          name: 'Psychological Readiness',
-          desc: 'Good psychological preparation with manageable anxiety levels and strong motivation for recovery.',
-          context: 'Some stress factors present but within normal range for surgical preparation.',
+          name: "Psychological Readiness",
+          desc: "Good psychological preparation with manageable anxiety levels and strong motivation for recovery.",
+          context:
+            "Some stress factors present but within normal range for surgical preparation.",
           strengths: [
-            'Positive outlook',
-            'Good stress management',
-            'Realistic expectations',
-            'Strong motivation'
+            "Positive outlook",
+            "Good stress management",
+            "Realistic expectations",
+            "Strong motivation",
           ],
           risks: [
-            'Continue stress reduction techniques',
-            'Maintain realistic recovery expectations'
-          ]
+            "Continue stress reduction techniques",
+            "Maintain realistic recovery expectations",
+          ],
         },
         {
-          name: 'Support System Adequacy',
-          desc: 'Excellent support network with comprehensive family, friend, and professional resources ensuring optimal recovery environment.',
-          context: 'Strong financial and logistical support provides excellent foundation for recovery.',
+          name: "Support System Adequacy",
+          desc: "Excellent support network with comprehensive family, friend, and professional resources ensuring optimal recovery environment.",
+          context:
+            "Strong financial and logistical support provides excellent foundation for recovery.",
           strengths: [
-            'Strong family support',
-            'Adequate financial resources',
-            'Reliable transportation',
-            'Professional care services available'
+            "Strong family support",
+            "Adequate financial resources",
+            "Reliable transportation",
+            "Professional care services available",
           ],
-          risks: [
-            'Establish backup support plans'
-          ]
-        }
+          risks: ["Establish backup support plans"],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with your surgical team for personalized guidance',
-            'Follow evidence-based preparation protocols',
-            'Optimize modifiable factors in this category',
-            'Monitor progress with your healthcare team'
+            "Consult with your surgical team for personalized guidance",
+            "Follow evidence-based preparation protocols",
+            "Optimize modifiable factors in this category",
+            "Monitor progress with your healthcare team",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin optimization 4-6 weeks before scheduled surgery for best results.'
-          }
+            timeline:
+              "Begin optimization 4-6 weeks before scheduled surgery for best results.",
+          },
         });
       });
     }
@@ -3059,36 +3337,47 @@ function surgeryPreparationBundleParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
-    console.error("Error parsing Surgery Preparation Bundle AI response:", error);
+    console.error(
+      "Error parsing Surgery Preparation Bundle AI response:",
+      error,
+    );
 
     return {
       overallScore: 75,
       overallRating: "Well Prepared",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your comprehensive surgical preparation assessment has been completed. Please consult with your surgical team for personalized preparation planning.",
-        recommendations: [
-          "Discuss your comprehensive results with your surgeon",
-          "Follow all pre-operative instructions carefully",
-          "Optimize preparation across all assessed domains",
-          "Coordinate with your anaesthesia team"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Comprehensive assessment completed', 'Multiple domains evaluated'],
-          riskFactors: ['Requires medical consultation for personalized plan'],
-          timeline: 'Consult with surgical team to develop integrated preparation strategy.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your comprehensive surgical preparation assessment has been completed. Please consult with your surgical team for personalized preparation planning.",
+          recommendations: [
+            "Discuss your comprehensive results with your surgeon",
+            "Follow all pre-operative instructions carefully",
+            "Optimize preparation across all assessed domains",
+            "Coordinate with your anaesthesia team",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Comprehensive assessment completed",
+              "Multiple domains evaluated",
+            ],
+            riskFactors: [
+              "Requires medical consultation for personalized plan",
+            ],
+            timeline:
+              "Consult with surgical team to develop integrated preparation strategy.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -3097,7 +3386,9 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract functional fitness age (OVERALL_SCORE)
     const fitnessAgeMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
-    const functionalFitnessAge = fitnessAgeMatch ? parseInt(fitnessAgeMatch[1]) : 45;
+    const functionalFitnessAge = fitnessAgeMatch
+      ? parseInt(fitnessAgeMatch[1])
+      : 45;
 
     // Extract chronological age
     const chronoAgeMatch = aiAnalysis.match(/CHRONOLOGICAL_AGE:\s*(\d+)/i);
@@ -3105,37 +3396,54 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
 
     // Extract overall rating
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Matches chronological age";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Matches chronological age";
 
     // Calculate fitness advantage
     const fitnessAdvantage = chronologicalAge - functionalFitnessAge;
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis - Functional Fitness categories
     if (detailedSection) {
       const categories = [
-        'Movement Quality',
-        'Strength & Power',
-        'Balance & Coordination',
-        'Cardiovascular Fitness',
-        'Flexibility & Mobility'
+        "Movement Quality",
+        "Strength & Power",
+        "Balance & Coordination",
+        "Cardiovascular Fitness",
+        "Flexibility & Mobility",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -3144,41 +3452,47 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Movement Quality',
-        'Strength & Power',
-        'Balance & Coordination',
-        'Cardiovascular Fitness',
-        'Flexibility & Mobility'
+        "Movement Quality",
+        "Strength & Power",
+        "Balance & Coordination",
+        "Cardiovascular Fitness",
+        "Flexibility & Mobility",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important functional fitness patterns.`,
-              strengths: ['Baseline function maintained', 'Awareness of fitness factors'],
-              riskFactors: ['Optimization opportunities identified'],
-              timeline: 'Improvements measurable within 8-12 weeks with targeted training.'
+              strengths: [
+                "Baseline function maintained",
+                "Awareness of fitness factors",
+              ],
+              riskFactors: ["Optimization opportunities identified"],
+              timeline:
+                "Improvements measurable within 8-12 weeks with targeted training.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -3191,60 +3505,101 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Movement Quality',
-          desc: 'Movement patterns show typical patterns for your age group with optimization opportunities.',
-          context: 'Movement quality assessment reveals functional capacity and compensatory patterns that affect daily activities.',
-          strengths: ['Functional movement maintained', 'Good body awareness', 'No major restrictions'],
-          risks: ['Some compensatory patterns present', 'Movement efficiency could improve']
+          name: "Movement Quality",
+          desc: "Movement patterns show typical patterns for your age group with optimization opportunities.",
+          context:
+            "Movement quality assessment reveals functional capacity and compensatory patterns that affect daily activities.",
+          strengths: [
+            "Functional movement maintained",
+            "Good body awareness",
+            "No major restrictions",
+          ],
+          risks: [
+            "Some compensatory patterns present",
+            "Movement efficiency could improve",
+          ],
         },
         {
-          name: 'Strength & Power',
-          desc: 'Muscular strength and power show age-appropriate levels with enhancement potential.',
-          context: 'Strength and power are key functional fitness markers that directly impact daily activities and independence.',
-          strengths: ['Adequate baseline strength', 'Good force production', 'Functional capacity maintained'],
-          risks: ['Power output declining with age', 'Muscle mass optimization needed']
+          name: "Strength & Power",
+          desc: "Muscular strength and power show age-appropriate levels with enhancement potential.",
+          context:
+            "Strength and power are key functional fitness markers that directly impact daily activities and independence.",
+          strengths: [
+            "Adequate baseline strength",
+            "Good force production",
+            "Functional capacity maintained",
+          ],
+          risks: [
+            "Power output declining with age",
+            "Muscle mass optimization needed",
+          ],
         },
         {
-          name: 'Balance & Coordination',
-          desc: 'Balance and coordination show good maintenance with room for enhancement.',
-          context: 'Balance capacity is a critical predictor of functional independence and fall risk in aging populations.',
-          strengths: ['Stable balance baseline', 'Good proprioception', 'Coordination maintained'],
-          risks: ['Single-leg balance could improve', 'Dynamic stability needs work']
+          name: "Balance & Coordination",
+          desc: "Balance and coordination show good maintenance with room for enhancement.",
+          context:
+            "Balance capacity is a critical predictor of functional independence and fall risk in aging populations.",
+          strengths: [
+            "Stable balance baseline",
+            "Good proprioception",
+            "Coordination maintained",
+          ],
+          risks: [
+            "Single-leg balance could improve",
+            "Dynamic stability needs work",
+          ],
         },
         {
-          name: 'Cardiovascular Fitness',
-          desc: 'Aerobic capacity shows typical age-related patterns with optimization opportunities.',
-          context: 'Cardiovascular fitness is the cornerstone of functional capacity and a key longevity predictor.',
-          strengths: ['Aerobic base maintained', 'Reasonable endurance', 'Good recovery patterns'],
-          risks: ['VO2 max declining with age', 'Aerobic capacity could improve']
+          name: "Cardiovascular Fitness",
+          desc: "Aerobic capacity shows typical age-related patterns with optimization opportunities.",
+          context:
+            "Cardiovascular fitness is the cornerstone of functional capacity and a key longevity predictor.",
+          strengths: [
+            "Aerobic base maintained",
+            "Reasonable endurance",
+            "Good recovery patterns",
+          ],
+          risks: [
+            "VO2 max declining with age",
+            "Aerobic capacity could improve",
+          ],
         },
         {
-          name: 'Flexibility & Mobility',
-          desc: 'Joint mobility and flexibility show typical patterns with room for improvement.',
-          context: 'Mobility and flexibility are essential for injury prevention and maintaining full functional range of motion.',
-          strengths: ['Basic mobility maintained', 'Reasonable flexibility', 'No major restrictions'],
-          risks: ['Some joint stiffness present', 'Range of motion limited in key areas']
-        }
+          name: "Flexibility & Mobility",
+          desc: "Joint mobility and flexibility show typical patterns with room for improvement.",
+          context:
+            "Mobility and flexibility are essential for injury prevention and maintaining full functional range of motion.",
+          strengths: [
+            "Basic mobility maintained",
+            "Reasonable flexibility",
+            "No major restrictions",
+          ],
+          risks: [
+            "Some joint stiffness present",
+            "Range of motion limited in key areas",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with fitness professional for personalized programming',
-            'Implement progressive exercise interventions',
-            'Track functional improvements over time'
+            "Consult with fitness professional for personalized programming",
+            "Implement progressive exercise interventions",
+            "Track functional improvements over time",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Measurable improvements typically occur within 8-12 weeks of consistent training.'
-          }
+            timeline:
+              "Measurable improvements typically occur within 8-12 weeks of consistent training.",
+          },
         });
       });
     }
@@ -3259,9 +3614,8 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Functional Fitness AI response:", error);
 
@@ -3270,26 +3624,30 @@ function functionalFitnessParseAIResponse(aiAnalysis, assessmentType) {
       chronologicalAge: 45,
       fitnessAdvantage: 0,
       overallRating: "Matches chronological age",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your functional fitness assessment has been completed. Consult with fitness professionals for comprehensive movement evaluation.",
-        recommendations: [
-          "Discuss results with qualified fitness professional",
-          "Implement evidence-based exercise programming",
-          "Track functional fitness improvements over time"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline established'],
-          riskFactors: ['Requires professional consultation'],
-          timeline: 'Consult with fitness specialist for personalized program.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your functional fitness assessment has been completed. Consult with fitness professionals for comprehensive movement evaluation.",
+          recommendations: [
+            "Discuss results with qualified fitness professional",
+            "Implement evidence-based exercise programming",
+            "Track functional fitness improvements over time",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Baseline established"],
+            riskFactors: ["Requires professional consultation"],
+            timeline:
+              "Consult with fitness specialist for personalized program.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -3300,36 +3658,53 @@ function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Nutrition";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Good Nutrition";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis - Nutrition specific categories
     if (detailedSection) {
       const categories = [
-        'Body Composition',
-        'Nutritional Quality',
-        'Macronutrient Balance',
-        'Metabolic Efficiency',
-        'Hydration & Recovery'
+        "Body Composition",
+        "Nutritional Quality",
+        "Macronutrient Balance",
+        "Metabolic Efficiency",
+        "Hydration & Recovery",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -3338,41 +3713,44 @@ function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Body Composition',
-        'Nutritional Quality',
-        'Macronutrient Balance',
-        'Metabolic Efficiency',
-        'Hydration & Recovery'
+        "Body Composition",
+        "Nutritional Quality",
+        "Macronutrient Balance",
+        "Metabolic Efficiency",
+        "Hydration & Recovery",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important nutritional factors.`,
-              strengths: ['Baseline nutrition maintained', 'Awareness present'],
-              riskFactors: ['Optimization opportunities identified'],
-              timeline: 'Improvements typically measurable within 4-8 weeks with consistent changes.'
+              strengths: ["Baseline nutrition maintained", "Awareness present"],
+              riskFactors: ["Optimization opportunities identified"],
+              timeline:
+                "Improvements typically measurable within 4-8 weeks with consistent changes.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -3381,64 +3759,107 @@ function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
 
     // Fallback if parsing failed
     if (results.length === 0) {
-      console.log("Creating fallback structure for Nutrition & Body Composition");
+      console.log(
+        "Creating fallback structure for Nutrition & Body Composition",
+      );
 
       const fallbackCategories = [
         {
-          name: 'Body Composition',
-          desc: 'Good muscle-to-fat ratio with healthy body composition metrics.',
-          context: 'Body composition significantly impacts metabolic health, with lean muscle mass supporting metabolic rate and insulin sensitivity.',
-          strengths: ['Baseline composition maintained', 'Awareness of body composition importance', 'Regular activity present'],
-          risks: ['Muscle mass optimization beneficial', 'Body fat distribution could improve']
+          name: "Body Composition",
+          desc: "Good muscle-to-fat ratio with healthy body composition metrics.",
+          context:
+            "Body composition significantly impacts metabolic health, with lean muscle mass supporting metabolic rate and insulin sensitivity.",
+          strengths: [
+            "Baseline composition maintained",
+            "Awareness of body composition importance",
+            "Regular activity present",
+          ],
+          risks: [
+            "Muscle mass optimization beneficial",
+            "Body fat distribution could improve",
+          ],
         },
         {
-          name: 'Nutritional Quality',
-          desc: 'Adequate nutritional intake with areas for micronutrient optimization.',
-          context: 'Dietary quality determines micronutrient adequacy and long-term health outcomes, with nutrient-dense foods supporting optimal function.',
-          strengths: ['Variety in diet', 'Whole food consumption present', 'Awareness of nutrition importance'],
-          risks: ['Micronutrient density could increase', 'Processed food reduction beneficial']
+          name: "Nutritional Quality",
+          desc: "Adequate nutritional intake with areas for micronutrient optimization.",
+          context:
+            "Dietary quality determines micronutrient adequacy and long-term health outcomes, with nutrient-dense foods supporting optimal function.",
+          strengths: [
+            "Variety in diet",
+            "Whole food consumption present",
+            "Awareness of nutrition importance",
+          ],
+          risks: [
+            "Micronutrient density could increase",
+            "Processed food reduction beneficial",
+          ],
         },
         {
-          name: 'Macronutrient Balance',
-          desc: 'Well-balanced macronutrient distribution supporting metabolic health.',
-          context: 'Optimal macronutrient distribution supports body composition goals, with protein adequacy being critical for muscle maintenance.',
-          strengths: ['Balanced approach to eating', 'Protein awareness present', 'Carbohydrate intake reasonable'],
-          risks: ['Protein timing optimization beneficial', 'Macronutrient distribution fine-tuning needed']
+          name: "Macronutrient Balance",
+          desc: "Well-balanced macronutrient distribution supporting metabolic health.",
+          context:
+            "Optimal macronutrient distribution supports body composition goals, with protein adequacy being critical for muscle maintenance.",
+          strengths: [
+            "Balanced approach to eating",
+            "Protein awareness present",
+            "Carbohydrate intake reasonable",
+          ],
+          risks: [
+            "Protein timing optimization beneficial",
+            "Macronutrient distribution fine-tuning needed",
+          ],
         },
         {
-          name: 'Metabolic Efficiency',
-          desc: 'Moderate metabolic function with optimization opportunities.',
-          context: 'Metabolic flexibility and insulin sensitivity are key markers of metabolic health and can be improved through nutrition.',
-          strengths: ['Stable energy levels', 'Meal timing awareness', 'Metabolic health consciousness'],
-          risks: ['Metabolic flexibility could improve', 'Insulin sensitivity optimization beneficial']
+          name: "Metabolic Efficiency",
+          desc: "Moderate metabolic function with optimization opportunities.",
+          context:
+            "Metabolic flexibility and insulin sensitivity are key markers of metabolic health and can be improved through nutrition.",
+          strengths: [
+            "Stable energy levels",
+            "Meal timing awareness",
+            "Metabolic health consciousness",
+          ],
+          risks: [
+            "Metabolic flexibility could improve",
+            "Insulin sensitivity optimization beneficial",
+          ],
         },
         {
-          name: 'Hydration & Recovery',
-          desc: 'Good hydration practices and recovery nutrition habits.',
-          context: 'Proper hydration and nutrient timing around exercise optimize performance and recovery, supporting adaptation and growth.',
-          strengths: ['Adequate fluid intake', 'Post-workout nutrition awareness', 'Recovery priority recognized'],
-          risks: ['Electrolyte optimization beneficial', 'Nutrient timing refinement helpful']
-        }
+          name: "Hydration & Recovery",
+          desc: "Good hydration practices and recovery nutrition habits.",
+          context:
+            "Proper hydration and nutrient timing around exercise optimize performance and recovery, supporting adaptation and growth.",
+          strengths: [
+            "Adequate fluid intake",
+            "Post-workout nutrition awareness",
+            "Recovery priority recognized",
+          ],
+          risks: [
+            "Electrolyte optimization beneficial",
+            "Nutrient timing refinement helpful",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with registered dietitian for personalized nutrition plan',
-            'Track macronutrient intake to ensure adequate protein',
-            'Consider body composition assessment for precise monitoring'
+            "Consult with registered dietitian for personalized nutrition plan",
+            "Track macronutrient intake to ensure adequate protein",
+            "Consider body composition assessment for precise monitoring",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Nutritional improvements typically measurable within 4-8 weeks of consistent implementation.'
-          }
+            timeline:
+              "Nutritional improvements typically measurable within 4-8 weeks of consistent implementation.",
+          },
         });
       });
     }
@@ -3452,35 +3873,41 @@ function nutritionCompositionParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
-    console.error("Error parsing Nutrition & Body Composition AI response:", error);
+    console.error(
+      "Error parsing Nutrition & Body Composition AI response:",
+      error,
+    );
 
     return {
       overallScore: 75,
       overallRating: "Good Nutrition",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your nutrition and body composition assessment has been completed. Consult with registered dietitian for personalized optimization.",
-        recommendations: [
-          "Discuss nutrition results with qualified nutrition professional",
-          "Implement evidence-based dietary improvements",
-          "Track body composition changes over time"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline established'],
-          riskFactors: ['Professional guidance recommended'],
-          timeline: 'Consult with registered dietitian to develop personalized nutrition strategy.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your nutrition and body composition assessment has been completed. Consult with registered dietitian for personalized optimization.",
+          recommendations: [
+            "Discuss nutrition results with qualified nutrition professional",
+            "Implement evidence-based dietary improvements",
+            "Track body composition changes over time",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Baseline established"],
+            riskFactors: ["Professional guidance recommended"],
+            timeline:
+              "Consult with registered dietitian to develop personalized nutrition strategy.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -3491,36 +3918,53 @@ function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "High Resilience";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "High Resilience";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first - Resilience Index specific categories
     if (detailedSection) {
       const categories = [
-        'Stress Response',
-        'Recovery Capacity',
-        'Adaptability',
-        'Social Support',
-        'Mental Toughness'
+        "Stress Response",
+        "Recovery Capacity",
+        "Adaptability",
+        "Social Support",
+        "Mental Toughness",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -3529,42 +3973,48 @@ function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Stress Response',
-        'Recovery Capacity',
-        'Adaptability',
-        'Social Support',
-        'Mental Toughness'
+        "Stress Response",
+        "Recovery Capacity",
+        "Adaptability",
+        "Social Support",
+        "Mental Toughness",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important resilience patterns.`,
-              strengths: ['Baseline resilience present', 'Awareness of resilience factors'],
-              riskFactors: ['Development opportunities identified'],
-              timeline: 'Measurable improvements typically occur within 8-12 weeks with consistent practice.'
+              strengths: [
+                "Baseline resilience present",
+                "Awareness of resilience factors",
+              ],
+              riskFactors: ["Development opportunities identified"],
+              timeline:
+                "Measurable improvements typically occur within 8-12 weeks with consistent practice.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -3577,95 +4027,101 @@ function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Stress Response',
-          desc: 'Your ability to maintain composure and effectiveness under pressure shows good baseline capacity.',
-          context: 'Stress response patterns determine how effectively you perform under pressure and manage challenging situations.',
+          name: "Stress Response",
+          desc: "Your ability to maintain composure and effectiveness under pressure shows good baseline capacity.",
+          context:
+            "Stress response patterns determine how effectively you perform under pressure and manage challenging situations.",
           strengths: [
-            'Awareness of stress triggers',
-            'Basic stress management techniques',
-            'Ability to maintain some composure'
+            "Awareness of stress triggers",
+            "Basic stress management techniques",
+            "Ability to maintain some composure",
           ],
           risks: [
-            'Could benefit from advanced stress inoculation',
-            'Performance optimization under high pressure needed'
-          ]
+            "Could benefit from advanced stress inoculation",
+            "Performance optimization under high pressure needed",
+          ],
         },
         {
-          name: 'Recovery Capacity',
-          desc: 'Your bounce-back ability from setbacks demonstrates developing resilience.',
-          context: 'Recovery capacity reflects how quickly and completely you rebound from adversity and integrate learning from challenges.',
+          name: "Recovery Capacity",
+          desc: "Your bounce-back ability from setbacks demonstrates developing resilience.",
+          context:
+            "Recovery capacity reflects how quickly and completely you rebound from adversity and integrate learning from challenges.",
           strengths: [
-            'Basic recovery mechanisms present',
-            'Ability to move forward after setbacks',
-            'Some learning from past challenges'
+            "Basic recovery mechanisms present",
+            "Ability to move forward after setbacks",
+            "Some learning from past challenges",
           ],
           risks: [
-            'Recovery speed could be accelerated',
-            'Lesson extraction from failures needs deepening'
-          ]
+            "Recovery speed could be accelerated",
+            "Lesson extraction from failures needs deepening",
+          ],
         },
         {
-          name: 'Adaptability',
-          desc: 'Your flexibility in adapting to change shows moderate capacity with growth potential.',
-          context: 'Adaptability determines how effectively you navigate change, uncertainty, and new situations while finding opportunities.',
+          name: "Adaptability",
+          desc: "Your flexibility in adapting to change shows moderate capacity with growth potential.",
+          context:
+            "Adaptability determines how effectively you navigate change, uncertainty, and new situations while finding opportunities.",
           strengths: [
-            'Openness to some changes',
-            'Basic cognitive flexibility',
-            'Willingness to try new approaches'
+            "Openness to some changes",
+            "Basic cognitive flexibility",
+            "Willingness to try new approaches",
           ],
           risks: [
-            'Comfort zone expansion would benefit resilience',
-            'Change tolerance could be strengthened'
-          ]
+            "Comfort zone expansion would benefit resilience",
+            "Change tolerance could be strengthened",
+          ],
         },
         {
-          name: 'Social Support',
-          desc: 'Your support network provides adequate foundation with room for deepening connections.',
-          context: 'Social support quality is a critical resilience buffer, with strong relationships accelerating recovery and providing perspective.',
+          name: "Social Support",
+          desc: "Your support network provides adequate foundation with room for deepening connections.",
+          context:
+            "Social support quality is a critical resilience buffer, with strong relationships accelerating recovery and providing perspective.",
           strengths: [
-            'Basic support network present',
-            'Some trusted relationships',
-            'Awareness of support importance'
+            "Basic support network present",
+            "Some trusted relationships",
+            "Awareness of support importance",
           ],
           risks: [
-            'Relationship depth could be enhanced',
-            'Vulnerability and authentic connection building needed'
-          ]
+            "Relationship depth could be enhanced",
+            "Vulnerability and authentic connection building needed",
+          ],
         },
         {
-          name: 'Mental Toughness',
-          desc: 'Your mental fortitude shows good baseline with opportunities for enhancement through progressive challenge.',
-          context: 'Mental toughness reflects psychological fortitude, grit, self-belief, and capacity for sustained effort despite obstacles.',
+          name: "Mental Toughness",
+          desc: "Your mental fortitude shows good baseline with opportunities for enhancement through progressive challenge.",
+          context:
+            "Mental toughness reflects psychological fortitude, grit, self-belief, and capacity for sustained effort despite obstacles.",
           strengths: [
-            'Basic confidence present',
-            'Some perseverance capacity',
-            'Willingness to face challenges'
+            "Basic confidence present",
+            "Some perseverance capacity",
+            "Willingness to face challenges",
           ],
           risks: [
-            'Could benefit from progressive challenge protocols',
-            'Self-efficacy enhancement would strengthen resilience'
-          ]
-        }
+            "Could benefit from progressive challenge protocols",
+            "Self-efficacy enhancement would strengthen resilience",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Implement evidence-based resilience training protocols',
-            'Practice progressive stress inoculation techniques',
-            'Work with resilience coach for personalized development'
+            "Implement evidence-based resilience training protocols",
+            "Practice progressive stress inoculation techniques",
+            "Work with resilience coach for personalized development",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Resilience capacity typically improves measurably within 8-12 weeks of consistent, progressive practice.'
-          }
+            timeline:
+              "Resilience capacity typically improves measurably within 8-12 weeks of consistent, progressive practice.",
+          },
         });
       });
     }
@@ -3679,35 +4135,38 @@ function resilienceIndexParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Resilience Index AI response:", error);
 
     return {
       overallScore: 75,
       overallRating: "High Resilience",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your resilience assessment has been completed. Consult with mental performance professionals for personalized resilience development.",
-        recommendations: [
-          "Work with resilience coach to develop personalized training plan",
-          "Implement evidence-based stress inoculation protocols",
-          "Practice progressive challenge and recovery cycles"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline established'],
-          riskFactors: ['Requires professional guidance for optimization'],
-          timeline: 'Consult with mental performance specialist to develop resilience enhancement strategy.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your resilience assessment has been completed. Consult with mental performance professionals for personalized resilience development.",
+          recommendations: [
+            "Work with resilience coach to develop personalized training plan",
+            "Implement evidence-based stress inoculation protocols",
+            "Practice progressive challenge and recovery cycles",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Baseline established"],
+            riskFactors: ["Requires professional guidance for optimization"],
+            timeline:
+              "Consult with mental performance specialist to develop resilience enhancement strategy.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -3720,33 +4179,48 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Cardiovascular Risk',
-        'Metabolic Health',
-        'Blood Pressure Control',
-        'Lipid Profile',
-        'Body Composition',
-        'Inflammation Status',
-        'Lifestyle Risk Factors'
+        "Cardiovascular Risk",
+        "Metabolic Health",
+        "Blood Pressure Control",
+        "Lipid Profile",
+        "Body Composition",
+        "Inflammation Status",
+        "Lifestyle Risk Factors",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -3754,43 +4228,50 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Cardiovascular Risk',
-        'Metabolic Health',
-        'Blood Pressure Control',
-        'Lipid Profile',
-        'Body Composition',
-        'Inflammation Status',
-        'Lifestyle Risk Factors'
+        "Cardiovascular Risk",
+        "Metabolic Health",
+        "Blood Pressure Control",
+        "Lipid Profile",
+        "Body Composition",
+        "Inflammation Status",
+        "Lifestyle Risk Factors",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for disease prevention.`,
-              strengths: ['Baseline assessment completed', 'Awareness of risk factors', 'Prevention opportunities identified'],
-              riskFactors: ['Continue monitoring and optimization'],
-              timeline: 'Regular screening and lifestyle optimization recommended.'
+              strengths: [
+                "Baseline assessment completed",
+                "Awareness of risk factors",
+                "Prevention opportunities identified",
+              ],
+              riskFactors: ["Continue monitoring and optimization"],
+              timeline:
+                "Regular screening and lifestyle optimization recommended.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -3802,123 +4283,131 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Cardiovascular Risk',
-          desc: 'Your cardiovascular risk profile shows good heart health with areas for optimization.',
-          context: 'Cardiovascular disease is the leading cause of death globally, affecting 1 in 4 deaths. However, 80% of cardiovascular disease is preventable through lifestyle modification. Your assessment reveals important opportunities for heart disease prevention.',
+          name: "Cardiovascular Risk",
+          desc: "Your cardiovascular risk profile shows good heart health with areas for optimization.",
+          context:
+            "Cardiovascular disease is the leading cause of death globally, affecting 1 in 4 deaths. However, 80% of cardiovascular disease is preventable through lifestyle modification. Your assessment reveals important opportunities for heart disease prevention.",
           strengths: [
-            'No smoking history or quit successfully',
-            'Regular physical activity participation',
-            'Good baseline cardiovascular fitness'
+            "No smoking history or quit successfully",
+            "Regular physical activity participation",
+            "Good baseline cardiovascular fitness",
           ],
           risks: [
-            'Some modifiable risk factors present',
-            'Continue preventive strategies'
-          ]
+            "Some modifiable risk factors present",
+            "Continue preventive strategies",
+          ],
         },
         {
-          name: 'Metabolic Health',
-          desc: 'Good metabolic function with opportunities for diabetes and metabolic syndrome prevention.',
-          context: 'Metabolic syndrome affects 30% of adults and increases diabetes risk 5-fold. Early intervention reduces type 2 diabetes progression by 58%. Optimizing metabolic health provides significant long-term disease prevention benefits.',
+          name: "Metabolic Health",
+          desc: "Good metabolic function with opportunities for diabetes and metabolic syndrome prevention.",
+          context:
+            "Metabolic syndrome affects 30% of adults and increases diabetes risk 5-fold. Early intervention reduces type 2 diabetes progression by 58%. Optimizing metabolic health provides significant long-term disease prevention benefits.",
           strengths: [
-            'Stable weight management',
-            'Balanced eating patterns',
-            'Good energy levels throughout day'
+            "Stable weight management",
+            "Balanced eating patterns",
+            "Good energy levels throughout day",
           ],
           risks: [
-            'Optimize glucose metabolism',
-            'Focus on insulin sensitivity improvement'
-          ]
+            "Optimize glucose metabolism",
+            "Focus on insulin sensitivity improvement",
+          ],
         },
         {
-          name: 'Blood Pressure Control',
-          desc: 'Blood pressure levels indicate good cardiovascular protection with continued focus beneficial.',
-          context: 'Hypertension affects 1 in 3 UK adults, doubling stroke risk and increasing heart attack risk by 60%. Lifestyle modifications can reduce blood pressure by 10-20 mmHg, significantly lowering cardiovascular events.',
+          name: "Blood Pressure Control",
+          desc: "Blood pressure levels indicate good cardiovascular protection with continued focus beneficial.",
+          context:
+            "Hypertension affects 1 in 3 UK adults, doubling stroke risk and increasing heart attack risk by 60%. Lifestyle modifications can reduce blood pressure by 10-20 mmHg, significantly lowering cardiovascular events.",
           strengths: [
-            'Normal blood pressure readings',
-            'Low sodium dietary approach',
-            'Stress management awareness and practices'
+            "Normal blood pressure readings",
+            "Low sodium dietary approach",
+            "Stress management awareness and practices",
           ],
           risks: [
-            'Continue regular monitoring',
-            'Maintain lifestyle protective factors'
-          ]
+            "Continue regular monitoring",
+            "Maintain lifestyle protective factors",
+          ],
         },
         {
-          name: 'Lipid Profile',
-          desc: 'Cholesterol levels show good cardiovascular protection with optimization potential.',
-          context: 'Dyslipidemia contributes to 50% of cardiovascular events. Optimizing lipids reduces heart attack risk by 30-40%. Focus on HDL/LDL ratio and triglyceride management provides significant protection.',
+          name: "Lipid Profile",
+          desc: "Cholesterol levels show good cardiovascular protection with optimization potential.",
+          context:
+            "Dyslipidemia contributes to 50% of cardiovascular events. Optimizing lipids reduces heart attack risk by 30-40%. Focus on HDL/LDL ratio and triglyceride management provides significant protection.",
           strengths: [
-            'Healthy dietary fat choices',
-            'Regular physical activity supporting HDL',
-            'Good cholesterol awareness'
+            "Healthy dietary fat choices",
+            "Regular physical activity supporting HDL",
+            "Good cholesterol awareness",
           ],
           risks: [
-            'Continue heart-healthy fat intake',
-            'Annual lipid panel monitoring recommended'
-          ]
+            "Continue heart-healthy fat intake",
+            "Annual lipid panel monitoring recommended",
+          ],
         },
         {
-          name: 'Body Composition',
-          desc: 'Body composition shows healthy patterns with continued focus beneficial for long-term health.',
-          context: 'Obesity increases cardiovascular death risk by 50-100%. Visceral fat is metabolically active and strongly predicts cardiometabolic disease. Maintaining healthy body composition reduces multiple disease risks simultaneously.',
+          name: "Body Composition",
+          desc: "Body composition shows healthy patterns with continued focus beneficial for long-term health.",
+          context:
+            "Obesity increases cardiovascular death risk by 50-100%. Visceral fat is metabolically active and strongly predicts cardiometabolic disease. Maintaining healthy body composition reduces multiple disease risks simultaneously.",
           strengths: [
-            'Healthy weight range maintenance',
-            'Good muscle mass for metabolic health',
-            'Active metabolism and energy expenditure'
+            "Healthy weight range maintenance",
+            "Good muscle mass for metabolic health",
+            "Active metabolism and energy expenditure",
           ],
           risks: [
-            'Monitor body composition trends quarterly',
-            'Focus on sustainable healthy habits'
-          ]
+            "Monitor body composition trends quarterly",
+            "Focus on sustainable healthy habits",
+          ],
         },
         {
-          name: 'Inflammation Status',
-          desc: 'Inflammatory markers suggest good systemic health with optimization opportunities.',
-          context: 'Chronic inflammation drives atherosclerosis and metabolic disease progression. Reducing inflammation lowers cardiovascular events by 25-30%. Anti-inflammatory lifestyle strategies provide broad health benefits.',
+          name: "Inflammation Status",
+          desc: "Inflammatory markers suggest good systemic health with optimization opportunities.",
+          context:
+            "Chronic inflammation drives atherosclerosis and metabolic disease progression. Reducing inflammation lowers cardiovascular events by 25-30%. Anti-inflammatory lifestyle strategies provide broad health benefits.",
           strengths: [
-            'Anti-inflammatory diet awareness',
-            'Good sleep quality reducing inflammation',
-            'Regular exercise with anti-inflammatory effects'
+            "Anti-inflammatory diet awareness",
+            "Good sleep quality reducing inflammation",
+            "Regular exercise with anti-inflammatory effects",
           ],
           risks: [
-            'Optimize anti-inflammatory lifestyle further',
-            'Consider inflammatory marker testing (hs-CRP)'
-          ]
+            "Optimize anti-inflammatory lifestyle further",
+            "Consider inflammatory marker testing (hs-CRP)",
+          ],
         },
         {
-          name: 'Lifestyle Risk Factors',
-          desc: 'Lifestyle patterns support good cardiometabolic health with areas for enhancement.',
-          context: 'Lifestyle factors contribute 80% of cardiometabolic disease risk. Comprehensive lifestyle intervention reduces cardiovascular events by 50%. Small changes in multiple areas create synergistic health benefits.',
+          name: "Lifestyle Risk Factors",
+          desc: "Lifestyle patterns support good cardiometabolic health with areas for enhancement.",
+          context:
+            "Lifestyle factors contribute 80% of cardiometabolic disease risk. Comprehensive lifestyle intervention reduces cardiovascular events by 50%. Small changes in multiple areas create synergistic health benefits.",
           strengths: [
-            'Regular physical activity participation',
-            'Balanced nutritional approach',
-            'Good health awareness and motivation'
+            "Regular physical activity participation",
+            "Balanced nutritional approach",
+            "Good health awareness and motivation",
           ],
           risks: [
-            'Continue building healthy behaviors',
-            'Track progress with biomarker monitoring'
-          ]
-        }
+            "Continue building healthy behaviors",
+            "Track progress with biomarker monitoring",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Continue protective lifestyle factors',
-            'Monitor key biomarkers regularly',
-            'Focus on evidence-based prevention strategies'
+            "Continue protective lifestyle factors",
+            "Monitor key biomarkers regularly",
+            "Focus on evidence-based prevention strategies",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Regular screening and lifestyle optimization recommended annually.'
-          }
+            timeline:
+              "Regular screening and lifestyle optimization recommended annually.",
+          },
         });
       });
     }
@@ -3936,9 +4425,8 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
       riskPercentage, // For display as "15% risk" instead of "85% health score"
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Cardiometabolic Risk AI response:", error);
 
@@ -3946,26 +4434,34 @@ function cardiometabolicRiskParseAIResponse(aiAnalysis, assessmentType) {
       overallScore: 75,
       overallRating: "Moderate Risk",
       riskPercentage: 25,
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your cardiometabolic risk assessment has been completed. Focus on preventive strategies for optimal heart and metabolic health.",
-        recommendations: [
-          "Maintain regular cardiovascular exercise and healthy diet",
-          "Monitor blood pressure, cholesterol, and glucose regularly",
-          "Focus on stress management and quality sleep for inflammation reduction"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Prevention awareness', 'Health-focused mindset'],
-          riskFactors: ['Continue monitoring and optimization'],
-          timeline: 'Regular screening and lifestyle optimization recommended.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your cardiometabolic risk assessment has been completed. Focus on preventive strategies for optimal heart and metabolic health.",
+          recommendations: [
+            "Maintain regular cardiovascular exercise and healthy diet",
+            "Monitor blood pressure, cholesterol, and glucose regularly",
+            "Focus on stress management and quality sleep for inflammation reduction",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Prevention awareness",
+              "Health-focused mindset",
+            ],
+            riskFactors: ["Continue monitoring and optimization"],
+            timeline:
+              "Regular screening and lifestyle optimization recommended.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -3978,37 +4474,56 @@ function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
 
     // Parse overall rating
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Potential";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Good Potential";
 
     // Parse priority level (unique to Health Concierge)
     const priorityMatch = aiAnalysis.match(/PRIORITY_LEVEL:\s*([^\n]+)/i);
-    const priorityLevel = priorityMatch ? priorityMatch[1].trim() : "Near-Term Focus";
+    const priorityLevel = priorityMatch
+      ? priorityMatch[1].trim()
+      : "Near-Term Focus";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis for each category
     if (detailedSection) {
       const categories = [
-        'Health Goal Clarity',
-        'Resource Readiness',
-        'Challenge Complexity',
-        'Optimization Pathway'
+        "Health Goal Clarity",
+        "Resource Readiness",
+        "Challenge Complexity",
+        "Optimization Pathway",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -4017,40 +4532,46 @@ function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Health Goal Clarity',
-        'Resource Readiness',
-        'Challenge Complexity',
-        'Optimization Pathway'
+        "Health Goal Clarity",
+        "Resource Readiness",
+        "Challenge Complexity",
+        "Optimization Pathway",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for your personalized health optimization journey.`,
-              strengths: ['Assessment completed', 'Health awareness demonstrated'],
-              riskFactors: ['Requires personalized strategy'],
-              timeline: 'Begin optimization strategies in initial consultation.'
+              strengths: [
+                "Assessment completed",
+                "Health awareness demonstrated",
+              ],
+              riskFactors: ["Requires personalized strategy"],
+              timeline:
+                "Begin optimization strategies in initial consultation.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -4063,81 +4584,86 @@ function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Health Goal Clarity',
-          desc: 'Your health goals are taking shape and would benefit from refinement.',
-          context: 'Clear health goals predict 85% of successful outcomes. Specific, measurable goals increase adherence by 3x. Goal clarity enables personalized protocol design and sustainable behavior change.',
+          name: "Health Goal Clarity",
+          desc: "Your health goals are taking shape and would benefit from refinement.",
+          context:
+            "Clear health goals predict 85% of successful outcomes. Specific, measurable goals increase adherence by 3x. Goal clarity enables personalized protocol design and sustainable behavior change.",
           strengths: [
-            'Health goal identified',
-            'Motivated for improvement',
-            'Timeline awareness present'
+            "Health goal identified",
+            "Motivated for improvement",
+            "Timeline awareness present",
           ],
           risks: [
-            'Goals need specificity refinement',
-            'Success metrics require definition'
-          ]
+            "Goals need specificity refinement",
+            "Success metrics require definition",
+          ],
         },
         {
-          name: 'Resource Readiness',
-          desc: 'You have resources available to support your health optimization journey.',
-          context: 'Resource allocation determines 70% of health optimization success. Adequate time and financial commitment predict sustainable change. Support systems increase success by 65%.',
+          name: "Resource Readiness",
+          desc: "You have resources available to support your health optimization journey.",
+          context:
+            "Resource allocation determines 70% of health optimization success. Adequate time and financial commitment predict sustainable change. Support systems increase success by 65%.",
           strengths: [
-            'Investment capacity demonstrated',
-            'Time availability present',
-            'Open to resource allocation'
+            "Investment capacity demonstrated",
+            "Time availability present",
+            "Open to resource allocation",
           ],
           risks: [
-            'Optimize time allocation strategy',
-            'Build stronger support network'
-          ]
+            "Optimize time allocation strategy",
+            "Build stronger support network",
+          ],
         },
         {
-          name: 'Challenge Complexity',
-          desc: 'Your health challenges require a tailored, integrated approach.',
-          context: 'Challenge complexity requires customized intervention strategies. Interconnected health issues need integrated approaches for 90% success rates. Root cause analysis enables effective resolution.',
+          name: "Challenge Complexity",
+          desc: "Your health challenges require a tailored, integrated approach.",
+          context:
+            "Challenge complexity requires customized intervention strategies. Interconnected health issues need integrated approaches for 90% success rates. Root cause analysis enables effective resolution.",
           strengths: [
-            'Self-awareness of health status',
-            'Symptom pattern recognition',
-            'Open to comprehensive solutions'
+            "Self-awareness of health status",
+            "Symptom pattern recognition",
+            "Open to comprehensive solutions",
           ],
           risks: [
-            'Multiple challenges need prioritization',
-            'Integrated protocol design beneficial'
-          ]
+            "Multiple challenges need prioritization",
+            "Integrated protocol design beneficial",
+          ],
         },
         {
-          name: 'Optimization Pathway',
-          desc: 'Your preferred approach style aligns well with effective optimization strategies.',
-          context: 'Personalized approach matching predicts 80% of adherence success. Alignment between preferences and protocols increases completion by 4x. Patient-centered care optimizes outcomes.',
+          name: "Optimization Pathway",
+          desc: "Your preferred approach style aligns well with effective optimization strategies.",
+          context:
+            "Personalized approach matching predicts 80% of adherence success. Alignment between preferences and protocols increases completion by 4x. Patient-centered care optimizes outcomes.",
           strengths: [
-            'Clear approach preference identified',
-            'Learning style awareness',
-            'Action-oriented mindset'
+            "Clear approach preference identified",
+            "Learning style awareness",
+            "Action-oriented mindset",
           ],
           risks: [
-            'Pathway requires fine-tuning',
-            'Feedback loops need establishment'
-          ]
-        }
+            "Pathway requires fine-tuning",
+            "Feedback loops need establishment",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 65,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Begin with personalized health assessment',
-            'Develop bespoke optimization protocol',
-            'Establish ongoing support structure'
+            "Begin with personalized health assessment",
+            "Develop bespoke optimization protocol",
+            "Establish ongoing support structure",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Initial strategy session within 1-2 weeks. Protocol implementation begins immediately after.'
-          }
+            timeline:
+              "Initial strategy session within 1-2 weeks. Protocol implementation begins immediately after.",
+          },
         });
       });
     }
@@ -4153,9 +4679,8 @@ function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
       priorityLevel, // Unique to Health Concierge
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Health Concierge AI response:", error);
 
@@ -4164,30 +4689,36 @@ function healthConciergeParseAIResponse(aiAnalysis, assessmentType) {
       overallScore: 75,
       overallRating: "Good Potential",
       priorityLevel: "Near-Term Focus",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your health concierge assessment has been completed. We're ready to create your personalized optimization roadmap.",
-        recommendations: [
-          "Schedule initial health concierge consultation",
-          "Review personalized protocol recommendations",
-          "Begin with highest-priority interventions"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Health commitment demonstrated'],
-          riskFactors: ['Personalized strategy development needed'],
-          timeline: 'Connect with health concierge team within 48-72 hours for strategy session.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your health concierge assessment has been completed. We're ready to create your personalized optimization roadmap.",
+          recommendations: [
+            "Schedule initial health concierge consultation",
+            "Review personalized protocol recommendations",
+            "Begin with highest-priority interventions",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Health commitment demonstrated",
+            ],
+            riskFactors: ["Personalized strategy development needed"],
+            timeline:
+              "Connect with health concierge team within 48-72 hours for strategy session.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
-
 
 function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
   try {
@@ -4195,32 +4726,49 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 58;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Burden";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Moderate Burden";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Polypharmacy Risk',
-        'Drug Interaction Risk',
-        'Side Effect Burden',
-        'Medication Management'
+        "Polypharmacy Risk",
+        "Drug Interaction Risk",
+        "Side Effect Burden",
+        "Medication Management",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -4228,40 +4776,46 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Polypharmacy Risk',
-        'Drug Interaction Risk',
-        'Side Effect Burden',
-        'Medication Management'
+        "Polypharmacy Risk",
+        "Drug Interaction Risk",
+        "Side Effect Burden",
+        "Medication Management",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 58;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors requiring pharmaceutical attention.`,
-              strengths: ['Baseline assessment completed', 'Some medication awareness'],
-              riskFactors: ['Could benefit from medication review'],
-              timeline: 'Medication optimization benefits typically seen within 2-4 weeks.'
+              strengths: [
+                "Baseline assessment completed",
+                "Some medication awareness",
+              ],
+              riskFactors: ["Could benefit from medication review"],
+              timeline:
+                "Medication optimization benefits typically seen within 2-4 weeks.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              level: ["low", "moderate", "high", "severe"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -4273,81 +4827,86 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Polypharmacy Risk',
-          desc: 'You are taking multiple medications which increases the risk of drug interactions and side effects.',
-          context: 'Polypharmacy is a major patient safety concern. Patients taking 5+ medications have exponentially increased adverse drug event risk. Medication reviews can reduce inappropriate prescribing by 40-60% according to Royal Pharmaceutical Society guidance.',
+          name: "Polypharmacy Risk",
+          desc: "You are taking multiple medications which increases the risk of drug interactions and side effects.",
+          context:
+            "Polypharmacy is a major patient safety concern. Patients taking 5+ medications have exponentially increased adverse drug event risk. Medication reviews can reduce inappropriate prescribing by 40-60% according to Royal Pharmaceutical Society guidance.",
           strengths: [
-            'Aware of complete medication list',
-            'Uses single pharmacy for dispensing',
-            'Willing to discuss medication optimization'
+            "Aware of complete medication list",
+            "Uses single pharmacy for dispensing",
+            "Willing to discuss medication optimization",
           ],
           risks: [
-            'Request comprehensive medication review',
-            'Ask about discontinuing unnecessary medications'
-          ]
+            "Request comprehensive medication review",
+            "Ask about discontinuing unnecessary medications",
+          ],
         },
         {
-          name: 'Drug Interaction Risk',
-          desc: 'Moderate risk of drug interactions based on your current medication profile.',
-          context: 'Drug interactions are responsible for significant morbidity. Complete medication lists including OTC drugs prevent 60% of interaction problems according to MHRA guidance.',
+          name: "Drug Interaction Risk",
+          desc: "Moderate risk of drug interactions based on your current medication profile.",
+          context:
+            "Drug interactions are responsible for significant morbidity. Complete medication lists including OTC drugs prevent 60% of interaction problems according to MHRA guidance.",
           strengths: [
-            'Maintains updated medication list',
-            'Communicates with healthcare prescribers',
-            'Uses interaction checking when possible'
+            "Maintains updated medication list",
+            "Communicates with healthcare prescribers",
+            "Uses interaction checking when possible",
           ],
           risks: [
-            'Include supplements and OTC drugs in medication list',
-            'Use interaction checking tools before adding medications'
-          ]
+            "Include supplements and OTC drugs in medication list",
+            "Use interaction checking tools before adding medications",
+          ],
         },
         {
-          name: 'Side Effect Burden',
-          desc: 'You experience some medication-related side effects that may impact your quality of life.',
-          context: 'Medication side effects significantly impact quality of life. Proactive side effect discussion improves adherence by 30-40% and timing adjustments can reduce burden.',
+          name: "Side Effect Burden",
+          desc: "You experience some medication-related side effects that may impact your quality of life.",
+          context:
+            "Medication side effects significantly impact quality of life. Proactive side effect discussion improves adherence by 30-40% and timing adjustments can reduce burden.",
           strengths: [
-            'Reports side effects to healthcare providers',
-            'Willing to optimize medication therapy',
-            'Understands importance of communication'
+            "Reports side effects to healthcare providers",
+            "Willing to optimize medication therapy",
+            "Understands importance of communication",
           ],
           risks: [
-            'Discuss bothersome side effects with providers',
-            'Consider timing adjustments or alternatives'
-          ]
+            "Discuss bothersome side effects with providers",
+            "Consider timing adjustments or alternatives",
+          ],
         },
         {
-          name: 'Medication Management',
-          desc: 'Your medication management skills are good with occasional missed doses.',
-          context: 'Effective medication management is crucial for treatment success. Organized systems improve adherence by 20-30% according to NHS medication safety guidance.',
+          name: "Medication Management",
+          desc: "Your medication management skills are good with occasional missed doses.",
+          context:
+            "Effective medication management is crucial for treatment success. Organized systems improve adherence by 20-30% according to NHS medication safety guidance.",
           strengths: [
-            'Has organization system in place',
-            'Plans ahead for medication refills',
-            'Maintains regular routine'
+            "Has organization system in place",
+            "Plans ahead for medication refills",
+            "Maintains regular routine",
           ],
           risks: [
-            'Consider backup reminder systems',
-            'Update system as medications change'
-          ]
-        }
+            "Consider backup reminder systems",
+            "Update system as medications change",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 30) + 35,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Request comprehensive medication review with pharmacist',
-            'Maintain complete and updated medication list',
-            'Communicate regularly with healthcare providers about medications'
+            "Request comprehensive medication review with pharmacist",
+            "Maintain complete and updated medication list",
+            "Communicate regularly with healthcare providers about medications",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Medication optimization benefits typically seen within 2-4 weeks of intervention.'
-          }
+            timeline:
+              "Medication optimization benefits typically seen within 2-4 weeks of intervention.",
+          },
         });
       });
     }
@@ -4360,35 +4919,41 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Medication Burden AI response:", error);
 
     return {
       overallScore: 58,
       overallRating: "Moderate Burden",
-      results: [{
-        category: "Overall Assessment",
-        score: 58,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your medication burden assessment has been completed. This provides insight into medication safety and optimization opportunities.",
-        recommendations: [
-          "Request comprehensive medication review with pharmacist",
-          "Share results with healthcare providers",
-          "Focus on safe medication optimization with professional guidance"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Medication profile documented'],
-          riskFactors: ['Professional medication review recommended'],
-          timeline: 'Schedule medication review within 2-4 weeks for optimization.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 58,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your medication burden assessment has been completed. This provides insight into medication safety and optimization opportunities.",
+          recommendations: [
+            "Request comprehensive medication review with pharmacist",
+            "Share results with healthcare providers",
+            "Focus on safe medication optimization with professional guidance",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Medication profile documented",
+            ],
+            riskFactors: ["Professional medication review recommended"],
+            timeline:
+              "Schedule medication review within 2-4 weeks for optimization.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -4396,14 +4961,22 @@ function medicationBurdenParseAIResponse(aiAnalysis, assessmentType) {
 function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Parse chronological and biological age
-    const chronologicalAgeMatch = aiAnalysis.match(/CHRONOLOGICAL_AGE:\s*(\d+)/i);
-    const chronologicalAge = chronologicalAgeMatch ? parseInt(chronologicalAgeMatch[1]) : 50;
+    const chronologicalAgeMatch = aiAnalysis.match(
+      /CHRONOLOGICAL_AGE:\s*(\d+)/i,
+    );
+    const chronologicalAge = chronologicalAgeMatch
+      ? parseInt(chronologicalAgeMatch[1])
+      : 50;
 
     const biologicalAgeMatch = aiAnalysis.match(/BIOLOGICAL_AGE:\s*(\d+)/i);
-    const biologicalAge = biologicalAgeMatch ? parseInt(biologicalAgeMatch[1]) : chronologicalAge;
+    const biologicalAge = biologicalAgeMatch
+      ? parseInt(biologicalAgeMatch[1])
+      : chronologicalAge;
 
     const ageAdvantageMatch = aiAnalysis.match(/AGE_ADVANTAGE:\s*(-?\d+)/i);
-    const ageAdvantage = ageAdvantageMatch ? parseInt(ageAdvantageMatch[1]) : chronologicalAge - biologicalAge;
+    const ageAdvantage = ageAdvantageMatch
+      ? parseInt(ageAdvantageMatch[1])
+      : chronologicalAge - biologicalAge;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Aging";
@@ -4417,33 +4990,48 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
     else if (ageAdvantage >= -5) overallScore = 55;
     else overallScore = 45;
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Cardiovascular Health',
-        'Metabolic Function',
-        'Cellular Health',
-        'Cognitive Function',
-        'Physical Vitality',
-        'Lifestyle Factors',
-        'Hormonal Balance'
+        "Cardiovascular Health",
+        "Metabolic Function",
+        "Cellular Health",
+        "Cognitive Function",
+        "Physical Vitality",
+        "Lifestyle Factors",
+        "Hormonal Balance",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -4451,43 +5039,49 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Cardiovascular Health',
-        'Metabolic Function',
-        'Cellular Health',
-        'Cognitive Function',
-        'Physical Vitality',
-        'Lifestyle Factors',
-        'Hormonal Balance'
+        "Cardiovascular Health",
+        "Metabolic Function",
+        "Cellular Health",
+        "Cognitive Function",
+        "Physical Vitality",
+        "Lifestyle Factors",
+        "Hormonal Balance",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for healthy aging and longevity.`,
-              strengths: ['Baseline function maintained', 'Awareness of health importance'],
-              riskFactors: ['Could benefit from optimization'],
-              timeline: 'Begin optimization strategies and monitor progress quarterly.'
+              strengths: [
+                "Baseline function maintained",
+                "Awareness of health importance",
+              ],
+              riskFactors: ["Could benefit from optimization"],
+              timeline:
+                "Begin optimization strategies and monitor progress quarterly.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -4499,123 +5093,131 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Cardiovascular Health',
-          desc: 'Your cardiovascular system shows typical aging patterns for your age group.',
-          context: 'Cardiovascular aging is a primary determinant of biological age, predicting 40-50% of overall aging trajectory. Heart health, arterial stiffness, and cardiovascular fitness are key markers.',
+          name: "Cardiovascular Health",
+          desc: "Your cardiovascular system shows typical aging patterns for your age group.",
+          context:
+            "Cardiovascular aging is a primary determinant of biological age, predicting 40-50% of overall aging trajectory. Heart health, arterial stiffness, and cardiovascular fitness are key markers.",
           strengths: [
-            'Basic cardiovascular function maintained',
-            'Awareness of heart health importance',
-            'Some physical activity present'
+            "Basic cardiovascular function maintained",
+            "Awareness of heart health importance",
+            "Some physical activity present",
           ],
           risks: [
-            'Could improve aerobic fitness',
-            'Heart-healthy diet optimization recommended'
-          ]
+            "Could improve aerobic fitness",
+            "Heart-healthy diet optimization recommended",
+          ],
         },
         {
-          name: 'Metabolic Function',
-          desc: 'Your metabolic markers indicate moderate aging with opportunities for optimization.',
-          context: 'Metabolic health drives 30-40% of biological aging. Insulin sensitivity, glucose regulation, and metabolic flexibility are critical for longevity.',
+          name: "Metabolic Function",
+          desc: "Your metabolic markers indicate moderate aging with opportunities for optimization.",
+          context:
+            "Metabolic health drives 30-40% of biological aging. Insulin sensitivity, glucose regulation, and metabolic flexibility are critical for longevity.",
           strengths: [
-            'Reasonable metabolic awareness',
-            'Basic blood sugar regulation',
-            'Some dietary consciousness'
+            "Reasonable metabolic awareness",
+            "Basic blood sugar regulation",
+            "Some dietary consciousness",
           ],
           risks: [
-            'Metabolic flexibility could improve',
-            'Consider time-restricted eating'
-          ]
+            "Metabolic flexibility could improve",
+            "Consider time-restricted eating",
+          ],
         },
         {
-          name: 'Cellular Health',
-          desc: 'Cellular function shows age-appropriate patterns with room for enhancement.',
-          context: 'Cellular aging and senescence determine lifespan at the fundamental level. Oxidative stress, inflammation, and autophagy affect all organ systems.',
+          name: "Cellular Health",
+          desc: "Cellular function shows age-appropriate patterns with room for enhancement.",
+          context:
+            "Cellular aging and senescence determine lifespan at the fundamental level. Oxidative stress, inflammation, and autophagy affect all organ systems.",
           strengths: [
-            'Basic cellular repair capacity',
-            'Adequate antioxidant intake',
-            'Cellular function maintained'
+            "Basic cellular repair capacity",
+            "Adequate antioxidant intake",
+            "Cellular function maintained",
           ],
           risks: [
-            'Could reduce inflammation markers',
-            'Autophagy enhancement beneficial'
-          ]
+            "Could reduce inflammation markers",
+            "Autophagy enhancement beneficial",
+          ],
         },
         {
-          name: 'Cognitive Function',
-          desc: 'Brain health indicators show good cognitive aging patterns.',
-          context: 'Cognitive reserve protects against age-related decline. Research shows 40% of dementia is preventable through lifestyle modifications.',
+          name: "Cognitive Function",
+          desc: "Brain health indicators show good cognitive aging patterns.",
+          context:
+            "Cognitive reserve protects against age-related decline. Research shows 40% of dementia is preventable through lifestyle modifications.",
           strengths: [
-            'Good mental engagement',
-            'Learning capacity maintained',
-            'Cognitive awareness present'
+            "Good mental engagement",
+            "Learning capacity maintained",
+            "Cognitive awareness present",
           ],
           risks: [
-            'Could increase cognitive challenges',
-            'Brain-healthy nutrition recommended'
-          ]
+            "Could increase cognitive challenges",
+            "Brain-healthy nutrition recommended",
+          ],
         },
         {
-          name: 'Physical Vitality',
-          desc: 'Physical function shows typical age-related patterns with optimization potential.',
-          context: 'Physical function predicts longevity and healthspan. Muscle mass declines 3-8% per decade after 30, making resistance training critical.',
+          name: "Physical Vitality",
+          desc: "Physical function shows typical age-related patterns with optimization potential.",
+          context:
+            "Physical function predicts longevity and healthspan. Muscle mass declines 3-8% per decade after 30, making resistance training critical.",
           strengths: [
-            'Basic physical function maintained',
-            'Some regular activity',
-            'Mobility preserved'
+            "Basic physical function maintained",
+            "Some regular activity",
+            "Mobility preserved",
           ],
           risks: [
-            'Muscle mass preservation needed',
-            'Strength training highly recommended'
-          ]
+            "Muscle mass preservation needed",
+            "Strength training highly recommended",
+          ],
         },
         {
-          name: 'Lifestyle Factors',
-          desc: 'Your lifestyle patterns support moderate aging with key improvement opportunities.',
-          context: 'Lifestyle determines 75% of aging trajectory. Blue Zones research shows optimal lifestyle can extend healthy lifespan by 10+ years.',
+          name: "Lifestyle Factors",
+          desc: "Your lifestyle patterns support moderate aging with key improvement opportunities.",
+          context:
+            "Lifestyle determines 75% of aging trajectory. Blue Zones research shows optimal lifestyle can extend healthy lifespan by 10+ years.",
           strengths: [
-            'Some healthy habits present',
-            'Health awareness demonstrated',
-            'Willing to optimize'
+            "Some healthy habits present",
+            "Health awareness demonstrated",
+            "Willing to optimize",
           ],
           risks: [
-            'Sleep optimization important',
-            'Stress management could improve'
-          ]
+            "Sleep optimization important",
+            "Stress management could improve",
+          ],
         },
         {
-          name: 'Hormonal Balance',
-          desc: 'Hormonal patterns show age-typical changes with support opportunities.',
-          context: 'Hormones regulate aging processes throughout the body. Natural decline starts in 30s, affecting multiple systems and overall vitality.',
+          name: "Hormonal Balance",
+          desc: "Hormonal patterns show age-typical changes with support opportunities.",
+          context:
+            "Hormones regulate aging processes throughout the body. Natural decline starts in 30s, affecting multiple systems and overall vitality.",
           strengths: [
-            'Basic endocrine function maintained',
-            'Energy levels reasonable',
-            'Metabolic signaling functional'
+            "Basic endocrine function maintained",
+            "Energy levels reasonable",
+            "Metabolic signaling functional",
           ],
           risks: [
-            'Hormonal support through lifestyle',
-            'Consider regular testing'
-          ]
-        }
+            "Hormonal support through lifestyle",
+            "Consider regular testing",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 65,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Follow evidence-based longevity practices',
-            'Monitor relevant biomarkers regularly',
-            'Implement gradual lifestyle optimizations'
+            "Follow evidence-based longevity practices",
+            "Monitor relevant biomarkers regularly",
+            "Implement gradual lifestyle optimizations",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin optimization strategies and reassess progress every 3-6 months.'
-          }
+            timeline:
+              "Begin optimization strategies and reassess progress every 3-6 months.",
+          },
         });
       });
     }
@@ -4631,9 +5233,8 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Biological Age AI response:", error);
 
@@ -4643,26 +5244,33 @@ function biologicalAgeParseAIResponse(aiAnalysis, assessmentType) {
       ageAdvantage: 0,
       overallScore: 70,
       overallRating: "Good Aging",
-      results: [{
-        category: "Overall Assessment",
-        score: 70,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your biological age assessment has been completed. This provides insights into your aging trajectory.",
-        recommendations: [
-          "Focus on evidence-based longevity practices",
-          "Monitor key health biomarkers regularly",
-          "Implement lifestyle optimizations gradually"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Health awareness demonstrated'],
-          riskFactors: ['Continue monitoring aging markers'],
-          timeline: 'Reassess biological age every 6-12 months to track progress.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 70,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your biological age assessment has been completed. This provides insights into your aging trajectory.",
+          recommendations: [
+            "Focus on evidence-based longevity practices",
+            "Monitor key health biomarkers regularly",
+            "Implement lifestyle optimizations gradually",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Health awareness demonstrated",
+            ],
+            riskFactors: ["Continue monitoring aging markers"],
+            timeline:
+              "Reassess biological age every 6-12 months to track progress.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -4673,32 +5281,49 @@ function lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 45;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Impact";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Moderate Impact";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Work & Professional Life',
-        'Social & Relationship Impact',
-        'Physical Activity & Recreation',
-        'Independence & Daily Living'
+        "Work & Professional Life",
+        "Social & Relationship Impact",
+        "Physical Activity & Recreation",
+        "Independence & Daily Living",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -4706,40 +5331,54 @@ function lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Work & Professional Life',
-        'Social & Relationship Impact',
-        'Physical Activity & Recreation',
-        'Independence & Daily Living'
+        "Work & Professional Life",
+        "Social & Relationship Impact",
+        "Physical Activity & Recreation",
+        "Independence & Daily Living",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 45;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors affecting daily functioning in this life domain.`,
-              strengths: ['Maintains awareness of limitations', 'Seeks adaptive strategies'],
-              riskFactors: ['Could benefit from targeted adaptation approaches'],
-              timeline: 'Functional improvements typically seen within 3-6 weeks of implementing strategies.'
+              strengths: [
+                "Maintains awareness of limitations",
+                "Seeks adaptive strategies",
+              ],
+              riskFactors: [
+                "Could benefit from targeted adaptation approaches",
+              ],
+              timeline:
+                "Functional improvements typically seen within 3-6 weeks of implementing strategies.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['minimal', 'mild', 'moderate', 'significant', 'severe'].includes(level) ? level : 'moderate',
+              level: [
+                "minimal",
+                "mild",
+                "moderate",
+                "significant",
+                "severe",
+              ].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -4751,49 +5390,73 @@ function lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Work & Professional Life',
-          desc: 'Health issues are moderately impacting your work performance and professional activities.',
-          context: 'Chronic conditions affect 20-30% of workforce productivity. Workplace accommodations improve functioning by 40-50% according to Health and Safety Executive research.',
-          strengths: ['Maintains work commitment despite challenges', 'Communicates needs with employers', 'Seeks workplace solutions']
+          name: "Work & Professional Life",
+          desc: "Health issues are moderately impacting your work performance and professional activities.",
+          context:
+            "Chronic conditions affect 20-30% of workforce productivity. Workplace accommodations improve functioning by 40-50% according to Health and Safety Executive research.",
+          strengths: [
+            "Maintains work commitment despite challenges",
+            "Communicates needs with employers",
+            "Seeks workplace solutions",
+          ],
         },
         {
-          name: 'Social & Relationship Impact',
-          desc: 'Some impact on social activities and relationships, but manageable with planning.',
-          context: 'Social isolation increases health risks by 30%. Maintaining social connections improves health outcomes according to British Psychological Society research.',
-          strengths: ['Values important relationships', 'Stays socially engaged when possible', 'Adapts social activities appropriately']
+          name: "Social & Relationship Impact",
+          desc: "Some impact on social activities and relationships, but manageable with planning.",
+          context:
+            "Social isolation increases health risks by 30%. Maintaining social connections improves health outcomes according to British Psychological Society research.",
+          strengths: [
+            "Values important relationships",
+            "Stays socially engaged when possible",
+            "Adapts social activities appropriately",
+          ],
         },
         {
-          name: 'Physical Activity & Recreation',
-          desc: 'Noticeable limitations in physical activities and recreational pursuits.',
-          context: 'Modified physical activity maintains function. Adaptive recreation improves wellbeing according to Chartered Society of Physiotherapy guidelines.',
-          strengths: ['Willing to adapt physical activities', 'Seeks appropriate exercise options', 'Maintains movement within capabilities']
+          name: "Physical Activity & Recreation",
+          desc: "Noticeable limitations in physical activities and recreational pursuits.",
+          context:
+            "Modified physical activity maintains function. Adaptive recreation improves wellbeing according to Chartered Society of Physiotherapy guidelines.",
+          strengths: [
+            "Willing to adapt physical activities",
+            "Seeks appropriate exercise options",
+            "Maintains movement within capabilities",
+          ],
         },
         {
-          name: 'Independence & Daily Living',
-          desc: 'Generally maintaining independence with some assistance needed for certain activities.',
-          context: 'Assistive devices and strategies maintain 70-80% independence. Support systems enable functioning according to occupational therapy research.',
-          strengths: ['Maintains daily self-care routines', 'Uses adaptive strategies effectively', 'Seeks appropriate support when needed']
-        }
+          name: "Independence & Daily Living",
+          desc: "Generally maintaining independence with some assistance needed for certain activities.",
+          context:
+            "Assistive devices and strategies maintain 70-80% independence. Support systems enable functioning according to occupational therapy research.",
+          strengths: [
+            "Maintains daily self-care routines",
+            "Uses adaptive strategies effectively",
+            "Seeks appropriate support when needed",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 25) + 35,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Implement adaptive strategies in affected life areas',
-            'Build support systems for managing limitations',
-            'Focus on maintaining function with appropriate accommodations'
+            "Implement adaptive strategies in affected life areas",
+            "Build support systems for managing limitations",
+            "Focus on maintaining function with appropriate accommodations",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
-            riskFactors: ['Explore additional adaptation strategies', 'Consider professional support services'],
-            timeline: 'Lifestyle adaptations show quality of life benefits within 3-6 weeks of implementation.'
-          }
+            riskFactors: [
+              "Explore additional adaptation strategies",
+              "Consider professional support services",
+            ],
+            timeline:
+              "Lifestyle adaptations show quality of life benefits within 3-6 weeks of implementation.",
+          },
         });
       });
     }
@@ -4806,39 +5469,41 @@ function lifestyleLimiterParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Lifestyle Limiter AI response:", error);
 
     return {
       overallScore: 45,
       overallRating: "Moderate Impact",
-      results: [{
-        category: "Overall Assessment",
-        score: 45,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your lifestyle limitation assessment has been completed. This provides insight into how health issues may be affecting different life domains.",
-        recommendations: [
-          "Implement adaptive strategies in high-impact areas",
-          "Build support systems for managing limitations",
-          "Focus on quality of life optimization with professional guidance"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Lifestyle impact documented'],
-          riskFactors: ['Continue adaptation strategies'],
-          timeline: 'Review functional status within 4-6 weeks of implementing adaptations.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 45,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your lifestyle limitation assessment has been completed. This provides insight into how health issues may be affecting different life domains.",
+          recommendations: [
+            "Implement adaptive strategies in high-impact areas",
+            "Build support systems for managing limitations",
+            "Focus on quality of life optimization with professional guidance",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Lifestyle impact documented"],
+            riskFactors: ["Continue adaptation strategies"],
+            timeline:
+              "Review functional status within 4-6 weeks of implementing adaptations.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
-
 
 function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
   try {
@@ -4846,32 +5511,49 @@ function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 65;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Energy";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Moderate Energy";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Sleep Quality & Recovery',
-        'Energy Pattern Stability',
-        'Stress & Recovery Balance',
-        'Nutritional Energy Support'
+        "Sleep Quality & Recovery",
+        "Energy Pattern Stability",
+        "Stress & Recovery Balance",
+        "Nutritional Energy Support",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -4879,40 +5561,49 @@ function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Sleep Quality & Recovery',
-        'Energy Pattern Stability',
-        'Stress & Recovery Balance',
-        'Nutritional Energy Support'
+        "Sleep Quality & Recovery",
+        "Energy Pattern Stability",
+        "Stress & Recovery Balance",
+        "Nutritional Energy Support",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 65;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors affecting daily energy levels.`,
-              strengths: ['Baseline assessment completed', 'Some energy awareness', 'Willing to optimize'],
-              riskFactors: ['Could benefit from energy optimization strategies'],
-              timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
+              strengths: [
+                "Baseline assessment completed",
+                "Some energy awareness",
+                "Willing to optimize",
+              ],
+              riskFactors: [
+                "Could benefit from energy optimization strategies",
+              ],
+              timeline:
+                "Energy improvements typically seen within 2-4 weeks of consistent implementation.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['excellent', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["excellent", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -4924,81 +5615,86 @@ function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Sleep Quality & Recovery',
-          desc: 'Your sleep patterns show moderate quality with opportunities for optimization to enhance energy restoration.',
-          context: 'Sleep is the foundation of daily energy. Quality sleep restores 70-80% of daily energy reserves, while poor sleep reduces cognitive function by 40% according to British Sleep Society guidelines and NICE sleep recommendations.',
+          name: "Sleep Quality & Recovery",
+          desc: "Your sleep patterns show moderate quality with opportunities for optimization to enhance energy restoration.",
+          context:
+            "Sleep is the foundation of daily energy. Quality sleep restores 70-80% of daily energy reserves, while poor sleep reduces cognitive function by 40% according to British Sleep Society guidelines and NICE sleep recommendations.",
           strengths: [
-            'Recognizes importance of quality sleep',
-            'Has some established sleep routines',
-            'Willing to optimize sleep habits'
+            "Recognizes importance of quality sleep",
+            "Has some established sleep routines",
+            "Willing to optimize sleep habits",
           ],
           risks: [
-            'Establish consistent sleep-wake schedule',
-            'Optimize sleep environment for better rest'
-          ]
+            "Establish consistent sleep-wake schedule",
+            "Optimize sleep environment for better rest",
+          ],
         },
         {
-          name: 'Energy Pattern Stability',
-          desc: 'Your energy levels fluctuate throughout the day with opportunities to stabilize patterns through circadian optimization.',
-          context: 'Circadian rhythms regulate 80% of energy patterns. Aligned circadian rhythms improve energy by 30-40%, while irregular patterns cause afternoon crashes according to British Society for Chronobiology research.',
+          name: "Energy Pattern Stability",
+          desc: "Your energy levels fluctuate throughout the day with opportunities to stabilize patterns through circadian optimization.",
+          context:
+            "Circadian rhythms regulate 80% of energy patterns. Aligned circadian rhythms improve energy by 30-40%, while irregular patterns cause afternoon crashes according to British Society for Chronobiology research.",
           strengths: [
-            'Some awareness of energy patterns',
-            'Recognizes daily fluctuations',
-            'Willing to optimize timing'
+            "Some awareness of energy patterns",
+            "Recognizes daily fluctuations",
+            "Willing to optimize timing",
           ],
           risks: [
-            'Align activities with natural circadian rhythms',
-            'Establish consistent daily routines'
-          ]
+            "Align activities with natural circadian rhythms",
+            "Establish consistent daily routines",
+          ],
         },
         {
-          name: 'Stress & Recovery Balance',
-          desc: 'Your stress levels impact energy reserves with opportunities for better stress management and recovery practices.',
-          context: 'Chronic stress depletes 50-60% of energy reserves. Effective stress management improves energy by 35-45% according to British Psychological Society stress guidelines and energy conservation research.',
+          name: "Stress & Recovery Balance",
+          desc: "Your stress levels impact energy reserves with opportunities for better stress management and recovery practices.",
+          context:
+            "Chronic stress depletes 50-60% of energy reserves. Effective stress management improves energy by 35-45% according to British Psychological Society stress guidelines and energy conservation research.",
           strengths: [
-            'Some stress awareness',
-            'Uses coping strategies when needed',
-            'Recognizes need for recovery time'
+            "Some stress awareness",
+            "Uses coping strategies when needed",
+            "Recognizes need for recovery time",
           ],
           risks: [
-            'Implement regular stress reduction practices',
-            'Build recovery periods into daily routine'
-          ]
+            "Implement regular stress reduction practices",
+            "Build recovery periods into daily routine",
+          ],
         },
         {
-          name: 'Nutritional Energy Support',
-          desc: 'Your nutrition provides moderate energy support with opportunities for optimization through timing and composition.',
-          context: 'Nutrition provides 60-70% of metabolic energy substrate. Stable blood sugar maintains energy, proper hydration improves energy by 20-25% according to British Dietetic Association guidelines.',
+          name: "Nutritional Energy Support",
+          desc: "Your nutrition provides moderate energy support with opportunities for optimization through timing and composition.",
+          context:
+            "Nutrition provides 60-70% of metabolic energy substrate. Stable blood sugar maintains energy, proper hydration improves energy by 20-25% according to British Dietetic Association guidelines.",
           strengths: [
-            'Some healthy eating habits',
-            'Understands nutrition importance',
-            'Willing to optimize dietary patterns'
+            "Some healthy eating habits",
+            "Understands nutrition importance",
+            "Willing to optimize dietary patterns",
           ],
           risks: [
-            'Stabilize blood sugar through meal timing',
-            'Ensure adequate hydration throughout day'
-          ]
-        }
+            "Stabilize blood sugar through meal timing",
+            "Ensure adequate hydration throughout day",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 25) + 55,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Implement evidence-based energy optimization strategies',
-            'Track energy patterns to identify improvements',
-            'Focus on sustainable lifestyle modifications'
+            "Implement evidence-based energy optimization strategies",
+            "Track energy patterns to identify improvements",
+            "Focus on sustainable lifestyle modifications",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
-          }
+            timeline:
+              "Energy improvements typically seen within 2-4 weeks of consistent implementation.",
+          },
         });
       });
     }
@@ -5011,35 +5707,42 @@ function dailyEnergyParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Daily Energy AI response:", error);
 
     return {
       overallScore: 65,
       overallRating: "Moderate Energy",
-      results: [{
-        category: "Overall Assessment",
-        score: 65,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your energy assessment has been completed. This provides insights into your daily energy patterns and optimization opportunities.",
-        recommendations: [
-          'Focus on sleep quality as foundation of energy',
-          'Establish consistent daily routines',
-          'Implement stress management practices'
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Energy awareness developing', 'Willing to optimize'],
-          riskFactors: ['Continue energy optimization efforts'],
-          timeline: 'Energy improvements typically seen within 2-4 weeks of consistent implementation.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 65,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your energy assessment has been completed. This provides insights into your daily energy patterns and optimization opportunities.",
+          recommendations: [
+            "Focus on sleep quality as foundation of energy",
+            "Establish consistent daily routines",
+            "Implement stress management practices",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Energy awareness developing",
+              "Willing to optimize",
+            ],
+            riskFactors: ["Continue energy optimization efforts"],
+            timeline:
+              "Energy improvements typically seen within 2-4 weeks of consistent implementation.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -5052,32 +5755,47 @@ function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Dietary Inflammation',
-        'Lifestyle Factors',
-        'Sleep Quality',
-        'Stress & Recovery',
-        'Body Composition',
-        'Environmental Factors'
+        "Dietary Inflammation",
+        "Lifestyle Factors",
+        "Sleep Quality",
+        "Stress & Recovery",
+        "Body Composition",
+        "Environmental Factors",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -5085,42 +5803,50 @@ function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Dietary Inflammation',
-        'Lifestyle Factors',
-        'Sleep Quality',
-        'Stress & Recovery',
-        'Body Composition',
-        'Environmental Factors'
+        "Dietary Inflammation",
+        "Lifestyle Factors",
+        "Sleep Quality",
+        "Stress & Recovery",
+        "Body Composition",
+        "Environmental Factors",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 32;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals factors influencing inflammatory burden.`,
-              strengths: ['Baseline assessment completed', 'Some awareness of inflammatory factors'],
-              riskFactors: ['Could benefit from targeted anti-inflammatory strategies'],
-              timeline: 'Improvements typically seen within 4-8 weeks of consistent changes.'
+              strengths: [
+                "Baseline assessment completed",
+                "Some awareness of inflammatory factors",
+              ],
+              riskFactors: [
+                "Could benefit from targeted anti-inflammatory strategies",
+              ],
+              timeline:
+                "Improvements typically seen within 4-8 weeks of consistent changes.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              level: ["low", "moderate", "high", "severe"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -5132,109 +5858,116 @@ function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Dietary Inflammation',
-          desc: 'Your diet contains moderate inflammatory triggers that could be optimized.',
-          context: 'Diet is a primary modifiable inflammation driver. Anti-inflammatory diets reduce CRP by 30-40% within 6-8 weeks according to British Dietetic Association guidelines.',
+          name: "Dietary Inflammation",
+          desc: "Your diet contains moderate inflammatory triggers that could be optimized.",
+          context:
+            "Diet is a primary modifiable inflammation driver. Anti-inflammatory diets reduce CRP by 30-40% within 6-8 weeks according to British Dietetic Association guidelines.",
           strengths: [
-            'Includes some anti-inflammatory foods in diet',
-            'Aware of dietary impact on health',
-            'Willing to modify eating patterns'
+            "Includes some anti-inflammatory foods in diet",
+            "Aware of dietary impact on health",
+            "Willing to modify eating patterns",
           ],
           risks: [
-            'Reduce processed food consumption',
-            'Increase omega-3 rich foods intake'
-          ]
+            "Reduce processed food consumption",
+            "Increase omega-3 rich foods intake",
+          ],
         },
         {
-          name: 'Lifestyle Factors',
-          desc: 'Your lifestyle choices support manageable inflammation levels with some room for improvement.',
-          context: 'Physical activity is one of the most powerful anti-inflammatory interventions. Regular exercise reduces inflammatory markers by 20-30% according to NHS guidelines.',
+          name: "Lifestyle Factors",
+          desc: "Your lifestyle choices support manageable inflammation levels with some room for improvement.",
+          context:
+            "Physical activity is one of the most powerful anti-inflammatory interventions. Regular exercise reduces inflammatory markers by 20-30% according to NHS guidelines.",
           strengths: [
-            'Maintains some regular physical activity',
-            'Understands exercise health benefits',
-            'Willing to increase daily movement'
+            "Maintains some regular physical activity",
+            "Understands exercise health benefits",
+            "Willing to increase daily movement",
           ],
           risks: [
-            'Reduce sedentary time throughout day',
-            'Consider adding structured exercise routine'
-          ]
+            "Reduce sedentary time throughout day",
+            "Consider adding structured exercise routine",
+          ],
         },
         {
-          name: 'Sleep Quality',
-          desc: 'Sleep patterns are moderately impacting your inflammatory regulation.',
-          context: 'Sleep is crucial for inflammatory regulation. Poor sleep increases IL-6 and TNF-alpha by 40-60% according to British Sleep Society research.',
+          name: "Sleep Quality",
+          desc: "Sleep patterns are moderately impacting your inflammatory regulation.",
+          context:
+            "Sleep is crucial for inflammatory regulation. Poor sleep increases IL-6 and TNF-alpha by 40-60% according to British Sleep Society research.",
           strengths: [
-            'Recognizes importance of quality sleep',
-            'Has some good sleep habits established',
-            'Willing to optimize sleep routine'
+            "Recognizes importance of quality sleep",
+            "Has some good sleep habits established",
+            "Willing to optimize sleep routine",
           ],
           risks: [
-            'Establish more consistent sleep schedule',
-            'Optimize bedroom environment for sleep'
-          ]
+            "Establish more consistent sleep schedule",
+            "Optimize bedroom environment for sleep",
+          ],
         },
         {
-          name: 'Stress & Recovery',
-          desc: 'You\'re managing stress reasonably well with opportunities for optimization.',
-          context: 'Chronic stress is a major inflammation driver. Stress management reduces inflammatory markers by 25-35% according to British Psychological Society guidelines.',
+          name: "Stress & Recovery",
+          desc: "You're managing stress reasonably well with opportunities for optimization.",
+          context:
+            "Chronic stress is a major inflammation driver. Stress management reduces inflammatory markers by 25-35% according to British Psychological Society guidelines.",
           strengths: [
-            'Has some stress awareness and monitoring',
-            'Uses stress coping strategies',
-            'Seeks stress reduction when possible'
+            "Has some stress awareness and monitoring",
+            "Uses stress coping strategies",
+            "Seeks stress reduction when possible",
           ],
           risks: [
-            'Develop more structured stress management practice',
-            'Consider mindfulness or relaxation techniques'
-          ]
+            "Develop more structured stress management practice",
+            "Consider mindfulness or relaxation techniques",
+          ],
         },
         {
-          name: 'Body Composition',
-          desc: 'Body composition is a factor in your inflammatory profile.',
-          context: 'Adipose tissue produces inflammatory cytokines. Modest weight loss (5-10%) reduces CRP by 20-30% according to NICE obesity guidelines.',
+          name: "Body Composition",
+          desc: "Body composition is a factor in your inflammatory profile.",
+          context:
+            "Adipose tissue produces inflammatory cytokines. Modest weight loss (5-10%) reduces CRP by 20-30% according to NICE obesity guidelines.",
           strengths: [
-            'Aware of weight impact on health',
-            'Willing to optimize body composition',
-            'Takes health-oriented approach'
+            "Aware of weight impact on health",
+            "Willing to optimize body composition",
+            "Takes health-oriented approach",
           ],
           risks: [
-            'Focus on gradual sustainable changes',
-            'Consider body recomposition strategies'
-          ]
+            "Focus on gradual sustainable changes",
+            "Consider body recomposition strategies",
+          ],
         },
         {
-          name: 'Environmental Factors',
-          desc: 'Environmental exposures may be contributing to your inflammatory burden.',
-          context: 'Environmental toxins contribute to inflammatory burden. Reducing toxin exposure improves inflammatory markers according to Public Health England.',
+          name: "Environmental Factors",
+          desc: "Environmental exposures may be contributing to your inflammatory burden.",
+          context:
+            "Environmental toxins contribute to inflammatory burden. Reducing toxin exposure improves inflammatory markers according to Public Health England.",
           strengths: [
-            'Some awareness of environmental impacts',
-            'Takes protective measures when possible',
-            'Willing to reduce harmful exposures'
+            "Some awareness of environmental impacts",
+            "Takes protective measures when possible",
+            "Willing to reduce harmful exposures",
           ],
           risks: [
-            'Minimize exposure to air pollutants',
-            'Reduce chemical exposure in daily products'
-          ]
-        }
+            "Minimize exposure to air pollutants",
+            "Reduce chemical exposure in daily products",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 30) + 20,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Implement evidence-based anti-inflammatory strategies',
-            'Track inflammatory indicators over time',
-            'Consult healthcare provider about inflammatory markers'
+            "Implement evidence-based anti-inflammatory strategies",
+            "Track inflammatory indicators over time",
+            "Consult healthcare provider about inflammatory markers",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Anti-inflammatory improvements typically seen within 4-8 weeks of consistent lifestyle changes.'
-          }
+            timeline:
+              "Anti-inflammatory improvements typically seen within 4-8 weeks of consistent lifestyle changes.",
+          },
         });
       });
     }
@@ -5247,35 +5980,41 @@ function inflammationRiskParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Inflammation Risk AI response:", error);
 
     return {
       overallScore: 32,
       overallRating: "Moderate Risk",
-      results: [{
-        category: "Overall Assessment",
-        score: 32,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your inflammation risk assessment has been completed. This provides insight into modifiable factors affecting your inflammatory burden.",
-        recommendations: [
-          "Implement evidence-based anti-inflammatory lifestyle strategies",
-          "Share results with healthcare provider for inflammatory marker testing",
-          "Focus on sustainable changes with highest impact potential"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline inflammatory profile documented'],
-          riskFactors: ['Continue anti-inflammatory lifestyle practices'],
-          timeline: 'Review inflammatory status with healthcare team within 8-12 weeks.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 32,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your inflammation risk assessment has been completed. This provides insight into modifiable factors affecting your inflammatory burden.",
+          recommendations: [
+            "Implement evidence-based anti-inflammatory lifestyle strategies",
+            "Share results with healthcare provider for inflammatory marker testing",
+            "Focus on sustainable changes with highest impact potential",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: [
+              "Assessment completed",
+              "Baseline inflammatory profile documented",
+            ],
+            riskFactors: ["Continue anti-inflammatory lifestyle practices"],
+            timeline:
+              "Review inflammatory status with healthcare team within 8-12 weeks.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -5286,35 +6025,52 @@ function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 42;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Symptoms";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Moderate Symptoms";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Pain Assessment',
-        'Fatigue Impact',
-        'Digestive Symptoms',
-        'Joint & Mobility',
-        'Sleep Quality',
-        'Cognitive Function',
-        'Emotional Wellbeing'
+        "Pain Assessment",
+        "Fatigue Impact",
+        "Digestive Symptoms",
+        "Joint & Mobility",
+        "Sleep Quality",
+        "Cognitive Function",
+        "Emotional Wellbeing",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -5322,43 +6078,51 @@ function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Pain Assessment',
-        'Fatigue Impact',
-        'Digestive Symptoms',
-        'Joint & Mobility',
-        'Sleep Quality',
-        'Cognitive Function',
-        'Emotional Wellbeing'
+        "Pain Assessment",
+        "Fatigue Impact",
+        "Digestive Symptoms",
+        "Joint & Mobility",
+        "Sleep Quality",
+        "Cognitive Function",
+        "Emotional Wellbeing",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 42;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important patterns for symptom management planning.`,
-              strengths: ['Baseline assessment completed', 'Awareness of symptoms'],
-              riskFactors: ['Could benefit from targeted management strategies'],
-              timeline: 'Improvements typically seen within 4-8 weeks of consistent intervention.'
+              strengths: [
+                "Baseline assessment completed",
+                "Awareness of symptoms",
+              ],
+              riskFactors: [
+                "Could benefit from targeted management strategies",
+              ],
+              timeline:
+                "Improvements typically seen within 4-8 weeks of consistent intervention.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['low', 'moderate', 'high', 'severe'].includes(level) ? level : 'moderate',
+              level: ["low", "moderate", "high", "severe"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -5370,123 +6134,131 @@ function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Pain Assessment',
-          desc: 'Your pain levels indicate moderate discomfort that may benefit from management strategies.',
-          context: 'Chronic pain affects 20-30% of adults with significant quality of life impact. Multimodal pain management approaches show 30-40% improvement with consistent application.',
+          name: "Pain Assessment",
+          desc: "Your pain levels indicate moderate discomfort that may benefit from management strategies.",
+          context:
+            "Chronic pain affects 20-30% of adults with significant quality of life impact. Multimodal pain management approaches show 30-40% improvement with consistent application.",
           strengths: [
-            'Good pain awareness and self-monitoring',
-            'Willing to try multiple approaches',
-            'Maintains activity despite discomfort'
+            "Good pain awareness and self-monitoring",
+            "Willing to try multiple approaches",
+            "Maintains activity despite discomfort",
           ],
           risks: [
-            'Consider anti-inflammatory dietary modifications',
-            'Explore mind-body pain management techniques'
-          ]
+            "Consider anti-inflammatory dietary modifications",
+            "Explore mind-body pain management techniques",
+          ],
         },
         {
-          name: 'Fatigue Impact',
-          desc: 'Fatigue is impacting your daily activities and may require targeted intervention.',
-          context: 'Chronic fatigue is multifactorial involving sleep, stress, and medical causes. Targeted interventions improve energy by 40-50% within weeks.',
+          name: "Fatigue Impact",
+          desc: "Fatigue is impacting your daily activities and may require targeted intervention.",
+          context:
+            "Chronic fatigue is multifactorial involving sleep, stress, and medical causes. Targeted interventions improve energy by 40-50% within weeks.",
           strengths: [
-            'Awareness of energy patterns throughout day',
-            'Willing to prioritize rest and recovery',
-            'Seeks to understand underlying causes'
+            "Awareness of energy patterns throughout day",
+            "Willing to prioritize rest and recovery",
+            "Seeks to understand underlying causes",
           ],
           risks: [
-            'Optimize sleep hygiene and duration',
-            'Consider energy conservation techniques'
-          ]
+            "Optimize sleep hygiene and duration",
+            "Consider energy conservation techniques",
+          ],
         },
         {
-          name: 'Digestive Symptoms',
-          desc: 'Your digestive symptoms warrant monitoring and dietary attention.',
-          context: 'Functional digestive disorders affect 10-20% of population. Dietary modifications help 70-80% of patients identify and manage triggers.',
+          name: "Digestive Symptoms",
+          desc: "Your digestive symptoms warrant monitoring and dietary attention.",
+          context:
+            "Functional digestive disorders affect 10-20% of population. Dietary modifications help 70-80% of patients identify and manage triggers.",
           strengths: [
-            'Attentive to dietary patterns and triggers',
-            'Willing to track symptoms systematically',
-            'Open to dietary modifications'
+            "Attentive to dietary patterns and triggers",
+            "Willing to track symptoms systematically",
+            "Open to dietary modifications",
           ],
           risks: [
-            'Keep detailed food diary to identify triggers',
-            'Consider gradual increase in fiber intake'
-          ]
+            "Keep detailed food diary to identify triggers",
+            "Consider gradual increase in fiber intake",
+          ],
         },
         {
-          name: 'Joint & Mobility',
-          desc: 'Joint stiffness and mobility issues are affecting your daily function.',
-          context: 'Joint symptoms affect mobility and quality of life. Exercise and lifestyle modifications reduce pain by 25-40% with consistent practice.',
+          name: "Joint & Mobility",
+          desc: "Joint stiffness and mobility issues are affecting your daily function.",
+          context:
+            "Joint symptoms affect mobility and quality of life. Exercise and lifestyle modifications reduce pain by 25-40% with consistent practice.",
           strengths: [
-            'Maintains some level of daily activity',
-            'Understands importance of movement',
-            'Willing to try gentle exercise approaches'
+            "Maintains some level of daily activity",
+            "Understands importance of movement",
+            "Willing to try gentle exercise approaches",
           ],
           risks: [
-            'Incorporate gentle stretching into routine',
-            'Consider low-impact exercises like swimming'
-          ]
+            "Incorporate gentle stretching into routine",
+            "Consider low-impact exercises like swimming",
+          ],
         },
         {
-          name: 'Sleep Quality',
-          desc: 'Sleep quality issues may be contributing to other symptoms.',
-          context: 'Sleep disorders affect 30-40% of adults with significant health impacts. Sleep hygiene improvements increase quality by 50-60%.',
+          name: "Sleep Quality",
+          desc: "Sleep quality issues may be contributing to other symptoms.",
+          context:
+            "Sleep disorders affect 30-40% of adults with significant health impacts. Sleep hygiene improvements increase quality by 50-60%.",
           strengths: [
-            'Recognizes importance of quality sleep',
-            'Willing to modify evening habits',
-            'Tracks sleep patterns'
+            "Recognizes importance of quality sleep",
+            "Willing to modify evening habits",
+            "Tracks sleep patterns",
           ],
           risks: [
-            'Establish consistent sleep-wake schedule',
-            'Optimize bedroom environment for sleep'
-          ]
+            "Establish consistent sleep-wake schedule",
+            "Optimize bedroom environment for sleep",
+          ],
         },
         {
-          name: 'Cognitive Function',
-          desc: 'Mental clarity and focus may benefit from targeted support.',
-          context: 'Brain fog and cognitive symptoms are common in chronic conditions. Mental health, sleep, and lifestyle factors significantly impact cognition.',
+          name: "Cognitive Function",
+          desc: "Mental clarity and focus may benefit from targeted support.",
+          context:
+            "Brain fog and cognitive symptoms are common in chronic conditions. Mental health, sleep, and lifestyle factors significantly impact cognition.",
           strengths: [
-            'Aware of cognitive patterns and triggers',
-            'Uses compensatory strategies effectively',
-            'Seeks cognitive optimization'
+            "Aware of cognitive patterns and triggers",
+            "Uses compensatory strategies effectively",
+            "Seeks cognitive optimization",
           ],
           risks: [
-            'Practice cognitive pacing techniques',
-            'Address sleep and stress as cognitive factors'
-          ]
+            "Practice cognitive pacing techniques",
+            "Address sleep and stress as cognitive factors",
+          ],
         },
         {
-          name: 'Emotional Wellbeing',
-          desc: 'Emotional health is an important component of overall symptom management.',
-          context: 'Emotional health is integral to physical symptom management. Psychological interventions reduce symptom burden by 30-50%.',
+          name: "Emotional Wellbeing",
+          desc: "Emotional health is an important component of overall symptom management.",
+          context:
+            "Emotional health is integral to physical symptom management. Psychological interventions reduce symptom burden by 30-50%.",
           strengths: [
-            'Self-aware of emotional patterns',
-            'Uses healthy coping strategies',
-            'Seeks support when needed'
+            "Self-aware of emotional patterns",
+            "Uses healthy coping strategies",
+            "Seeks support when needed",
           ],
           risks: [
-            'Consider stress reduction techniques',
-            'Explore mind-body practices like meditation'
-          ]
-        }
+            "Consider stress reduction techniques",
+            "Explore mind-body practices like meditation",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 30) + 25,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Track symptom patterns in a journal',
-            'Discuss findings with healthcare provider',
-            'Implement recommended lifestyle modifications'
+            "Track symptom patterns in a journal",
+            "Discuss findings with healthcare provider",
+            "Implement recommended lifestyle modifications",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Symptom improvements typically seen within 4-8 weeks of consistent management.'
-          }
+            timeline:
+              "Symptom improvements typically seen within 4-8 weeks of consistent management.",
+          },
         });
       });
     }
@@ -5499,35 +6271,38 @@ function symptomSeverityParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Symptom Severity AI response:", error);
 
     return {
       overallScore: 42,
       overallRating: "Moderate Symptoms",
-      results: [{
-        category: "Overall Assessment",
-        score: 42,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your symptom severity assessment has been completed. This provides a baseline for tracking symptom patterns and management effectiveness.",
-        recommendations: [
-          "Share these results with your healthcare provider",
-          "Begin implementing priority symptom management strategies",
-          "Track symptom patterns over time to assess improvement"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Symptom awareness documented'],
-          riskFactors: ['Continue monitoring symptoms'],
-          timeline: 'Review symptom patterns with healthcare team within 4-8 weeks.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 42,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your symptom severity assessment has been completed. This provides a baseline for tracking symptom patterns and management effectiveness.",
+          recommendations: [
+            "Share these results with your healthcare provider",
+            "Begin implementing priority symptom management strategies",
+            "Track symptom patterns over time to assess improvement",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Symptom awareness documented"],
+            riskFactors: ["Continue monitoring symptoms"],
+            timeline:
+              "Review symptom patterns with healthcare team within 4-8 weeks.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -5537,34 +6312,51 @@ function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Safe with Precautions";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Safe with Precautions";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Airway Management Risk',
-        'Sleep Apnoea Risk',
-        'Medication Interactions',
-        'Substance Use Impact',
-        'Previous Anaesthesia History',
-        'Allergy & Reaction Risk'
+        "Airway Management Risk",
+        "Sleep Apnoea Risk",
+        "Medication Interactions",
+        "Substance Use Impact",
+        "Previous Anaesthesia History",
+        "Allergy & Reaction Risk",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -5572,42 +6364,47 @@ function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Airway Management Risk',
-        'Sleep Apnoea Risk',
-        'Medication Interactions',
-        'Substance Use Impact',
-        'Previous Anaesthesia History',
-        'Allergy & Reaction Risk'
+        "Airway Management Risk",
+        "Sleep Apnoea Risk",
+        "Medication Interactions",
+        "Substance Use Impact",
+        "Previous Anaesthesia History",
+        "Allergy & Reaction Risk",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for anaesthesia safety planning.`,
-              strengths: ['Baseline assessment completed', 'Standard protocols appropriate'],
-              riskFactors: ['Requires anaesthesia team review'],
-              timeline: 'Discuss with anaesthesia team before surgery.'
+              strengths: [
+                "Baseline assessment completed",
+                "Standard protocols appropriate",
+              ],
+              riskFactors: ["Requires anaesthesia team review"],
+              timeline: "Discuss with anaesthesia team before surgery.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -5619,107 +6416,110 @@ function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Airway Management Risk',
-          desc: 'Your airway assessment indicates manageable risk for anaesthesia delivery.',
-          context: 'Airway assessment is crucial for safe anaesthesia. Proper evaluation predicts 80-90% of potential difficulties.',
+          name: "Airway Management Risk",
+          desc: "Your airway assessment indicates manageable risk for anaesthesia delivery.",
+          context:
+            "Airway assessment is crucial for safe anaesthesia. Proper evaluation predicts 80-90% of potential difficulties.",
           strengths: [
-            'Good neck mobility and mouth opening',
-            'No previous airway difficulties reported',
-            'Standard airway management appropriate'
+            "Good neck mobility and mouth opening",
+            "No previous airway difficulties reported",
+            "Standard airway management appropriate",
           ],
-          risks: [
-            'Standard monitoring protocols required'
-          ]
+          risks: ["Standard monitoring protocols required"],
         },
         {
-          name: 'Sleep Apnoea Risk',
-          desc: 'Sleep-related factors may require consideration during anaesthesia.',
-          context: 'Obstructive sleep apnoea affects 10-15% of adults and increases perioperative complications 2-3x.',
+          name: "Sleep Apnoea Risk",
+          desc: "Sleep-related factors may require consideration during anaesthesia.",
+          context:
+            "Obstructive sleep apnoea affects 10-15% of adults and increases perioperative complications 2-3x.",
           strengths: [
-            'Awareness of sleep patterns',
-            'No severe daytime sleepiness',
-            'Willing to cooperate with monitoring'
+            "Awareness of sleep patterns",
+            "No severe daytime sleepiness",
+            "Willing to cooperate with monitoring",
           ],
           risks: [
-            'May benefit from sleep study evaluation',
-            'Extended post-operative monitoring may be advised'
-          ]
+            "May benefit from sleep study evaluation",
+            "Extended post-operative monitoring may be advised",
+          ],
         },
         {
-          name: 'Medication Interactions',
-          desc: 'Current medications require review for anaesthetic interactions.',
-          context: 'Drug interactions with anaesthetic agents can impact safety. Proper review prevents 70% of complications.',
+          name: "Medication Interactions",
+          desc: "Current medications require review for anaesthetic interactions.",
+          context:
+            "Drug interactions with anaesthetic agents can impact safety. Proper review prevents 70% of complications.",
           strengths: [
-            'Good medication compliance',
-            'Clear medication documentation',
-            'Regular medication reviews'
+            "Good medication compliance",
+            "Clear medication documentation",
+            "Regular medication reviews",
           ],
           risks: [
-            'Some medications require timing adjustments',
-            'Drug interaction assessment needed'
-          ]
+            "Some medications require timing adjustments",
+            "Drug interaction assessment needed",
+          ],
         },
         {
-          name: 'Substance Use Impact',
-          desc: 'Substance use history requires consideration for anaesthetic planning.',
-          context: 'Alcohol and substance use significantly affects anaesthetic requirements and recovery outcomes.',
+          name: "Substance Use Impact",
+          desc: "Substance use history requires consideration for anaesthetic planning.",
+          context:
+            "Alcohol and substance use significantly affects anaesthetic requirements and recovery outcomes.",
           strengths: [
-            'Willing to modify habits for surgery',
-            'Understands anaesthetic implications',
-            'Open communication with team'
+            "Willing to modify habits for surgery",
+            "Understands anaesthetic implications",
+            "Open communication with team",
           ],
           risks: [
-            'May require adjusted anaesthetic doses',
-            'Cessation timeline important'
-          ]
+            "May require adjusted anaesthetic doses",
+            "Cessation timeline important",
+          ],
         },
         {
-          name: 'Previous Anaesthesia History',
-          desc: 'Your previous anaesthesia experiences provide valuable safety insights.',
-          context: 'Previous experiences are strong predictors with 90% likelihood of similar outcomes.',
+          name: "Previous Anaesthesia History",
+          desc: "Your previous anaesthesia experiences provide valuable safety insights.",
+          context:
+            "Previous experiences are strong predictors with 90% likelihood of similar outcomes.",
           strengths: [
-            'Previous anaesthesia experiences documented',
-            'No major complications reported',
-            'Good historical information available'
+            "Previous anaesthesia experiences documented",
+            "No major complications reported",
+            "Good historical information available",
           ],
-          risks: [
-            'Minor post-operative nausea previously'
-          ]
+          risks: ["Minor post-operative nausea previously"],
         },
         {
-          name: 'Allergy & Reaction Risk',
-          desc: 'Known allergies require precautionary measures during anaesthesia.',
-          context: 'Perioperative allergic reactions occur in 1:10,000-1:20,000 cases. Proper identification prevents 95% of serious complications.',
+          name: "Allergy & Reaction Risk",
+          desc: "Known allergies require precautionary measures during anaesthesia.",
+          context:
+            "Perioperative allergic reactions occur in 1:10,000-1:20,000 cases. Proper identification prevents 95% of serious complications.",
           strengths: [
-            'Allergies well documented',
-            'Previous procedures without allergic reactions',
-            'Emergency protocols available'
+            "Allergies well documented",
+            "Previous procedures without allergic reactions",
+            "Emergency protocols available",
           ],
           risks: [
-            'Requires allergy documentation review',
-            'Precautionary medications may be needed'
-          ]
-        }
+            "Requires allergy documentation review",
+            "Precautionary medications may be needed",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Discuss assessment results with your anaesthesia team',
-            'Follow all pre-operative fasting and medication instructions',
-            'Inform team of any changes to health status before surgery'
+            "Discuss assessment results with your anaesthesia team",
+            "Follow all pre-operative fasting and medication instructions",
+            "Inform team of any changes to health status before surgery",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Review with anaesthesia team 1-2 weeks before scheduled surgery.'
-          }
+            timeline:
+              "Review with anaesthesia team 1-2 weeks before scheduled surgery.",
+          },
         });
       });
     }
@@ -5732,35 +6532,37 @@ function anaesthesiaRiskParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Anaesthesia Risk AI response:", error);
 
     return {
       overallScore: 75,
       overallRating: "Safe with Precautions",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your anaesthesia risk assessment has been completed. Please discuss these results with your anaesthesia team.",
-        recommendations: [
-          "Share this assessment with your anaesthetist during pre-operative consultation",
-          "Follow all pre-operative instructions carefully",
-          "Inform team of any health changes before surgery"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Information documented'],
-          riskFactors: ['Requires anaesthesia team review'],
-          timeline: 'Discuss with anaesthesia team before surgery date.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your anaesthesia risk assessment has been completed. Please discuss these results with your anaesthesia team.",
+          recommendations: [
+            "Share this assessment with your anaesthetist during pre-operative consultation",
+            "Follow all pre-operative instructions carefully",
+            "Inform team of any health changes before surgery",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Information documented"],
+            riskFactors: ["Requires anaesthesia team review"],
+            timeline: "Discuss with anaesthesia team before surgery date.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -5770,35 +6572,52 @@ function mobilityStrengthParseAIResponse(aiAnalysis, assessmentType) {
     const overallScore = scoreMatch ? parseInt(scoreMatch[1]) : 75;
 
     const ratingMatch = aiAnalysis.match(/OVERALL_RATING:\s*([^\n]+)/i);
-    const overallRating = ratingMatch ? ratingMatch[1].trim() : "Strong Baseline";
+    const overallRating = ratingMatch
+      ? ratingMatch[1].trim()
+      : "Strong Baseline";
 
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     if (detailedSection) {
       const categories = [
-        'Cardiovascular Endurance',
-        'Lower Body Strength',
-        'Balance & Stability',
-        'Upper Body Strength',
-        'Functional Independence',
-        'Pain & Limitations',
-        'Activity Baseline'
+        "Cardiovascular Endurance",
+        "Lower Body Strength",
+        "Balance & Stability",
+        "Upper Body Strength",
+        "Functional Independence",
+        "Pain & Limitations",
+        "Activity Baseline",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -5806,43 +6625,48 @@ function mobilityStrengthParseAIResponse(aiAnalysis, assessmentType) {
 
     if (categorySection) {
       const categories = [
-        'Cardiovascular Endurance',
-        'Lower Body Strength',
-        'Balance & Stability',
-        'Upper Body Strength',
-        'Functional Independence',
-        'Pain & Limitations',
-        'Activity Baseline'
+        "Cardiovascular Endurance",
+        "Lower Body Strength",
+        "Balance & Stability",
+        "Upper Body Strength",
+        "Functional Independence",
+        "Pain & Limitations",
+        "Activity Baseline",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for recovery planning.`,
-              strengths: ['Baseline assessment completed', 'Standard protocols appropriate'],
-              riskFactors: ['Could benefit from targeted training'],
-              timeline: 'Begin conditioning 4-6 weeks before surgery.'
+              strengths: [
+                "Baseline assessment completed",
+                "Standard protocols appropriate",
+              ],
+              riskFactors: ["Could benefit from targeted training"],
+              timeline: "Begin conditioning 4-6 weeks before surgery.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -5854,120 +6678,122 @@ function mobilityStrengthParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Cardiovascular Endurance',
-          desc: 'Your walking ability and endurance indicate good cardiovascular fitness for recovery.',
-          context: 'Cardiovascular fitness is strongly predictive of surgical outcomes. Good pre-operative fitness reduces recovery time by 30-40% and complications by 50%.',
+          name: "Cardiovascular Endurance",
+          desc: "Your walking ability and endurance indicate good cardiovascular fitness for recovery.",
+          context:
+            "Cardiovascular fitness is strongly predictive of surgical outcomes. Good pre-operative fitness reduces recovery time by 30-40% and complications by 50%.",
           strengths: [
-            'Can walk reasonable distances',
-            'Good stamina during activities',
-            'No severe breathlessness'
+            "Can walk reasonable distances",
+            "Good stamina during activities",
+            "No severe breathlessness",
           ],
           risks: [
-            'Could improve with consistent walking routine',
-            'Gradual increase in duration recommended'
-          ]
+            "Could improve with consistent walking routine",
+            "Gradual increase in duration recommended",
+          ],
         },
         {
-          name: 'Lower Body Strength',
-          desc: 'Good lower body strength provides a foundation for post-surgical mobility.',
-          context: 'Lower body strength is crucial for post-surgical mobility. Strong leg muscles reduce fall risk by 40% and enable earlier mobilization.',
+          name: "Lower Body Strength",
+          desc: "Good lower body strength provides a foundation for post-surgical mobility.",
+          context:
+            "Lower body strength is crucial for post-surgical mobility. Strong leg muscles reduce fall risk by 40% and enable earlier mobilization.",
           strengths: [
-            'Daily activities maintained',
-            'Good functional leg capacity',
-            'Can manage stairs'
+            "Daily activities maintained",
+            "Good functional leg capacity",
+            "Can manage stairs",
           ],
           risks: [
-            'Some strengthening exercises beneficial',
-            'Focus on chair rises and squats'
-          ]
+            "Some strengthening exercises beneficial",
+            "Focus on chair rises and squats",
+          ],
         },
         {
-          name: 'Balance & Stability',
-          desc: 'Your balance is adequate but could benefit from improvement to reduce fall risk.',
-          context: 'Balance is critical for safe mobility and fall prevention. Poor balance increases post-operative fall risk by 300%.',
+          name: "Balance & Stability",
+          desc: "Your balance is adequate but could benefit from improvement to reduce fall risk.",
+          context:
+            "Balance is critical for safe mobility and fall prevention. Poor balance increases post-operative fall risk by 300%.",
           strengths: [
-            'No recent falls',
-            'Confident during movement',
-            'Good spatial awareness'
+            "No recent falls",
+            "Confident during movement",
+            "Good spatial awareness",
           ],
           risks: [
-            'Dynamic balance could improve',
-            'Practice single-leg stands recommended'
-          ]
+            "Dynamic balance could improve",
+            "Practice single-leg stands recommended",
+          ],
         },
         {
-          name: 'Upper Body Strength',
-          desc: 'Good functional strength supports independent recovery activities.',
-          context: 'Upper body and grip strength correlate with overall muscle mass and predict 90% of functional recovery outcomes.',
+          name: "Upper Body Strength",
+          desc: "Good functional strength supports independent recovery activities.",
+          context:
+            "Upper body and grip strength correlate with overall muscle mass and predict 90% of functional recovery outcomes.",
           strengths: [
-            'Adequate grip strength',
-            'Can perform daily tasks',
-            'Good arm coordination'
+            "Adequate grip strength",
+            "Can perform daily tasks",
+            "Good arm coordination",
           ],
-          risks: [
-            'Some upper body strengthening beneficial'
-          ]
+          risks: ["Some upper body strengthening beneficial"],
         },
         {
-          name: 'Functional Independence',
-          desc: 'High level of independence in daily activities suggests excellent recovery potential.',
-          context: 'Pre-operative independence strongly predicts post-operative outcomes. High baseline independence leads to 50% better recovery.',
+          name: "Functional Independence",
+          desc: "High level of independence in daily activities suggests excellent recovery potential.",
+          context:
+            "Pre-operative independence strongly predicts post-operative outcomes. High baseline independence leads to 50% better recovery.",
           strengths: [
-            'Fully independent in self-care',
-            'Good problem-solving skills',
-            'High baseline function'
+            "Fully independent in self-care",
+            "Good problem-solving skills",
+            "High baseline function",
           ],
-          risks: [
-            'Plan temporary support for immediate post-op'
-          ]
+          risks: ["Plan temporary support for immediate post-op"],
         },
         {
-          name: 'Pain & Limitations',
-          desc: 'Current discomfort is manageable and shouldn\'t significantly impact recovery with proper planning.',
-          context: 'Existing pain affects but doesn\'t prevent successful recovery when well-managed with appropriate strategies.',
+          name: "Pain & Limitations",
+          desc: "Current discomfort is manageable and shouldn't significantly impact recovery with proper planning.",
+          context:
+            "Existing pain affects but doesn't prevent successful recovery when well-managed with appropriate strategies.",
           strengths: [
-            'Good pain awareness',
-            'Effective coping strategies',
-            'Willing to follow pain protocols'
+            "Good pain awareness",
+            "Effective coping strategies",
+            "Willing to follow pain protocols",
           ],
           risks: [
-            'Optimize pain management before surgery',
-            'Discuss perioperative control strategies'
-          ]
+            "Optimize pain management before surgery",
+            "Discuss perioperative control strategies",
+          ],
         },
         {
-          name: 'Activity Baseline',
-          desc: 'Your regular activity level provides a good foundation for rehabilitation.',
-          context: 'Current activity level provides foundation for recovery. Active patients have 40% faster recovery and better long-term outcomes.',
+          name: "Activity Baseline",
+          desc: "Your regular activity level provides a good foundation for rehabilitation.",
+          context:
+            "Current activity level provides foundation for recovery. Active patients have 40% faster recovery and better long-term outcomes.",
           strengths: [
-            'Regular physical activity',
-            'Good exercise tolerance',
-            'Positive attitude toward movement'
+            "Regular physical activity",
+            "Good exercise tolerance",
+            "Positive attitude toward movement",
           ],
-          risks: [
-            'Activity will need modification post-surgery'
-          ]
-        }
+          risks: ["Activity will need modification post-surgery"],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Maintain current activity levels before surgery',
-            'Practice recommended exercises daily',
-            'Focus on areas identified for improvement'
+            "Maintain current activity levels before surgery",
+            "Practice recommended exercises daily",
+            "Focus on areas identified for improvement",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin conditioning program 4-6 weeks before scheduled surgery.'
-          }
+            timeline:
+              "Begin conditioning program 4-6 weeks before scheduled surgery.",
+          },
         });
       });
     }
@@ -5980,39 +6806,42 @@ function mobilityStrengthParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Mobility & Strength AI response:", error);
 
     return {
       overallScore: 75,
       overallRating: "Strong Baseline",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your mobility and strength assessment has been completed. This baseline will help track your recovery progress.",
-        recommendations: [
-          "Maintain current activity levels until surgery",
-          "Focus on daily walking and strength exercises",
-          "Follow physiotherapist recommendations for conditioning"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Baseline documented'],
-          riskFactors: ['Continue conditioning program'],
-          timeline: 'Begin pre-operative conditioning 4-6 weeks before surgery.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your mobility and strength assessment has been completed. This baseline will help track your recovery progress.",
+          recommendations: [
+            "Maintain current activity levels until surgery",
+            "Focus on daily walking and strength exercises",
+            "Follow physiotherapist recommendations for conditioning",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Baseline documented"],
+            riskFactors: ["Continue conditioning program"],
+            timeline:
+              "Begin pre-operative conditioning 4-6 weeks before surgery.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
-function surgeryParseAIResponse(aiAnalysis, assessmentType){
+function surgeryParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract overall score and rating
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
@@ -6022,33 +6851,48 @@ function surgeryParseAIResponse(aiAnalysis, assessmentType){
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first - Surgery Readiness specific categories
     if (detailedSection) {
       const categories = [
-        'Physical Readiness',
-        'Metabolic Health',
-        'Recovery Potential',
-        'Risk Factors',
-        'Preparation Status'
+        "Physical Readiness",
+        "Metabolic Health",
+        "Recovery Potential",
+        "Risk Factors",
+        "Preparation Status",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            evidenceBase: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            evidenceBase: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -6057,42 +6901,51 @@ function surgeryParseAIResponse(aiAnalysis, assessmentType){
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Physical Readiness',
-        'Metabolic Health',
-        'Recovery Potential',
-        'Risk Factors',
-        'Preparation Status'
+        "Physical Readiness",
+        "Metabolic Health",
+        "Recovery Potential",
+        "Risk Factors",
+        "Preparation Status",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 70;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical preparation.`,
-              evidenceBase: ['Evidence-based assessment completed', 'Consult healthcare provider for detailed guidance'],
-              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
-              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
+              evidenceBase: [
+                "Evidence-based assessment completed",
+                "Consult healthcare provider for detailed guidance",
+              ],
+              riskFactors: [
+                "Requires optimization before surgery",
+                "Close monitoring recommended",
+              ],
+              timeline:
+                "Discuss with your healthcare team 4-6 weeks before surgery.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -6105,95 +6958,101 @@ function surgeryParseAIResponse(aiAnalysis, assessmentType){
 
       const fallbackCategories = [
         {
-          name: 'Physical Readiness',
-          desc: 'Your physical condition shows good preparation for surgical procedures.',
-          context: 'Based on your exercise patterns and fitness levels, your physical readiness is on track.',
+          name: "Physical Readiness",
+          desc: "Your physical condition shows good preparation for surgical procedures.",
+          context:
+            "Based on your exercise patterns and fitness levels, your physical readiness is on track.",
           evidence: [
-            'NHS guidelines recommend 150 minutes of moderate exercise weekly for surgical preparation',
-            'ERAS protocols show that prehabilitation improves surgical outcomes',
-            'Regular physical activity is associated with reduced postoperative complications'
+            "NHS guidelines recommend 150 minutes of moderate exercise weekly for surgical preparation",
+            "ERAS protocols show that prehabilitation improves surgical outcomes",
+            "Regular physical activity is associated with reduced postoperative complications",
           ],
           risks: [
-            'Sedentary lifestyle may increase surgical risks',
-            'Limited cardiovascular fitness could affect recovery'
-          ]
+            "Sedentary lifestyle may increase surgical risks",
+            "Limited cardiovascular fitness could affect recovery",
+          ],
         },
         {
-          name: 'Metabolic Health',
-          desc: 'Your metabolic markers indicate room for optimization before surgery.',
-          context: 'Metabolic stability and blood glucose control are important factors for surgical outcomes.',
+          name: "Metabolic Health",
+          desc: "Your metabolic markers indicate room for optimization before surgery.",
+          context:
+            "Metabolic stability and blood glucose control are important factors for surgical outcomes.",
           evidence: [
-            'NICE guidelines emphasize optimal glycemic control before elective surgery',
-            'Diabetes UK research shows improved metabolic control enhances healing',
-            'Nutritional optimization supports better wound healing and recovery'
+            "NICE guidelines emphasize optimal glycemic control before elective surgery",
+            "Diabetes UK research shows improved metabolic control enhances healing",
+            "Nutritional optimization supports better wound healing and recovery",
           ],
           risks: [
-            'Uncontrolled blood sugar may affect healing',
-            'Metabolic imbalances can increase complication risk'
-          ]
+            "Uncontrolled blood sugar may affect healing",
+            "Metabolic imbalances can increase complication risk",
+          ],
         },
         {
-          name: 'Recovery Potential',
-          desc: 'Excellent indicators for post-surgical healing and recovery.',
-          context: 'Your sleep quality, stress management, and overall recovery markers show positive signs.',
+          name: "Recovery Potential",
+          desc: "Excellent indicators for post-surgical healing and recovery.",
+          context:
+            "Your sleep quality, stress management, and overall recovery markers show positive signs.",
           evidence: [
-            'Research shows 7-9 hours sleep supports immune function and healing',
-            'Stress management is associated with improved surgical recovery',
-            'Adequate vitamin D levels support bone health and immune function'
+            "Research shows 7-9 hours sleep supports immune function and healing",
+            "Stress management is associated with improved surgical recovery",
+            "Adequate vitamin D levels support bone health and immune function",
           ],
           risks: [
-            'Sleep deprivation may affect immune response',
-            'Chronic stress can impact healing processes'
-          ]
+            "Sleep deprivation may affect immune response",
+            "Chronic stress can impact healing processes",
+          ],
         },
         {
-          name: 'Risk Factors',
-          desc: 'Some risk factors identified that should be addressed pre-surgery.',
-          context: 'Modifiable risk factors can be optimized to improve surgical outcomes.',
+          name: "Risk Factors",
+          desc: "Some risk factors identified that should be addressed pre-surgery.",
+          context:
+            "Modifiable risk factors can be optimized to improve surgical outcomes.",
           evidence: [
-            'NICE guidelines recommend smoking cessation 4 weeks before surgery',
-            'Royal College of Surgeons emphasizes preoperative risk modification',
-            'Medication optimization reduces perioperative complications'
+            "NICE guidelines recommend smoking cessation 4 weeks before surgery",
+            "Royal College of Surgeons emphasizes preoperative risk modification",
+            "Medication optimization reduces perioperative complications",
           ],
           risks: [
-            'Smoking significantly increases surgical complications',
-            'Unmanaged chronic conditions may increase risk'
-          ]
+            "Smoking significantly increases surgical complications",
+            "Unmanaged chronic conditions may increase risk",
+          ],
         },
         {
-          name: 'Preparation Status',
-          desc: 'Your preparation efforts are on track but could be enhanced.',
-          context: 'Comprehensive preoperative preparation improves outcomes and patient experience.',
+          name: "Preparation Status",
+          desc: "Your preparation efforts are on track but could be enhanced.",
+          context:
+            "Comprehensive preoperative preparation improves outcomes and patient experience.",
           evidence: [
-            'ERAS protocols reduce hospital stay and improve outcomes',
-            'NHS guidance emphasizes preoperative education importance',
-            'Structured preparation programs reduce anxiety and complications'
+            "ERAS protocols reduce hospital stay and improve outcomes",
+            "NHS guidance emphasizes preoperative education importance",
+            "Structured preparation programs reduce anxiety and complications",
           ],
           risks: [
-            'Inadequate preparation may increase anxiety',
-            'Limited surgical knowledge can affect recovery'
-          ]
-        }
+            "Inadequate preparation may increase anxiety",
+            "Limited surgical knowledge can affect recovery",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with your healthcare provider for personalized guidance',
-            'Follow preoperative preparation protocols carefully',
-            'Ensure all medical information is shared with your surgical team'
+            "Consult with your healthcare provider for personalized guidance",
+            "Follow preoperative preparation protocols carefully",
+            "Ensure all medical information is shared with your surgical team",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             evidenceBase: cat.evidence,
             riskFactors: cat.risks,
-            timeline: 'Begin optimization 4-8 weeks before scheduled surgery for best results.'
-          }
+            timeline:
+              "Begin optimization 4-8 weeks before scheduled surgery for best results.",
+          },
         });
       });
     }
@@ -6207,35 +7066,37 @@ function surgeryParseAIResponse(aiAnalysis, assessmentType){
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Surgery Readiness AI response:", error);
 
     return {
       overallScore: 70,
       overallRating: "Good",
-      results: [{
-        category: "Overall Assessment",
-        score: 70,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your surgical readiness assessment has been completed. Please consult with your healthcare provider.",
-        recommendations: [
-          "Discuss your readiness assessment results with your surgical team",
-          "Follow all preoperative preparation instructions carefully",
-          "Ensure complete medical disclosure to optimize your surgical outcomes"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          evidenceBase: ['Assessment completed', 'Consultation recommended'],
-          riskFactors: ['Requires medical consultation'],
-          timeline: 'Consult with healthcare team as soon as possible.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 70,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your surgical readiness assessment has been completed. Please consult with your healthcare provider.",
+          recommendations: [
+            "Discuss your readiness assessment results with your surgical team",
+            "Follow all preoperative preparation instructions carefully",
+            "Ensure complete medical disclosure to optimize your surgical outcomes",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            evidenceBase: ["Assessment completed", "Consultation recommended"],
+            riskFactors: ["Requires medical consultation"],
+            timeline: "Consult with healthcare team as soon as possible.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
@@ -6250,34 +7111,49 @@ function recoverySpeedParseAIResponse(aiAnalysis, assessmentType) {
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Good Recovery";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first - Recovery Speed specific categories
     if (detailedSection) {
       const categories = [
-        'Nutritional Foundation',
-        'Mental Readiness',
-        'Support System Strength',
-        'Home Environment Readiness',
-        'Sleep Quality Impact',
-        'Physical Baseline'
+        "Nutritional Foundation",
+        "Mental Readiness",
+        "Support System Strength",
+        "Home Environment Readiness",
+        "Sleep Quality Impact",
+        "Physical Baseline",
       ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -6286,43 +7162,50 @@ function recoverySpeedParseAIResponse(aiAnalysis, assessmentType) {
     // Parse category analysis
     if (categorySection) {
       const categories = [
-        'Nutritional Foundation',
-        'Mental Readiness',
-        'Support System Strength',
-        'Home Environment Readiness',
-        'Sleep Quality Impact',
-        'Physical Baseline'
+        "Nutritional Foundation",
+        "Mental Readiness",
+        "Support System Strength",
+        "Home Environment Readiness",
+        "Sleep Quality Impact",
+        "Physical Baseline",
       ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 75;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for recovery prediction.`,
-              strengths: ['Baseline assessment completed', 'Areas identified for optimization'],
-              riskFactors: ['Consult healthcare provider for personalized guidance'],
-              timeline: 'Discuss optimization timeline with your medical team.'
+              strengths: [
+                "Baseline assessment completed",
+                "Areas identified for optimization",
+              ],
+              riskFactors: [
+                "Consult healthcare provider for personalized guidance",
+              ],
+              timeline: "Discuss optimization timeline with your medical team.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -6335,108 +7218,113 @@ function recoverySpeedParseAIResponse(aiAnalysis, assessmentType) {
 
       const fallbackCategories = [
         {
-          name: 'Nutritional Foundation',
-          desc: 'Your nutrition habits provide a foundation for healing and tissue repair.',
-          context: 'Nutrition plays a crucial role in surgical recovery, with optimal nutrition supporting 30-40% faster healing.',
+          name: "Nutritional Foundation",
+          desc: "Your nutrition habits provide a foundation for healing and tissue repair.",
+          context:
+            "Nutrition plays a crucial role in surgical recovery, with optimal nutrition supporting 30-40% faster healing.",
           strengths: [
-            'Adequate protein intake for tissue repair',
-            'Good hydration habits',
-            'Balanced micronutrient profile'
+            "Adequate protein intake for tissue repair",
+            "Good hydration habits",
+            "Balanced micronutrient profile",
           ],
           risks: [
-            'Could benefit from increased vitamin C',
-            'Zinc levels may need optimization'
-          ]
+            "Could benefit from increased vitamin C",
+            "Zinc levels may need optimization",
+          ],
         },
         {
-          name: 'Mental Readiness',
-          desc: 'Your mental preparation will support your recovery experience.',
-          context: 'Psychological preparation significantly impacts recovery, with mentally prepared patients experiencing 25% shorter recovery times.',
+          name: "Mental Readiness",
+          desc: "Your mental preparation will support your recovery experience.",
+          context:
+            "Psychological preparation significantly impacts recovery, with mentally prepared patients experiencing 25% shorter recovery times.",
           strengths: [
-            'Positive outlook towards surgery',
-            'Good stress management techniques',
-            'Realistic recovery expectations'
+            "Positive outlook towards surgery",
+            "Good stress management techniques",
+            "Realistic recovery expectations",
           ],
           risks: [
-            'Mild anxiety about surgical outcome',
-            'Limited meditation or relaxation practice'
-          ]
+            "Mild anxiety about surgical outcome",
+            "Limited meditation or relaxation practice",
+          ],
         },
         {
-          name: 'Support System Strength',
-          desc: 'Your support network will influence your recovery timeline.',
-          context: 'Strong support systems accelerate recovery, with patients showing 20-30% faster healing with robust networks.',
+          name: "Support System Strength",
+          desc: "Your support network will influence your recovery timeline.",
+          context:
+            "Strong support systems accelerate recovery, with patients showing 20-30% faster healing with robust networks.",
           strengths: [
-            'Strong family support network',
-            'Adequate help for daily activities',
-            'Good communication with healthcare team'
+            "Strong family support network",
+            "Adequate help for daily activities",
+            "Good communication with healthcare team",
           ],
-          risks: [
-            'Limited backup support options'
-          ]
+          risks: ["Limited backup support options"],
         },
         {
-          name: 'Home Environment Readiness',
-          desc: 'Your home preparation is progressing for recovery.',
-          context: 'Home environment significantly impacts recovery safety and comfort during the healing period.',
+          name: "Home Environment Readiness",
+          desc: "Your home preparation is progressing for recovery.",
+          context:
+            "Home environment significantly impacts recovery safety and comfort during the healing period.",
           strengths: [
-            'Safe recovery space identified',
-            'Basic accessibility considerations made',
-            'Planning for equipment needs'
+            "Safe recovery space identified",
+            "Basic accessibility considerations made",
+            "Planning for equipment needs",
           ],
           risks: [
-            'Additional safety modifications needed',
-            'Meal preparation could be optimized'
-          ]
+            "Additional safety modifications needed",
+            "Meal preparation could be optimized",
+          ],
         },
         {
-          name: 'Sleep Quality Impact',
-          desc: 'Your sleep quality will support healing processes.',
-          context: 'Quality sleep is essential for healing, with poor sleep extending recovery time by 40-50%.',
+          name: "Sleep Quality Impact",
+          desc: "Your sleep quality will support healing processes.",
+          context:
+            "Quality sleep is essential for healing, with poor sleep extending recovery time by 40-50%.",
           strengths: [
-            'Regular sleep schedule',
-            'Good sleep hygiene awareness',
-            'Adequate sleep duration'
+            "Regular sleep schedule",
+            "Good sleep hygiene awareness",
+            "Adequate sleep duration",
           ],
           risks: [
-            'Occasional sleep interruptions',
-            'Pre-surgical anxiety affecting sleep'
-          ]
+            "Occasional sleep interruptions",
+            "Pre-surgical anxiety affecting sleep",
+          ],
         },
         {
-          name: 'Physical Baseline',
-          desc: 'Your current fitness level provides a recovery foundation.',
-          context: 'Physical fitness before surgery strongly predicts recovery speed according to ERAS protocols.',
+          name: "Physical Baseline",
+          desc: "Your current fitness level provides a recovery foundation.",
+          context:
+            "Physical fitness before surgery strongly predicts recovery speed according to ERAS protocols.",
           strengths: [
-            'Good cardiovascular fitness',
-            'Adequate muscle strength',
-            'Good mobility baseline'
+            "Good cardiovascular fitness",
+            "Adequate muscle strength",
+            "Good mobility baseline",
           ],
           risks: [
-            'Could improve core stability',
-            'Flexibility needs enhancement'
-          ]
-        }
+            "Could improve core stability",
+            "Flexibility needs enhancement",
+          ],
+        },
       ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 70,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with your healthcare provider for personalized guidance',
-            'Follow evidence-based recovery optimization protocols',
-            'Monitor and adjust based on your surgical team\'s recommendations'
+            "Consult with your healthcare provider for personalized guidance",
+            "Follow evidence-based recovery optimization protocols",
+            "Monitor and adjust based on your surgical team's recommendations",
           ],
           detailedAnalysis: {
             clinicalContext: cat.context,
             strengths: cat.strengths,
             riskFactors: cat.risks,
-            timeline: 'Begin optimization 4-6 weeks before scheduled surgery for best results.'
-          }
+            timeline:
+              "Begin optimization 4-6 weeks before scheduled surgery for best results.",
+          },
         });
       });
     }
@@ -6450,40 +7338,45 @@ function recoverySpeedParseAIResponse(aiAnalysis, assessmentType) {
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing Recovery Speed AI response:", error);
 
     return {
       overallScore: 75,
       overallRating: "Good Recovery",
-      results: [{
-        category: "Overall Assessment",
-        score: 75,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your recovery speed assessment has been completed. Please consult with your healthcare provider for personalized recovery planning.",
-        recommendations: [
-          "Discuss your recovery timeline with your surgical team",
-          "Follow all pre and post-operative instructions carefully",
-          "Optimize modifiable factors to accelerate healing"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Consultation recommended'],
-          riskFactors: ['Requires medical consultation for personalized plan'],
-          timeline: 'Consult with healthcare team to develop recovery optimization strategy.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 75,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your recovery speed assessment has been completed. Please consult with your healthcare provider for personalized recovery planning.",
+          recommendations: [
+            "Discuss your recovery timeline with your surgical team",
+            "Follow all pre and post-operative instructions carefully",
+            "Optimize modifiable factors to accelerate healing",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Consultation recommended"],
+            riskFactors: [
+              "Requires medical consultation for personalized plan",
+            ],
+            timeline:
+              "Consult with healthcare team to develop recovery optimization strategy.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
 
-function complicationParseAIResponse(aiAnalysis, assessmentType){
+function complicationParseAIResponse(aiAnalysis, assessmentType) {
   try {
     // Extract overall score and rating
     const scoreMatch = aiAnalysis.match(/OVERALL_SCORE:\s*(\d+)/i);
@@ -6493,29 +7386,58 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
     const overallRating = ratingMatch ? ratingMatch[1].trim() : "Moderate Risk";
 
     // Extract category analysis section
-    const categorySection = aiAnalysis.match(/CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is);
+    const categorySection = aiAnalysis.match(
+      /CATEGORY_ANALYSIS:(.*?)(?=DETAILED_ANALYSIS:|$)/is,
+    );
     const results = [];
 
     // Extract detailed analysis section
-    const detailedSection = aiAnalysis.match(/DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is);
+    const detailedSection = aiAnalysis.match(
+      /DETAILED_ANALYSIS:(.*?)(?=DETAILED_SUMMARY:|$)/is,
+    );
     const detailedAnalysisMap = new Map();
 
     // Parse detailed analysis first
     if (detailedSection) {
-      const categories = assessmentType === "Complication Risk"
-        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
-        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
+      const categories =
+        assessmentType === "Complication Risk"
+          ? [
+              "Medical History Risk",
+              "Lifestyle Risk Factors",
+              "Medication Risk Profile",
+              "Surgical History Impact",
+              "Physical Risk Factors",
+            ]
+          : [
+              "Airway Management Risk",
+              "Sleep Apnoea Risk",
+              "Medication Interactions",
+              "Substance Use Impact",
+              "Previous Anaesthesia History",
+              "Allergy & Reaction Risk",
+            ];
 
-      categories.forEach(category => {
-        const regex = new RegExp(`${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const regex = new RegExp(
+          `${category}\\|([^|]+)\\|([^|]+)\\|([^|]+)\\|([^\\n]+)`,
+          "i",
+        );
         const match = detailedSection[1].match(regex);
 
         if (match) {
           detailedAnalysisMap.set(category, {
             clinicalContext: match[1].trim(),
-            strengths: match[2].trim().split(',').map(s => s.trim()).filter(s => s.length > 0),
-            riskFactors: match[3].trim().split(',').map(r => r.trim()).filter(r => r.length > 0),
-            timeline: match[4].trim()
+            strengths: match[2]
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+            riskFactors: match[3]
+              .trim()
+              .split(",")
+              .map((r) => r.trim())
+              .filter((r) => r.length > 0),
+            timeline: match[4].trim(),
           });
         }
       });
@@ -6523,39 +7445,63 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
 
     // Parse category analysis
     if (categorySection) {
-      const categories = assessmentType === "Complication Risk"
-        ? ['Medical History Risk', 'Lifestyle Risk Factors', 'Medication Risk Profile', 'Surgical History Impact', 'Physical Risk Factors']
-        : ['Airway Management Risk', 'Sleep Apnoea Risk', 'Medication Interactions', 'Substance Use Impact', 'Previous Anaesthesia History', 'Allergy & Reaction Risk'];
+      const categories =
+        assessmentType === "Complication Risk"
+          ? [
+              "Medical History Risk",
+              "Lifestyle Risk Factors",
+              "Medication Risk Profile",
+              "Surgical History Impact",
+              "Physical Risk Factors",
+            ]
+          : [
+              "Airway Management Risk",
+              "Sleep Apnoea Risk",
+              "Medication Interactions",
+              "Substance Use Impact",
+              "Previous Anaesthesia History",
+              "Allergy & Reaction Risk",
+            ];
 
-      categories.forEach(category => {
-        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, 'i');
+      categories.forEach((category) => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n]+)`, "i");
         const categoryMatch = categorySection[1].match(categoryRegex);
 
         if (categoryMatch) {
-          const parts = categoryMatch[1].split('|').map(p => p.trim());
+          const parts = categoryMatch[1].split("|").map((p) => p.trim());
 
           if (parts.length >= 4) {
             const score = parseInt(parts[0]) || 70;
             const level = parts[1].toLowerCase();
             const description = parts[2];
-            const recommendations = parts.slice(3).filter(r => r.length > 0);
+            const recommendations = parts.slice(3).filter((r) => r.length > 0);
 
             // Get detailed analysis for this category
             const detailedAnalysis = detailedAnalysisMap.get(category) || {
               clinicalContext: `Your ${category.toLowerCase()} assessment reveals important factors for surgical planning.`,
-              strengths: ['Regular health monitoring', 'Awareness of risk factors', 'Proactive health management'],
-              riskFactors: ['Requires optimization before surgery', 'Close monitoring recommended'],
-              timeline: 'Discuss with your healthcare team 4-6 weeks before surgery.'
+              strengths: [
+                "Regular health monitoring",
+                "Awareness of risk factors",
+                "Proactive health management",
+              ],
+              riskFactors: [
+                "Requires optimization before surgery",
+                "Close monitoring recommended",
+              ],
+              timeline:
+                "Discuss with your healthcare team 4-6 weeks before surgery.",
             };
 
             results.push({
               category,
               score,
               maxScore: 100,
-              level: ['optimal', 'high', 'moderate', 'low'].includes(level) ? level : 'moderate',
+              level: ["optimal", "high", "moderate", "low"].includes(level)
+                ? level
+                : "moderate",
               description,
               recommendations,
-              detailedAnalysis
+              detailedAnalysis,
             });
           }
         }
@@ -6566,38 +7512,70 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
     if (results.length === 0) {
       console.log("Creating fallback structure for:", assessmentType);
 
-      const fallbackCategories = assessmentType === "Complication Risk"
-        ? [
-            { name: 'Medical History Risk', desc: 'Your medical history indicates factors that require attention and optimization before surgery.' },
-            { name: 'Lifestyle Risk Factors', desc: 'Several lifestyle factors could impact your surgical outcome and recovery.' },
-            { name: 'Medication Risk Profile', desc: 'Your current medications require careful perioperative management.' },
-            { name: 'Surgical History Impact', desc: 'Your previous surgical experiences provide valuable insights.' },
-            { name: 'Physical Risk Factors', desc: 'Physical condition factors may impact surgical outcomes.' }
-          ]
-        : [
-            { name: 'Airway Management Risk', desc: 'Your airway assessment indicates manageable risk factors.' },
-            { name: 'Sleep Apnoea Risk', desc: 'Sleep-related factors may require monitoring.' },
-            { name: 'Medication Interactions', desc: 'Current medications require review for interactions.' }
-          ];
+      const fallbackCategories =
+        assessmentType === "Complication Risk"
+          ? [
+              {
+                name: "Medical History Risk",
+                desc: "Your medical history indicates factors that require attention and optimization before surgery.",
+              },
+              {
+                name: "Lifestyle Risk Factors",
+                desc: "Several lifestyle factors could impact your surgical outcome and recovery.",
+              },
+              {
+                name: "Medication Risk Profile",
+                desc: "Your current medications require careful perioperative management.",
+              },
+              {
+                name: "Surgical History Impact",
+                desc: "Your previous surgical experiences provide valuable insights.",
+              },
+              {
+                name: "Physical Risk Factors",
+                desc: "Physical condition factors may impact surgical outcomes.",
+              },
+            ]
+          : [
+              {
+                name: "Airway Management Risk",
+                desc: "Your airway assessment indicates manageable risk factors.",
+              },
+              {
+                name: "Sleep Apnoea Risk",
+                desc: "Sleep-related factors may require monitoring.",
+              },
+              {
+                name: "Medication Interactions",
+                desc: "Current medications require review for interactions.",
+              },
+            ];
 
-      fallbackCategories.forEach(cat => {
+      fallbackCategories.forEach((cat) => {
         results.push({
           category: cat.name,
           score: Math.floor(Math.random() * 20) + 65,
           maxScore: 100,
-          level: 'moderate',
+          level: "moderate",
           description: cat.desc,
           recommendations: [
-            'Consult with your healthcare provider for personalized guidance',
-            'Follow pre-operative preparation protocols carefully',
-            'Ensure all medical information is shared with your surgical team'
+            "Consult with your healthcare provider for personalized guidance",
+            "Follow pre-operative preparation protocols carefully",
+            "Ensure all medical information is shared with your surgical team",
           ],
           detailedAnalysis: {
             clinicalContext: `Based on your responses, your ${cat.name.toLowerCase()} shows areas for attention and optimization before surgery.`,
-            strengths: ['Good baseline awareness', 'Engaged with assessment process', 'Open to optimization'],
-            riskFactors: ['Requires pre-operative optimization', 'Close monitoring recommended'],
-            timeline: 'Begin optimization 4-6 weeks before scheduled surgery.'
-          }
+            strengths: [
+              "Good baseline awareness",
+              "Engaged with assessment process",
+              "Open to optimization",
+            ],
+            riskFactors: [
+              "Requires pre-operative optimization",
+              "Close monitoring recommended",
+            ],
+            timeline: "Begin optimization 4-6 weeks before scheduled surgery.",
+          },
         });
       });
     }
@@ -6611,49 +7589,49 @@ function complicationParseAIResponse(aiAnalysis, assessmentType){
       overallRating,
       results,
       summary,
-      assessmentType
+      assessmentType,
     };
-
   } catch (error) {
     console.error("Error parsing AI response:", error);
 
     return {
       overallScore: 70,
       overallRating: "Moderate Risk",
-      results: [{
-        category: "Overall Assessment",
-        score: 70,
-        maxScore: 100,
-        level: "moderate",
-        description: "Your assessment has been completed. Please consult with your healthcare provider.",
-        recommendations: [
-          "Discuss your assessment results with your doctor",
-          "Follow all pre-operative instructions carefully",
-          "Ensure complete medical disclosure to your surgical team"
-        ],
-        detailedAnalysis: {
-          clinicalContext: aiAnalysis,
-          strengths: ['Assessment completed', 'Engaged with process'],
-          riskFactors: ['Requires medical consultation'],
-          timeline: 'Consult with healthcare team as soon as possible.'
-        }
-      }],
+      results: [
+        {
+          category: "Overall Assessment",
+          score: 70,
+          maxScore: 100,
+          level: "moderate",
+          description:
+            "Your assessment has been completed. Please consult with your healthcare provider.",
+          recommendations: [
+            "Discuss your assessment results with your doctor",
+            "Follow all pre-operative instructions carefully",
+            "Ensure complete medical disclosure to your surgical team",
+          ],
+          detailedAnalysis: {
+            clinicalContext: aiAnalysis,
+            strengths: ["Assessment completed", "Engaged with process"],
+            riskFactors: ["Requires medical consultation"],
+            timeline: "Consult with healthcare team as soon as possible.",
+          },
+        },
+      ],
       summary: aiAnalysis,
-      assessmentType
+      assessmentType,
     };
   }
 }
 
-
-
 // Contact form endpoint
-app.post('/api/contact', async (req, res) => {
+app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, phone, service, message } = req.body;
 
     // Create transporter using Gmail SMTP
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD,
@@ -6663,7 +7641,7 @@ app.post('/api/contact', async (req, res) => {
     // Email content
     const mailOptions = {
       from: process.env.GMAIL_USER,
-      to: 'admin@luther.health',
+      to: "admin@luther.health",
       subject: `New Contact Form Submission from ${name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -6674,8 +7652,8 @@ app.post('/api/contact', async (req, res) => {
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0;"><strong>Full Name:</strong> ${name}</p>
             <p style="margin: 10px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-            <p style="margin: 10px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-            <p style="margin: 10px 0;"><strong>Service Interest:</strong> ${service || 'Not specified'}</p>
+            <p style="margin: 10px 0;"><strong>Phone:</strong> ${phone || "Not provided"}</p>
+            <p style="margin: 10px 0;"><strong>Service Interest:</strong> ${service || "Not specified"}</p>
           </div>
 
           <div style="margin: 20px 0;">
@@ -6695,8 +7673,8 @@ New Contact Form Submission
 
 Full Name: ${name}
 Email: ${email}
-Phone: ${phone || 'Not provided'}
-Service Interest: ${service || 'Not specified'}
+Phone: ${phone || "Not provided"}
+Service Interest: ${service || "Not specified"}
 
 Message:
 ${message}
@@ -6706,22 +7684,29 @@ ${message}
     // Send email
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: 'Email sent successfully' });
+    res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "Failed to send email" });
   }
 });
 
-
-
-
 app.post("/api/send-email-report", async (req, res) => {
   try {
-    const { userEmail, userName, assessmentType, report, reportId, pageUrl, stripeSessionId } = req.body;
+    const {
+      userEmail,
+      userName,
+      assessmentType,
+      report,
+      reportId,
+      pageUrl,
+      stripeSessionId,
+    } = req.body;
 
     if (!userEmail || !userName || !assessmentType || !report || !pageUrl) {
-      return res.status(400).json({ success: false, error: "Missing required fields" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing required fields" });
     }
 
     console.log(`📸 Capturing screenshots for ${userName}...`);
@@ -6730,77 +7715,88 @@ app.post("/api/send-email-report", async (req, res) => {
     // Launch Puppeteer
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/home/ubuntu/.cache/puppeteer/chrome/linux-141.0.7390.76/chrome-linux64/chrome',
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+      executablePath:
+        "/home/ubuntu/.cache/puppeteer/chrome/linux-141.0.7390.76/chrome-linux64/chrome",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
     });
 
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
 
     // ✅ FIX: Use the assessmentType from the request instead of hardcoding
-    await page.evaluateOnNewDocument((reportData, userInfoData, assessType, sessionId) => {
-      sessionStorage.setItem('assessmentReport', JSON.stringify(reportData));
-      sessionStorage.setItem('assessmentType', assessType); // ✅ Dynamic now
-      sessionStorage.setItem('userInfo', JSON.stringify(userInfoData));
-      sessionStorage.setItem('currentUser', JSON.stringify(userInfoData));
-      if (sessionId) {
-        sessionStorage.setItem('stripe_session_id', sessionId); // ✅ Set session_id for PaymentGate
-      }
-    }, report, {
-      email: userEmail,
-      first_name: userName.split(' ')[0],
-      last_name: userName.split(' ').slice(1).join(' ')
-    }, assessmentType, stripeSessionId); // ✅ Pass stripeSessionId as fourth parameter
+    await page.evaluateOnNewDocument(
+      (reportData, userInfoData, assessType, sessionId) => {
+        sessionStorage.setItem("assessmentReport", JSON.stringify(reportData));
+        sessionStorage.setItem("assessmentType", assessType); // ✅ Dynamic now
+        sessionStorage.setItem("userInfo", JSON.stringify(userInfoData));
+        sessionStorage.setItem("currentUser", JSON.stringify(userInfoData));
+        if (sessionId) {
+          sessionStorage.setItem("stripe_session_id", sessionId); // ✅ Set session_id for PaymentGate
+        }
+      },
+      report,
+      {
+        email: userEmail,
+        first_name: userName.split(" ")[0],
+        last_name: userName.split(" ").slice(1).join(" "),
+      },
+      assessmentType,
+      stripeSessionId,
+    ); // ✅ Pass stripeSessionId as fourth parameter
 
     // Navigate to page
-    await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 0 });
+    await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 0 });
 
     // Wait for page to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const screenshots = [];
     let tabs;
-    if (assessmentType === 'Surgery Readiness') {
-      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
-    } else if (assessmentType === 'Anaesthesia Risk') {
-      tabs = ['Overview', 'Detailed Results', 'Safety Measures'];
-    } else if (assessmentType === 'Complication Risk') {
-      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
-    } else if (assessmentType === 'Recovery Speed') {
-      tabs = ['Overview', 'Detailed Results', 'Speed Boosters'];
-    } else if (assessmentType === 'Mobility Strength') {
-      tabs = ['Overview', 'Detailed Results', 'Training Plan'];
-    } else if (assessmentType === 'Symptom Severity') {
-      tabs = ['Overview', 'Detailed Results', 'Management Plan'];
-    } else if (assessmentType === 'Inflammation Risk') {
-      tabs = ['Overview', 'Detailed Results', 'Anti-Inflammation Plan'];
-    } else if (assessmentType === 'Medication Burden') {
-      tabs = ['Overview', 'Detailed Results', 'Optimization Plan'];
-    } else if (assessmentType === 'Daily Energy') {
-      tabs = ['Overview', 'Detailed Results', 'Energy Optimization'];
-    } else if (assessmentType === 'Lifestyle Limiter') {
-      tabs = ['Overview', 'Detailed Results', 'Adaptation Strategies'];
-    } else if (assessmentType === 'Biological Age') {
-      tabs = ['Overview', 'Detailed Results', 'Longevity Plan'];
-    } else if (assessmentType === 'Health Concierge') {
-      tabs = ['Overview', 'Detailed Analysis', 'Your Roadmap'];
-    } else if (assessmentType === 'Cardiometabolic Risk') {
-      tabs = ['Overview', 'Detailed Results', 'Prevention Plan'];
-    } else if (assessmentType === 'Resilience Index') {
-      tabs = ['Overview', 'Detailed Results', 'Resilience Plan'];
-    } else if (assessmentType === 'Nutrition Composition') {
-      tabs = ['Overview', 'Detailed Results', 'Nutrition Plan'];
-    } else if (assessmentType === 'Functional Fitness') {
-      tabs = ['Overview', 'Detailed Results', 'Fitness Plan'];
-    } else if (assessmentType === 'Surgery Preparation Bundle') {
-      tabs = ['Overview', 'Detailed Results', 'Preparation Plan'];
-    } else if (assessmentType === 'Chronic Symptoms Bundle') {
-      tabs = ['Overview', 'Detailed Results', 'Management Plan'];
-    } else if (assessmentType === 'Longevity Wellness Bundle') {
-      tabs = ['Overview', 'Detailed Results', 'Optimization Plan'];
+    if (assessmentType === "Surgery Readiness") {
+      tabs = ["Overview", "Detailed Results", "Recommendations"];
+    } else if (assessmentType === "Anaesthesia Risk") {
+      tabs = ["Overview", "Detailed Results", "Safety Measures"];
+    } else if (assessmentType === "Complication Risk") {
+      tabs = ["Overview", "Detailed Results", "Recommendations"];
+    } else if (assessmentType === "Recovery Speed") {
+      tabs = ["Overview", "Detailed Results", "Speed Boosters"];
+    } else if (assessmentType === "Mobility Strength") {
+      tabs = ["Overview", "Detailed Results", "Training Plan"];
+    } else if (assessmentType === "Symptom Severity") {
+      tabs = ["Overview", "Detailed Results", "Management Plan"];
+    } else if (assessmentType === "Inflammation Risk") {
+      tabs = ["Overview", "Detailed Results", "Anti-Inflammation Plan"];
+    } else if (assessmentType === "Medication Burden") {
+      tabs = ["Overview", "Detailed Results", "Optimization Plan"];
+    } else if (assessmentType === "Daily Energy") {
+      tabs = ["Overview", "Detailed Results", "Energy Optimization"];
+    } else if (assessmentType === "Lifestyle Limiter") {
+      tabs = ["Overview", "Detailed Results", "Adaptation Strategies"];
+    } else if (assessmentType === "Biological Age") {
+      tabs = ["Overview", "Detailed Results", "Longevity Plan"];
+    } else if (assessmentType === "Health Concierge") {
+      tabs = ["Overview", "Detailed Analysis", "Your Roadmap"];
+    } else if (assessmentType === "Cardiometabolic Risk") {
+      tabs = ["Overview", "Detailed Results", "Prevention Plan"];
+    } else if (assessmentType === "Resilience Index") {
+      tabs = ["Overview", "Detailed Results", "Resilience Plan"];
+    } else if (assessmentType === "Nutrition Composition") {
+      tabs = ["Overview", "Detailed Results", "Nutrition Plan"];
+    } else if (assessmentType === "Functional Fitness") {
+      tabs = ["Overview", "Detailed Results", "Fitness Plan"];
+    } else if (assessmentType === "Surgery Preparation Bundle") {
+      tabs = ["Overview", "Detailed Results", "Preparation Plan"];
+    } else if (assessmentType === "Chronic Symptoms Bundle") {
+      tabs = ["Overview", "Detailed Results", "Management Plan"];
+    } else if (assessmentType === "Longevity Wellness Bundle") {
+      tabs = ["Overview", "Detailed Results", "Optimization Plan"];
     } else {
       // Default tabs for other assessments
-      tabs = ['Overview', 'Detailed Results', 'Recommendations'];
+      tabs = ["Overview", "Detailed Results", "Recommendations"];
     }
 
     console.log(`📋 Tab names for ${assessmentType}:`, tabs);
@@ -6812,22 +7808,26 @@ app.post("/api/send-email-report", async (req, res) => {
 
       try {
         // Click the tab button
-        await page.evaluate((index, tabList) => {
-          const buttons = Array.from(document.querySelectorAll('button'));
-          const tabButtons = buttons.filter(btn =>
-            tabList.some(tab => btn.textContent.trim() === tab)
-          );
-          if (tabButtons[index]) {
-            tabButtons[index].click();
-          }
-        }, i, tabs);
+        await page.evaluate(
+          (index, tabList) => {
+            const buttons = Array.from(document.querySelectorAll("button"));
+            const tabButtons = buttons.filter((btn) =>
+              tabList.some((tab) => btn.textContent.trim() === tab),
+            );
+            if (tabButtons[index]) {
+              tabButtons[index].click();
+            }
+          },
+          i,
+          tabs,
+        );
 
         // Wait for tab content to load
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Scroll to top
         await page.evaluate(() => window.scrollTo(0, 0));
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Take screenshot
         const screenshot = await page.screenshot({ fullPage: true });
@@ -6843,7 +7843,7 @@ app.post("/api/send-email-report", async (req, res) => {
     await browser.close();
 
     if (screenshots.length === 0) {
-      throw new Error('Failed to capture any screenshots');
+      throw new Error("Failed to capture any screenshots");
     }
 
     console.log(`✅ All ${screenshots.length} tabs captured`);
@@ -6852,9 +7852,9 @@ app.post("/api/send-email-report", async (req, res) => {
     const doc = new PDFDocument({ autoFirstPage: false });
     const chunks = [];
 
-    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("error", (err) => {
-      console.error('PDF Error:', err);
+      console.error("PDF Error:", err);
       throw err;
     });
 
@@ -6869,11 +7869,11 @@ app.post("/api/send-email-report", async (req, res) => {
 
     // Wait until PDF is complete
     const pdfBuffer = await new Promise((resolve, reject) => {
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
+      doc.on("end", () => resolve(Buffer.concat(chunks)));
+      doc.on("error", reject);
     });
 
-    console.log('✅ PDF created with all tabs');
+    console.log("✅ PDF created with all tabs");
 
     // Send Email with PDF
     const mailOptions = {
@@ -6885,22 +7885,21 @@ app.post("/api/send-email-report", async (req, res) => {
         {
           filename: `Luther-Health-${assessmentType.replace(/\s+/g, "-")}-Report.pdf`,
           content: pdfBuffer,
-          contentType: 'application/pdf'
-        }
-      ]
+          contentType: "application/pdf",
+        },
+      ],
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('📧 Email sent:', userEmail);
+    console.log("📧 Email sent:", userEmail);
 
     res.json({
       success: true,
       message: "Email sent successfully",
-      tabsCaptured: screenshots.length
+      tabsCaptured: screenshots.length,
     });
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error("❌ Error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -6962,20 +7961,20 @@ function generateEmailBodyWithAttachment(userName, assessmentType) {
 const activeReminders = new Map();
 
 // Environment variable for reminder timing (default 30 minutes)
-const REMINDER_MINUTES_BEFORE = process.env.REMINDER_MINUTES_BEFORE 
-  ? parseInt(process.env.REMINDER_MINUTES_BEFORE) 
+const REMINDER_MINUTES_BEFORE = process.env.REMINDER_MINUTES_BEFORE
+  ? parseInt(process.env.REMINDER_MINUTES_BEFORE)
   : 60;
 
 // Helper function to format date/time for display
 function formatDateTime(dateStr) {
   const date = new Date(dateStr);
-  return date.toLocaleString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return date.toLocaleString("en-GB", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -6983,7 +7982,7 @@ function formatDateTime(dateStr) {
 async function sendEmailReminder(name, email, startTime, inquiryId) {
   try {
     const formattedTime = formatDateTime(startTime);
-    
+
     const mailOptions = {
       from: `"Luther Health Reminders" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -7032,11 +8031,13 @@ async function sendEmailReminder(name, email, startTime, inquiryId) {
             <p>This is an automated reminder. Please do not reply to this email.</p>
           </div>
         </div>
-      `
+      `,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`✅ Email reminder sent to ${email} for appointment ${inquiryId}`);
+    console.log(
+      `✅ Email reminder sent to ${email} for appointment ${inquiryId}`,
+    );
     return true;
   } catch (error) {
     console.error(`❌ Error sending email reminder to ${email}:`, error);
@@ -7047,11 +8048,11 @@ async function sendEmailReminder(name, email, startTime, inquiryId) {
 // Helper function to send SMS reminder via Twilio
 async function sendSMSReminder(name, phone, startTime, inquiryId) {
   if (!twilioClient) {
-    console.warn('⚠️  Twilio not configured - skipping SMS');
+    console.warn("⚠️  Twilio not configured - skipping SMS");
     return false;
   }
 
-  if (!phone || phone === '') {
+  if (!phone || phone === "") {
     console.log(`ℹ️  No phone number provided for ${name} - skipping SMS`);
     return false;
   }
@@ -7059,9 +8060,9 @@ async function sendSMSReminder(name, phone, startTime, inquiryId) {
   try {
     // Format phone number for Twilio (ensure it has country code)
     let formattedPhone = phone.trim();
-    if (!formattedPhone.startsWith('+')) {
+    if (!formattedPhone.startsWith("+")) {
       // Assume UK if no country code
-      formattedPhone = '+44' + formattedPhone.replace(/^0/, '');
+      formattedPhone = "+44" + formattedPhone.replace(/^0/, "");
     }
 
     const formattedTime = formatDateTime(startTime);
@@ -7081,10 +8082,12 @@ Please ensure you're ready. If you need to reschedule, contact us immediately.
     await twilioClient.messages.create({
       body: message,
       from: process.env.TWILIO_PHONE_NUMBER,
-      to: formattedPhone
+      to: formattedPhone,
     });
 
-    console.log(`✅ SMS reminder sent to ${formattedPhone} for appointment ${inquiryId}`);
+    console.log(
+      `✅ SMS reminder sent to ${formattedPhone} for appointment ${inquiryId}`,
+    );
     return true;
   } catch (error) {
     console.error(`❌ Error sending SMS reminder to ${phone}:`, error.message);
@@ -7093,10 +8096,17 @@ Please ensure you're ready. If you need to reschedule, contact us immediately.
 }
 
 // Save reminder to Supabase database
-async function saveReminderToDatabase(inquiryId, name, email, phone, appointmentTime, reminderTime) {
+async function saveReminderToDatabase(
+  inquiryId,
+  name,
+  email,
+  phone,
+  appointmentTime,
+  reminderTime,
+) {
   try {
     const { data, error } = await supabase
-      .from('reminders')
+      .from("reminders")
       .insert({
         inquiry_id: inquiryId,
         name,
@@ -7104,7 +8114,7 @@ async function saveReminderToDatabase(inquiryId, name, email, phone, appointment
         phone,
         appointment_time: appointmentTime,
         reminder_time: reminderTime,
-        status: 'pending'
+        status: "pending",
       })
       .select()
       .single();
@@ -7118,13 +8128,19 @@ async function saveReminderToDatabase(inquiryId, name, email, phone, appointment
 }
 
 // Update reminder status in database
-async function updateReminderStatus(inquiryId, status, emailSent = false, smsSent = false, errorMessage = null) {
+async function updateReminderStatus(
+  inquiryId,
+  status,
+  emailSent = false,
+  smsSent = false,
+  errorMessage = null,
+) {
   try {
     const updateData = {
       status,
       email_sent: emailSent,
       sms_sent: smsSent,
-      last_attempt_at: new Date().toISOString()
+      last_attempt_at: new Date().toISOString(),
     };
 
     if (errorMessage) {
@@ -7132,9 +8148,9 @@ async function updateReminderStatus(inquiryId, status, emailSent = false, smsSen
     }
 
     const { error } = await supabase
-      .from('reminders')
+      .from("reminders")
       .update(updateData)
-      .eq('inquiry_id', inquiryId);
+      .eq("inquiry_id", inquiryId);
 
     if (error) throw error;
   } catch (error) {
@@ -7145,42 +8161,73 @@ async function updateReminderStatus(inquiryId, status, emailSent = false, smsSen
 // Execute reminder: send email and SMS
 async function executeReminder(inquiryId, name, email, phone, appointmentTime) {
   console.log(`⏰ Executing reminders for appointment ${inquiryId}...`);
-  
+
   let emailSent = false;
   let smsSent = false;
-  let errorMessage = null;
 
   try {
     // Send both email and SMS
-    emailSent = await sendEmailReminder(name, email, appointmentTime, inquiryId);
+    emailSent = await sendEmailReminder(
+      name,
+      email,
+      appointmentTime,
+      inquiryId,
+    );
     smsSent = await sendSMSReminder(name, phone, appointmentTime, inquiryId);
 
-    // Update database with results
-    const status = (emailSent || smsSent) ? 'sent' : 'failed';
-    await updateReminderStatus(inquiryId, status, emailSent, smsSent);
+    // Delete from database after sending
+    const { error } = await supabase
+      .from("reminders")
+      .delete()
+      .eq("inquiry_id", inquiryId);
+
+    if (error) {
+      console.error(`⚠️  Error deleting reminder from database:`, error);
+    } else {
+      console.log(`🗑️  Reminder deleted from database for ${inquiryId}`);
+    }
 
     // Remove from active reminders
     activeReminders.delete(inquiryId);
 
-    console.log(`📊 Reminder results for ${inquiryId}: Email=${emailSent}, SMS=${smsSent}`);
+    console.log(
+      `📊 Reminder results for ${inquiryId}: Email=${emailSent}, SMS=${smsSent}`,
+    );
   } catch (error) {
-    errorMessage = error.message;
     console.error(`❌ Error executing reminder:`, error);
-    await updateReminderStatus(inquiryId, 'failed', emailSent, smsSent, errorMessage);
+
+    // Update status to failed if sending fails
+    await updateReminderStatus(
+      inquiryId,
+      "failed",
+      emailSent,
+      false,
+      error.message,
+    );
   }
 }
 
 // Schedule a reminder for an inquiry (save to DB and set timeout)
-async function scheduleInquiryReminder(inquiryId, name, email, phone, startTime) {
+async function scheduleInquiryReminder(
+  inquiryId,
+  name,
+  email,
+  phone,
+  startTime,
+) {
   try {
     const appointmentTime = new Date(startTime);
-    const reminderTime = new Date(appointmentTime.getTime() - REMINDER_MINUTES_BEFORE * 60 * 1000);
+    const reminderTime = new Date(
+      appointmentTime.getTime() - REMINDER_MINUTES_BEFORE * 60 * 1000,
+    );
     const now = new Date();
 
     // Check if reminder time is in the past
     if (reminderTime <= now) {
-      console.log(`⏭️  Appointment ${inquiryId} is too soon for reminder (starts at ${appointmentTime.toISOString()})`);
-      return { scheduled: false, reason: 'too_soon' };
+      console.log(
+        `⏭️  Appointment ${inquiryId} is too soon for reminder (starts at ${appointmentTime.toISOString()})`,
+      );
+      return { scheduled: false, reason: "too_soon" };
     }
 
     // Save to database
@@ -7190,25 +8237,34 @@ async function scheduleInquiryReminder(inquiryId, name, email, phone, startTime)
       email,
       phone,
       appointmentTime.toISOString(),
-      reminderTime.toISOString()
+      reminderTime.toISOString(),
     );
 
     // Schedule the timeout
     const delayMs = reminderTime.getTime() - now.getTime();
     const timeoutId = setTimeout(
-      () => executeReminder(inquiryId, name, email, phone, appointmentTime.toISOString()),
-      delayMs
+      () =>
+        executeReminder(
+          inquiryId,
+          name,
+          email,
+          phone,
+          appointmentTime.toISOString(),
+        ),
+      delayMs,
     );
 
     // Store timeout ID for cancellation
     activeReminders.set(inquiryId, timeoutId);
 
-    console.log(`✅ Reminder scheduled for ${inquiryId} at ${reminderTime.toISOString()} (in ${Math.round(delayMs / 1000 / 60)} minutes)`);
-    
+    console.log(
+      `✅ Reminder scheduled for ${inquiryId} at ${reminderTime.toISOString()} (in ${Math.round(delayMs / 1000 / 60)} minutes)`,
+    );
+
     return {
       scheduled: true,
       reminderTime: reminderTime.toISOString(),
-      appointmentTime: appointmentTime.toISOString()
+      appointmentTime: appointmentTime.toISOString(),
     };
   } catch (error) {
     console.error(`❌ Error scheduling reminder for ${inquiryId}:`, error);
@@ -7228,9 +8284,9 @@ async function cancelInquiryReminder(inquiryId) {
 
     // Update database status to cancelled
     const { error } = await supabase
-      .from('reminders')
-      .update({ status: 'cancelled' })
-      .eq('inquiry_id', inquiryId);
+      .from("reminders")
+      .update({ status: "cancelled" })
+      .eq("inquiry_id", inquiryId);
 
     if (error) throw error;
 
@@ -7243,59 +8299,65 @@ async function cancelInquiryReminder(inquiryId) {
 }
 
 // API endpoint to schedule a reminder
-app.post('/api/schedule-reminder', async (req, res) => {
+app.post("/api/schedule-reminder", async (req, res) => {
   try {
     const { inquiryId, name, email, phone, startTime } = req.body;
 
     if (!inquiryId || !name || !email || !startTime) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: inquiryId, name, email, startTime'
+        error: "Missing required fields: inquiryId, name, email, startTime",
       });
     }
 
-    const result = await scheduleInquiryReminder(inquiryId, name, email, phone, startTime);
-    
+    const result = await scheduleInquiryReminder(
+      inquiryId,
+      name,
+      email,
+      phone,
+      startTime,
+    );
+
     res.json({
       success: result.scheduled,
-      ...result
+      ...result,
     });
   } catch (error) {
-    console.error('Error in schedule-reminder endpoint:', error);
+    console.error("Error in schedule-reminder endpoint:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // API endpoint to cancel a reminder
-app.delete('/api/cancel-reminder/:inquiryId', async (req, res) => {
+app.delete("/api/cancel-reminder/:inquiryId", async (req, res) => {
   try {
     const { inquiryId } = req.params;
     const cancelled = await cancelInquiryReminder(inquiryId);
-    
+
     res.json({
       success: true,
-      cancelled
+      cancelled,
     });
   } catch (error) {
-    console.error('Error in cancel-reminder endpoint:', error);
+    console.error("Error in cancel-reminder endpoint:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // API endpoint to get scheduled reminders status
-app.get('/api/reminders/status', async (req, res) => {
+app.get("/api/reminders/status", async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from('reminders')
-      .select('*')
-      .eq('status', 'pending')
-      .order('reminder_time', { ascending: true });
+      .from("reminders")
+      .select("*")
+      .eq("status", "pending")
+      .order("reminder_time", { ascending: true });
 
     if (error) throw error;
 
@@ -7303,7 +8365,7 @@ app.get('/api/reminders/status', async (req, res) => {
       success: true,
       count: data.length,
       active: activeReminders.size,
-      reminders: data.map(r => ({
+      reminders: data.map((r) => ({
         inquiryId: r.inquiry_id,
         name: r.name,
         email: r.email,
@@ -7312,14 +8374,14 @@ app.get('/api/reminders/status', async (req, res) => {
         appointmentTime: r.appointment_time,
         status: r.status,
         emailSent: r.email_sent,
-        smsSent: r.sms_sent
-      }))
+        smsSent: r.sms_sent,
+      })),
     });
   } catch (error) {
-    console.error('Error in reminders status endpoint:', error);
+    console.error("Error in reminders status endpoint:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -7329,15 +8391,17 @@ async function checkPendingReminders() {
   try {
     const now = new Date();
     const checkWindowMinutes = 10; // Check reminders due in next 10 minutes
-    const checkWindowTime = new Date(now.getTime() + checkWindowMinutes * 60 * 1000);
+    const checkWindowTime = new Date(
+      now.getTime() + checkWindowMinutes * 60 * 1000,
+    );
 
     // Query pending reminders that are due soon
     const { data, error } = await supabase
-      .from('reminders')
-      .select('*')
-      .eq('status', 'pending')
-      .lte('reminder_time', checkWindowTime.toISOString())
-      .order('reminder_time', { ascending: true });
+      .from("reminders")
+      .select("*")
+      .eq("status", "pending")
+      .lte("reminder_time", checkWindowTime.toISOString())
+      .order("reminder_time", { ascending: true });
 
     if (error) throw error;
 
@@ -7362,21 +8426,22 @@ async function checkPendingReminders() {
           reminder.name,
           reminder.email,
           reminder.phone,
-          reminder.appointment_time
+          reminder.appointment_time,
         );
         scheduled++;
       } else {
         // Schedule for future
         const delayMs = reminderTime.getTime() - now.getTime();
         const timeoutId = setTimeout(
-          () => executeReminder(
-            reminder.inquiry_id,
-            reminder.name,
-            reminder.email,
-            reminder.phone,
-            reminder.appointment_time
-          ),
-          delayMs
+          () =>
+            executeReminder(
+              reminder.inquiry_id,
+              reminder.name,
+              reminder.email,
+              reminder.phone,
+              reminder.appointment_time,
+            ),
+          delayMs,
         );
         activeReminders.set(reminder.inquiry_id, timeoutId);
         scheduled++;
@@ -7385,7 +8450,7 @@ async function checkPendingReminders() {
 
     return { checked: data.length, scheduled };
   } catch (error) {
-    console.error('❌ Error checking pending reminders:', error);
+    console.error("❌ Error checking pending reminders:", error);
     return { checked: 0, scheduled: 0, error: error.message };
   }
 }
@@ -7393,44 +8458,43 @@ async function checkPendingReminders() {
 // On server startup, load pending reminders from database
 async function initializeReminders() {
   try {
-    console.log('🔄 Initializing reminder system from database...');
-    
+    console.log("🔄 Initializing reminder system from database...");
+
     const result = await checkPendingReminders();
-    
+
     if (result.scheduled > 0) {
-      console.log(`✅ Loaded and scheduled ${result.scheduled} pending reminders`);
+      console.log(
+        `✅ Loaded and scheduled ${result.scheduled} pending reminders`,
+      );
     } else {
-      console.log('ℹ️  No pending reminders found');
+      console.log("ℹ️  No pending reminders found");
     }
   } catch (error) {
-    console.error('❌ Error initializing reminders:', error);
+    console.error("❌ Error initializing reminders:", error);
   }
 }
 
-// Cron endpoint to check and process pending reminders
-// Call this endpoint every 5-10 minutes from an external cron service
-// (e.g., GitHub Actions, Vercel Cron, or cron-job.org)
-app.get('/api/cron/check-reminders', async (req, res) => {
+app.get("/api/cron/check-reminders", async (req, res) => {
   try {
     // Optional: Add authentication
     const cronSecret = process.env.CRON_SECRET;
     if (cronSecret && req.query.secret !== cronSecret) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
+      return res.status(401).json({ success: false, error: "Unauthorized" });
     }
 
-    console.log('🔄 Cron: Checking pending reminders...');
+    console.log("🔄 Cron: Checking pending reminders...");
     const result = await checkPendingReminders();
-    
+
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-      ...result
+      ...result,
     });
   } catch (error) {
-    console.error('Error in cron check-reminders endpoint:', error);
+    console.error("Error in cron check-reminders endpoint:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -7438,18 +8502,21 @@ app.get('/api/cron/check-reminders', async (req, res) => {
 // ----------------------------
 const server = app.listen(process.env.PORT, () => {
   console.log(`🚀 Server running on port ${process.env.PORT}`);
-  
+
   // Initialize reminders on server start
   if (process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
     initializeReminders();
   }
-  
+
   // Optional: Run reminder check every 5 minutes internally
-  setInterval(() => {
-    checkPendingReminders().catch(err => 
-      console.error('Error in scheduled reminder check:', err)
-    );
-  }, 5 * 60 * 1000); // 5 minutes
+  setInterval(
+    () => {
+      checkPendingReminders().catch((err) =>
+        console.error("Error in scheduled reminder check:", err),
+      );
+    },
+    5 * 60 * 1000,
+  ); // 5 minutes
 });
 
 // Set timeouts to prevent 504 errors
