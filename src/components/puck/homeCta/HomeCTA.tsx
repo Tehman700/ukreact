@@ -199,7 +199,7 @@ export const HomeCTA: ComponentConfig<{
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
-                  className="banner-btn dark-btn inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg transition-colors w-full sm:w-auto"
+                  className="banner-btn dark-btn inline-flex items-center justify-center px-6 py-3 text-base font-semibold rounded-lg transition-colors w-full sm:w-auto cursor-pointer"
                   style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
                   onClick={() => (window.location.href = buttonLink)}
                 >

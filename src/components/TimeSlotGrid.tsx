@@ -46,12 +46,12 @@ export const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
               key={slot}
               type="button"
               disabled={booked}
-              className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+              className={`px-3 py-2 text-sm rounded-md border transition-colors  ${
                 booked
                   ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
                   : selectedSlot === slot
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background hover:bg-accent'
+                    ? 'bg-primary text-primary-foreground cursor-pointer border-primary'
+                    : 'cursor-pointer bg-background hover:bg-accent'
               }`}
               onClick={() => {
                 if (!booked) onSelectSlot(slot);

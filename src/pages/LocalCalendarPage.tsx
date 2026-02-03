@@ -336,6 +336,7 @@ export const LocalCalendarPage: React.FC = () => {
       const phone = createPhone.trim();
       if (!name) throw new Error('Name is required');
       if (!email) throw new Error('Email is required');
+      if (!phone) throw new Error('Phone is required');
       if (!selectedTimeSlot) throw new Error('Please select a time slot');
       if (!createStartDateTime || !createEndDateTime) throw new Error('Please select a time slot');
 
@@ -348,7 +349,7 @@ export const LocalCalendarPage: React.FC = () => {
         id: safeUuid(),
         name,
         email,
-        phone: phone || undefined,
+        phone,
         start: { dateTime: s.toISOString() },
         end: { dateTime: e.toISOString() },
       };

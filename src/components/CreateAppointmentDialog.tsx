@@ -63,9 +63,9 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
 
         <div className="grid gap-4">
           {error && (
-            <div className="rounded-md border p-3 text-sm">
-              Create error: {error}
-            </div>
+            <p className="text-sm text-red-500 mt-1">
+              {error}
+            </p>
           )}
 
           <div className="grid gap-2">
@@ -110,13 +110,14 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
         </div>
 
         <DialogFooter className="sm:justify-between">
-          <Button type="button" onClick={onCreate}>
+          <Button type="button" onClick={onCreate} className="cursor-pointer">
             {primaryLabel}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
+            className="cursor-pointer"
           >
             Cancel
           </Button>
