@@ -88,11 +88,13 @@ export const LocalCalendarPage: React.FC = () => {
     const run = async () => {
       setLoading(true);
       setError(null);
-      const today = new Date().toISOString(); 
+      const today = new Date();
+      today.setDate(today.getDate() - 1);
+      const yesterday = today.toISOString(); 
       const { data, error } = await supabase
         .from('inquiry')
         .select('id, created_at, name, email, phone, start, status, end')
-        .gte('start', today)
+        .gte('start', yesterday)
         .order('start', { ascending: true })
         .limit(500);
 
@@ -339,7 +341,9 @@ export const LocalCalendarPage: React.FC = () => {
       const phone = createPhone.trim();
       if (!name) throw new Error('Name is required');
       if (!email) throw new Error('Email is required');
+       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Invalid email address');  
       if (!phone) throw new Error('Phone is required');
+      if (!/^\+?[0-9]{7,}$/.test(phone)) throw new Error('Invalid phone number');
       if (!selectedTimeSlot) throw new Error('Please select a time slot');
       if (!createStartDateTime || !createEndDateTime) throw new Error('Please select a time slot');
 

@@ -471,6 +471,9 @@ export const AdminCalendarPage: React.FC = () => {
       const phone = localCreatePhone.trim();
       if (!name) throw new Error('Name is required');
       if (!email) throw new Error('Email is required');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Invalid email address');  
+      if (!phone) throw new Error('Phone is required');
+      if (!/^\+?[0-9]{7,}$/.test(phone)) throw new Error('Invalid phone number');
       if (!localSelectedTimeSlot) throw new Error('Please select a time slot');
       if (!localCreateStartDateTime || !localCreateEndDateTime) throw new Error('Please select a time slot');
 

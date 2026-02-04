@@ -75,26 +75,31 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               placeholder="Full name"
+              required
             />
           </div>
 
           <div className="grid gap-2">
             <div className="text-sm font-medium">Email</div>
             <input
+              type="email"
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="Email address"
+              required
             />
           </div>
 
           <div className="grid gap-2">
             <div className="text-sm font-medium">Phone</div>
             <input
+              type="tel"
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={phone}
               onChange={(e) => onPhoneChange(e.target.value)}
-              placeholder="Phone number"
+              placeholder="Phone number ex.+1234567890"
+              required
             />
           </div>
 
