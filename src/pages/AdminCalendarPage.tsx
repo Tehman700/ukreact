@@ -556,7 +556,7 @@ export const AdminCalendarPage: React.FC = () => {
       // if generateTimeSlots and selectedTimeSlot are defined, validate selected slot is valid
       if (localSelectedDateForCreate && localSelectedTimeSlot) {
         const validSlots = generateTimeSlots(localSelectedDateForCreate);
-        if (!validSlots.includes(localSelectedTimeSlot) || isSlotBooked(localSelectedDateForCreate, localSelectedTimeSlot)) {
+        if (!validSlots.includes(localSelectedTimeSlot)) {
           throw new Error('Selected time slot is outside of working hours');
         }
         if (isSlotBooked(localSelectedDateForCreate, localSelectedTimeSlot)) {
