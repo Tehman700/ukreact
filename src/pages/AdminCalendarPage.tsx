@@ -506,6 +506,12 @@ export const AdminCalendarPage: React.FC = () => {
       if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) throw new Error('Invalid start/end date');
       if (e <= s) throw new Error('End time must be after start time');
 
+      // check selected slot is between 9am and 5pm
+      const [slotHours, slotMinutes] = localSelectedTimeSlot.split(':').map(Number);
+      if (slotHours < 9 || slotHours >= 17) {
+        throw new Error('Selected time slot must be between 9am and 5pm');
+      }
+
       const newId = safeUuid();
       const startIso = s.toISOString();
       const endIso = e.toISOString();

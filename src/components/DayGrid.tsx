@@ -175,7 +175,7 @@ export const DayGrid = <TEvent,>({
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onEventClick(event);
+                           onEventClick(event);
                         }}
                         title={getEventName(event)}
                       >

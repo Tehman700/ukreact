@@ -112,6 +112,7 @@ export const LocalCalendarPage: React.FC = () => {
       const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
       const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
       setBookEvents(mapped);
+      setEvents(mapped);
       setLoading(false);
     };
 
@@ -292,7 +293,7 @@ export const LocalCalendarPage: React.FC = () => {
     slotEnd.setMinutes(slotEnd.getMinutes() + slotDefaultDuration);
 
     // Check if any event overlaps with this slot
-    return bookEvents.some((event) => {
+    return events.some((event) => {
       if (!event.start?.dateTime || !event.end?.dateTime) return false;
       
       const eventStart = new Date(event.start.dateTime);
@@ -330,6 +331,7 @@ export const LocalCalendarPage: React.FC = () => {
     setCreateStartDateTime('');
     setCreateEndDateTime('');
     setSelectedDateForCreate(base);
+
     
     // If preset time is provided, auto-select that time slot
     if (presetTime) {
@@ -389,6 +391,12 @@ export const LocalCalendarPage: React.FC = () => {
       const e = new Date(createEndDateTime);
       if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) throw new Error('Invalid start/end date');
       if (e <= s) throw new Error('End time must be after start time');
+
+      // check selected slot is between 9am and 5pm
+      const [slotHours, slotMinutes] = selectedTimeSlot.split(':').map(Number);
+      if (slotHours < 9 || slotHours >= 17) {
+        throw new Error('Selected time slot must be between 9am and 5pm');
+      }
 
       const newEvent: LocalCalendarEvent = {
         id: safeUuid(),
@@ -599,18 +607,18 @@ export const LocalCalendarPage: React.FC = () => {
                             onClick={(ev) => {
                               ev.preventDefault();
                               ev.stopPropagation();
-                              setSelectedEvent(event);
-                              const d = normalizeDate(event);
-                              if (d) setSelectedDate(d);
+                              // setSelectedEvent(event);
+                              // const d = normalizeDate(event);
+                              // if (d) setSelectedDate(d);
                               setEventsPanelMode('day');
                             }}
                             onKeyDown={(ev) => {
                               if (ev.key !== 'Enter' && ev.key !== ' ') return;
                               ev.preventDefault();
                               ev.stopPropagation();
-                              setSelectedEvent(event);
-                              const d = normalizeDate(event);
-                              if (d) setSelectedDate(d);
+                              // setSelectedEvent(event);
+                              // const d = normalizeDate(event);
+                              // if (d) setSelectedDate(d);
                               setEventsPanelMode('day');
                             }}
                           >
@@ -633,7 +641,7 @@ export const LocalCalendarPage: React.FC = () => {
                   onNextWeek={goNextWeek}
                   formatDate={(date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   formatTime={formatTime}
-                  onEventClick={setSelectedEvent}
+                  onEventClick={() => {}}
                   onTimeSlotClick={(date, hour, minute) => {
                     openCreateEvent(date, { hour, minute });
                   }}
