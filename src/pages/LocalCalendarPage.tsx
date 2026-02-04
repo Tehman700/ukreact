@@ -62,7 +62,6 @@ function toLocalEvent(row: InquiryRow): LocalCalendarEvent | null {
 
 export const LocalCalendarPage: React.FC = () => {
   const [events, setEvents] = useState<LocalCalendarEvent[]>([]);
-  const [bookEvents, setBookEvents] = useState<LocalCalendarEvent[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,14 +103,13 @@ export const LocalCalendarPage: React.FC = () => {
 
       if (error) {
         setError(error.message || String(error));
-        setBookEvents([]);
+        setEvents([]);
         setLoading(false);
         return;
       }
 
       const rows = Array.isArray(data) ? (data as InquiryRow[]) : [];
       const mapped = rows.map(toLocalEvent).filter(Boolean) as LocalCalendarEvent[];
-      setBookEvents(mapped);
       setEvents(mapped);
       setLoading(false);
     };
@@ -424,7 +422,6 @@ export const LocalCalendarPage: React.FC = () => {
 
       const inserted = toLocalEvent(data as InquiryRow) ?? newEvent;
       setEvents((prev) => [inserted, ...prev]);
-      setBookEvents((prev) => [inserted, ...prev]);
 
       // Schedule automated reminder (30 minutes before appointment)
       try {
