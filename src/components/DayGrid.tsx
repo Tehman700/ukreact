@@ -52,7 +52,7 @@ export const DayGrid = <TEvent,>({
 
   // Generate time slots from 9am to 5pm
   const timeSlots: { hour: number; minute: number }[] = [];
-  for (let hour = 9; hour < 17; hour++) {
+  for (let hour = 0; hour < 24; hour++) {
     timeSlots.push({ hour, minute: 0 });
     timeSlots.push({ hour, minute: 30 });
   }
@@ -85,13 +85,13 @@ export const DayGrid = <TEvent,>({
     const endMinute = range.end.getMinutes();
 
     // Calculate position relative to 9am start
-    const startOffset = (startHour - 9) * 2 + (startMinute >= 30 ? 1 : 0);
-    const endOffset = (endHour - 9) * 2 + (endMinute >= 30 ? 1 : 0);
+    const startOffset = (startHour - 0) * 2 + (startMinute >= 30 ? 1 : 0);
+    const endOffset = (endHour - 0) * 2 + (endMinute >= 30 ? 1 : 0);
     const slots = endOffset - startOffset || 1;
 
     return {
-      top: startOffset * 60, // 60px per slot
-      height: slots * 60,
+      top: startOffset * 30, // 30px per slot
+      height: slots * 30,
       startTime: `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`,
       endTime: `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`,
     };
@@ -177,9 +177,9 @@ export const DayGrid = <TEvent,>({
                           e.stopPropagation();
                           onEventClick(event);
                         }}
+                        title={getEventName(event)}
                       >
-                        <div className="event-time-compact">{position.startTime}</div>
-                        <div className="event-name-compact">{getEventName(event)}</div>
+                        <div className="event-name-compact"> {getEventName(event)}</div>
                       </div>
                     );
                   })}

@@ -859,7 +859,7 @@
 }
 
 .time-slot-label {
-  height: 60px;
+  height: 30px;
   padding: 0.5rem;
   font-size: 0.75rem;
   color: var(--muted-foreground);
@@ -884,7 +884,7 @@
 }
 
 .time-slot-cell {
-  height: 60px;
+  height: 30px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background-color 0.2s;
@@ -926,7 +926,7 @@
 }
 
 .week-event-inquiry {
-  background: #000000;
+  background: var(--foreground);
   color: white;
   border-left: 3px solid rgba(255, 255, 255, 0.6);
 }
@@ -945,11 +945,16 @@
 }
 
 .event-name-compact {
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.week-event.week-event-inquiry {
+    display: flex;
+    gap: 0.25rem;
 }
 
 /* Old single day view styles - kept for backwards compatibility */
@@ -969,7 +974,7 @@
 .time-slot {
   display: flex;
   align-items: flex-start;
-  height: 60px;
+  height: 30px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background-color 0.2s;
@@ -1046,12 +1051,12 @@
 @media (max-width: 768px) {
   .time-column-header,
   .time-slots-column {
-    width: 60px;
+    width: 30px;
   }
 
   .time-slot-label,
   .time-label {
-    width: 60px;
+    width: 30px;
     font-size: 0.6875rem;
   }
 
