@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { CalendarHeader } from '../components/CalendarHeader';
 import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
 import { MonthGrid } from '../components/MonthGrid';
+import { DayGrid } from '../components/DayGrid';
 import { EventsPanel } from '../components/EventsPanel';
 import './CalendarPage.theme.css';
 
@@ -88,6 +89,7 @@ export const AdminCalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [eventsPanelMode, setEventsPanelMode] = useState<'day' | 'upcoming'>('upcoming');
   const [showEventsPanel, setShowEventsPanel] = useState(true);
+  const [viewMode, setViewMode] = useState<'month' | 'day'>('day');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -429,9 +431,13 @@ export const AdminCalendarPage: React.FC = () => {
     ));
   };
 
-  const openLocalCreateEvent = (date?: Date | null) => {
+  const openLocalCreateEvent = (date?: Date | null, presetTime?: { hour: number; minute: number }) => {
     const base = date ? new Date(date) : selectedDate ? new Date(selectedDate) : new Date();
-    base.setHours(0, 0, 0, 0);
+    
+    // Don't reset hours if we have preset time
+    if (!presetTime) {
+      base.setHours(0, 0, 0, 0);
+    }
 
     setLocalCreateError(null);
     setLocalCreateName('');
@@ -440,7 +446,25 @@ export const AdminCalendarPage: React.FC = () => {
     setLocalCreateStartDateTime('');
     setLocalCreateEndDateTime('');
     setLocalSelectedDateForCreate(base);
-    setLocalSelectedTimeSlot(null);
+    
+    // If preset time is provided, auto-select that time slot
+    if (presetTime) {
+      const { hour, minute } = presetTime;
+      const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      setLocalSelectedTimeSlot(timeSlot);
+      
+      const startDate = new Date(base);
+      startDate.setHours(hour, minute, 0, 0);
+      
+      const endDate = new Date(startDate);
+      endDate.setMinutes(endDate.getMinutes() + slotDefaultDuration);
+      
+      setLocalCreateStartDateTime(toLocalDateTimeInput(startDate));
+      setLocalCreateEndDateTime(toLocalDateTimeInput(endDate));
+    } else {
+      setLocalSelectedTimeSlot(null);
+    }
+    
     if (date) setSelectedDate(date);
     setEventsPanelMode('day');
     setLocalCreateDialogOpen(true);
@@ -710,6 +734,20 @@ export const AdminCalendarPage: React.FC = () => {
   const goNextMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
+  const goPrevWeek = () => {
+    const newDate = new Date(selectedDate || currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedDate(newDate);
+    setCurrentDate(newDate);
+  };
+
+  const goNextWeek = () => {
+    const newDate = new Date(selectedDate || currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedDate(newDate);
+    setCurrentDate(newDate);
+  };
+
   const goToday = () => {
     const today = new Date();
     setCurrentDate(today);
@@ -971,6 +1009,24 @@ export const AdminCalendarPage: React.FC = () => {
             rightContent={(
               <>
                 <Button variant="default" size="lg" className="cursor-pointer" onClick={goToday}>Today</Button>
+                <div style={{ display: 'flex', gap: '8px', marginLeft: '8px' }}>
+                  <Button
+                    variant={viewMode === 'month' ? 'default' : 'outline'}
+                    size="lg"
+                    onClick={() => setViewMode('month')}
+                    className="cursor-pointer"
+                  >
+                    Month
+                  </Button>
+                  <Button
+                    variant={viewMode === 'day' ? 'default' : 'outline'}
+                    size="lg"
+                    onClick={() => setViewMode('day')}
+                    className="cursor-pointer"
+                  >
+                    Day
+                  </Button>
+                </div>
                 <Button variant="default" size="lg" className="cursor-pointer" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create appointment</Button>
                 <Button variant="default" size="lg" className="cursor-pointer" onClick={openCreateEvent}>Create Google Calendar event</Button>   
                 {accessToken ? (
@@ -1039,6 +1095,7 @@ export const AdminCalendarPage: React.FC = () => {
             <div className="calendar-grid">
 
               {/* CALENDAR */}
+              {viewMode === 'month' ? (
               <MonthGrid
                 showPanel={showEventsPanel}
                 currentDate={currentDate}
@@ -1105,6 +1162,32 @@ export const AdminCalendarPage: React.FC = () => {
                   ) : null
                 }
               />
+              ) : (
+                <DayGrid
+                  selectedDate={selectedDate || currentDate}
+                  events={events}
+                  onPrevWeek={goPrevWeek}
+                  onNextWeek={goNextWeek}
+                  formatDate={(date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  formatTime={formatTime}
+                  onEventClick={setSelectedEvent}
+                  onTimeSlotClick={(date, hour, minute) => {
+                    openLocalCreateEvent(date, { hour, minute });
+                  }}
+                  getEventTimeRange={(event) => {
+                    if (event.start?.dateTime && event.end?.dateTime) {
+                      return {
+                        start: new Date(event.start.dateTime),
+                        end: new Date(event.end.dateTime)
+                      };
+                    }
+                    return null;
+                  }}
+                  getEventName={(event) => event.summary || 'Event'}
+                  getEventClassName={(event) => isInquiryEvent(event) ? 'week-event-inquiry' : 'week-event-google'}
+                  showPanel={showEventsPanel}
+                />
+              )}
               {/* EVENTS */}
               {showEventsPanel && (
                 <EventsPanel

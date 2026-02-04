@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { CalendarHeader } from '../components/CalendarHeader';
 import { CreateAppointmentDialog } from '../components/CreateAppointmentDialog';
 import { MonthGrid } from '../components/MonthGrid';
+import { DayGrid } from '../components/DayGrid';
 import { EventsPanel } from '../components/EventsPanel';
 import './CalendarPage.theme.css';
 
@@ -70,6 +71,7 @@ export const LocalCalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<LocalCalendarEvent | null>(null);
   const [eventsPanelMode, setEventsPanelMode] = useState<'day' | 'upcoming'>('day');
   const [showEventsPanel, setShowEventsPanel] = useState(false);
+  const [viewMode, setViewMode] = useState<'month' | 'day'>('day');
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createName, setCreateName] = useState('');
@@ -242,6 +244,18 @@ export const LocalCalendarPage: React.FC = () => {
 
   const goPrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const goNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const goPrevWeek = () => {
+    const newDate = new Date(selectedDate || currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedDate(newDate);
+    setCurrentDate(newDate);
+  };
+  const goNextWeek = () => {
+    const newDate = new Date(selectedDate || currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedDate(newDate);
+    setCurrentDate(newDate);
+  };
   const goToday = () => {
     const today = new Date();
     setCurrentDate(today);
@@ -292,14 +306,20 @@ export const LocalCalendarPage: React.FC = () => {
     });
   };
 
-  const openCreateEvent = (date?: Date | null) => {
+  const openCreateEvent = (date?: Date | null, presetTime?: { hour: number; minute: number }) => {
     const base = date ? new Date(date) : selectedDate ? new Date(selectedDate) : new Date();
-    base.setHours(0, 0, 0, 0); // Reset to midnight for date selection
+    
+    // Don't reset hours if we have preset time
+    if (!presetTime) {
+      base.setHours(0, 0, 0, 0); // Reset to midnight for date selection
+    }
     
     // Prevent creating appointments on past dates
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (base < today) {
+    const checkDate = new Date(base);
+    checkDate.setHours(0, 0, 0, 0);
+    if (checkDate < today) {
       return; // Don't open dialog for past dates
     }
     
@@ -310,7 +330,25 @@ export const LocalCalendarPage: React.FC = () => {
     setCreateStartDateTime('');
     setCreateEndDateTime('');
     setSelectedDateForCreate(base);
-    setSelectedTimeSlot(null);
+    
+    // If preset time is provided, auto-select that time slot
+    if (presetTime) {
+      const { hour, minute } = presetTime;
+      const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      setSelectedTimeSlot(timeSlot);
+      
+      const startDate = new Date(base);
+      startDate.setHours(hour, minute, 0, 0);
+      
+      const endDate = new Date(startDate);
+      endDate.setMinutes(endDate.getMinutes() + slotDefaultDuration);
+      
+      setCreateStartDateTime(toLocalDateTimeInput(startDate));
+      setCreateEndDateTime(toLocalDateTimeInput(endDate));
+    } else {
+      setSelectedTimeSlot(null);
+    }
+    
     if (date) setSelectedDate(date);
     setCreateDialogOpen(true);
   };
@@ -495,22 +533,37 @@ export const LocalCalendarPage: React.FC = () => {
           <CalendarHeader
             subtitle="Click on the date to add an appointment."
             rightContent={(
-              <>
-              </>
+              <div className="view-toggle" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Button
+                  variant={viewMode === 'month' ? 'default' : 'outline'}
+                  onClick={() => setViewMode('month')}
+                  className="cursor-pointer"
+                >
+                  Month
+                </Button>
+                <Button
+                  variant={viewMode === 'day' ? 'default' : 'outline'}
+                  onClick={() => setViewMode('day')}
+                  className="cursor-pointer"
+                >
+                  Day
+                </Button>
+              </div>
             )}
           />
 
           <div className="calendar-content">
             <div className="calendar-grid">
-              <MonthGrid
-                showPanel={showEventsPanel}
-                currentDate={currentDate}
-                formatMonthYear={formatMonthYear}
-                days={calendarDays}
-                isToday={isToday}
-                isSelected={isSelected}
-                onPrevMonth={goPrevMonth}
-                onNextMonth={goNextMonth}
+              {viewMode === 'month' ? (
+                <MonthGrid
+                  showPanel={showEventsPanel}
+                  currentDate={currentDate}
+                  formatMonthYear={formatMonthYear}
+                  days={calendarDays}
+                  isToday={isToday}
+                  isSelected={isSelected}
+                  onPrevMonth={goPrevMonth}
+                  onNextMonth={goNextMonth}
                 onDayClick={(date) => {
                   // Prevent clicking past dates
                   const today = new Date();
@@ -572,6 +625,31 @@ export const LocalCalendarPage: React.FC = () => {
                   ) : null
                 }
               />
+              ) : (
+                <DayGrid
+                  selectedDate={selectedDate || currentDate}
+                  events={events}
+                  onPrevWeek={goPrevWeek}
+                  onNextWeek={goNextWeek}
+                  formatDate={(date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  formatTime={formatTime}
+                  onEventClick={setSelectedEvent}
+                  onTimeSlotClick={(date, hour, minute) => {
+                    openCreateEvent(date, { hour, minute });
+                  }}
+                  getEventTimeRange={(event) => {
+                    if (event.start?.dateTime && event.end?.dateTime) {
+                      return {
+                        start: new Date(event.start.dateTime),
+                        end: new Date(event.end.dateTime)
+                      };
+                    }
+                    return null;
+                  }}
+                  getEventName={(event) => event.name || 'Event'}
+                  showPanel={showEventsPanel}
+                />
+              )}
             </div>
           </div>
         </div>
