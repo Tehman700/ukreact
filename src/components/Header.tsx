@@ -37,6 +37,7 @@ export function Header({ onDesignSystemClick }: HeaderProps) {
                   <nav className="flex flex-col space-y-4 px-[20px] py-[0px] pr-4">
                     <h4 className="font-medium text-primary">Main Navigation</h4>
                     <a href="#" onClick={() => window.location.hash = 'home'} className="text-sm hover:text-primary transition-colors pl-2">Home</a>
+                    <a href="#calendar" onClick={() => window.location.hash = 'calendar'} className="text-sm hover:text-primary transition-colors pl-2">My Calendar</a>
                     <a href="#about" onClick={() => window.location.hash = 'about'} className="text-sm hover:text-primary transition-colors pl-2">About</a>
                     <a href="#services" onClick={() => window.location.hash = 'services'} className="text-sm hover:text-primary transition-colors pl-2">Services</a>
                     <a href="#assessments" onClick={() => window.location.hash = 'assessments'} className="text-sm hover:text-primary transition-colors pl-2">Assessments</a>
