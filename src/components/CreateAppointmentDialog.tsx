@@ -74,7 +74,7 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
-              placeholder="Full name"
+              placeholder="Full name ex. John Doe"
               required
             />
           </div>
@@ -86,7 +86,7 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
-              placeholder="Email address"
+              placeholder="Email address ex. user@example.com"
               required
             />
           </div>
@@ -98,7 +98,7 @@ export const CreateAppointmentDialog: React.FC<CreateAppointmentDialogProps> = (
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={phone}
               onChange={(e) => onPhoneChange(e.target.value)}
-              placeholder="Phone number ex.+1234567890"
+              placeholder="Phone number ex.+1234567890 "
               required
             />
           </div>
