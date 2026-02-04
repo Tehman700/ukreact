@@ -442,11 +442,14 @@ export const LocalCalendarPage: React.FC = () => {
       if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) throw new Error('Invalid start/end date');
       if (e <= s) throw new Error('End time must be after start time');
 
-      // if generateTimeSlots and selectedTimeSlot are defined, validate selected slot is valid
-      if (selectedDateForCreate) {
+      // Validate selected slot is within working hours and not booked
+      if (selectedDateForCreate && selectedTimeSlot) {
         const validSlots = generateTimeSlots(selectedDateForCreate);
         if (!validSlots.includes(selectedTimeSlot)) {
-          throw new Error('Selected time slot is outside of working hours');
+          throw new Error('Selected time slot is outside of business hours (9am-5pm UK time)');
+        }
+        if (isSlotBooked(selectedDateForCreate, selectedTimeSlot)) {
+          throw new Error('Selected time slot is already booked. Please choose another time.');
         }
       }
 

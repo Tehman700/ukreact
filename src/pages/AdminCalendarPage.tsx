@@ -554,10 +554,13 @@ export const AdminCalendarPage: React.FC = () => {
       if (e <= s) throw new Error('End time must be after start time');
 
       // if generateTimeSlots and selectedTimeSlot are defined, validate selected slot is valid
-      if (localSelectedDateForCreate) {
+      if (localSelectedDateForCreate && localSelectedTimeSlot) {
         const validSlots = generateTimeSlots(localSelectedDateForCreate);
-        if (!validSlots.includes(localSelectedTimeSlot)) {
+        if (!validSlots.includes(localSelectedTimeSlot) || isSlotBooked(localSelectedDateForCreate, localSelectedTimeSlot)) {
           throw new Error('Selected time slot is outside of working hours');
+        }
+        if (isSlotBooked(localSelectedDateForCreate, localSelectedTimeSlot)) {
+          throw new Error('Selected time slot is already booked. Please choose another time.');
         }
       }
       const newId = safeUuid();
