@@ -50,9 +50,47 @@ export const DayGrid = <TEvent,>({
   const startDate = weekDays[0];
   const endDate = weekDays[6];
 
-  // Generate time slots from 9am to 5pm
+  // Calculate UK business hours (9am-5pm UK) in local timezone
+  const calculateLocalBusinessHours = () => {
+    const testDate = new Date(selectedDate);
+    testDate.setHours(12, 0, 0, 0);
+    
+    // Get UK timezone offset (GMT=0, BST=+1)
+    const ukOffsetStr = testDate.toLocaleTimeString('en-US', { 
+      timeZone: 'Europe/London', 
+      timeZoneName: 'short' 
+    }).split(' ').pop() || 'GMT';
+    const isGMT = ukOffsetStr === 'GMT';
+    const ukOffsetHours = isGMT ? 0 : 1;
+    
+    // Create UTC times for 9am and 5pm UK time
+    const ukStartUTC = new Date(Date.UTC(
+      testDate.getFullYear(),
+      testDate.getMonth(),
+      testDate.getDate(),
+      9 - ukOffsetHours,
+      0
+    ));
+    
+    const ukEndUTC = new Date(Date.UTC(
+      testDate.getFullYear(),
+      testDate.getMonth(),
+      testDate.getDate(),
+      17 - ukOffsetHours,
+      0
+    ));
+    
+    return {
+      startHour: ukStartUTC.getHours(),
+      endHour: ukEndUTC.getHours()
+    };
+  };
+
+  const { startHour: businessStartHour, endHour: businessEndHour } = calculateLocalBusinessHours();
+
+  // Generate time slots for business hours in local timezone
   const timeSlots: { hour: number; minute: number }[] = [];
-  for (let hour = 0; hour < 24; hour++) {
+  for (let hour = businessStartHour; hour < businessEndHour; hour++) {
     timeSlots.push({ hour, minute: 0 });
     timeSlots.push({ hour, minute: 30 });
   }
@@ -84,16 +122,23 @@ export const DayGrid = <TEvent,>({
     const endHour = range.end.getHours();
     const endMinute = range.end.getMinutes();
 
-    // Calculate position relative to 9am start
-    const startOffset = (startHour - 0) * 2 + (startMinute >= 30 ? 1 : 0);
-    const endOffset = (endHour - 0) * 2 + (endMinute >= 30 ? 1 : 0);
+    // Calculate position relative to business start hour (dynamic based on UK time)
+    const startOffset = (startHour - businessStartHour) * 2 + (startMinute >= 30 ? 1 : 0);
+    const endOffset = (endHour - businessStartHour) * 2 + (endMinute >= 30 ? 1 : 0);
     const slots = endOffset - startOffset || 1;
+
+    // Format time in 12-hour format with AM/PM
+    const formatTime12Hour = (hour: number, minute: number) => {
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+    };
 
     return {
       top: startOffset * 30, // 30px per slot
       height: slots * 30,
-      startTime: `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`,
-      endTime: `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`,
+      startTime: formatTime12Hour(startHour, startMinute),
+      endTime: formatTime12Hour(endHour, endMinute),
     };
   };
 
@@ -168,7 +213,7 @@ export const DayGrid = <TEvent,>({
                     return (
                       <div
                         key={idx}
-                        className={`week-event ${eventClassName}`}
+                        className={`flex gap-2 week-event ${eventClassName}`}
                         style={{
                           top: `${position.top}px`,
                           height: `${position.height}px`,
@@ -177,9 +222,9 @@ export const DayGrid = <TEvent,>({
                           e.stopPropagation();
                            onEventClick(event);
                         }}
-                        title={getEventName(event)}
+                        title={`${position.startTime} - ${getEventName(event)}`}
                       >
-                        <div className="event-name-compact"> {getEventName(event)}</div>
+                        <div className="event-name-compact">{position.startTime} -  {getEventName(event)}</div>
                       </div>
                     );
                   })}
