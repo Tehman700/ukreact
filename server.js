@@ -8386,7 +8386,6 @@ app.get("/api/reminders/status", async (req, res) => {
   }
 });
 
-// Check and process pending reminders (called by cron or on startup)
 async function checkPendingReminders() {
   try {
     const now = new Date();
@@ -8516,10 +8515,9 @@ const server = app.listen(process.env.PORT, () => {
       );
     },
     5 * 60 * 1000,
-  ); // 5 minutes
+  );
 });
 
-// Set timeouts to prevent 504 errors
 server.timeout = 300000; // 5 minutes
 server.keepAliveTimeout = 300000;
 server.headersTimeout = 300000;
