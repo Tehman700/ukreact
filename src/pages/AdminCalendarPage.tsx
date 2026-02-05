@@ -1243,6 +1243,7 @@ export const AdminCalendarPage: React.FC = () => {
                   getEventName={(event) => event.summary || 'Event'}
                   getEventClassName={(event) => isInquiryEvent(event) ? 'week-event-inquiry' : 'week-event-google'}
                   showPanel={showEventsPanel}
+                  useFullDayHours={true}
                 />
               )}
               {/* EVENTS */}

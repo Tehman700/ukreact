@@ -14,6 +14,7 @@ type DayGridProps<TEvent> = {
   getEventName: (event: TEvent) => string;
   getEventClassName?: (event: TEvent) => string;
   showPanel?: boolean;
+  useFullDayHours?: boolean;
 };
 
 export const DayGrid = <TEvent,>({
@@ -29,6 +30,7 @@ export const DayGrid = <TEvent,>({
   getEventName,
   getEventClassName,
   showPanel = true,
+  useFullDayHours = false,
 }: DayGridProps<TEvent>) => {
   // Calculate the week range (Sunday to Saturday)
   const getWeekDays = (date: Date): Date[] => {
@@ -88,9 +90,12 @@ export const DayGrid = <TEvent,>({
 
   const { startHour: businessStartHour, endHour: businessEndHour } = calculateLocalBusinessHours();
 
-  // Generate time slots for business hours in local timezone
+  // Generate time slots for business hours in local timezone (or full day if useFullDayHours is true)
   const timeSlots: { hour: number; minute: number }[] = [];
-  for (let hour = businessStartHour; hour < businessEndHour; hour++) {
+  const startHour = useFullDayHours ? 0 : businessStartHour;
+  const endHour = useFullDayHours ? 24 : businessEndHour;
+  
+  for (let hour = startHour; hour < endHour; hour++) {
     timeSlots.push({ hour, minute: 0 });
     timeSlots.push({ hour, minute: 30 });
   }
@@ -122,9 +127,10 @@ export const DayGrid = <TEvent,>({
     const endHour = range.end.getHours();
     const endMinute = range.end.getMinutes();
 
-    // Calculate position relative to business start hour (dynamic based on UK time)
-    const startOffset = (startHour - businessStartHour) * 2 + (startMinute >= 30 ? 1 : 0);
-    const endOffset = (endHour - businessStartHour) * 2 + (endMinute >= 30 ? 1 : 0);
+    // Calculate position relative to business start hour (dynamic based on UK time or 0 if full day)
+    const displayStartHour = useFullDayHours ? 0 : businessStartHour;
+    const startOffset = (startHour - displayStartHour) * 2 + (startMinute >= 30 ? 1 : 0);
+    const endOffset = (endHour - displayStartHour) * 2 + (endMinute >= 30 ? 1 : 0);
     const slots = endOffset - startOffset || 1;
 
     // Format time in 12-hour format with AM/PM
