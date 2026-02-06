@@ -170,6 +170,8 @@ background: linear-gradient(91.17deg, rgba(255, 255, 255, 0) 78.47%, #FFFFFF 98.
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .risk-col-end {
@@ -300,6 +302,7 @@ background: linear-gradient(91.17deg, rgba(255, 255, 255, 0) 78.47%, #FFFFFF 98.
 .banner-start-col {
   max-width: 96%;
 }
+
 @media (max-width: 1300px) {
   .banner-start-col h1 {
     font-size: 39px;

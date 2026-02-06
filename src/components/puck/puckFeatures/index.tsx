@@ -1,4 +1,6 @@
 import { ComponentConfig } from "@measured/puck";
+import { useState } from "react";
+import { Quiz } from "../../quiz/Quiz";
 
 export const PuckFeatures: ComponentConfig<{
   heading: string;
@@ -40,7 +42,7 @@ export const PuckFeatures: ComponentConfig<{
       },
     ],
     buttonText: "Start",
-    buttonLink: "#",
+    buttonLink: "#quiz",
   },
   render: ({
     heading,
@@ -48,6 +50,20 @@ export const PuckFeatures: ComponentConfig<{
     buttonText,
     buttonLink
   }) => {
+    const [showQuiz, setShowQuiz] = useState(false);
+
+    const handleStartQuiz = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      setShowQuiz(true);
+      // Scroll to quiz smoothly
+      setTimeout(() => {
+        const quizElement = document.getElementById('quiz-container');
+        if (quizElement) {
+          quizElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    };
+
     return (
       <section
         className="puck-features-section"
@@ -56,13 +72,21 @@ export const PuckFeatures: ComponentConfig<{
             <div className="container mx-auto ">
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16 items-center">
             {/* Card with button - Left on desktop, bottom on mobile */}
-            <div className="flex justify-center order-2 lg:order-1 risk-col-start">
-              <div className="w-full text-center">
-                <a
-                  href={buttonLink}
-                  className="dark-btn"
-                >{buttonText}</a>
-              </div>
+            <div className="flex flex-col justify-center order-2 lg:order-1 risk-col-start w-full">
+              {!showQuiz && (
+                <div className="w-full text-center">
+                  <a
+                    href={buttonLink}
+                    className="dark-btn"
+                    onClick={handleStartQuiz}
+                  >{buttonText}</a>
+                </div>
+              )}
+              {showQuiz && (
+                <div id="quiz-container" className="w-full">
+                  <Quiz />
+                </div>
+              )}
             </div>
 
             {/* Content - Right on desktop, top on mobile */}
