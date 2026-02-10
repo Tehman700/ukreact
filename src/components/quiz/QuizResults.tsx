@@ -77,7 +77,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
           <div className="improvement-item">
             <div className="improvement-details">
               <p className="improvement-text">
-                You could reduce your <strong>overall complication risk</strong> up to:
+                You could reduce your <strong className="text-muted">overall complication risk</strong> up to:
               </p>
               <div className="improvement-percentage">{improvements.complication}%</div>
             </div>
@@ -86,7 +86,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
           <div className="improvement-item">
             <div className="improvement-details">
               <p className="improvement-text">
-                You could reduce your <strong>length of stay in hospital</strong> up to:
+                You could reduce your <strong className="text-muted">length of stay in hospital</strong> up to:
               </p>
               <div className="improvement-percentage">{improvements.hospital}%</div>
             </div>
@@ -95,13 +95,15 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
           <div className="improvement-item">
             <div className="improvement-details">
               <p className="improvement-text">
-                You could reduce your <strong>post op pain</strong> by up to:
+                You could reduce your <strong className="text-muted">post op pain</strong> by up to:
               </p>
               <div className="improvement-percentage">{improvements.pain}%</div>
             </div>
           </div>
            <div className="results-simple-actions">
-          <button className="results-simple-btn btn-book" onClick={onRestart}>
+          <button 
+          className="results-simple-btn btn-book"
+           onClick={onRestart}>
             Clear
           </button>
           <a href="#calendar" className="results-simple-btn btn-book">

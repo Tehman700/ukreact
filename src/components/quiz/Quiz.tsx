@@ -69,7 +69,7 @@ export const Quiz: React.FC = () => {
               min={currentQuestion.min!}
               max={currentQuestion.max!}
               unit={currentQuestion.unit}
-              value={answers[currentQuestion.id] as number}
+              value={answers[currentQuestion.id] as number || 50}
               onChange={(value) => handleAnswer(currentQuestion.id, value)}
             />
           )}
