@@ -14,9 +14,9 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
     const alcohol = answers[7] || "";
     const activity = answers[8] || "";
 
-    let complicationReduction = 15; // Base
-    let hospitalStayReduction = 20; // Base
-    let painReduction = 25; // Base
+    let complicationReduction = 30; // Base
+    let hospitalStayReduction = 35; // Base
+    let painReduction = 40; // Base
 
     // Smoking cessation has major impact
     if (smoking === "current") {
