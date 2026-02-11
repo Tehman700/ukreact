@@ -1,4 +1,5 @@
 import React from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface QuizResultsProps {
   answers: Record<number, any>;
@@ -69,6 +70,22 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
 
   const improvements = calculateImprovements();
 
+  // Generate chart data with improvement names and values
+  const chartData = [
+    {
+      name: "Complication Risk",
+      value: improvements.complication,
+    },
+    {
+      name: "Hospital Stay",
+      value: improvements.hospital,
+    },
+    {
+      name: "Post-op Pain",
+      value: improvements.pain,
+    },
+  ];
+
   return (
     <div className="quiz-results-simple">
       <div className="results-simple-wrapper">
@@ -100,7 +117,33 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
               <div className="improvement-percentage">{improvements.pain}%</div>
             </div>
           </div>
-           <div className="results-simple-actions">
+          
+   
+            <div className="chart-container" style={{ marginTop: '1rem' }}>
+            <ResponsiveContainer width="50%" height={100}>
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis 
+                  domain={[25, 'auto']} 
+                  tick={{ fontSize: 5 }}
+                  width={10}
+                />
+                <Tooltip />
+                <Line 
+                  type="natural" 
+                  dataKey="value" 
+                  stroke="#8884d8" 
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="results-simple-actions">
+            
           <button 
           className="results-simple-btn btn-book"
            onClick={onRestart}>
@@ -110,6 +153,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
             Book a call
           </a>
         </div>
+        
         </div>
 
         {/* Action Buttons */}
