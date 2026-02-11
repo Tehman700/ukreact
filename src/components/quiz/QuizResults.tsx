@@ -135,9 +135,12 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
                 <Line 
                   type="natural" 
                   dataKey="value" 
-                  stroke="#8884d8" 
+                  stroke="#a1a1a1" 
                   strokeWidth={2}
-                  activeDot={{ r: 6 }}
+                  dot={false}  
+                  activeDot={{ r: 5 }}
+                  connectNulls
+                  animationDuration={700}
                 />
               </LineChart>
             </ResponsiveContainer>
