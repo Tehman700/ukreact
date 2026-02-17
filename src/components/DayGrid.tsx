@@ -32,25 +32,10 @@ export const DayGrid = <TEvent,>({
   showPanel = true,
   useFullDayHours = false,
 }: DayGridProps<TEvent>) => {
-  // Calculate the week range (Sunday to Saturday)
-  const getWeekDays = (date: Date): Date[] => {
-    const days: Date[] = [];
-    const current = new Date(date);
-    const dayOfWeek = current.getDay();
-    const sunday = new Date(current);
-    sunday.setDate(current.getDate() - dayOfWeek);
-    
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(sunday);
-      day.setDate(sunday.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
-  const weekDays = getWeekDays(selectedDate);
-  const startDate = weekDays[0];
-  const endDate = weekDays[6];
+  // Show only the selected day
+  const weekDays = [selectedDate];
+  const startDate = selectedDate;
+  const endDate = selectedDate;
 
   // Calculate UK business hours (9am-5pm UK) in local timezone
   const calculateLocalBusinessHours = () => {
@@ -70,7 +55,7 @@ export const DayGrid = <TEvent,>({
       testDate.getFullYear(),
       testDate.getMonth(),
       testDate.getDate(),
-      9 - ukOffsetHours,
+       ukOffsetHours,
       0
     ));
     
@@ -78,7 +63,7 @@ export const DayGrid = <TEvent,>({
       testDate.getFullYear(),
       testDate.getMonth(),
       testDate.getDate(),
-      17 - ukOffsetHours,
+      24 - ukOffsetHours,
       0
     ));
     
@@ -149,9 +134,7 @@ export const DayGrid = <TEvent,>({
   };
 
   const formatWeekRange = () => {
-    const start = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const end = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    return `${start} - ${end}`;
+    return formatDate(selectedDate);
   };
 
   const isToday = (date: Date) => {

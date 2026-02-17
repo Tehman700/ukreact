@@ -358,67 +358,18 @@ export const AdminCalendarPage: React.FC = () => {
     return startLabel === endLabel ? `${startLabel} (All day)` : `${startLabel} → ${endLabel} (All day)`;
   };
 
-  // Generate 30-minute time slots for working hours (9am-5pm UK timezone)
-  // Returns slots in user's local timezone for display
+  // Generate 30-minute time slots for 24 hours (0:00 to 23:30) in local timezone
   const generateTimeSlots = (date: Date): string[] => {
     const slots: string[] = [];
     
-    // Create base date for the selected day
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
-
-    // Generate slots for 9am-5pm UK time
-    for (let i = 0; i < 16; i++) { // 16 slots = 8 hours (9am to 5pm)
-      // Create a date string in UK timezone
-      const hour = 9 + Math.floor(i * slotDefaultDuration / 60);
-      const minute = (i * slotDefaultDuration) % 60;
-      
-      // Create ISO string for this time in UK timezone
-      const ukDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
-      
-      // Parse as if it's UK time and convert to local time for display
-      const localDate = new Date(ukDateStr + '+00:00'); // Treat as UTC first
-      
-      // Adjust for UK timezone offset (GMT or BST)
-      const ukFormatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Europe/London',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-      
-      // Create the UK time and get it as a Date object
-      const ukParts = ukFormatter.formatToParts(new Date(year, month, day, hour, minute));
-      const ukTimeString = `${ukParts.find(p => p.type === 'year')?.value}-${ukParts.find(p => p.type === 'month')?.value}-${ukParts.find(p => p.type === 'day')?.value}T${ukParts.find(p => p.type === 'hour')?.value}:${ukParts.find(p => p.type === 'minute')?.value}:00`;
-      const ukTimeAsLocal = new Date(ukTimeString);
-      
-      // This represents the UK time interpreted as local time
-      // Now we need to create a Date that represents this UK time as UTC
-      const ukOffsetDate = new Date(Date.UTC(year, month, day, hour, minute));
-      
-      // Get UK offset at this date
-      const ukSampleDate = new Date(year, month, day, 12, 0);
-      const ukOffsetStr = ukSampleDate.toLocaleTimeString('en-US', { 
-        timeZone: 'Europe/London', 
-        timeZoneName: 'short' 
-      }).split(' ').pop() || 'GMT';
-      const isGMT = ukOffsetStr === 'GMT';
-      const ukOffsetHours = isGMT ? 0 : 1; // GMT or BST (+1)
-      
-      // Create the actual UTC time that corresponds to this UK local time
-      const utcTime = new Date(Date.UTC(year, month, day, hour - ukOffsetHours, minute));
-      
-      // Format in user's local timezone
-      const localHours = utcTime.getHours().toString().padStart(2, '0');
-      const localMinutes = utcTime.getMinutes().toString().padStart(2, '0');
-      slots.push(`${localHours}:${localMinutes}`);
+    // Generate slots for 24 hours (0:00 to 23:30)
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += slotDefaultDuration) {
+        const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        slots.push(timeSlot);
+      }
     }
-
+    
     return slots;
   };
 
@@ -791,16 +742,16 @@ export const AdminCalendarPage: React.FC = () => {
   const goNextMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
-  const goPrevWeek = () => {
+  const goPrevDay = () => {
     const newDate = new Date(selectedDate || currentDate);
-    newDate.setDate(newDate.getDate() - 7);
+    newDate.setDate(newDate.getDate() - 1);
     setSelectedDate(newDate);
     setCurrentDate(newDate);
   };
 
-  const goNextWeek = () => {
+  const goNextDay = () => {
     const newDate = new Date(selectedDate || currentDate);
-    newDate.setDate(newDate.getDate() + 7);
+    newDate.setDate(newDate.getDate() + 1);
     setSelectedDate(newDate);
     setCurrentDate(newDate);
   };
@@ -1223,8 +1174,8 @@ export const AdminCalendarPage: React.FC = () => {
                 <DayGrid
                   selectedDate={selectedDate || currentDate}
                   events={events}
-                  onPrevWeek={goPrevWeek}
-                  onNextWeek={goNextWeek}
+                  onPrevWeek={goPrevDay}
+                  onNextWeek={goNextDay}
                   formatDate={(date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   formatTime={formatTime}
                   onEventClick={setSelectedEvent}
