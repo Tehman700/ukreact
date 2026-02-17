@@ -6,7 +6,7 @@ export const VideoList: ComponentConfig<{
   title: string;
   slides: Array<{
     videoUrl: string;
-    thumbnailUrl: string;
+    thumbnailUrl?: string;
     title: string;
   }>;
 
@@ -72,6 +72,8 @@ export const VideoList: ComponentConfig<{
       }
     };
 
+    
+
     const VideoSlide = ({ slide, index }: { slide: any; index: number }) => {
       const [isPlaying, setIsPlaying] = React.useState(false);
       const [isHovered, setIsHovered] = React.useState(false);
@@ -86,6 +88,7 @@ export const VideoList: ComponentConfig<{
             videoRef.current.play();
             setIsPlaying(true);
           }
+
         }
       };
 
@@ -106,7 +109,7 @@ export const VideoList: ComponentConfig<{
             <video
               ref={videoRef}
               className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              poster={slide.thumbnailUrl}
+              {...(slide.thumbnailUrl && { poster: slide.thumbnailUrl })}
               preload="metadata"
               onEnded={() => setIsPlaying(false)}
             >
