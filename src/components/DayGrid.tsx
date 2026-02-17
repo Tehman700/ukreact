@@ -156,13 +156,13 @@ export const DayGrid = <TEvent,>({
 
       <div className="week-grid-container">
         <div className="week-header">
-          <div className="time-column-header"></div>
+          {/* <div className="time-column-header"></div>
           {weekDays.map((day, index) => (
             <div key={index} className={`day-column-header ${isToday(day) ? 'today-header' : ''}`}>
               <div className="day-name">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
               <div className="day-number">{day.getDate()}</div>
             </div>
-          ))}
+          ))} */}
         </div>
 
         <div className="week-grid-body">
