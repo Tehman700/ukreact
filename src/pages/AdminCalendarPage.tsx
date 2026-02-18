@@ -22,6 +22,7 @@ interface CalendarEvent {
   description?: string;
   location?: string;
   htmlLink?: string;
+  hangoutLink?: string;
   start?: {
     dateTime?: string;
     date?: string;
@@ -96,7 +97,6 @@ export const AdminCalendarPage: React.FC = () => {
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
   const [createAllDay, setCreateAllDay] = useState(false);
   const [createStartDateTime, setCreateStartDateTime] = useState('');
@@ -599,112 +599,6 @@ export const AdminCalendarPage: React.FC = () => {
     }
   };
 
-  const openCreateEvent = () => {
-    const base = selectedDate ? new Date(selectedDate) : new Date();
-    base.setHours(9, 0, 0, 0);
-    const end = new Date(base);
-    end.setHours(10, 0, 0, 0);
-
-    setCreateError(null);
-    setCreateTitle('');
-    setCreateAllDay(false);
-    setCreateStartDateTime(toLocalDateTimeInput(base));
-    setCreateEndDateTime(toLocalDateTimeInput(end));
-    setCreateStartDate(toLocalDateInput(base));
-    setCreateEndDate(toLocalDateInput(base));
-    setCreateLocation('');
-    setCreateDescription('');
-
-    setCreateDialogOpen(true);
-  };
-
-  const createEventInCalendar = async () => {
-    setCreateError(null);
-
-    if (!calendarId) {
-      setCreateError('Missing calendar id (VITE_GOOGLE_CALENDAR_ID)');
-      return;
-    }
-
-    try {
-      setCreateSubmitting(true);
-
-      const token = accessToken ?? (await requestAccessToken('consent'));
-
-      const payload: any = {
-        summary: createTitle.trim() || '(No title)',
-      };
-
-      if (createLocation.trim()) payload.location = createLocation.trim();
-      if (createDescription.trim()) payload.description = createDescription.trim();
-
-      if (createAllDay) {
-        const start = createStartDate || toLocalDateInput(new Date());
-        const endInclusive = createEndDate || start;
-
-        // Google all-day end date is exclusive.
-        const endExclusive = new Date(endInclusive + 'T00:00:00');
-        endExclusive.setDate(endExclusive.getDate() + 1);
-
-        payload.start = { date: start };
-        payload.end = { date: toLocalDateInput(endExclusive) };
-      } else {
-        const start = createStartDateTime ? new Date(createStartDateTime) : new Date();
-        const end = createEndDateTime
-          ? new Date(createEndDateTime)
-          : new Date(start.getTime() + 60 * 60_000);
-
-        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-          throw new Error('Invalid start/end date');
-        }
-        if (end <= start) {
-          throw new Error('End time must be after start time');
-        }
-
-        payload.start = { dateTime: start.toISOString() };
-        payload.end = { dateTime: end.toISOString() };
-      }
-
-      const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-
-      const created = await res.json().catch(() => null);
-
-      const createdStart =
-        created?.start?.date
-          ? new Date(created.start.date + 'T00:00:00')
-          : created?.start?.dateTime
-            ? new Date(created.start.dateTime)
-            : null;
-      if (createdStart && !Number.isNaN(createdStart.getTime())) {
-        setSelectedDate(createdStart);
-      }
-
-      setEventsPanelMode('day');
-      setCreateDialogOpen(false);
-      setRefreshKey((k) => k + 1);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setCreateError(msg);
-    } finally {
-      setCreateSubmitting(false);
-    }
-  };
-
   /* ---------------------------------- CALENDAR GRID ---------------------------------- */
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -859,6 +753,17 @@ export const AdminCalendarPage: React.FC = () => {
                       </a>
                     </Button>
                   )}
+                   {selectedEvent?.hangoutLink && (
+                    <Button asChild>
+                      <a
+                        href={selectedEvent.hangoutLink}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open in Google Meet
+                      </a>
+                    </Button>
+                  )}
                 </div>
                 <Button variant="outline" className="cursor-pointer" onClick={() => setSelectedEvent(null)}>
                   Close
@@ -888,157 +793,7 @@ export const AdminCalendarPage: React.FC = () => {
             onCancel={() => setLocalCreateDialogOpen(false)}
           />
 
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create Google Calendar event</DialogTitle>
-                <DialogDescription>
-                  Creates the event directly in your Google Calendar (requires Google sign-in).
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid gap-4">
-                {!oauthClientId && (
-                  <div className="rounded-md border p-3 text-sm">
-                    Missing `VITE_GOOGLE_OAUTH_CLIENT_ID`. Add it to your environment to enable creating events.
-                  </div>
-                )}
-
-                {authError && (
-                  <div className="rounded-md border p-3 text-sm">
-                    Auth error: {authError}
-                  </div>
-                )}
-
-                {createError && (
-                  <div className="rounded-md border p-3 text-sm">
-                    Create error: {createError}
-                  </div>
-                )}
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Title</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createTitle}
-                    onChange={(e) => setCreateTitle(e.target.value)}
-                    placeholder="Event title"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={createAllDay}
-                    onChange={(e) => setCreateAllDay(e.target.checked)}
-                  />
-                  All day
-                </label>
-
-                {createAllDay ? (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                      <div className="text-sm font-medium">Start date</div>
-                      <input
-                        type="date"
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        value={createStartDate}
-                        onChange={(e) => setCreateStartDate(e.target.value)}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <div className="text-sm font-medium">End date</div>
-                      <input
-                        type="date"
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        value={createEndDate}
-                        onChange={(e) => setCreateEndDate(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                      <div className="text-sm font-medium">Start</div>
-                      <input
-                        type="datetime-local"
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        value={createStartDateTime}
-                        onChange={(e) => setCreateStartDateTime(e.target.value)}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <div className="text-sm font-medium">End</div>
-                      <input
-                        type="datetime-local"
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        value={createEndDateTime}
-                        onChange={(e) => setCreateEndDateTime(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Location</div>
-                  <input
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createLocation}
-                    onChange={(e) => setCreateLocation(e.target.value)}
-                    placeholder="Optional"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="text-sm font-medium">Description</div>
-                  <textarea
-                    className="min-h-28 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createDescription}
-                    onChange={(e) => setCreateDescription(e.target.value)}
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-
-              <DialogFooter className="sm:justify-between">
-                <div className="flex gap-2">
-                  {!accessToken ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={!authReady || !oauthClientId}
-                      onClick={() => void requestAccessToken('consent')}
-                      className="cursor-pointer"
-                    >
-                      Connect Calendar
-                    </Button>
-                  ) : (
-                    <Button type="button" variant="outline" className="cursor-pointer" onClick={signOut}>
-                      Disconnect Calendar
-                    </Button>
-                  )}
-
-                  <Button
-                    type="button"
-                    disabled={
-                      !oauthClientId ||
-                      !calendarId ||
-                      createSubmitting ||
-                      (!accessToken && !authReady)
-                    }
-                    onClick={() => void createEventInCalendar()}
-                    className="cursor-pointer"
-                  >
-                    {createSubmitting ? 'Creating…' : 'Create'}
-                  </Button>
-                </div>
-                <Button variant="outline" className="cursor-pointer" onClick={() => setCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          
+ 
 
           {/* HEADER */}
           <CalendarHeader
@@ -1065,12 +820,6 @@ export const AdminCalendarPage: React.FC = () => {
                   </Button>
                 </div>
                 <Button variant="default" size="lg" className="cursor-pointer" onClick={() => openLocalCreateEvent(selectedDate ?? new Date())}>Create appointment</Button>
-                <Button variant="default" size="lg" className="cursor-pointer" onClick={openCreateEvent}>Create Google Calendar event</Button>   
-                {accessToken ? (
-                  <Button variant="default" size="lg" className="cursor-pointer" onClick={signOut}>Disconnect Calendar</Button>
-                ) : (
-                  <Button variant="default" size="lg" className="cursor-pointer" onClick={() => void requestAccessToken('consent')}>Connect Calendar</Button>
-                )}
                 <Button 
                   variant="outline" 
                   size="lg" 
@@ -1103,17 +852,6 @@ export const AdminCalendarPage: React.FC = () => {
             </div>
           )}
 
-          {authError && (
-            <div className="error-box">
-              <div className="error-content">
-                <div className="error-icon">⚠️</div>
-                <div>
-                  <div className="error-title">Google Sign-in Error</div>
-                  <div className="error-message">{authError}</div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* API ERROR */}
           {error && (

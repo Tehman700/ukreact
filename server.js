@@ -8259,10 +8259,7 @@ async function executeReminder(inquiryId, name, email, phone, appointmentTime, m
 // GOOGLE CALENDAR MEET LINK GENERATION
 // ----------------------------
 
-/**
- * Generate instant Google Meet link (fallback method)
- * Creates a random meet.google.com URL without API
- */
+
 function generateInstantMeetLink() {
   const chars = "abcdefghijklmnopqrstuvwxyz";
   const segments = [];
@@ -8279,11 +8276,6 @@ function generateInstantMeetLink() {
   return `https://meet.google.com/${segments.join("-")}`;
 }
 
-/**
- * Create Google Calendar event with Meet link using Calendar API
- * This creates a REAL calendar event with an actual working Meet link
- * Each booking gets a unique, real Google Meet room
- */
 async function createGoogleCalendarMeetLink({
   name,
   email,
@@ -8311,7 +8303,7 @@ async function createGoogleCalendarMeetLink({
     
     const event = {
       summary: `${name}`,
-      description: `Luther Health Video Consultation\n\nPatient: ${name}\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ""}Booking Reference: ${inquiryId}`,
+      description: `\nName: ${name}\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ""}Booking Reference: ${inquiryId}`,
       start: {
         dateTime: startTime,
         timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || "Europe/London",
@@ -8329,36 +8321,31 @@ async function createGoogleCalendarMeetLink({
         },
 
   },
-      // Don't add attendees - service accounts can't send calendar invites without Domain-Wide Delegation
-      // We send Meet links via our own email/SMS reminders instead
-
-      reminders: {
+        reminders: {
         useDefault: false,
         overrides: [
-          { method: "email", minutes: 60 },
-          { method: "popup", minutes: 30 },
+          { method: "email", minutes: 30 },
+          { method: "popup", minutes: 10 },
         ],
       },
     };
-
-    // Insert event with conferenceDataVersion=1 to enable Meet link generation
+    
     const response = await calendar.events.insert({
       calendarId: process.env.VITE_GOOGLE_CALENDAR_ID || "primary",
-      conferenceDataVersion: 1, // Required for conference data
-      sendUpdates: "none", // Don't send calendar invites (we use our own email/SMS system)
+      conferenceDataVersion: 1, 
+      sendUpdates: "none",
       resource: event,
     });
 
     console.log(`📅 Calendar event created: ${response.data.id}`);
     console.log(`🔍 Checking for conference data...`);
     
-    // Sometimes the conference data isn't immediately available
-    // Try to fetch the event again to get the conference data
+
     let meetUrl = response.data.conferenceData?.entryPoints?.find(
       (ep) => ep.entryPointType === "video"
     )?.uri;
 
-    // If no Meet URL in initial response, fetch the event again
+
     if (!meetUrl) {
       console.log("   ⏳ Conference data not in initial response, fetching event...");
       try {
@@ -8368,7 +8355,7 @@ async function createGoogleCalendarMeetLink({
           calendarId: process.env.VITE_GOOGLE_CALENDAR_ID || "primary",
           eventId: response.data.id,
         });
-        
+
         meetUrl = fetchedEvent.data.conferenceData?.entryPoints?.find(
           (ep) => ep.entryPointType === "video"
         )?.uri;
@@ -8392,10 +8379,7 @@ async function createGoogleCalendarMeetLink({
         eventId: response.data.id,
       };
     }
-
     console.log(`✅ Real Google Meet link created for ${name}`);
-    console.log(`📅 Event link: ${response.data.htmlLink}`);
-
     return {
       meetUrl,
       eventId: response.data.id,
@@ -8407,7 +8391,7 @@ async function createGoogleCalendarMeetLink({
     if (error.response?.data) {
       console.error("   API Response:", JSON.stringify(error.response.data, null, 2));
     }
-    console.log("   Falling back to instant link (won't work without manual creation)");
+    
     return {
       meetUrl: generateInstantMeetLink(),
       method: "instant_fallback",
