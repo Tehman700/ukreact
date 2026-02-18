@@ -570,6 +570,8 @@ export const LocalCalendarPage: React.FC = () => {
             subtitle="Click on the date to add an appointment."
             rightContent={(
               <div className="view-toggle" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Button variant="default" size="lg" className="cursor-pointer" onClick={goToday}>Today</Button>
+               
                 <Button
                   variant={viewMode === 'month' ? 'default' : 'outline'}
                   onClick={() => setViewMode('month')}
