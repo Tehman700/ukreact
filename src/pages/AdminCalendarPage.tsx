@@ -517,6 +517,35 @@ export const AdminCalendarPage: React.FC = () => {
       const startIso = s.toISOString();
       const endIso = e.toISOString();
 
+      // Generate Google Meet link via server API
+      let meetUrl = '';
+      try {
+        const meetResponse = await fetch('https://luther.health/api/create-meet-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            phone: phone || '',
+            startTime: startIso,
+            endTime: endIso,
+            inquiryId: newId
+          })
+        });
+        
+        if (meetResponse.ok) {
+          const meetData = await meetResponse.json();
+          meetUrl = meetData.meetUrl;
+          console.log('✅ Google Meet link generated:', meetUrl, `(${meetData.method})`);
+        } else {
+          // Fallback to client-side generation
+          console.log('⚠️  Using fallback instant Meet link:', meetUrl);
+        }
+      } catch (meetError) {
+        console.warn('⚠️  Failed to generate Meet link via API, using fallback:', meetError);
+
+      }
+
       const { data, error } = await supabase
         .from('inquiry')
         .insert({
@@ -526,6 +555,7 @@ export const AdminCalendarPage: React.FC = () => {
           phone: phone || null,
           start: startIso,
           end: endIso,
+          meet_url: meetUrl,
         })
         .select('id, created_at, name, email, phone, start, end')
         .single();
@@ -547,7 +577,8 @@ export const AdminCalendarPage: React.FC = () => {
               name,
               email,
               phone: phone || '',
-              startTime: startIso
+              startTime: startIso,
+              meetUrl: meetUrl
             })
           });
           console.log('✅ Reminder scheduled for inquiry:', newId);

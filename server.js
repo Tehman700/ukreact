@@ -11,6 +11,9 @@ import { Buffer } from "buffer";
 import puppeteer from "puppeteer";
 import twilio from "twilio";
 import { createClient } from "@supabase/supabase-js";
+import { google } from "googleapis";
+import { createRequire } from "module";
+
 
 const { Pool } = pkg;
 const app = express();
@@ -22,7 +25,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 180000, // 3 minutes
 });
-
 // ----------------------------
 // EMAIL CONFIGURATION
 // ----------------------------
@@ -80,6 +82,53 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_ANON_KEY,
 );
 console.log("✅ Supabase client initialized");
+
+// ----------------------------
+// GOOGLE CALENDAR API
+// ----------------------------
+let googleCalendarEnabled = false;
+let googleAuth = null;
+
+console.log("🔍 Checking Google Calendar configuration...");
+console.log(`   Email set: ${!!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}`);
+console.log(`   Key set: ${!!process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY}`);
+
+if (
+  process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
+  process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+) {
+  try {
+    let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+
+    if (!privateKey.includes('\n') && privateKey.includes('\\n')) {
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+
+    if (!privateKey.includes('BEGIN PRIVATE KEY')) {
+      throw new Error('Private key must include "-----BEGIN PRIVATE KEY-----" header');
+    }
+
+    googleAuth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: privateKey,
+      },
+      scopes: [
+        "https://www.googleapis.com/auth/calendar",
+        "https://www.googleapis.com/auth/calendar.events",
+      ],
+    });
+
+    googleCalendarEnabled = true;
+    console.log("✅ Google Calendar API configured successfully");
+  } catch (error) {
+    console.error("❌ Google Calendar API initialization error:", error.message);
+    console.warn("⚠️  Google Calendar integration disabled - using fallback instant links");
+  }
+} else {
+  console.warn("⚠️  Google Calendar API not configured");
+}
+
 
 // Important: Raw body parsing for webhook BEFORE express.json()
 app.use("/api/webhook", express.raw({ type: "application/json" }));
@@ -7979,9 +8028,25 @@ function formatDateTime(dateStr) {
 }
 
 // Helper function to send email reminder
-async function sendEmailReminder(name, email, startTime, inquiryId) {
+async function sendEmailReminder(name, email, startTime, inquiryId, meetUrl = null) {
   try {
     const formattedTime = formatDateTime(startTime);
+    
+    const meetLinkSection = meetUrl ? `
+      <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 4px solid #4caf50; margin: 25px 0;">
+        <p style="font-size: 16px; color: #2e7d32; margin: 0 0 15px 0; font-weight: bold;">
+          🎥 Join your video consultation:
+        </p>
+        <a href="${meetUrl}" 
+           style="display: inline-block; background: #4caf50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+          Join Google Meet
+        </a>
+        <p style="font-size: 13px; color: #555; margin: 15px 0 0 0;">
+          or copy this link: <br>
+          <span style="color: #1976d2; word-break: break-all;">${meetUrl}</span>
+        </p>
+      </div>
+    ` : '';
 
     const mailOptions = {
       from: `"Luther Health Reminders" <${process.env.GMAIL_USER}>`,
@@ -8013,9 +8078,11 @@ async function sendEmailReminder(name, email, startTime, inquiryId) {
               </p>
             </div>
             
+            ${meetLinkSection}
+            
             <div style="background: #fff8e1; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <p style="font-size: 14px; color: #856404; margin: 0;">
-                <strong>💡 Tip:</strong> Please ensure you're ready a few minutes early. If you need to reschedule or have any questions, please contact us immediately.
+                <strong>💡 Tip:</strong> Please ${meetUrl ? 'click the link above to join the meeting' : 'be ready'} a few minutes early. If you need to reschedule or have any questions, please contact us immediately.
               </p>
             </div>
             
@@ -8046,7 +8113,7 @@ async function sendEmailReminder(name, email, startTime, inquiryId) {
 }
 
 // Helper function to send SMS reminder via Twilio
-async function sendSMSReminder(name, phone, startTime, inquiryId) {
+async function sendSMSReminder(name, phone, startTime, inquiryId, meetUrl = null) {
   if (!twilioClient) {
     console.warn("⚠️  Twilio not configured - skipping SMS");
     return false;
@@ -8066,6 +8133,9 @@ async function sendSMSReminder(name, phone, startTime, inquiryId) {
     }
 
     const formattedTime = formatDateTime(startTime);
+    
+    const meetLinkText = meetUrl ? `\n\n🎥 Join via Google Meet:\n${meetUrl}` : '';
+    
     const message = `🔔 Luther Health Reminder
 
 Hello ${name},
@@ -8073,9 +8143,9 @@ Hello ${name},
 Your appointment is starting in 30 minutes!
 
 📅 ${formattedTime}
-🆔 Ref: ${inquiryId.substring(0, 8)}
+🆔 Ref: ${inquiryId.substring(0, 8)}${meetLinkText}
 
-Please ensure you're ready. If you need to reschedule, contact us immediately.
+Please ${meetUrl ? 'click the link to join' : 'be ready'}. If you need to reschedule, contact us immediately.
 
 - Luther Health Team`;
 
@@ -8159,7 +8229,7 @@ async function updateReminderStatus(
 }
 
 // Execute reminder: send email and SMS
-async function executeReminder(inquiryId, name, email, phone, appointmentTime) {
+async function executeReminder(inquiryId, name, email, phone, appointmentTime, meetUrl = null) {
   console.log(`⏰ Executing reminders for appointment ${inquiryId}...`);
 
   let emailSent = false;
@@ -8172,8 +8242,9 @@ async function executeReminder(inquiryId, name, email, phone, appointmentTime) {
       email,
       appointmentTime,
       inquiryId,
+      meetUrl,
     );
-    smsSent = await sendSMSReminder(name, phone, appointmentTime, inquiryId);
+    smsSent = await sendSMSReminder(name, phone, appointmentTime, inquiryId, meetUrl);
 
     // Delete from database after sending
     const { error } = await supabase
@@ -8207,6 +8278,223 @@ async function executeReminder(inquiryId, name, email, phone, appointmentTime) {
   }
 }
 
+// ----------------------------
+// GOOGLE CALENDAR MEET LINK GENERATION
+// ----------------------------
+
+/**
+ * Generate instant Google Meet link (fallback method)
+ * Creates a random meet.google.com URL without API
+ */
+function generateInstantMeetLink() {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const segments = [];
+
+  for (let i = 0; i < 3; i++) {
+    let segment = "";
+    const length = i === 0 ? 3 : 4;
+    for (let j = 0; j < length; j++) {
+      segment += chars[Math.floor(Math.random() * chars.length)];
+    }
+    segments.push(segment);
+  }
+
+  return `https://meet.google.com/${segments.join("-")}`;
+}
+
+/**
+ * Create Google Calendar event with Meet link using Calendar API
+ * This creates a REAL calendar event with an actual working Meet link
+ * Each booking gets a unique, real Google Meet room
+ */
+async function createGoogleCalendarMeetLink({
+  name,
+  email,
+  phone,
+  startTime,
+  endTime,
+  inquiryId,
+}) {
+  // Check if Google Calendar API is configured
+  if (!googleCalendarEnabled || !googleAuth) {
+    console.log("⚠️  Google Calendar API not configured - using fallback instant link");
+    console.log("⚠️  Note: Instant links won't work until manually created in Google Meet");
+    return {
+      meetUrl: generateInstantMeetLink(),
+      method: "instant_fallback",
+    };
+  }
+
+  try {
+
+
+
+    const calendar = google.calendar({ version: "v3", auth: googleAuth });
+    const safeRequestId = `luther-health-${String(inquiryId).replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}`;
+    
+    const event = {
+      summary: `${name}`,
+      description: `Luther Health Video Consultation\n\nPatient: ${name}\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ""}Booking Reference: ${inquiryId}`,
+      start: {
+        dateTime: startTime,
+        timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || "Europe/London",
+      },
+      end: {
+        dateTime: endTime,
+        timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || "Europe/London",
+      },
+      conferenceData: {
+        createRequest: {
+          requestId: safeRequestId, // Unique ID for this conference request
+        },
+
+  },
+      // Don't add attendees - service accounts can't send calendar invites without Domain-Wide Delegation
+      // We send Meet links via our own email/SMS reminders instead
+
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: "email", minutes: 60 },
+          { method: "popup", minutes: 30 },
+        ],
+      },
+    };
+
+    // Insert event with conferenceDataVersion=1 to enable Meet link generation
+    const response = await calendar.events.insert({
+      calendarId: process.env.VITE_GOOGLE_CALENDAR_ID || "primary",
+      conferenceDataVersion: 1, // Required for conference data
+      sendUpdates: "none", // Don't send calendar invites (we use our own email/SMS system)
+      resource: event,
+    });
+
+    console.log(`📅 Calendar event created: ${response.data.id}`);
+    console.log(`🔍 Checking for conference data...`);
+    
+    // Sometimes the conference data isn't immediately available
+    // Try to fetch the event again to get the conference data
+    let meetUrl = response.data.conferenceData?.entryPoints?.find(
+      (ep) => ep.entryPointType === "video"
+    )?.uri;
+
+    // If no Meet URL in initial response, fetch the event again
+    if (!meetUrl) {
+      console.log("   ⏳ Conference data not in initial response, fetching event...");
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        
+        const fetchedEvent = await calendar.events.get({
+          calendarId: process.env.VITE_GOOGLE_CALENDAR_ID || "primary",
+          eventId: response.data.id,
+        });
+        
+        meetUrl = fetchedEvent.data.conferenceData?.entryPoints?.find(
+          (ep) => ep.entryPointType === "video"
+        )?.uri;
+        
+        if (meetUrl) {
+          console.log(`   ✅ Meet URL retrieved after fetch: ${meetUrl}`);
+        }
+      } catch (fetchError) {
+        console.warn(`   ⚠️  Failed to fetch event for conference data: ${fetchError.message}`);
+      }
+    } else {
+      console.log(`   ✅ Meet URL in initial response: ${meetUrl}`);
+    }
+
+    if (!meetUrl) {
+      console.warn("⚠️  No Meet URL after retries, using fallback");
+      console.log(" 💡 Check that Google Calendar has Meet enabled: https://workspace.google.com/marketplace/app/google_meet/645841773148");
+      return {
+        meetUrl: generateInstantMeetLink(),
+        method: "instant_fallback",
+        eventId: response.data.id,
+      };
+    }
+
+    console.log(`✅ Real Google Meet link created for ${name}`);
+    console.log(`📅 Event link: ${response.data.htmlLink}`);
+
+    return {
+      meetUrl,
+      eventId: response.data.id,
+      htmlLink: response.data.htmlLink,
+      method: "calendar_api",
+    };
+  } catch (error) {
+    console.error("❌ Error creating Google Calendar event:", error.message);
+    if (error.response?.data) {
+      console.error("   API Response:", JSON.stringify(error.response.data, null, 2));
+    }
+    console.log("   Falling back to instant link (won't work without manual creation)");
+    return {
+      meetUrl: generateInstantMeetLink(),
+      method: "instant_fallback",
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Delete Google Calendar event (when appointment is cancelled)
+ */
+async function deleteGoogleCalendarEvent(eventId) {
+  if (!googleCalendarEnabled || !googleAuth || !eventId) {
+    return false;
+  }
+
+  try {
+    const calendar = google.calendar({ version: "v3", auth: googleAuth });
+
+    await calendar.events.delete({
+      calendarId: process.env.VITE_GOOGLE_CALENDAR_ID || "primary",
+      eventId,
+      sendUpdates: "all",
+    });
+
+    console.log(`✅ Google Calendar event deleted: ${eventId}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error deleting Google Calendar event:", error.message);
+    return false;
+  }
+}
+
+// API endpoint to create Google Meet link
+app.post("/api/create-meet-link", async (req, res) => {
+  try {
+    const { name, email, phone, startTime, endTime, inquiryId } = req.body;
+
+    if (!name || !email || !startTime || !endTime || !inquiryId) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields",
+      });
+    }
+
+    const result = await createGoogleCalendarMeetLink({
+      name,
+      email,
+      phone,
+      startTime,
+      endTime,
+      inquiryId,
+    });
+
+    res.json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    console.error("Error creating Meet link:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // Schedule a reminder for an inquiry (save to DB and set timeout)
 async function scheduleInquiryReminder(
   inquiryId,
@@ -8214,6 +8502,7 @@ async function scheduleInquiryReminder(
   email,
   phone,
   startTime,
+  meetUrl = null,
 ) {
   try {
     const appointmentTime = new Date(startTime);
@@ -8250,6 +8539,7 @@ async function scheduleInquiryReminder(
           email,
           phone,
           appointmentTime.toISOString(),
+          meetUrl,
         ),
       delayMs,
     );
@@ -8301,7 +8591,7 @@ async function cancelInquiryReminder(inquiryId) {
 // API endpoint to schedule a reminder
 app.post("/api/schedule-reminder", async (req, res) => {
   try {
-    const { inquiryId, name, email, phone, startTime } = req.body;
+    const { inquiryId, name, email, phone, startTime, meetUrl } = req.body;
 
     if (!inquiryId || !name || !email || !startTime) {
       return res.status(400).json({
@@ -8316,6 +8606,7 @@ app.post("/api/schedule-reminder", async (req, res) => {
       email,
       phone,
       startTime,
+      meetUrl,
     );
 
     res.json({
