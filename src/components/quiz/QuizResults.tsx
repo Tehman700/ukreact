@@ -1,5 +1,4 @@
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface QuizResultsProps {
   answers: Record<number, any>;
@@ -70,21 +69,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
 
   const improvements = calculateImprovements();
 
-  // Generate chart data with improvement names and values
-  const chartData = [
-    {
-      name: "Complication Risk",
-      value: improvements.complication,
-    },
-    {
-      name: "Hospital Stay",
-      value: improvements.hospital,
-    },
-    {
-      name: "Post-op Pain",
-      value: improvements.pain,
-    },
-  ];
+
 
   return (
     <div className="quiz-results-simple">
@@ -118,37 +103,10 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ answers, onRestart }) 
             </div>
           </div>
           
-   
-            <div className="chart-container" style={{ marginTop: '1rem' }}>
-            <ResponsiveContainer width="50%" height={100}>
-              <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis 
-                  domain={[25, 'auto']} 
-                  tick={{ fontSize: 5 }}
-                  width={10}
-                />
-                <Tooltip />
-                <Line 
-                  type="natural" 
-                  dataKey="value" 
-                  stroke="#a1a1a1" 
-                  strokeWidth={2}
-                  dot={false}  
-                  activeDot={{ r: 5 }}
-                  connectNulls
-                  animationDuration={700}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
           <div className="results-simple-actions">
             
           <button 
-          className="results-simple-btn btn-book"
+          className="results-simple-btn btn-clear"
            onClick={onRestart}>
             Clear
           </button>

@@ -45,7 +45,7 @@ export function Footer() {
 
 
           {/* Services */}
-          <div className="space-y-3 sm:space-y-4">
+          {/* <div className="space-y-3 sm:space-y-4">
             <h3 className="font-medium">Services</h3>
             <ul className="space-y-1 sm:space-y-2 text-sm">
               <li><a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Surgery Conditioning Protocol</a></li>
@@ -53,7 +53,7 @@ export function Footer() {
               <li><a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Symptom Control Protocol</a></li>
               <li><a href="#assessments" className="text-muted-foreground hover:text-foreground transition-colors">Health Assessments</a></li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Company */}
           <div className="space-y-3 sm:space-y-4">
