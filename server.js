@@ -83,51 +83,28 @@ const supabase = createClient(
 );
 console.log("✅ Supabase client initialized");
 
-// ----------------------------
-// GOOGLE CALENDAR API
-// ----------------------------
+
 let googleCalendarEnabled = false;
 let googleAuth = null;
 
-console.log("🔍 Checking Google Calendar configuration...");
-console.log(`   Email set: ${!!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}`);
-console.log(`   Key set: ${!!process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY}`);
+const CLIENT_ID =process.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
+const CLIENT_SECRET = process.env.VITE_GOOGLE_OAUTH_CLIENT_SECRET;
+const REDIRECT_URL =
+  process.env.GOOGLE_OAUTH_REDIRECT_URL ||
+  "https://developers.google.com/oauthplayground";
+const REFRESH_TOKEN = process.env.VITE_GOOGLE_OAUTH_REFRESH_TOKEN;
 
-if (
-  process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
-  process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-) {
+if (CLIENT_ID && CLIENT_SECRET && REFRESH_TOKEN) {
   try {
-    let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-
-    if (!privateKey.includes('\n') && privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    if (!privateKey.includes('BEGIN PRIVATE KEY')) {
-      throw new Error('Private key must include "-----BEGIN PRIVATE KEY-----" header');
-    }
-
-    googleAuth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: privateKey,
-      },
-      scopes: [
-        "https://www.googleapis.com/auth/calendar",
-        "https://www.googleapis.com/auth/calendar.events",
-      ],
+    googleAuth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+    googleAuth.setCredentials({
+      refresh_token: REFRESH_TOKEN,
     });
 
     googleCalendarEnabled = true;
-    console.log("✅ Google Calendar API configured successfully");
   } catch (error) {
-    console.error("❌ Google Calendar API initialization error:", error.message);
-    console.warn("⚠️  Google Calendar integration disabled - using fallback instant links");
   }
-} else {
-  console.warn("⚠️  Google Calendar API not configured");
-}
+} 
 
 
 // Important: Raw body parsing for webhook BEFORE express.json()
@@ -8346,6 +8323,9 @@ async function createGoogleCalendarMeetLink({
       conferenceData: {
         createRequest: {
           requestId: safeRequestId, // Unique ID for this conference request
+          conferenceSolutionKey: {
+            type: "hangoutsMeet", // Request a Google Meet link
+          },
         },
 
   },
