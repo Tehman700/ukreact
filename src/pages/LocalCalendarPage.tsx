@@ -293,17 +293,14 @@ export const LocalCalendarPage: React.FC = () => {
     const slotEnd = new Date(slotStart);
     slotEnd.setMinutes(slotEnd.getMinutes() + slotDefaultDuration);
 
-    // Check if any event overlaps with this slot
     return events.some((event) => {
       if (!event.start?.dateTime || !event.end?.dateTime) return false;
       
       const eventStart = new Date(event.start.dateTime);
       const eventEnd = new Date(event.end.dateTime);
       
-      // Check if events are on the same day
       if (!isSameDay(eventStart, date)) return false;
       
-      // Check for overlap: slot overlaps if slotStart < eventEnd && slotEnd > eventStart
       return slotStart < eventEnd && slotEnd > eventStart;
     });
   };
@@ -311,18 +308,16 @@ export const LocalCalendarPage: React.FC = () => {
   const openCreateEvent = (date?: Date | null, presetTime?: { hour: number; minute: number }) => {
     const base = date ? new Date(date) : selectedDate ? new Date(selectedDate) : new Date();
     
-    // Don't reset hours if we have preset time
     if (!presetTime) {
-      base.setHours(0, 0, 0, 0); // Reset to midnight for date selection
+      base.setHours(0, 0, 0, 0); 
     }
     
-    // Prevent creating appointments on past dates
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const checkDate = new Date(base);
     checkDate.setHours(0, 0, 0, 0);
     if (checkDate < today) {
-      return; // Don't open dialog for past dates
+      return;
     }
     
     setCreateError(null);
@@ -431,7 +426,6 @@ export const LocalCalendarPage: React.FC = () => {
       const inserted = toLocalEvent(data as InquiryRow) ?? newEvent;
       setEvents((prev) => [inserted, ...prev]);
 
-      // Schedule automated reminder (30 minutes before appointment)
       try {
         await fetch('https://luther.health/api/schedule-reminder', {
           method: 'POST',
@@ -447,7 +441,6 @@ export const LocalCalendarPage: React.FC = () => {
         console.log('✅ Reminder scheduled for inquiry:', newEvent.id);
       } catch (reminderError) {
         console.warn('⚠️  Failed to schedule reminder:', reminderError);
-        // Don't fail the inquiry creation if reminder scheduling fails
       }
 
       const d = normalizeDate(inserted);

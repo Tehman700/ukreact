@@ -432,7 +432,6 @@ export const AdminCalendarPage: React.FC = () => {
   const openLocalCreateEvent = (date?: Date | null, presetTime?: { hour: number; minute: number }) => {
     const base = date ? new Date(date) : selectedDate ? new Date(selectedDate) : new Date();
     
-    // Don't reset hours if we have preset time
     if (!presetTime) {
       base.setHours(0, 0, 0, 0);
     }
@@ -654,7 +653,6 @@ export const AdminCalendarPage: React.FC = () => {
 
       const created = await res.json().catch(() => null);
 
-      // Refresh list + focus created event day.
       const createdStart =
         created?.start?.date
           ? new Date(created.start.date + 'T00:00:00')
