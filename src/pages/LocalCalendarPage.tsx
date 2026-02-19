@@ -637,18 +637,12 @@ export const LocalCalendarPage: React.FC = () => {
                             onClick={(ev) => {
                               ev.preventDefault();
                               ev.stopPropagation();
-                              // setSelectedEvent(event);
-                              // const d = normalizeDate(event);
-                              // if (d) setSelectedDate(d);
                               setEventsPanelMode('day');
                             }}
                             onKeyDown={(ev) => {
                               if (ev.key !== 'Enter' && ev.key !== ' ') return;
                               ev.preventDefault();
                               ev.stopPropagation();
-                              // setSelectedEvent(event);
-                              // const d = normalizeDate(event);
-                              // if (d) setSelectedDate(d);
                               setEventsPanelMode('day');
                             }}
                           >
