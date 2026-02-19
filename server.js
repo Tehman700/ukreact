@@ -8652,7 +8652,12 @@ async function checkPendingReminders() {
     // Query pending reminders that are due soon
     const { data, error } = await supabase
       .from("reminders")
-      .select("*")
+      .select(
+        `
+          *,
+          inquiry:inquiry_id (meet_url)
+        `,
+      )
       .eq("status", "pending")
       .lte("reminder_time", checkWindowTime.toISOString())
       .order("reminder_time", { ascending: true });
@@ -8672,6 +8677,7 @@ async function checkPendingReminders() {
 
       const reminderTime = new Date(reminder.reminder_time);
       const appointmentTime = new Date(reminder.appointment_time);
+      const meetUrl = reminder.inquiry?.meet_url || null;
 
       // If reminder time has passed, send immediately
       if (reminderTime <= now) {
@@ -8681,6 +8687,7 @@ async function checkPendingReminders() {
           reminder.email,
           reminder.phone,
           reminder.appointment_time,
+          meetUrl,
         );
         scheduled++;
       } else {
@@ -8694,6 +8701,7 @@ async function checkPendingReminders() {
               reminder.email,
               reminder.phone,
               reminder.appointment_time,
+              meetUrl,
             ),
           delayMs,
         );
