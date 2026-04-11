@@ -54,10 +54,10 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
       <section className="bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="tracking-tight">
+            <h1 className="tracking-tight text-center">
               Health Assessments
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-center">
              Our health assessments are designed by medical experts using real clinical data and the latest research to spot risks early, personalise your care, and give you a clear, actionable plan—all in ~ 10 minutes, fully remote, and built to help you stay ahead of your health.
             </p>
           </div>
@@ -67,7 +67,7 @@ export function AssessmentsPage({ onAddToBasket, onOpenBasket }: AssessmentsPage
       {/* Filter Section */}
       <section className="container mx-auto px-4 sm:pb-8 px-[14px] py-[21px]">
         <div className="flex justify-center">
-          <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1 bg-muted p-1 rounded-lg overflow-x-auto scrollbar-hide w-full max-w-2xl">
+          <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1 bg-muted p-1 rounded-lg overflow-x-auto scrollbar-hide w-full max-w-2xl justify-center">
             <Button
               variant={activeFilter === 'all' ? 'default' : 'ghost'}
               size="sm"
