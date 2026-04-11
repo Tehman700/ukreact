@@ -50,7 +50,7 @@ export function AssessmentsSection() {
         {/* Category Filter */}
         <section className="container mx-auto px-4 pb-8">
           <div className="flex justify-center">
-            <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1 bg-muted p-1 rounded-lg overflow-x-auto scrollbar-hide w-fit mx-auto">
+            <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1 bg-muted p-1 rounded-lg overflow-x-auto scrollbar-hide">
               <Button
                 variant={selectedCategory === 'all' ? 'default' : 'ghost'}
                 size="sm"
