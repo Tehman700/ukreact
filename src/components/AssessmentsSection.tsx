@@ -55,7 +55,7 @@ export function AssessmentsSection() {
                 variant={selectedCategory === 'all' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedCategory('all')}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 justify-center items-center"
               >
                 All
               </Button>
@@ -63,7 +63,7 @@ export function AssessmentsSection() {
                 variant={selectedCategory === 'bundle' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedCategory('bundle')}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 justify-center items-center"
               >
                 Bundles
               </Button>
@@ -71,7 +71,7 @@ export function AssessmentsSection() {
                 variant={selectedCategory === 'symptoms-control' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedCategory('symptoms-control')}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 justify-center items-center"
               >
                 <span className="hidden sm:inline">Symptoms</span>
                 <span className="sm:hidden">Symptoms</span>
@@ -80,7 +80,7 @@ export function AssessmentsSection() {
                 variant={selectedCategory === 'surgery-preparation' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedCategory('surgery-preparation')}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 justify-center items-center"
               >
                 <span className="hidden sm:inline">Surgery</span>
                 <span className="sm:hidden">Surgery</span>
@@ -89,7 +89,7 @@ export function AssessmentsSection() {
                 variant={selectedCategory === 'longevity' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedCategory('longevity')}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 justify-center items-center"
               >
                 Longevity
               </Button>
